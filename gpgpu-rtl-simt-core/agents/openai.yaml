@@ -1,0 +1,4 @@
+interface:
+  display_name: "GPGPU RTL SIMT Core"
+  short_description: "Design and review SIMT core RTL state, pipeline, and hazards."
+  default_prompt: "Review a GPGPU SIMT RTL core change."

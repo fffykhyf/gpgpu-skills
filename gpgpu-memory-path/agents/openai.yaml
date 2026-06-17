@@ -1,0 +1,4 @@
+interface:
+  display_name: "GPGPU Memory Path"
+  short_description: "Design and debug LSU, masks, memory traces, coalescing, and cache."
+  default_prompt: "Design or debug a GPGPU memory-path change."

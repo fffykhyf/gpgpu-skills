@@ -1,0 +1,4 @@
+interface:
+  display_name: "GPGPU PPA Evaluation"
+  short_description: "Evaluate performance, power, area, timing, and architecture tradeoffs."
+  default_prompt: "Plan or review a GPGPU PPA evaluation."

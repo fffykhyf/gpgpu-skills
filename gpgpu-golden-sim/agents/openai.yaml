@@ -1,0 +1,4 @@
+interface:
+  display_name: "GPGPU Golden Sim"
+  short_description: "Use golden simulation and traces to define and debug GPGPU behavior."
+  default_prompt: "Define or compare a GPGPU golden simulator and trace workflow."
