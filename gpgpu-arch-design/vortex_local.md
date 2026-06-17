@@ -2,6 +2,8 @@
 
 This file is the local Vortex reference for the architecture-design skill. It summarizes the parts of Vortex that matter for staged GPGPU architecture work, including both design documents and code implementation patterns. It is not a request to clone Vortex.
 
+Terminology note: this file preserves Vortex source names such as `warp`, `warp ID`, `tmask`, and `CTA`. In the skill contract, map them to `SIMT group`, `simt_group_id`, `active lane mask`, and `CTA/workgroup`; use Vortex names only when quoting source behavior.
+
 ## What To Learn From Vortex
 
 Vortex is useful here because it treats a GPGPU as a full-stack system, not as a standalone RTL core. Its design keeps these layers tied together:

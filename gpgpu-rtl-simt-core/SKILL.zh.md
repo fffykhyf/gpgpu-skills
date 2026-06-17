@@ -1,6 +1,6 @@
 ---
 name: gpgpu-rtl-simt-core
-description: 用于设计、编辑或评审 GPGPU SIMT RTL，包括 warp lifecycle、PC、active masks、IPDOM、split/join、fetch/decode、scheduler、scoreboard、operands、register file、functional units、valid-ready、stall、flush 或 commit 行为。
+description: 用于设计、编辑或评审 GPGPU SIMT RTL，包括 SIMT group lifecycle、PC、active masks、IPDOM、split/join、fetch/decode、scheduler、scoreboard、operands、register file、functional units、valid-ready、stall、flush 或 commit 行为。
 ---
 
 # GPGPU RTL SIMT Core
@@ -13,9 +13,9 @@ description: 用于设计、编辑或评审 GPGPU SIMT RTL，包括 warp lifecyc
 
 每个 RTL 变更在编辑逻辑前，都必须先定义 state contract：
 
-- 每个 warp 的 PC。
-- Active mask 和 predicate 行为。
-- Warp lifecycle：inactive、ready、issued、waiting、barrier、replay、done。
+- 每个 SIMT group 的 PC。
+- Active lane mask 和 predicate 行为。
+- SIMT group lifecycle：inactive、ready、issued、waiting、barrier、replay、done。
 - 如果控制流变化，说明 IPDOM、split、join、branch 和 reconvergence state。
 - Register file read/writeback 和 write conflict 规则。
 - Scoreboard set、clear、flush、reset 和 kill 规则。
@@ -23,11 +23,23 @@ description: 用于设计、编辑或评审 GPGPU SIMT RTL，包括 warp lifecyc
 
 如果这些规则无法清楚说明，说明模块边界太宽，或架构契约不完整。
 
+## 术语契约
+
+本地设计契约使用统一术语；只有命名 Vortex 或 MIAOW 信号时保留源码别名。
+
+| 统一术语 | 源码别名 | RTL 契约 |
+|---|---|---|
+| SIMT group | warp、wavefront、wave | 带一个 PC 和 active lane mask 的调度单元 |
+| simt_group_id | warp ID、`wfid`、wave ID、wavefront tag | readiness、wait、trace 和 completion tables 的索引 |
+| active lane mask | active mask、thread mask、`tmask`、`EXEC` mask | scheduler/divergence/exec logic 拥有的 lane participation state |
+| CTA/workgroup | CTA、block、workgroup | 包含 SIMT groups 的 barrier 和 launch context |
+| compute core/CU | core、CU、compute unit | resident SIMT groups 和 execution units 的 owner |
+
 ## 推荐 Pipeline 边界
 
 | Stage 或 unit | 职责 |
 |---|---|
-| schedule | 选择 ready warp，暴露 stall reason，跟踪 lifecycle |
+| schedule | 选择 ready SIMT group，暴露 stall reason，跟踪 lifecycle |
 | fetch | 按 PC 请求指令并处理 I-cache response |
 | decode | 将 instruction bits 转成 control fields |
 | issue | 缓冲 decoded instructions、检查 hazards、选择 issue slots |
@@ -38,7 +50,7 @@ description: 用于设计、编辑或评审 GPGPU SIMT RTL，包括 warp lifecyc
 
 避免用一个模块同时完成 schedule、decode、read registers、execute、write back 和 drive memory。
 
-在实现 issue 或 hazard 逻辑前，state contract 还必须列出拥有 readiness 的 per-wavefront tables：
+在实现 issue 或 hazard 逻辑前，state contract 还必须列出拥有 readiness 的 per-SIMT-group tables：
 
 | 表 | 职责 |
 |---|---|
@@ -46,10 +58,10 @@ description: 用于设计、编辑或评审 GPGPU SIMT RTL，包括 warp lifecyc
 | FU class | resident instruction 的 SALU、SIMD、SIMF、LSU 目标 |
 | GPR dependency | SGPR/VGPR source 和 destination readiness |
 | SPR dependency | EXEC、VCC、SCC、M0 readiness |
-| memory wait | LSU in-flight block，并由 done wfid 释放 |
+| memory wait | LSU in-flight block，并由 done simt_group_id 释放 |
 | branch wait | branch 已发射但未 resolved |
-| barrier wait | workgroup barrier arrival 和 release |
-| in-flight limit | maximum outstanding instruction 或 finished-wavefront state |
+| barrier wait | CTA/workgroup barrier arrival 和 release |
+| in-flight limit | maximum outstanding instruction 或 finished-SIMT-group state |
 
 使用显式 readiness equation。具体 LSU issue 条件可以是：
 
@@ -64,7 +76,7 @@ ready = fu_lsu & valid & gpr_spr_ready & ~max_inflight & ~mem_wait & ~branch_wai
 对每类 instruction 或 uop，说明它是否改变：
 
 - PC 或 next PC。
-- active mask、predicate mask、split/join stack 或 warp status。
+- active lane mask、predicate mask、split/join stack 或 SIMT group status。
 - integer、floating、vector 或 predicate registers。
 - scoreboard 或 in-flight state。
 - memory request、response、fence 或 replay state。
@@ -72,13 +84,13 @@ ready = fu_lsu & valid & gpr_spr_ready & ~max_inflight & ~mem_wait & ~branch_wai
 
 ## Bring-Up 顺序
 
-1. Single warp、single issue、ALU-only、无 divergence。
-2. Multi-warp round-robin scheduler。
+1. Single SIMT group、single issue、ALU-only、无 divergence。
+2. Multi-SIMT-group round-robin scheduler。
 3. Register writeback 和 scoreboard。
 4. Active mask 和 predicated execution。
 5. Branch 加简化 divergence/reconvergence state。
 6. 通过 memory-path contract 接入 LSU。
-7. Barrier、CTA dispatch 和完整 warp lifecycle。
+7. Barrier、CTA/workgroup dispatch 和完整 SIMT group lifecycle。
 
 ## 本地参考
 

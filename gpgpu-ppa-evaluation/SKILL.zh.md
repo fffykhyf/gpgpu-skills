@@ -21,11 +21,23 @@ description: 用于评估 GPGPU performance、power、area、timing、energy、c
 
 Credibility claim 可以引用 ISA scope、benchmark capability、FPGA prototype data 和 ASIC-style estimates，但同时必须说明 relaxed design goals 和 comparison caveats。
 
+## 术语契约
+
+Config IDs、counter names 和 PPA tables 使用统一术语；只有报告具体 backend counter 时保留源码别名。
+
+| 统一术语 | 源码别名 | Evaluation 含义 |
+|---|---|---|
+| SIMT group | warp、wavefront、wave | 用于 issue、stalls、occupancy 和 launch shape 计数的 scheduling group |
+| simt_group_id | warp ID、`wfid`、wave ID、wavefront tag | 报告 per-group 数据时的 trace/counter identity |
+| active lane mask | active mask、thread mask、`tmask`、`EXEC` mask | lane utilization 和 divergence evidence |
+| CTA/workgroup | CTA、block、workgroup | workload launch unit 和 local-memory/barrier scope |
+| compute core/CU | core、CU、compute unit | area、power、counters 和 occupancy 的 resource unit |
+
 ## 最小 Evaluation Record
 
 | 字段 | 必填内容 |
 |---|---|
-| config_id | commit、build flags、core/warp/thread、memory/cache、ISA/features |
+| config_id | commit、build flags、compute core/CU、SIMT-group/thread、memory/cache、ISA/features |
 | baseline | 未改变参考，带 exact command 或 report path |
 | variant | 变更设计，且只改变一个预期变量 |
 | workload | kernel 或 benchmark、input size、launch shape、memory image |
@@ -53,8 +65,8 @@ Credibility claim 可以引用 ISA scope、benchmark capability、FPGA prototype
 调优前优先添加 counters：
 
 - total cycles 和 committed instructions
-- IPC 和 issued warps
-- scheduler idle 和 active warps
+- IPC 和 issued SIMT groups
+- scheduler idle 和 active SIMT groups
 - scoreboard、operand、ALU/FPU/LSU/SFU/TCU stalls
 - branch 和 divergence counts
 - load/store requests 和 latency

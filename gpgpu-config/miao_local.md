@@ -2,6 +2,8 @@
 
 This file is the local MIAOW reference for configuration work. MIAOW is useful here because it has real configuration needs spread across RTL, testbench, FPGA software, unit tests, and generators. It is both a source of useful parameter families and a warning about drift.
 
+Terminology note: this file preserves MIAOW source names such as `wave`, `wavefront`, `wfid`, `workgroup`, and `EXEC`. In the skill contract, map them to `SIMT group`, `simt_group_id`, `CTA/workgroup`, and `active lane mask`; use the MIAOW names only when quoting source behavior.
+
 ## Relevant Source Map
 
 Use these files as the main references:

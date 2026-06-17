@@ -2,6 +2,8 @@
 
 This file is the local MIAOW reference for the architecture-design skill. It explains what parts of MIAOW matter for staged architecture work, including paper-level scope, RTL anchors, trace/test evidence, FPGA control, and caveats. It is not a request to clone AMD Southern Islands or MIAOW.
 
+Terminology note: this file preserves MIAOW source names such as `wave`, `wavefront`, `wfid`, `workgroup`, and `EXEC`. In the skill contract, map them to `SIMT group`, `simt_group_id`, `CTA/workgroup`, and `active lane mask`; use the MIAOW names only when quoting source behavior.
+
 ## What To Learn From MIAOW
 
 MIAOW is useful here because it turns a GPGPU architecture claim into a credible research prototype:

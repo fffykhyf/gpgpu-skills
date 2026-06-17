@@ -2,6 +2,8 @@
 
 This file is the local MIAOW reference for golden simulator and trace work. MIAOW is valuable here because it shows a working external-oracle flow: Multi2Sim produces functional traces, RTL emits tracemon side effects, and a comparator finds trace divergence per wavefront.
 
+Terminology note: this file preserves MIAOW source names such as `wave`, `wavefront`, `wfid`, `workgroup`, and `EXEC`. In the skill contract, map them to `SIMT group`, `simt_group_id`, `CTA/workgroup`, and `active lane mask`; use the MIAOW names only when quoting source behavior.
+
 ## Relevant Source Map
 
 Use these files as the main references:

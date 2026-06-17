@@ -21,11 +21,23 @@ Do not claim a design is better without a baseline, variant, workload, configura
 
 A credibility claim can cite ISA scope, benchmark capability, FPGA prototype data, and ASIC-style estimates, but it must also state relaxed design goals and comparison caveats.
 
+## Terminology Contract
+
+Use canonical terms in config IDs, counter names, and PPA tables. Keep source aliases only when reporting a specific backend counter.
+
+| Canonical term | Source aliases | Evaluation meaning |
+|---|---|---|
+| SIMT group | warp, wavefront, wave | scheduling group counted for issue, stalls, occupancy, and launch shape |
+| simt_group_id | warp ID, `wfid`, wave ID, wavefront tag | trace/counter identity when per-group data is reported |
+| active lane mask | active mask, thread mask, `tmask`, `EXEC` mask | lane utilization and divergence evidence |
+| CTA/workgroup | CTA, block, workgroup | workload launch unit and local-memory/barrier scope |
+| compute core/CU | core, CU, compute unit | resource unit for area, power, counters, and occupancy |
+
 ## Minimum Evaluation Record
 
 | Field | Required content |
 |---|---|
-| config_id | commit, build flags, core/warp/thread, memory/cache, ISA/features |
+| config_id | commit, build flags, compute core/CU, SIMT-group/thread, memory/cache, ISA/features |
 | baseline | unchanged reference with exact command or report path |
 | variant | changed design with one intended variable changed |
 | workload | kernel or benchmark, input size, launch shape, memory image |
@@ -53,8 +65,8 @@ An incorrect design's IPC is not useful evidence.
 Prefer adding counters before tuning:
 
 - total cycles and committed instructions
-- IPC and issued warps
-- scheduler idle and active warps
+- IPC and issued SIMT groups
+- scheduler idle and active SIMT groups
 - scoreboard, operand, ALU/FPU/LSU/SFU/TCU stalls
 - branch and divergence counts
 - load/store requests and latency

@@ -1,6 +1,6 @@
 ---
 name: gpgpu-rtl-simt-core
-description: Use when designing, editing, or reviewing GPGPU SIMT RTL such as warp lifecycle, PC, active masks, IPDOM, split/join, fetch/decode, scheduler, scoreboard, operands, register file, functional units, valid-ready, stall, flush, or commit behavior.
+description: Use when designing, editing, or reviewing GPGPU SIMT RTL such as SIMT group lifecycle, PC, active masks, IPDOM, split/join, fetch/decode, scheduler, scoreboard, operands, register file, functional units, valid-ready, stall, flush, or commit behavior.
 ---
 
 # GPGPU RTL SIMT Core
@@ -13,9 +13,9 @@ Use this skill for the minimal compute core of a GPGPU. Keep SIMT state explicit
 
 For every RTL change, define the state contract before editing logic:
 
-- PC per warp.
-- Active mask and predicate behavior.
-- Warp lifecycle: inactive, ready, issued, waiting, barrier, replay, done.
+- PC per SIMT group.
+- Active lane mask and predicate behavior.
+- SIMT group lifecycle: inactive, ready, issued, waiting, barrier, replay, done.
 - IPDOM, split, join, branch, and reconvergence state if control flow changes.
 - Register file read/writeback and write conflict rules.
 - Scoreboard set, clear, flush, reset, and kill rules.
@@ -23,11 +23,23 @@ For every RTL change, define the state contract before editing logic:
 
 If these cannot be stated cleanly, the module boundary is too broad or the architecture contract is incomplete.
 
+## Terminology Contract
+
+Use canonical terms for local design contracts. Preserve source aliases only when naming Vortex or MIAOW signals.
+
+| Canonical term | Source aliases | RTL contract |
+|---|---|---|
+| SIMT group | warp, wavefront, wave | scheduling unit with one PC and active lane mask |
+| simt_group_id | warp ID, `wfid`, wave ID, wavefront tag | table index for readiness, waits, trace, and completion |
+| active lane mask | active mask, thread mask, `tmask`, `EXEC` mask | lane participation state owned by scheduler/divergence/exec logic |
+| CTA/workgroup | CTA, block, workgroup | barrier and launch context containing SIMT groups |
+| compute core/CU | core, CU, compute unit | owner of resident SIMT groups and execution units |
+
 ## Preferred Pipeline Boundaries
 
 | Stage or unit | Responsibility |
 |---|---|
-| schedule | choose a ready warp, expose stall reason, track lifecycle |
+| schedule | choose a ready SIMT group, expose stall reason, track lifecycle |
 | fetch | request instruction by PC and handle I-cache response |
 | decode | turn instruction bits into control fields |
 | issue | buffer decoded instructions, check hazards, select issue slots |
@@ -38,7 +50,7 @@ If these cannot be stated cleanly, the module boundary is too broad or the archi
 
 Avoid a single module that schedules, decodes, reads registers, executes, writes back, and drives memory.
 
-Before implementing issue or hazard logic, the state contract must also list the per-wavefront tables that own readiness:
+Before implementing issue or hazard logic, the state contract must also list the per-SIMT-group tables that own readiness:
 
 | Table | Owns |
 |---|---|
@@ -46,10 +58,10 @@ Before implementing issue or hazard logic, the state contract must also list the
 | FU class | SALU, SIMD, SIMF, LSU destination for the resident instruction |
 | GPR dependency | SGPR/VGPR source and destination readiness |
 | SPR dependency | EXEC, VCC, SCC, M0 readiness |
-| memory wait | LSU in-flight block and release by done wfid |
+| memory wait | LSU in-flight block and release by done simt_group_id |
 | branch wait | branch issued but not resolved |
-| barrier wait | workgroup barrier arrival and release |
-| in-flight limit | maximum outstanding instruction or finished-wavefront state |
+| barrier wait | CTA/workgroup barrier arrival and release |
+| in-flight limit | maximum outstanding instruction or finished-SIMT-group state |
 
 Use an explicit readiness equation. A concrete LSU issue condition is:
 
@@ -64,7 +76,7 @@ For non-LSU units, remove only the wait terms that truly do not apply. Do not co
 For each instruction or uop class, state whether it changes:
 
 - PC or next PC.
-- active mask, predicate mask, split/join stack, or warp status.
+- active lane mask, predicate mask, split/join stack, or SIMT group status.
 - integer, floating, vector, or predicate registers.
 - scoreboard or in-flight state.
 - memory request, response, fence, or replay state.
@@ -72,13 +84,13 @@ For each instruction or uop class, state whether it changes:
 
 ## Bring-Up Order
 
-1. Single warp, single issue, ALU-only, no divergence.
-2. Multi-warp round-robin scheduler.
+1. Single SIMT group, single issue, ALU-only, no divergence.
+2. Multi-SIMT-group round-robin scheduler.
 3. Register writeback and scoreboard.
 4. Active mask and predicated execution.
 5. Branch plus simplified divergence/reconvergence state.
 6. LSU connection through the memory-path contract.
-7. Barrier, CTA dispatch, and full warp lifecycle.
+7. Barrier, CTA/workgroup dispatch, and full SIMT group lifecycle.
 
 ## Local References
 

@@ -2,6 +2,8 @@
 
 This file is the local MIAOW reference for runtime and control-plane work. MIAOW does not provide a Vortex-style full runtime API, but it has three useful early launch/control forms: testbench soft dispatch, hard resource dispatch, and FPGA AXI-lite control.
 
+Terminology note: this file preserves MIAOW source names such as `wave`, `wavefront`, `wfid`, `workgroup`, and `EXEC`. In the skill contract, map them to `SIMT group`, `simt_group_id`, `CTA/workgroup`, and `active lane mask`; use the MIAOW names only when quoting source behavior.
+
 ## Relevant Source Map
 
 Use these files as the main references:

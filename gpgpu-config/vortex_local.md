@@ -4,6 +4,8 @@ This note expands the Vortex references that matter for the `gpgpu-config`
 skill. It focuses on parameter classification, generated headers, HW/SW ABI
 constants, CSR/DCR maps, memory maps, capability reporting, and drift checks.
 
+Terminology note: this file preserves Vortex source names such as `warp`, `warp ID`, `tmask`, and `CTA`. In the skill contract, map them to `SIMT group`, `simt_group_id`, `active lane mask`, and `CTA/workgroup`; use Vortex names only when quoting source behavior.
+
 ## What Vortex Teaches For This Skill
 
 Vortex separates hardware-private build configuration from hardware/software

@@ -5,6 +5,8 @@ This note expands the Vortex references that matter for the
 area, timing, counters, workload/config control, SAIF/VCD activity, and report
 interpretation.
 
+Terminology note: this file preserves Vortex source names such as `warp`, `warp ID`, `tmask`, and `CTA`. In the skill contract, map them to `SIMT group`, `simt_group_id`, `active lane mask`, and `CTA/workgroup`; use Vortex names only when quoting source behavior.
+
 ## What Vortex Teaches For This Skill
 
 Vortex ties every PPA claim to a workload, backend, configuration, correctness

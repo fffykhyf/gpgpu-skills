@@ -4,6 +4,8 @@ This note expands the Vortex references that matter for the `gpgpu-golden-sim`
 skill. It is meant to be read before routine simulator, trace, or first
 divergence work so you do not need to reopen the whole Vortex tree every time.
 
+Terminology note: this file preserves Vortex source names such as `warp`, `warp ID`, `tmask`, and `CTA`. In the skill contract, map them to `SIMT group`, `simt_group_id`, `active lane mask`, and `CTA/workgroup`; use Vortex names only when quoting source behavior.
+
 ## What Vortex Teaches For This Skill
 
 Vortex treats SimX as a modular executable twin of the hardware, not as a

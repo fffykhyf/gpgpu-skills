@@ -4,6 +4,8 @@ This note expands the Vortex references that matter for the `gpgpu-memory-path`
 skill. It focuses on LSU frontend/backend separation, lane masks, byte enables,
 tags, coalescing, caches, fences, VM, and simulator/RTL trace alignment.
 
+Terminology note: this file preserves Vortex source names such as `warp`, `warp ID`, `tmask`, and `CTA`. In the skill contract, map them to `SIMT group`, `simt_group_id`, `active lane mask`, and `CTA/workgroup`; use Vortex names only when quoting source behavior.
+
 ## What Vortex Teaches For This Skill
 
 Vortex does not treat memory as a black-box load/store function. The path is

@@ -2,6 +2,8 @@
 
 This file is the local MIAOW reference for PPA evaluation. MIAOW is useful because it shows how an open-source GPGPU prototype can make a credibility claim with functional scope, benchmarks, FPGA data, and ASIC-style area/power estimates while still stating caveats.
 
+Terminology note: this file preserves MIAOW source names such as `wave`, `wavefront`, `wfid`, `workgroup`, and `EXEC`. In the skill contract, map them to `SIMT group`, `simt_group_id`, `CTA/workgroup`, and `active lane mask`; use the MIAOW names only when quoting source behavior.
+
 ## Relevant Source Map
 
 Use these files and artifacts as references:

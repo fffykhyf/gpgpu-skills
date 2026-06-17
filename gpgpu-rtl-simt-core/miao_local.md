@@ -2,6 +2,8 @@
 
 This file is the local MIAOW reference for the RTL SIMT core skill. It summarizes the MIAOW CU implementation details that matter when designing fetch, wavefront state, decode, issue, dependency tracking, special registers, execution units, writeback, and trace.
 
+Terminology note: this file preserves MIAOW source names such as `wave`, `wavefront`, `wfid`, `workgroup`, and `EXEC`. In the skill contract, map them to `SIMT group`, `simt_group_id`, `CTA/workgroup`, and `active lane mask`; use the MIAOW names only when quoting source behavior.
+
 ## Core RTL Path
 
 The main entry is `ref_submodule/miaow/src/verilog/rtl/compute_unit/compute_unit.vp`. The useful mental model is:

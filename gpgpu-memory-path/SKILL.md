@@ -13,7 +13,7 @@ Use this skill for LSU and memory-system work. Start with a blocking, traceable 
 
 Every memory request must be traceable by SIMT context:
 
-- core ID, warp ID, PC or instruction ID
+- compute core/CU ID, simt_group_id, PC or instruction ID
 - active lane mask
 - per-lane address or coalesced address
 - byte enable and access width
@@ -23,6 +23,18 @@ Every memory request must be traceable by SIMT context:
 - stall, replay, fence, or exception reason when relevant
 
 Do not make a memory optimization if the current trace and counters cannot show the problem it solves.
+
+## Terminology Contract
+
+Use canonical terms for memory traces and tags. Keep source aliases only when naming RTL signals.
+
+| Canonical term | Source aliases | Memory-path meaning |
+|---|---|---|
+| SIMT group | warp, wavefront, wave | execution group that issues memory operations |
+| simt_group_id | warp ID, `wfid`, wave ID, wavefront tag | request/response identity for a resident SIMT group |
+| active lane mask | active mask, lane mask, thread mask, `EXEC` mask | lanes that participate in a load/store |
+| CTA/workgroup | CTA, block, workgroup | local-memory and barrier scope |
+| compute core/CU | core, CU, compute unit | memory-client owner |
 
 ## Frontend And Backend Split
 
@@ -38,12 +50,12 @@ A first blocking LSU should name its FSM states and trace:
 
 | Area | Required evidence |
 |---|---|
-| issue capture | wfid, PC, opcode, memory format, destination, SGPR/VGPR class |
+| issue capture | simt_group_id, PC, opcode, memory format, destination, SGPR/VGPR class |
 | address generation | scalar base, vector offset, immediate, thread id, LDS base, global/LDS bit |
-| lane control | active or EXEC mask, skipped lanes, per-lane address vector |
+| lane control | active lane mask, skipped lanes, per-lane address vector |
 | request | read/write enable, address, write data, write mask, tag |
 | response | ack, tag, read data, destination register, writeback mask |
-| completion | done wfid, retire PC, memory wait release, trace event |
+| completion | done simt_group_id, retire PC, memory wait release, trace event |
 
 Only after this path passes load/store, masked-lane, global/LDS, and SGPR/VGPR writeback tests should coalescing, cache, MSHR, or VM be treated as implementation work rather than speculation.
 
@@ -67,7 +79,7 @@ Any non-blocking load must specify:
 
 - tag or index-buffer allocation and release.
 - maximum outstanding requests.
-- response demux path back to warp, lane mask, and destination.
+- response demux path back to SIMT group, lane mask, and destination.
 - behavior on flush, kill, fence, exception, or queue-full.
 - watchdog, assertion, or test that catches deadlock.
 
@@ -76,7 +88,7 @@ Any non-blocking load must specify:
 - Adding cache before a working blocking LSU.
 - Assuming in-order responses after introducing outstanding requests.
 - Coalescing without preserving per-lane writeback, byte enables, and exception behavior.
-- Losing the original warp/lane/destination metadata in the request tag.
+- Losing the original SIMT-group/lane/destination metadata in the request tag.
 - Treating final kernel output as the only memory correctness check.
 
 ## Local References

@@ -19,12 +19,26 @@ description: 用于规划、分阶段实现或评审 GPGPU 架构，范围包括
 | 模拟器 | functional model、cycle model、golden trace | 可执行参考是什么？ |
 | RTL | SIMT core、LSU、cache、CP、interconnect | valid-ready 和 stall 契约是什么？ |
 | Runtime | device、buffer、queue、launch、event、fence | host 软件如何启动并观察工作？ |
-| Kernel ABI | entry PC、args、grid/block/CTA IDs | device 代码假设了什么？ |
+| Kernel ABI | entry PC、args、grid/block/CTA/workgroup IDs | device 代码假设了什么？ |
 | Config | 私有旋钮、ABI 常量、生成头文件 | 哪些值跨层可见？ |
 | Tests | smoke、trace diff、regression、backend matrix | 什么能证明这一阶段可用？ |
 | Evaluation | counters、logs、SAIF、synthesis reports | 哪个指标支撑这个变化？ |
 
 不要静默修改多个层级。列出每个受影响层级、每个契约的 owner，以及证明它仍然工作的最小 gate。
+
+## 术语契约
+
+新的设计和文档使用统一术语；只有在引用具体参考实现时保留源码原名。
+
+| 统一术语 | 源码别名 | 含义 |
+|---|---|---|
+| SIMT group | warp、wavefront、wave | 共享 PC、scheduler residency 和 active lane mask 的 threads 或 work-items |
+| simt_group_id | warp ID、`wfid`、wave ID、wavefront tag | 一个 resident SIMT group 的身份 |
+| active lane mask | active mask、thread mask、`tmask`、`EXEC` mask | SIMT group 的 per-lane participation mask |
+| CTA/workgroup | CTA、block、workgroup | 包含一个或多个 SIMT groups 的 launch group |
+| compute core/CU | core、CU、compute unit | 拥有 SIMT groups 和 execution resources 的硬件单元 |
+
+保持 `simt_group_width`、`active_mask_width`、`physical_simd_width`、`resident_simt_groups` 和 `test_thread_count` 分开记录。
 
 ## 必要契约
 
@@ -32,7 +46,7 @@ description: 用于规划、分阶段实现或评审 GPGPU 架构，范围包括
 
 - Objective：正在测试的一个能力或假设。
 - Non-goals：明确不做的高级功能。
-- State contract：PC、active mask、warp state、registers、memory、CSR/DCR、launch state。
+- State contract：PC、active lane mask、SIMT group state、registers、memory、CSR/DCR、launch state。
 - Config contract：将每个参数分类为 hardware-private、simulator-private、HW/SW ABI、test-only 或 debug-only。
 - Launch contract：program image、kernel entry、args、grid/block dimensions、start、done、result、synchronization path。
 - Test gate：simulator smoke、RTL trace diff、runtime launch test、counter check 或 PPA report。
@@ -44,21 +58,21 @@ description: 用于规划、分阶段实现或评审 GPGPU 架构，范围包括
 | 项 | 必填内容 |
 |---|---|
 | ISA scope | 已支持、计划支持、明确不支持的指令或功能 |
-| CU organization | wavefront slots、issue width、architectural mask width、physical SIMD width、SGPR/VGPR/LDS resources |
+| CU organization | resident SIMT-group slots、issue width、active-mask width、physical SIMD width、SGPR/VGPR/LDS resources |
 | Implementation anchors | fetch、wavepool、decode、issue、scoreboard、exec state、FU、LSU、dispatcher 或 control-plane owner |
 | Evidence path | unit test、external oracle trace、RTL tracemon diff、FPGA control path、PPA report |
 | Credibility caveat | relaxed frequency、area、power、tooling、ISA、runtime、memory hierarchy 或 benchmark assumptions |
 
-不要把 architectural wavefront size、active-mask width、physical SIMD width 和 test thread count 混成一个模糊的 "lane count"。
+不要把 SIMT-group width、active-mask width、physical SIMD width、resident SIMT-group slots 和 test thread count 混成一个模糊的 "lane count"。
 
 ## 阶段顺序
 
 1. 定义项目骨架、ISA sketch、SIMT state、configuration boundary 和最小 launch path。
 2. 在复杂 RTL 之前建立 simulator 或 golden trace。
-3. 实现最小 SIMT core：warp state、active mask、scheduler、register file、ALU、commit。
+3. 实现最小 SIMT core：SIMT group state、active lane mask、scheduler、register file、ALU、commit。
 4. 分阶段加入 memory：blocking LSU、lane masks 和 byte enables、outstanding tags、response demux，然后再 coalescing/cache。
 5. 用 runtime 或 launch contract 替代 testbench pokes：load program、load args、start、wait、copy result。
-6. 在调优前加入 counters：cycles、instructions、warp stalls、scoreboard stalls、memory stalls、load/store counts。
+6. 在调优前加入 counters：cycles、instructions、SIMT-group stalls、scoreboard stalls、memory stalls、load/store counts。
 7. 只有在基本循环可调试后，才加入 cache、VM、tensor、graphics、FPGA 或软件生态工作。
 8. 只有 correctness gates 通过后才使用 PPA。
 

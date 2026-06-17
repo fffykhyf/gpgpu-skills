@@ -2,6 +2,8 @@
 
 This file is the local MIAOW reference for the memory-path skill. It explains how MIAOW builds a small but observable LSU and what to copy conceptually before adding coalescing, cache, MSHR, VM, or timing studies.
 
+Terminology note: this file preserves MIAOW source names such as `wave`, `wavefront`, `wfid`, `workgroup`, and `EXEC`. In the skill contract, map them to `SIMT group`, `simt_group_id`, `CTA/workgroup`, and `active lane mask`; use the MIAOW names only when quoting source behavior.
+
 ## Relevant Source Map
 
 The main files are:

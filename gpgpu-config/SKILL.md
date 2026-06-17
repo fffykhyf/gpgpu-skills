@@ -1,6 +1,6 @@
 ---
 name: gpgpu-config
-description: Use when adding, editing, or reviewing GPGPU parameters, generated config, hardware-private knobs, simulator-private knobs, HW/SW ABI constants, CSR or DCR maps, memory maps, kernel ABI values, device capabilities, backend config drift, or hard-coded core/warp/thread/cache values.
+description: Use when adding, editing, or reviewing GPGPU parameters, generated config, hardware-private knobs, simulator-private knobs, HW/SW ABI constants, CSR or DCR maps, memory maps, kernel ABI values, device capabilities, backend config drift, or hard-coded core/SIMT-group/thread/cache values.
 ---
 
 # GPGPU Config
@@ -23,11 +23,25 @@ Classify every parameter before changing it:
 
 HW/SW ABI values need a single source of truth and a verification path through RTL, simulator, runtime, kernel, and tests.
 
+## Terminology Contract
+
+Use canonical terms in config names unless quoting source constants.
+
+| Canonical term | Source aliases | Configuration boundary |
+|---|---|---|
+| SIMT group | warp, wavefront, wave | execution group width, scheduler residency, and trace identity |
+| simt_group_id | warp ID, `wfid`, wave ID, wavefront tag | ID width, tag fields, trace fields, and done signals |
+| active lane mask | active mask, thread mask, `tmask`, `EXEC` mask | mask width and lane-enable ABI |
+| CTA/workgroup | CTA, block, workgroup | launch dimensions, group IDs, barriers, and local memory |
+| compute core/CU | core, CU, compute unit | hardware capacity and resource allocation |
+
+Do not encode source aliases into a public ABI unless the implementation already exposes that name.
+
 For common GPGPU value families, start with this classification:
 
 | Value family | Required classification |
 |---|---|
-| wavefront and mask sizes | architectural limit, physical SIMD width, test thread count, or FPGA prototype limit |
+| SIMT-group and mask sizes | SIMT-group width, active-mask width, physical SIMD width, test thread count, or FPGA prototype limit |
 | SGPR/VGPR/LDS/GDS counts | physical resource, dispatch allocation unit, or test fixture value |
 | dispatcher fields | HW/SW ABI, resource-private, or debug-only |
 | MMIO/control offsets | HW/SW ABI requiring synchronized RTL decode, host header, tests, and docs |
@@ -62,7 +76,7 @@ For every config change:
 
 Use this skill immediately when you see:
 
-- lane, warp, core, register, cache, or memory sizes copied in multiple files.
+- lane, SIMT-group, core/CU, register, cache, or memory sizes copied in multiple files.
 - simulator and RTL using different constants.
 - runtime guessing hardware capability from build flags.
 - tests passing only under one hard-coded configuration.

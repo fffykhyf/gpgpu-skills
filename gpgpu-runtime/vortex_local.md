@@ -5,6 +5,8 @@ skill. It focuses on public runtime handles, command submission, module/kernel
 loading, kernel entry ABI, command processor control, CTA/KMU dispatch, and
 host/device synchronization.
 
+Terminology note: this file preserves Vortex source names such as `warp`, `warp ID`, `tmask`, and `CTA`. In the skill contract, map them to `SIMT group`, `simt_group_id`, `active lane mask`, and `CTA/workgroup`; use Vortex names only when quoting source behavior.
+
 ## What Vortex Teaches For This Skill
 
 Vortex separates the user-facing runtime from backend transport and from RTL
