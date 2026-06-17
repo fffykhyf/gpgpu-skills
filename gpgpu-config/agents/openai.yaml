@@ -1,0 +1,4 @@
+interface:
+  display_name: "GPGPU Config"
+  short_description: "Classify and synchronize GPGPU parameters, ABI constants, and generated config."
+  default_prompt: "Review a GPGPU configuration or ABI-constant change."

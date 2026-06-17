@@ -4,57 +4,68 @@
 
 ## 概述
 
-当 GPGPU 修改需要功能正确性之外的证据时，使用这个 skill。PPA 工作必须把 performance、power、area 和 timing 结论绑定到 counter、report 和受控对比。
+当 GPGPU 修改需要功能正确性之外的证据时，使用这个 skill。PPA 结论必须把 workload、backend、configuration、counter、activity 和 report 绑定成受控对比。
 
 ## 核心规则
 
-没有 baseline、workload、configuration、metric 和可复现 command/report path，就不要宣称优化更好。
+没有 baseline、variant、workload、configuration、backend、metric、evidence path 和 interpretation，就不要宣称设计更好。
 
 ## 最小评估记录
 
-每个结果都要记录：
-
-| 项目 | 必需内容 |
+| 字段 | 必需内容 |
 |---|---|
-| Baseline | 修改前的 commit/config/parameter set |
-| Variant | 修改后的 commit/config/parameter set |
-| Workload | program、input size、launch config、memory image |
-| Backend | simulator、RTL sim、FPGA、synthesis 或 analytic model |
-| Metrics | cycles、IPC、stalls、bandwidth、power、area、timing 或 energy |
-| Evidence | log path、trace path、report path 或 command |
-| Interpretation | 发生了什么变化，以及仍不确定的部分 |
+| config_id | commit、build flags、core/warp/thread、memory/cache、ISA/features |
+| baseline | 未修改参考设计及精确 command 或 report path |
+| variant | 只改变一个目标变量后的设计 |
+| workload | kernel 或 benchmark、input size、launch shape、memory image |
+| backend | simulator、RTL sim、synthesis、FPGA 或 analytic model |
+| correctness | pass/fail、trace diff 状态、已知限制 |
+| counters | cycles、instrs、IPC、stalls、load/store、cache、memory |
+| reports | area、timing、Fmax、power、SAIF/VCD 或模型输出 |
+| interpretation | 数据支持什么，不支持什么 |
 
-## Counter 优先
+如果多个变量同时变化，拆分实验；否则标记为 exploratory。
 
-在做性能判断前，优先加入 counter：
+## Correctness Before PPA
 
-- total cycles
-- committed instructions
-- IPC
-- issued warps
-- scoreboard stalls
-- memory stalls
-- barrier stalls
-- load/store request count
-- coalesced request count
-- cache 存在时的 hits/misses
+按这个顺序：
+
+1. Correctness gate：smoke/regression/trace diff 通过。
+2. Performance gate：counter 能解释观察到的 speedup 或 slowdown。
+3. Area/timing gate：synthesis 或 FPGA report 显示资源和频率影响。
+4. Power/energy gate：说明是 vectorless 还是 activity-annotated 估计。
+
+错误设计的 IPC 不是有用证据。
+
+## Counter Schema
+
+调优前优先加入 counter：
+
+- total cycles 和 committed instructions
+- IPC 和 issued warps
+- scheduler idle 和 active warps
+- scoreboard、operand、ALU/FPU/LSU/SFU/TCU stalls
+- branch 和 divergence counts
+- load/store requests 和 latency
+- coalescer misses 或 merge rate
+- cache reads/writes、misses、bank stalls、MSHR stalls
 
 如果缺少 counter，必须说明当前结论是假设还是测量事实。
 
-## PPA 工作流
+## Power And Area 纪律
 
-1. 定义假设和瓶颈。
-2. 选择能触发瓶颈的最小 benchmark。
-3. 运行 baseline 并保存日志。
-4. 在相同配置下运行 variant。
-5. 先比较 counter，再看总 speedup。
-6. 对 power 或 area，把 simulator/RTL activity 映射到 McPAT、GPUWattch、AccelWattch 或 synthesis report。
-7. 报告退化和测量限制。
+- 报告 target clock、tool、device 或 technology、build flags。
+- 区分 vectorless power 和 SAIF/VCD-annotated power。
+- SAIF/VCD 必须绑定生成它的 workload。
+- 记录 WNS 和 estimated Fmax，不只写 timing passed。
+- 如果改动局部化，保留 hierarchical area 和 power。
 
 ## 常见错误
 
 - 报告 speedup 但不展示 cycle 和 stall breakdown。
 - 比较不同 config 或 workload，却声称是架构收益。
-- 不加说明地把 simulator counter 当作硅上 timing 或 power。
-- 只优化 IPC，却忽略 bandwidth、energy 或 area。
-- 只保留 summary number，丢失复现所需 report path。
+- 不加 caveat 地把 simulator counter 当作硅上 timing 或 power。
+- 使用来自不同 workload 或 config 的 SAIF/VCD。
+- 只保留 summary number，丢失 command 或 report path。
+
+如果需要了解更多和本 skill 相关的 Vortex 背景，请阅读本目录下的 `vortex_local.zh.md`。它已经整理了相关 Vortex 设计文档和代码路径的要点，日常 PPA 工作不需要重新通读整个 reference tree。

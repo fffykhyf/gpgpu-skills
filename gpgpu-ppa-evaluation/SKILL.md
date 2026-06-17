@@ -1,63 +1,74 @@
 ---
 name: gpgpu-ppa-evaluation
-description: Use when evaluating GPGPU performance, power, area, timing, energy, counters, bottlenecks, synthesis reports, FPGA results, McPAT, GPUWattch, AccelWattch, or architecture tradeoffs.
+description: Use when evaluating GPGPU performance, power, area, timing, energy, counters, bottlenecks, workload matrices, SAIF or VCD activity, synthesis reports, FPGA results, McPAT, GPUWattch, AccelWattch, or architecture tradeoffs.
 ---
 
 # GPGPU PPA Evaluation
 
 ## Overview
 
-Use this skill when a GPGPU change needs evidence beyond functional correctness. PPA work must tie performance, power, area, and timing claims to counters, reports, and controlled comparisons.
+Use this skill when a GPGPU change needs evidence beyond functional correctness. PPA conclusions must bind workload, backend, configuration, counters, activity, and reports into a controlled comparison.
 
 ## Core Rule
 
-Do not claim an optimization is better without a baseline, workload, configuration, metric, and reproducible command or report path.
+Do not claim a design is better without a baseline, variant, workload, configuration, backend, metric, evidence path, and interpretation.
 
 ## Minimum Evaluation Record
 
-For every result, capture:
-
-| Item | Required content |
+| Field | Required content |
 |---|---|
-| Baseline | commit/config/parameter set before the change |
-| Variant | commit/config/parameter set after the change |
-| Workload | program, input size, launch config, memory image |
-| Backend | simulator, RTL sim, FPGA, synthesis, or analytic model |
-| Metrics | cycles, IPC, stalls, bandwidth, power, area, timing, or energy |
-| Evidence | log path, trace path, report path, or command |
-| Interpretation | what changed and what remains uncertain |
+| config_id | commit, build flags, core/warp/thread, memory/cache, ISA/features |
+| baseline | unchanged reference with exact command or report path |
+| variant | changed design with one intended variable changed |
+| workload | kernel or benchmark, input size, launch shape, memory image |
+| backend | simulator, RTL sim, synthesis, FPGA, or analytic model |
+| correctness | pass/fail, trace diff state, known limitations |
+| counters | cycles, instrs, IPC, stalls, load/store, cache, memory |
+| reports | area, timing, Fmax, power, SAIF/VCD, or model output |
+| interpretation | what the data supports and what it does not support |
 
-## Counter First
+If multiple variables changed, split the experiment or label the result as exploratory.
 
-Prefer adding counters before making performance decisions:
+## Correctness Before PPA
 
-- total cycles
-- committed instructions
-- IPC
-- issued warps
-- scoreboard stalls
-- memory stalls
-- barrier stalls
-- load/store request count
-- coalesced request count
-- cache hits/misses when cache exists
+Use this order:
 
-If counters are missing, state whether the current conclusion is a hypothesis or measured fact.
+1. Correctness gate: smoke/regression/trace diff passes.
+2. Performance gate: counters explain the observed speedup or slowdown.
+3. Area/timing gate: synthesis or FPGA reports show resource and frequency impact.
+4. Power/energy gate: vectorless or activity-annotated estimate is identified.
 
-## PPA Workflow
+An incorrect design's IPC is not useful evidence.
 
-1. Define the hypothesis and the bottleneck.
-2. Choose the smallest benchmark that exercises the bottleneck.
-3. Run the baseline and save logs.
-4. Run the variant under the same configuration.
-5. Compare counters before inspecting aggregate speedup.
-6. For power or area, map simulator/RTL activity to McPAT, GPUWattch, AccelWattch, or synthesis reports.
-7. Report regressions and measurement limits with the result.
+## Counter Schema
+
+Prefer adding counters before tuning:
+
+- total cycles and committed instructions
+- IPC and issued warps
+- scheduler idle and active warps
+- scoreboard, operand, ALU/FPU/LSU/SFU/TCU stalls
+- branch and divergence counts
+- load/store requests and latency
+- coalescer misses or merge rate
+- cache reads/writes, misses, bank stalls, MSHR stalls
+
+If counters are missing, state whether the conclusion is a hypothesis or measured fact.
+
+## Power And Area Discipline
+
+- Report target clock, tool, device or technology, and build flags.
+- Distinguish vectorless power from SAIF/VCD-annotated power.
+- Keep SAIF/VCD tied to the workload that produced it.
+- Record WNS and estimated Fmax, not only "timing passed".
+- Preserve hierarchical area and power when the change is localized.
 
 ## Common Mistakes
 
-- Reporting speedup without showing cycle and stall breakdown.
-- Comparing different configs or workloads and calling it an architectural win.
+- Reporting speedup without cycle and stall breakdown.
+- Comparing different configs or workloads and calling it an architecture win.
 - Treating simulator counters as silicon timing or power without caveats.
-- Optimizing for IPC while ignoring bandwidth, energy, or area.
-- Keeping only summary numbers and losing the report path needed to reproduce them.
+- Using SAIF/VCD from a different workload or config.
+- Keeping only summary numbers and losing the command or report path.
+
+For deeper Vortex background tied to this skill, read `vortex_local.md` in this directory. It summarizes the relevant Vortex design documents and code paths so routine PPA work does not require re-reading the whole reference tree.

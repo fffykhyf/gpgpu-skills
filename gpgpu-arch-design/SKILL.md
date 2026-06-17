@@ -1,57 +1,72 @@
 ---
 name: gpgpu-arch-design
-description: Use when planning, staging, or reviewing simple GPGPU architecture design across ISA, SIMT execution, simulator, RTL, runtime, tests, performance counters, memory hierarchy, PPA, FPGA bring-up, or project roadmap decisions.
+description: Use when planning, staging, or reviewing GPGPU architecture across ISA, SIMT execution, simulator, RTL, runtime launch, configuration, tests, counters, memory hierarchy, PPA, FPGA bring-up, or roadmap decisions.
 ---
 
 # GPGPU Architecture Design
 
 ## Overview
 
-Use this skill as the top-level guardrail for local GPGPU development. It keeps work staged around a runnable, observable path instead of letting ISA, RTL, runtime, and performance work drift together.
+Use this skill as the top-level guardrail for local GPGPU work. A GPGPU is a full-stack system, so architecture work must state how ISA, simulator, RTL, runtime, kernel ABI, configuration, tests, and PPA evidence stay aligned.
 
 ## Core Rule
 
-Before changing or proposing any GPGPU feature, classify the task into one or more layers:
+Before changing or proposing any GPGPU feature, produce a layer impact table and a staged verification path.
 
 | Layer | Typical artifacts | Required question |
 |---|---|---|
-| ISA | instruction semantics, encoding, assembler rules | What architectural state changes? |
-| Simulator | functional model, cycle model, golden trace | What is the reference behavior? |
-| RTL | pipeline, SIMT core, LSU, cache, interconnect | What is the valid-ready and stall contract? |
-| Runtime | launch ABI, host/device contract, buffers | How does software start and observe work? |
-| Tests | smoke tests, trace diff, regressions | What proves this stage works? |
-| Evaluation | counters, logs, PPA reports | What metric justifies the change? |
-| Docs | architecture notes, design decisions | What does the next agent need to know? |
+| ISA | instruction semantics, encoding, CSR/DCR state | What architectural state changes? |
+| Simulator | functional model, cycle model, golden trace | What is the executable reference? |
+| RTL | SIMT core, LSU, cache, CP, interconnect | What is the valid-ready and stall contract? |
+| Runtime | device, buffer, queue, launch, event, fence | How does host software start and observe work? |
+| Kernel ABI | entry PC, args, grid/block/CTA IDs | What does device code assume? |
+| Config | private knobs, ABI constants, generated headers | Which values are visible across layers? |
+| Tests | smoke, trace diff, regression, backend matrix | What proves this stage works? |
+| Evaluation | counters, logs, SAIF, synthesis reports | What metric justifies the change? |
 
-Do not silently modify multiple layers. Name the affected layers and add the smallest verification path for each.
+Do not silently modify multiple layers. Name each affected layer, the owner of each contract, and the smallest gate that proves it still works.
+
+## Required Contracts
+
+Every architecture design should include:
+
+- Objective: one capability or hypothesis being tested.
+- Non-goals: advanced features intentionally left out.
+- State contract: PC, active mask, warp state, registers, memory, CSR/DCR, and launch state.
+- Config contract: classify each parameter as hardware-private, simulator-private, HW/SW ABI, test-only, or debug-only.
+- Launch contract: program image, kernel entry, args, grid/block dimensions, start, done, result, and synchronization path.
+- Test gate: simulator smoke, RTL trace diff, runtime launch test, counter check, or PPA report.
 
 ## Stage Order
 
-Follow this order unless the user explicitly scopes a narrower investigation:
-
-1. Define the project skeleton, ISA sketch, SIMT state, and centralized configuration.
-2. Build or update the simulator/golden model before complex RTL.
+1. Define the project skeleton, ISA sketch, SIMT state, configuration boundary, and minimal launch path.
+2. Establish the simulator or golden trace before complex RTL.
 3. Implement the minimal SIMT core: warp state, active mask, scheduler, register file, ALU, commit.
-4. Add the memory path: blocking LSU first, lane mask and byte enable next, coalescing/cache later.
-5. Define the runtime or testbench launch contract: load program, load args, start, done, read result.
-6. Add counters before performance tuning: cycles, instructions, warp stalls, memory stalls, load/store counts.
-7. Add memory hierarchy only after traces and counters show the bottleneck.
-8. Move to synthesis, FPGA, PPA, VM, tensor, or software ecosystem work only after the basic loop is stable.
+4. Add memory in stages: blocking LSU, lane masks and byte enables, outstanding tags, response demux, then coalescing/cache.
+5. Replace testbench pokes with a runtime or launch contract: load program, load args, start, wait, copy result.
+6. Add counters before tuning: cycles, instructions, warp stalls, scoreboard stalls, memory stalls, load/store counts.
+7. Add cache, VM, tensor, graphics, FPGA, or software ecosystem work only after the basic loop is debuggable.
+8. Use PPA only after correctness gates pass.
 
-## Required Output For Design Work
+## Skill Routing
 
-When asked to design or extend the GPGPU, produce:
+Use the narrower skill when the task is mostly about one boundary:
 
-- Scope: affected layers and non-goals.
-- State contract: PC, active mask, warp state, registers, memory, and launch state if relevant.
-- Execution path: simulator behavior, RTL module boundary, and runtime/test entry.
-- Verification: smallest smoke test, trace diff plan, and required counters.
-- Deferral list: advanced features intentionally left out.
+| Task shape | Use |
+|---|---|
+| Parameter or ABI changes | `gpgpu-config` |
+| Reference behavior or trace mismatch | `gpgpu-golden-sim` |
+| SIMT RTL state or pipeline | `gpgpu-rtl-simt-core` |
+| LSU, cache, coalescing, memory ordering | `gpgpu-memory-path` |
+| Host/device launch, queue, event, kernel entry | `gpgpu-runtime` |
+| Performance, power, area, timing | `gpgpu-ppa-evaluation` |
 
 ## Common Mistakes
 
-- Starting RTL before a reference model exists.
-- Adding cache, VM, tensor, OpenCL, or HIP before a minimal SIMT loop is debuggable.
-- Treating tests as final output checks instead of traceable behavior checks.
-- Hard-coding core, warp, lane, register, or memory sizes across unrelated files.
-- Letting testbench-only pokes become the permanent runtime interface.
+- Drawing only an RTL block diagram and omitting runtime, config, tests, or counters.
+- Treating launch ABI and configuration as script details instead of architecture contracts.
+- Adding cache, VM, tensor, OpenCL, HIP, Vulkan, or FPGA bring-up before a minimal SIMT loop is traceable.
+- Letting testbench-only internal pokes become the permanent runtime interface.
+- Changing several variables at once and calling the result an architecture conclusion.
+
+For deeper Vortex background tied to this skill, read `vortex_local.md` in this directory. It summarizes the relevant Vortex design documents and code paths so you do not need to re-read the whole reference tree for routine architecture work.
