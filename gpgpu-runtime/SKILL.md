@@ -48,6 +48,16 @@ This can be small, but it must be the same conceptual path for simulator and RTL
 
 Keep these layers separate so a new backend does not rewrite the API.
 
+Classify the early control-plane form before changing launch behavior:
+
+| Mode | Allowed use | Risk |
+|---|---|---|
+| testbench C hook | unit-test setup, direct SGPR/VGPR initialization, fast trace regressions | becomes a fake public API |
+| hard dispatcher | resource allocation, wavefront tags, VGPR/SGPR/LDS/GDS bases, done/deallocation | config drift with CU capacity |
+| FPGA MMIO control | program load, register/memory init, start, done, memory-service handshake | host offsets drift from RTL decode |
+
+Even the smallest runtime/control plane must define program load, state initialization, dispatch fields, start, done/status, memory service, result readback, and cleanup. Test-only internal pokes must be labeled test-only.
+
 ## Runtime Verification
 
 Every runtime change needs at least one of:
@@ -68,4 +78,8 @@ For launch-related changes, prefer one workload that runs through both simulator
 - Adding async queues or events without ordering and completion semantics.
 - Hiding cache flush or fence behavior inside ad hoc test code.
 
-For deeper Vortex background tied to this skill, read `vortex_local.md` in this directory. It summarizes the relevant Vortex design documents and code paths so routine runtime and launch-ABI work does not require re-reading the whole reference tree.
+## Local References
+
+For deeper Vortex background tied to this skill, read `vortex_local.md` in this directory. It explains handle-based runtime APIs, command processor control plane, kernel entry, CTA dispatch, and launch DCR programming.
+
+For deeper MIAOW background tied to this skill, read `miao_local.md` in this directory. It explains testbench soft dispatch, hard resource dispatch, FPGA AXI-lite control registers, Xilinx SDK command flow, and the boundaries between test hooks and public runtime contracts.

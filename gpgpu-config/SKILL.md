@@ -23,6 +23,17 @@ Classify every parameter before changing it:
 
 HW/SW ABI values need a single source of truth and a verification path through RTL, simulator, runtime, kernel, and tests.
 
+For common GPGPU value families, start with this classification:
+
+| Value family | Required classification |
+|---|---|
+| wavefront and mask sizes | architectural limit, physical SIMD width, test thread count, or FPGA prototype limit |
+| SGPR/VGPR/LDS/GDS counts | physical resource, dispatch allocation unit, or test fixture value |
+| dispatcher fields | HW/SW ABI, resource-private, or debug-only |
+| MMIO/control offsets | HW/SW ABI requiring synchronized RTL decode, host header, tests, and docs |
+| unit-test config format | test ABI with parser validation |
+| conditional build flags | interface-changing, implementation-only, debug-only, or FPGA-only |
+
 ## Change Checklist
 
 For every config change:
@@ -30,6 +41,7 @@ For every config change:
 - Name the class of the parameter.
 - Identify its single source of truth.
 - List generated or synchronized consumers.
+- Audit duplicate appearances across Verilog `define`, Verilog parameter, C `#define`, scripts, unit-test config, FPGA scripts, generated headers, and docs.
 - State whether public capability, version, or query output changes.
 - Remove duplicate hard-coded copies.
 - Test at least one small config and one target config.
@@ -42,6 +54,9 @@ For every config change:
 - Debug/test knobs must not become permanent architecture assumptions.
 - Derived values should be generated from source values rather than copied by hand.
 - Changing a visible config without updating tests and capability reporting is a bug.
+- If a MMIO map exists, list the RTL decode path, host C/C++ constants, tests, and documentation consumer before changing any offset.
+- If a unit-test config format changes, update parser validation, generators, fixtures, and trace/regression expectations together.
+- If a conditional build flag changes an interface, document whether it is public, FPGA-only, debug-only, or test-only.
 
 ## Drift Signals
 
@@ -61,4 +76,8 @@ Use this skill immediately when you see:
 - Changing memory maps or CSR/DCR numbers without a capability or version story.
 - Running only the default config after changing parameterized logic.
 
-For deeper Vortex background tied to this skill, read `vortex_local.md` in this directory. It summarizes the relevant Vortex design documents and code paths so routine config and ABI work does not require re-reading the whole reference tree.
+## Local References
+
+For deeper Vortex background tied to this skill, read `vortex_local.md` in this directory. It explains generated config/type sources, ABI-visible values, DCR/capability contracts, and backend config synchronization.
+
+For deeper MIAOW background tied to this skill, read `miao_local.md` in this directory. It explains the scattered constants in global definitions, dispatcher parameters, FPGA MMIO registers, Xilinx SDK offsets, unit-test config files, and SIAGen workload parameters.

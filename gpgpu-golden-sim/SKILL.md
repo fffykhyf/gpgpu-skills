@@ -11,7 +11,17 @@ Use this skill when simulator behavior, instruction semantics, or trace comparis
 
 ## Core Rule
 
-Every non-trivial RTL behavior needs either simulator behavior or a golden trace before the RTL is trusted. For bugs, find the first divergence between the reference and implementation before proposing a hardware fix.
+Every non-trivial RTL behavior needs either simulator behavior or a golden trace before the RTL is trusted. For bugs, find the first divergence between the reference and implementation before proposing a hardware fix. Use the smallest oracle that proves the current stage:
+
+| Stage | Oracle | Use when |
+|---|---|---|
+| G0 | hand-written expected side effects | tiny ALU, branch, or LSU unit tests |
+| G1 | external ISA simulator trace | expanding instruction coverage before a full local simulator exists |
+| G2 | normalized per-wavefront trace | debugging multi-wavefront RTL effects |
+| G3 | module-level golden model | scoreboard, LSU, branch, or barrier ownership is under test |
+| G4 | cycle-aware simulator | stalls, counters, and PPA interpretation depend on timing |
+
+External functional traces and normalized per-wavefront RTL traces are valid as an early correctness loop, but they are not a cycle model.
 
 ## Module Twin Map
 
@@ -54,7 +64,19 @@ If a field is omitted, say why it is not needed at this stage.
 6. Report the first divergent event with enough context to reproduce it.
 7. Decide whether simulator, RTL, memory path, runtime, or test harness violated the contract.
 
-Do not edit the simulator merely to match RTL output. First decide which side violates the architecture contract.
+Do not edit the simulator merely to match RTL output. First decide which side violates the architecture contract. Trace comparison must also:
+
+- Normalize external traces before comparison; never diff raw simulator logs with RTL logs.
+- Keep per-wavefront streams or stable identity fields so interleaving does not hide the first divergence.
+- Distinguish content differences from missing trace or hang conditions.
+- Trace architectural side effects first: register writes, special register writes, memory load/store effects, branch, barrier, waitcnt, and retire PC.
+- Record the external oracle version, command, input memory, instruction memory, and launch/config files.
+
+## Local References
+
+For deeper Vortex background tied to this skill, read `vortex_local.md` in this directory. It explains the SimX executable twin and module-aligned simulator/RTL contracts.
+
+For deeper MIAOW background tied to this skill, read `miao_local.md` in this directory. It explains the Multi2Sim trace flow, trace parser, tracemon data structures and print functions, trace comparator, regression runner, and what MIAOW's oracle does not prove.
 
 ## Common Mistakes
 
@@ -63,5 +85,3 @@ Do not edit the simulator merely to match RTL output. First decide which side vi
 - Mixing functional correctness and timing fidelity in one unclear trace.
 - Keeping simulator structure unrelated to RTL, making trace diffs hard to map back.
 - Declaring a fix without rerunning the reproducer and at least one regression.
-
-For deeper Vortex background tied to this skill, read `vortex_local.md` in this directory. It summarizes the relevant Vortex design documents and code paths so routine simulator and trace work does not require re-reading the whole reference tree.

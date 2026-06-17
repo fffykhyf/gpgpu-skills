@@ -34,6 +34,19 @@ Do not make a memory optimization if the current trace and counters cannot show 
 
 Keep this split visible in simulator, RTL, trace, and tests.
 
+A first blocking LSU should name its FSM states and trace:
+
+| Area | Required evidence |
+|---|---|
+| issue capture | wfid, PC, opcode, memory format, destination, SGPR/VGPR class |
+| address generation | scalar base, vector offset, immediate, thread id, LDS base, global/LDS bit |
+| lane control | active or EXEC mask, skipped lanes, per-lane address vector |
+| request | read/write enable, address, write data, write mask, tag |
+| response | ack, tag, read data, destination register, writeback mask |
+| completion | done wfid, retire PC, memory wait release, trace event |
+
+Only after this path passes load/store, masked-lane, global/LDS, and SGPR/VGPR writeback tests should coalescing, cache, MSHR, or VM be treated as implementation work rather than speculation.
+
 ## Stage Order
 
 | Stage | Capability | Gate |
@@ -66,4 +79,8 @@ Any non-blocking load must specify:
 - Losing the original warp/lane/destination metadata in the request tag.
 - Treating final kernel output as the only memory correctness check.
 
-For deeper Vortex background tied to this skill, read `vortex_local.md` in this directory. It summarizes the relevant Vortex design documents and code paths so routine LSU and memory-system work does not require re-reading the whole reference tree.
+## Local References
+
+For deeper Vortex background tied to this skill, read `vortex_local.md` in this directory. It explains the LSU scheduler, memory unit, coalescer/cache/MSHR boundaries, and full-stack memory contracts.
+
+For deeper MIAOW background tied to this skill, read `miao_local.md` in this directory. It explains the MIAOW LSU opcode decoder, address calculator, op-manager FSM, simple memory model, trace signals, and limitations.

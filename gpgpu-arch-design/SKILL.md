@@ -36,6 +36,20 @@ Every architecture design should include:
 - Config contract: classify each parameter as hardware-private, simulator-private, HW/SW ABI, test-only, or debug-only.
 - Launch contract: program image, kernel entry, args, grid/block dimensions, start, done, result, and synchronization path.
 - Test gate: simulator smoke, RTL trace diff, runtime launch test, counter check, or PPA report.
+- Prototype credibility target: instruction unit tests, external golden trace, RTL simulation, FPGA smoke, benchmark run, synthesis report, or ASIC estimate.
+- Implementation anchors: name the modules or planned modules that own the claim.
+
+For any architecture proposal that should become a credible prototype, also record:
+
+| Item | Required content |
+|---|---|
+| ISA scope | supported, planned, and explicitly unsupported instructions or features |
+| CU organization | wavefront slots, issue width, architectural mask width, physical SIMD width, SGPR/VGPR/LDS resources |
+| Implementation anchors | fetch, wavepool, decode, issue, scoreboard, exec state, FU, LSU, dispatcher, or control-plane owner |
+| Evidence path | unit test, external oracle trace, RTL tracemon diff, FPGA control path, PPA report |
+| Credibility caveat | relaxed frequency, area, power, tooling, ISA, runtime, memory hierarchy, or benchmark assumptions |
+
+Do not merge architectural wavefront size, active-mask width, physical SIMD width, and test thread count into one vague "lane count".
 
 ## Stage Order
 
@@ -61,6 +75,12 @@ Use the narrower skill when the task is mostly about one boundary:
 | Host/device launch, queue, event, kernel entry | `gpgpu-runtime` |
 | Performance, power, area, timing | `gpgpu-ppa-evaluation` |
 
+## Local References
+
+For deeper Vortex background tied to this skill, read `vortex_local.md` in this directory. It explains the full-stack contract across RTL, simulator, runtime, ABI, config, tests, and PPA.
+
+For deeper MIAOW background tied to this skill, read `miao_local.md` in this directory. It explains the MIAOW paper scope, CU source anchors, trace/test loop, FPGA control path, and prototype credibility caveats relevant to architecture work.
+
 ## Common Mistakes
 
 - Drawing only an RTL block diagram and omitting runtime, config, tests, or counters.
@@ -68,5 +88,3 @@ Use the narrower skill when the task is mostly about one boundary:
 - Adding cache, VM, tensor, OpenCL, HIP, Vulkan, or FPGA bring-up before a minimal SIMT loop is traceable.
 - Letting testbench-only internal pokes become the permanent runtime interface.
 - Changing several variables at once and calling the result an architecture conclusion.
-
-For deeper Vortex background tied to this skill, read `vortex_local.md` in this directory. It summarizes the relevant Vortex design documents and code paths so you do not need to re-read the whole reference tree for routine architecture work.

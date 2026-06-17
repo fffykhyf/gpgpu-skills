@@ -38,6 +38,27 @@ If these cannot be stated cleanly, the module boundary is too broad or the archi
 
 Avoid a single module that schedules, decodes, reads registers, executes, writes back, and drives memory.
 
+Before implementing issue or hazard logic, the state contract must also list the per-wavefront tables that own readiness:
+
+| Table | Owns |
+|---|---|
+| valid entry | decoded instruction residency and removal on halt, branch, waitcnt, barrier, or issue |
+| FU class | SALU, SIMD, SIMF, LSU destination for the resident instruction |
+| GPR dependency | SGPR/VGPR source and destination readiness |
+| SPR dependency | EXEC, VCC, SCC, M0 readiness |
+| memory wait | LSU in-flight block and release by done wfid |
+| branch wait | branch issued but not resolved |
+| barrier wait | workgroup barrier arrival and release |
+| in-flight limit | maximum outstanding instruction or finished-wavefront state |
+
+Use an explicit readiness equation. A concrete LSU issue condition is:
+
+```text
+ready = fu_lsu & valid & gpr_spr_ready & ~max_inflight & ~mem_wait & ~branch_wait & ~barrier_wait
+```
+
+For non-LSU units, remove only the wait terms that truly do not apply. Do not collapse these owners into a single unexplainable `ready`.
+
 ## Instruction Impact Checklist
 
 For each instruction or uop class, state whether it changes:
@@ -59,6 +80,12 @@ For each instruction or uop class, state whether it changes:
 6. LSU connection through the memory-path contract.
 7. Barrier, CTA dispatch, and full warp lifecycle.
 
+## Local References
+
+For deeper Vortex background tied to this skill, read `vortex_local.md` in this directory. It explains SIMT state, scheduler/fetch/decode/issue/execute/commit boundaries, and simulator-aligned RTL contracts.
+
+For deeper MIAOW background tied to this skill, read `miao_local.md` in this directory. It explains the CU RTL path, fetch and wavepool state, issue readiness equations, scoreboard dependency tables, EXEC/VCC/SCC/M0 ownership, FU writeback, and trace signals.
+
 ## Common Mistakes
 
 - Treating active mask as a temporary signal instead of core SIMT state.
@@ -66,5 +93,3 @@ For each instruction or uop class, state whether it changes:
 - Hiding hazard behavior inside operand read logic.
 - Letting backpressure rely on implicit ordering between unrelated always blocks.
 - Debugging only through waveform browsing instead of simulator/RTL trace alignment.
-
-For deeper Vortex background tied to this skill, read `vortex_local.md` in this directory. It summarizes the relevant Vortex design documents and code paths so routine SIMT RTL work does not require re-reading the whole reference tree.

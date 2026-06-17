@@ -11,7 +11,15 @@ Use this skill when a GPGPU change needs evidence beyond functional correctness.
 
 ## Core Rule
 
-Do not claim a design is better without a baseline, variant, workload, configuration, backend, metric, evidence path, and interpretation.
+Do not claim a design is better without a baseline, variant, workload, configuration, backend, metric, evidence path, and interpretation. Classify the result before reporting it:
+
+| Claim | Required evidence |
+|---|---|
+| optimization claim | controlled baseline and variant with one intended variable changed |
+| credibility claim | working correctness path plus RTL, FPGA, synthesis, benchmark, or power/area evidence showing the prototype is real |
+| exploratory observation | multiple variables changed or incomplete counters; label as hypothesis |
+
+A credibility claim can cite ISA scope, benchmark capability, FPGA prototype data, and ASIC-style estimates, but it must also state relaxed design goals and comparison caveats.
 
 ## Minimum Evaluation Record
 
@@ -62,6 +70,7 @@ If counters are missing, state whether the conclusion is a hypothesis or measure
 - Keep SAIF/VCD tied to the workload that produced it.
 - Record WNS and estimated Fmax, not only "timing passed".
 - Preserve hierarchical area and power when the change is localized.
+- When comparing to a commercial GPU or paper number, state process node, clock, CU count, memory system, compiler/runtime path, workload, estimation method, and which goals were relaxed. Do not imply PPA optimality from a research prototype credibility number.
 
 ## Common Mistakes
 
@@ -71,4 +80,8 @@ If counters are missing, state whether the conclusion is a hypothesis or measure
 - Using SAIF/VCD from a different workload or config.
 - Keeping only summary numbers and losing the command or report path.
 
-For deeper Vortex background tied to this skill, read `vortex_local.md` in this directory. It summarizes the relevant Vortex design documents and code paths so routine PPA work does not require re-reading the whole reference tree.
+## Local References
+
+For deeper Vortex background tied to this skill, read `vortex_local.md` in this directory. It explains synthesis reports, counters, backend evidence, and full-stack reproducibility for PPA work.
+
+For deeper MIAOW background tied to this skill, read `miao_local.md` in this directory. It explains the MIAOW paper's FPGA, area, power, performance, OpenCL/Rodinia, and comparison evidence, plus the caveats that prevent overclaiming.
