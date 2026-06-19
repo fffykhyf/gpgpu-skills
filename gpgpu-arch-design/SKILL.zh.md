@@ -7,7 +7,7 @@ description: 用于规划、分阶段实现或评审 GPGPU 架构，范围包括
 
 ## 概览
 
-将本 skill 作为本地 GPGPU 工作的顶层护栏。GPGPU 是完整系统工程，因此架构工作必须说明 ISA、模拟器、RTL、runtime、kernel ABI、配置、测试和 PPA 证据如何保持一致。使用 GPGPU-Sim 作为 execution-driven runtime、functional/timing simulator 分层、可配置 timing model、trace/statistics 和 power evidence plumbing 的参考。
+将本 skill 作为本地 GPGPU 工作的顶层护栏。GPGPU 是完整系统工程，因此架构工作必须说明 ISA、模拟器、RTL、runtime、kernel ABI、配置、测试和 PPA 证据如何保持一致。使用 GPGPU-Sim 作为 execution-driven runtime、functional/timing simulator 分层、可配置 timing model、trace/statistics 和 power evidence plumbing 的参考。使用 Rocket Chip 作为 generator discipline 的参考：named configurations、negotiated bus/control protocols、tile/periphery boundaries、runtime-visible resources、protocol monitors 和 test harness integration。
 
 ## 核心规则
 
@@ -25,6 +25,8 @@ description: 用于规划、分阶段实现或评审 GPGPU 架构，范围包括
 | Evaluation | counters、logs、SAIF、synthesis reports | 哪个指标支撑这个变化？ |
 
 不要静默修改多个层级。列出每个受影响层级、每个契约的 owner，以及证明它仍然工作的最小 gate。
+
+把系统集成视为生成出来的契约，而不是事后手工连线。任何新架构功能都必须说明由哪个 configuration fragment 打开、由哪个 tile/core/periphery 或 runtime-visible block 拥有、由哪些 protocol fields 承载，以及由哪个 monitor、trace 或 test harness 观察。
 
 ## 术语契约
 
@@ -50,6 +52,7 @@ description: 用于规划、分阶段实现或评审 GPGPU 架构，范围包括
 - Config contract：将每个参数分类为 hardware-private、simulator-private、HW/SW ABI、test-only 或 debug-only。
 - Launch contract：program image、kernel entry、args、grid/block dimensions、start、done、result、synchronization path。
 - Simulation contract：functional oracle、timing model、shared kernel descriptor、trace schema 和 backend mode selection。
+- Integration contract：memory/control protocol schema、source 或 tag 生命周期、resource/capability 暴露，以及 optional-feature ownership。
 - Test gate：simulator smoke、RTL trace diff、runtime launch test、counter check 或 PPA report。
 - Prototype credibility target：instruction unit tests、external golden trace、RTL simulation、FPGA smoke、benchmark run、synthesis report 或 ASIC estimate。
 - Implementation anchors：说明哪个模块或计划模块拥有该声明。
@@ -73,9 +76,10 @@ description: 用于规划、分阶段实现或评审 GPGPU 架构，范围包括
 3. 实现最小 SIMT core：SIMT group state、active lane mask、scheduler、register file、ALU、commit。
 4. 分阶段加入 memory：blocking LSU、lane masks 和 byte enables、outstanding tags、response demux，然后再 coalescing/cache。
 5. 用 runtime 或 launch contract 替代 testbench pokes：load program、load args、start、wait、copy result。
-6. 在调优前加入 counters：cycles、instructions、SIMT-group stalls、scoreboard stalls、memory stalls、load/store counts。
-7. 只有在基本循环可调试后，才加入 cache、VM、tensor、graphics、FPGA 或软件生态工作。
-8. 只有 correctness gates 通过后才使用 PPA。
+6. 在扩展规模前加入 protocol/resource checks：request schema、source IDs、lane masks、ordering、capability exposure，以及至少一个 monitor 或 trace assertion。
+7. 在调优前加入 counters：cycles、instructions、SIMT-group stalls、scoreboard stalls、memory stalls、load/store counts。
+8. 只有在基本循环可调试后，才加入 cache、VM、tensor、graphics、FPGA 或软件生态工作。
+9. 只有 correctness gates 通过后才使用 PPA。
 
 ## GPGPU-Sim 架构视角
 
@@ -92,6 +96,21 @@ description: 用于规划、分阶段实现或评审 GPGPU 架构，范围包括
 | Config/evidence | `option_parser`、`gpgpusim.config`、stats、trace、AccelWattch | 哪个 workload、config、backend、counters 和 power assumptions 支撑结论？ |
 
 把 GPGPU-Sim 当作可执行架构参考。把它的 C++ timing behavior 用作硬件指导前，先翻译成 RTL state、valid-ready、reset、flush、arbitration 和 backpressure。
+
+## Rocket Chip Generator 视角
+
+使用 Rocket Chip 作为把架构变成可复现 generated system 的参考：
+
+| 契约 | Rocket Chip anchor | 本地架构问题 |
+|---|---|---|
+| named configuration | `Configs.scala`、`BaseConfig`、`DefaultConfig`、`With*` fragments | 哪个 config fragment 打开该功能，它影响哪些 generated values？ |
+| tile boundary | `BaseTile.scala`、`RocketTile.scala` | 该功能属于 compute core、tile boundary、memory client、periphery，还是 runtime-visible resource？ |
+| protocol negotiation | Diplomacy `LazyModule`、nodes、`Parameters.scala` | 哪些 width、ID range、address range 和 capability values 应该协商或检查，而不是硬编码？ |
+| memory/control protocol | TileLink bundles、edges、monitors | 新路径有什么 request/response schema 和 executable protocol checks？ |
+| accelerator control | `LazyRoCC.scala` | command、response、memory access、busy、interrupt、exception 和 optional ports 如何暴露？ |
+| SoC resources | BootROM、debug、device resources、`ExampleRocketSystem`、`TestHarness` | 软件或 harness 如何发现、启动、调试和观察硬件？ |
+
+不要把 Rocket 的 scalar CPU pipeline 复制成 SIMT 设计；借鉴的是它的 generator、boundary、protocol 和 verification discipline。
 
 ## Skill 路由
 
@@ -114,6 +133,8 @@ description: 用于规划、分阶段实现或评审 GPGPU 架构，范围包括
 
 若想了解与本 skill 相关的 GPGPU-Sim 背景，请阅读本目录下的 `gpgpusim_local.md`。它说明 execution-driven runtime path、functional/timing split、shader/memory hierarchy、config、trace/statistics 和与架构决策相关的 power evidence。
 
+若想了解与本 skill 相关的 Rocket Chip 背景，请阅读 `../../ref/skillref/rocket.md`，必要时再查看 `../../ref_submodule/rocket-chip`。重点关注 `Configs.scala`、Diplomacy docs、`BaseTile.scala`、`RocketTile.scala`、`LazyRoCC.scala`、TileLink monitor/fuzzer、`ExampleRocketSystem.scala` 和 `TestHarness.scala`。
+
 ## 常见错误
 
 - 只画 RTL block diagram，却遗漏 runtime、config、tests 或 counters。
@@ -122,3 +143,4 @@ description: 用于规划、分阶段实现或评审 GPGPU 架构，范围包括
 - 让 testbench-only internal pokes 变成永久 runtime interface。
 - 一次改变多个变量，然后把结果称为架构结论。
 - 把 C++ timing simulator path 当成可综合 RTL，却没有定义 hardware state、handshakes 和 reset/flush 行为。
+- 硬编码本应生成、检查或作为 capability 暴露的 bus widths、source IDs、MMIO maps 或 optional feature ports。

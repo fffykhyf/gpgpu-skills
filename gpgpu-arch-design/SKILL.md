@@ -7,7 +7,7 @@ description: Use when planning, staging, or reviewing GPGPU architecture across 
 
 ## Overview
 
-Use this skill as the top-level guardrail for local GPGPU work. A GPGPU is a full-stack system, so architecture work must state how ISA, simulator, RTL, runtime, kernel ABI, configuration, tests, and PPA evidence stay aligned. Use GPGPU-Sim as the reference for execution-driven runtime, functional/timing simulator separation, configurable timing models, trace/statistics, and power-evidence plumbing.
+Use this skill as the top-level guardrail for local GPGPU work. A GPGPU is a full-stack system, so architecture work must state how ISA, simulator, RTL, runtime, kernel ABI, configuration, tests, and PPA evidence stay aligned. Use GPGPU-Sim as the reference for execution-driven runtime, functional/timing simulator separation, configurable timing models, trace/statistics, and power-evidence plumbing. Use Rocket Chip as the reference for generator discipline: named configurations, negotiated bus/control protocols, tile/periphery boundaries, runtime-visible resources, protocol monitors, and test harness integration.
 
 ## Core Rule
 
@@ -25,6 +25,8 @@ Before changing or proposing any GPGPU feature, produce a layer impact table and
 | Evaluation | counters, logs, SAIF, synthesis reports | What metric justifies the change? |
 
 Do not silently modify multiple layers. Name each affected layer, the owner of each contract, and the smallest gate that proves it still works.
+
+Treat system integration as a generated contract, not a hand-wired afterthought. Any new architecture feature must say which configuration fragment enables it, which tile/core/periphery or runtime-visible block owns it, which protocol fields carry it, and which monitor, trace, or test harness observes it.
 
 ## Terminology Contract
 
@@ -50,6 +52,7 @@ Every architecture design should include:
 - Config contract: classify each parameter as hardware-private, simulator-private, HW/SW ABI, test-only, or debug-only.
 - Launch contract: program image, kernel entry, args, grid/block dimensions, start, done, result, and synchronization path.
 - Simulation contract: functional oracle, timing model, shared kernel descriptor, trace schema, and backend mode selection.
+- Integration contract: memory/control protocol schema, source or tag lifetime, resource/capability exposure, and optional-feature ownership.
 - Test gate: simulator smoke, RTL trace diff, runtime launch test, counter check, or PPA report.
 - Prototype credibility target: instruction unit tests, external golden trace, RTL simulation, FPGA smoke, benchmark run, synthesis report, or ASIC estimate.
 - Implementation anchors: name the modules or planned modules that own the claim.
@@ -73,9 +76,10 @@ Do not merge SIMT-group width, active-mask width, physical SIMD width, resident 
 3. Implement the minimal SIMT core: SIMT group state, active lane mask, scheduler, register file, ALU, commit.
 4. Add memory in stages: blocking LSU, lane masks and byte enables, outstanding tags, response demux, then coalescing/cache.
 5. Replace testbench pokes with a runtime or launch contract: load program, load args, start, wait, copy result.
-6. Add counters before tuning: cycles, instructions, SIMT-group stalls, scoreboard stalls, memory stalls, load/store counts.
-7. Add cache, VM, tensor, graphics, FPGA, or software ecosystem work only after the basic loop is debuggable.
-8. Use PPA only after correctness gates pass.
+6. Add protocol/resource checks before scaling: request schema, source IDs, lane masks, ordering, capability exposure, and at least one monitor or trace assertion.
+7. Add counters before tuning: cycles, instructions, SIMT-group stalls, scoreboard stalls, memory stalls, load/store counts.
+8. Add cache, VM, tensor, graphics, FPGA, or software ecosystem work only after the basic loop is debuggable.
+9. Use PPA only after correctness gates pass.
 
 ## GPGPU-Sim Architecture Lens
 
@@ -92,6 +96,21 @@ When GPGPU-Sim is the reference, map the proposal onto this chain:
 | Config/evidence | `option_parser`, `gpgpusim.config`, stats, trace, AccelWattch | Which workload, config, backend, counters, and power assumptions support the claim? |
 
 Treat GPGPU-Sim as an executable architecture reference. Translate its C++ timing behavior into RTL state, valid-ready, reset, flush, arbitration, and backpressure before using it as hardware guidance.
+
+## Rocket Chip Generator Lens
+
+Use Rocket Chip as the reference for turning architecture into a reproducible generated system:
+
+| Contract | Rocket Chip anchor | Local architecture question |
+|---|---|---|
+| named configuration | `Configs.scala`, `BaseConfig`, `DefaultConfig`, `With*` fragments | Which config fragment enables the feature, and what generated values does it affect? |
+| tile boundary | `BaseTile.scala`, `RocketTile.scala` | Is the feature owned by compute core, tile boundary, memory client, periphery, or runtime-visible resource? |
+| protocol negotiation | Diplomacy `LazyModule`, nodes, `Parameters.scala` | Which width, ID range, address range, and capability values are negotiated or checked instead of hard-coded? |
+| memory/control protocol | TileLink bundles, edges, monitors | What request/response schema and executable protocol checks exist for the new path? |
+| accelerator control | `LazyRoCC.scala` | How are command, response, memory access, busy, interrupt, exception, and optional ports exposed? |
+| SoC resources | BootROM, debug, device resources, `ExampleRocketSystem`, `TestHarness` | How does software or the harness discover, start, debug, and observe the hardware? |
+
+Do not copy Rocket's scalar CPU pipeline as a SIMT design. Borrow its generator, boundary, protocol, and verification discipline.
 
 ## Skill Routing
 
@@ -114,6 +133,8 @@ For deeper MIAOW background tied to this skill, read `miao_local.md` in this dir
 
 For deeper GPGPU-Sim background tied to this skill, read `gpgpusim_local.md` in this directory. It explains the execution-driven runtime path, functional/timing split, shader/memory hierarchy, config, trace/statistics, and power evidence relevant to architecture decisions.
 
+For Rocket Chip background tied to this skill, read `../../ref/skillref/rocket.md` and then inspect `../../ref_submodule/rocket-chip` when needed. Focus on `Configs.scala`, Diplomacy docs, `BaseTile.scala`, `RocketTile.scala`, `LazyRoCC.scala`, TileLink monitor/fuzzer, `ExampleRocketSystem.scala`, and `TestHarness.scala`.
+
 ## Common Mistakes
 
 - Drawing only an RTL block diagram and omitting runtime, config, tests, or counters.
@@ -122,3 +143,4 @@ For deeper GPGPU-Sim background tied to this skill, read `gpgpusim_local.md` in 
 - Letting testbench-only internal pokes become the permanent runtime interface.
 - Changing several variables at once and calling the result an architecture conclusion.
 - Treating a C++ timing simulator path as synthesizable RTL without defining hardware state, handshakes, and reset/flush behavior.
+- Hard-coding bus widths, source IDs, MMIO maps, or optional feature ports that should be generated, checked, or exposed as capabilities.

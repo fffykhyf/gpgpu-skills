@@ -7,7 +7,7 @@ description: 用于设计或调试 GPGPU golden simulator、SimX-like module twi
 
 ## 概览
 
-当 simulator behavior、instruction semantics 或 trace comparison 是事实来源时使用本 skill。Simulator 应该是架构的 executable twin，也是 RTL debug 的实用 oracle，而不只是 final-output checker。
+当 simulator behavior、instruction semantics 或 trace comparison 是事实来源时使用本 skill。Simulator 应该是架构的 executable twin，也是 RTL debug 的实用 oracle，而不只是 final-output checker。使用 Rocket Chip 作为补充 ISA 或 timing oracle 的参考：executable protocol monitors、constrained fuzzers、unit-test harnesses 和 trace/resource checks。
 
 ## 核心规则
 
@@ -24,6 +24,8 @@ description: 用于设计或调试 GPGPU golden simulator、SimX-like module twi
 External functional traces 和 normalized per-SIMT-group RTL traces 适合作为早期 correctness loop，但它们不是 cycle model。
 
 Functional semantics 和 timing behavior 必须保持分离。如果 timing model 或 RTL 与 functional oracle 共享结构，必须显式说明 shared schema：kernel descriptor、instruction metadata、active lane mask、memory access、trace identity 和 config。
+
+并非每个 oracle 都必须是完整 GPU simulator。对于 memory、command queue、MMIO 和 interconnect-like paths，应定义局部可执行契约：request/response legality、source/tag lifetime、address alignment、mask correctness、ordering、replay、fault 和 completion checks。
 
 ## 术语契约
 
@@ -51,6 +53,20 @@ Trace schema 和 mismatch report 使用统一术语；只有引用具体 backend
 | Trace/debug | `Trace`、stats、component logs | normalized first-divergence artifacts |
 
 在 architecture contract 说明 oracle 错误之前，不要为了匹配 timing artifact 而修改 functional oracle。
+
+## Rocket Chip Checker 模式
+
+使用 Rocket Chip 作为 protocols 和 harnesses 周围局部 oracle 的参考：
+
+| Checker 类型 | Rocket Chip anchor | 本地规则 |
+|---|---|---|
+| protocol monitor | `tilelink/Monitor.scala` | 将 memory/control protocol rules 写成 assertions，而不是 prose。 |
+| constrained fuzzer | `tilelink/Fuzzer.scala` | 生成 legal randomized traffic，并维护 source/tag allocation 和 in-flight tracking。 |
+| harness oracle | `system/TestHarness.scala`、`unittest/UnitTest.scala` | 每个 hardware smoke test 都要有 start、finish、timeout、memory/debug 和 success semantics。 |
+| trace sink | `trace/` | 为 command、issue、memory、completion 和 fault paths 输出稳定 trace records。 |
+| generated docs | docs `mdoc` flow | 让 reference docs 和 code examples 足够接近，方便发现 drift。 |
+
+在完整 golden simulator 下方使用这些 checker。Protocol monitor 可以在 final kernel output 不同之前就抓到错误 lane mask 或 source ID。
 
 ## Module Twin Map
 
@@ -90,8 +106,9 @@ Trace schema 和 mismatch report 使用统一术语；只有引用具体 backend
 3. 发出能覆盖该行为的最小 golden trace。
 4. 用同一 program、config、input memory 和 launch shape 跑 RTL 或第二个 backend。
 5. 先 diff ordered architectural effects，再看 timing fields。
-6. 报告第一个 divergent event，并给出足够复现上下文。
-7. 判断是 simulator、RTL、memory path、runtime 还是 test harness 违反了契约。
+6. 运行适用的 local protocol monitors 或 harness assertions，把 legality bugs 和 semantic mismatches 分开。
+7. 报告第一个 divergent event，并给出足够复现上下文。
+8. 判断是 simulator、RTL、memory path、runtime、config、protocol monitor 还是 test harness 违反了契约。
 
 不要为了匹配 RTL output 而编辑 simulator。先判断哪一边违反了 architecture contract。Trace comparison 还必须：
 
@@ -100,6 +117,7 @@ Trace schema 和 mismatch report 使用统一术语；只有引用具体 backend
 - 区分 content differences 和 missing trace/hang conditions。
 - 先 trace architectural side effects：register writes、special register writes、memory load/store effects、branch、barrier、waitcnt、retire PC。
 - 记录 external oracle version、command、input memory、instruction memory 和 launch/config files。
+- 对 memory/control paths，记录 protocol legality state：source/tag allocation、outstanding count、address/mask alignment、replay/nack/fault 和 completion ordering。
 
 ## 本地参考
 
@@ -109,6 +127,8 @@ Trace schema 和 mismatch report 使用统一术语；只有引用具体 backend
 
 若想了解与本 skill 相关的 GPGPU-Sim 背景，请阅读本目录下的 `gpgpusim_local.md`。它说明 `cuda-sim` functional oracle、timing model、shared `kernel_info_t`/`warp_inst_t` abstractions、trace schema 和 functional-versus-timing caveats。
 
+若想了解与本 skill 相关的 Rocket Chip 背景，请阅读 `../../ref/skillref/rocket.md`，必要时查看 `../../ref_submodule/rocket-chip/src/main/scala/tilelink/Monitor.scala`、`tilelink/Fuzzer.scala`、`unittest/UnitTest.scala`、`system/TestHarness.scala` 和 `trace/`。
+
 ## 常见错误
 
 - 只比较 final memory output，而第一个错误 writeback 早已发生。
@@ -117,3 +137,5 @@ Trace schema 和 mismatch report 使用统一术语；只有引用具体 backend
 - Simulator 结构与 RTL 无关，导致 trace diffs 很难映射回模块。
 - 让 timing-model convenience code 变成 ISA oracle。
 - 没有 rerun reproducer 和至少一个 regression 就宣称修复。
+- 等到 full-kernel mismatch 才发现错误，而不是让 protocol monitor 在源头抓住 invalid request。
+- 使用不遵守合法 source/tag、mask、ordering 和 in-flight rules 的随机流量。

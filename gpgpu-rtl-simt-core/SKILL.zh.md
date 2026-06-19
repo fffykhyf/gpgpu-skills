@@ -7,7 +7,7 @@ description: 用于设计、编辑或评审 GPGPU SIMT RTL，包括 SIMT group l
 
 ## 概览
 
-用于 GPGPU 的最小 compute core 工作。保持 SIMT state 明确、模块边界小，并让 RTL 行为能够和 simulator trace 对齐。
+用于 GPGPU 的最小 compute core 工作。保持 SIMT state 明确、模块边界小，并让 RTL 行为能够和 simulator trace 对齐。使用 Rocket Chip 作为 typed parameters、optional unit hooks、ready-valid interfaces、command/response arbitration、local perf events 和 generated tile integration 的参考。不要把 Rocket 的 scalar in-order pipeline 当作 SIMT execution template。
 
 ## 核心规则
 
@@ -20,6 +20,8 @@ description: 用于设计、编辑或评审 GPGPU SIMT RTL，包括 SIMT group l
 - Register file read/writeback 和 write conflict 规则。
 - Scoreboard set、clear、flush、reset 和 kill 规则。
 - Pipeline valid-ready、stall、flush、reset 和 kill 行为。
+- Optional feature ownership：decode hook、issue packet fields、ports、config bit、trace field、perf event 和 test gate。
+- Protocol boundary：request/response fields、source/tag lifetime、nack/replay/kill priority，以及 LSU 或 control-plane interfaces 的 monitor point。
 
 如果这些规则无法清楚说明，说明模块边界太宽，或架构契约不完整。
 
@@ -47,6 +49,7 @@ description: 用于设计、编辑或评审 GPGPU SIMT RTL，包括 SIMT group l
 | dispatcher | 将 issue slots 路由到 ALU/FPU/LSU/SFU/TCU |
 | execute | 产生 unit results 和 memory requests |
 | commit | 应用 writeback、更新 scoreboard、发出 trace |
+| integration shell | 暴露 configured ports、debug/perf/trace、runtime-visible status 和 protocol monitor hooks |
 
 避免用一个模块同时完成 schedule、decode、read registers、execute、write back 和 drive memory。
 
@@ -65,6 +68,20 @@ description: 用于设计、编辑或评审 GPGPU SIMT RTL，包括 SIMT group l
 | `writeback()` | destination write、scoreboard release、pipeline count update、trace event |
 
 把每个 C++ queue、vector 和 helper call 翻译成显式 capacity、valid-ready、reset、flush 和 kill behavior。
+
+## Rocket Chip RTL Integration 模式
+
+使用 Rocket Chip 作为集成 optional units 且不模糊 ownership 的参考：
+
+| 模式 | Rocket Chip anchor | 本地 SIMT 规则 |
+|---|---|---|
+| typed core params | `RocketCoreParams`、`RocketTileParams` | 将 feature flags、widths、counters 和 optional ports 放入 typed config surface。 |
+| optional decode hooks | 带 optional M/A/F/D/RoCC/vector features 的 Rocket decode table | 新 uop classes 必须同时声明 decode、issue、scoreboard、writeback、trace 和 test effects。 |
+| ready-valid interfaces | `DecoupledIO`、`HellaCacheIO`、RoCC cmd/resp | 明确 backpressure、kill、nack、replay、exception 和 response arbitration。 |
+| accelerator command path | `LazyRoCC.scala` command router 和 response arbiter | 将 external 或 optional execution units 视为带 busy、fault、interrupt/status semantics 的 command/response clients。 |
+| local events | Rocket event sets 和 cache perf events | 在 scheduler、scoreboard、LSU 和 FU owners 附近添加 perf events。 |
+
+借鉴 integration pattern；不要用 CPU concepts 替代 SIMT scheduler、active-mask、reconvergence、CTA 或 lane semantics。
 
 在实现 issue 或 hazard 逻辑前，state contract 还必须列出拥有 readiness 的 per-SIMT-group tables：
 
@@ -97,6 +114,8 @@ ready = fu_lsu & valid & gpr_spr_ready & ~max_inflight & ~mem_wait & ~branch_wai
 - scoreboard 或 in-flight state。
 - memory request、response、fence 或 replay state。
 - barrier、CTA、CSR 或 launch-visible state。
+- source/tag、byte mask、lane mask、ordering、exception 或 completion status 等 protocol-visible fields。
+- perf/debug/trace counters 或 runtime-visible status。
 
 Issue packet 至少应携带 simt_group_id、PC、active lane mask、opcode/FU type、source 和 destination fields、memory metadata、必要时的 scheduler 或 issue slot ID，以及 trace identity。
 
@@ -118,6 +137,8 @@ Issue packet 至少应携带 simt_group_id、PC、active lane mask、opcode/FU t
 
 若想了解与本 skill 相关的 GPGPU-Sim 背景，请阅读本目录下的 `gpgpusim_local.md`。它说明 `shd_warp_t`、`simt_stack`、scheduler readiness、dynamic `warp_inst_t` issue packets、scoreboard release、operand collection 和 RTL translation caveats。
 
+若想了解与本 skill 相关的 Rocket Chip 背景，请阅读 `../../ref/skillref/rocket.md`，必要时查看 `../../ref_submodule/rocket-chip/src/main/scala/rocket/RocketCore.scala`、`tile/RocketTile.scala`、`tile/BaseTile.scala`、`tile/LazyRoCC.scala` 和 `rocket/HellaCache.scala`。
+
 ## 常见错误
 
 - 把 active mask 当成临时信号，而不是 core SIMT state。
@@ -126,3 +147,5 @@ Issue packet 至少应携带 simt_group_id、PC、active lane mask、opcode/FU t
 - 让 backpressure 依赖无关 always blocks 之间的隐式顺序。
 - 复制 GPGPU-Sim C++ timing order，却没有说明 RTL handshakes、table capacity 和 reset/flush behavior。
 - 只靠 waveform browsing 调试，而不是对齐 simulator/RTL trace。
+- 复制 Rocket 的 scalar core structure，而不是只借鉴它的 config、optional-unit、ready-valid、event 和 integration patterns。
+- 添加 optional unit，却没有 decode、scoreboard、trace、perf、config 和 protocol ownership。

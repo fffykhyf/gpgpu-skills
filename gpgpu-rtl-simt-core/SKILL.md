@@ -7,7 +7,7 @@ description: Use when designing, editing, or reviewing GPGPU SIMT RTL such as SI
 
 ## Overview
 
-Use this skill for the minimal compute core of a GPGPU. Keep SIMT state explicit, keep module boundaries small, and keep RTL behavior comparable to the simulator trace.
+Use this skill for the minimal compute core of a GPGPU. Keep SIMT state explicit, keep module boundaries small, and keep RTL behavior comparable to the simulator trace. Use Rocket Chip as a reference for typed parameters, optional unit hooks, ready-valid interfaces, command/response arbitration, local perf events, and generated tile integration. Do not use Rocket's scalar in-order pipeline as a SIMT execution template.
 
 ## Core Rule
 
@@ -20,6 +20,8 @@ For every RTL change, define the state contract before editing logic:
 - Register file read/writeback and write conflict rules.
 - Scoreboard set, clear, flush, reset, and kill rules.
 - Pipeline valid-ready, stall, flush, reset, and kill behavior.
+- Optional feature ownership: decode hook, issue packet fields, ports, config bit, trace field, perf event, and test gate.
+- Protocol boundary: request/response fields, source/tag lifetime, nack/replay/kill priority, and monitor point for LSU or control-plane interfaces.
 
 If these cannot be stated cleanly, the module boundary is too broad or the architecture contract is incomplete.
 
@@ -47,6 +49,7 @@ Use canonical terms for local design contracts. Preserve source aliases only whe
 | dispatcher | route issue slots to ALU/FPU/LSU/SFU/TCU |
 | execute | produce unit results and memory requests |
 | commit | apply writeback, update scoreboard, emit trace |
+| integration shell | expose configured ports, debug/perf/trace, runtime-visible status, and protocol monitor hooks |
 
 Avoid a single module that schedules, decodes, reads registers, executes, writes back, and drives memory.
 
@@ -65,6 +68,20 @@ Use GPGPU-Sim's shader core as a state checklist, not an RTL template:
 | `writeback()` | destination write, scoreboard release, pipeline count update, trace event |
 
 Translate every C++ queue, vector, and helper call into explicit capacity, valid-ready, reset, flush, and kill behavior.
+
+## Rocket Chip RTL Integration Pattern
+
+Use Rocket Chip as the reference for integrating optional units without blurring ownership:
+
+| Pattern | Rocket Chip anchor | Local SIMT rule |
+|---|---|---|
+| typed core params | `RocketCoreParams`, `RocketTileParams` | Keep feature flags, widths, counters, and optional ports in a typed config surface. |
+| optional decode hooks | Rocket decode table with optional M/A/F/D/RoCC/vector features | New uop classes must declare decode, issue, scoreboard, writeback, trace, and test effects together. |
+| ready-valid interfaces | `DecoupledIO`, `HellaCacheIO`, RoCC cmd/resp | Define backpressure, kill, nack, replay, exception, and response arbitration explicitly. |
+| accelerator command path | `LazyRoCC.scala` command router and response arbiter | Treat external or optional execution units as command/response clients with busy, fault, and interrupt/status semantics. |
+| local events | Rocket event sets and cache perf events | Add perf events close to scheduler, scoreboard, LSU, and FU owners. |
+
+Borrow the integration pattern. Do not replace SIMT scheduler, active-mask, reconvergence, CTA, or lane semantics with CPU concepts.
 
 Before implementing issue or hazard logic, the state contract must also list the per-SIMT-group tables that own readiness:
 
@@ -97,6 +114,8 @@ For each instruction or uop class, state whether it changes:
 - scoreboard or in-flight state.
 - memory request, response, fence, or replay state.
 - barrier, CTA, CSR, or launch-visible state.
+- protocol-visible fields such as source/tag, byte mask, lane mask, ordering, exception, or completion status.
+- perf/debug/trace counters or runtime-visible status.
 
 An issue packet should carry at least simt_group_id, PC, active lane mask, opcode/FU type, source and destination fields, memory metadata, scheduler or issue slot ID when relevant, and trace identity.
 
@@ -118,6 +137,8 @@ For deeper MIAOW background tied to this skill, read `miao_local.md` in this dir
 
 For deeper GPGPU-Sim background tied to this skill, read `gpgpusim_local.md` in this directory. It explains `shd_warp_t`, `simt_stack`, scheduler readiness, dynamic `warp_inst_t` issue packets, scoreboard release, operand collection, and RTL translation caveats.
 
+For Rocket Chip background tied to this skill, read `../../ref/skillref/rocket.md` and then inspect `../../ref_submodule/rocket-chip/src/main/scala/rocket/RocketCore.scala`, `tile/RocketTile.scala`, `tile/BaseTile.scala`, `tile/LazyRoCC.scala`, and `rocket/HellaCache.scala` when needed.
+
 ## Common Mistakes
 
 - Treating active mask as a temporary signal instead of core SIMT state.
@@ -126,3 +147,5 @@ For deeper GPGPU-Sim background tied to this skill, read `gpgpusim_local.md` in 
 - Letting backpressure rely on implicit ordering between unrelated always blocks.
 - Copying GPGPU-Sim C++ timing order without specifying RTL handshakes, table capacity, and reset/flush behavior.
 - Debugging only through waveform browsing instead of simulator/RTL trace alignment.
+- Copying Rocket's scalar core structure instead of only borrowing its config, optional-unit, ready-valid, event, and integration patterns.
+- Adding an optional unit without decode, scoreboard, trace, perf, config, and protocol ownership.

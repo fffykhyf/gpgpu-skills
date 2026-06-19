@@ -7,7 +7,7 @@ description: Use when adding, editing, or reviewing GPGPU parameters, generated 
 
 ## Overview
 
-Use this skill when a value might drift across RTL, simulator, runtime, kernel, tests, or PPA scripts. Configuration work is not just replacing numbers with macros; it is deciding which values are private implementation knobs and which values are visible contracts.
+Use this skill when a value might drift across RTL, simulator, runtime, kernel, tests, or PPA scripts. Configuration work is not just replacing numbers with macros; it is deciding which values are private implementation knobs, which values are generated from typed parameters, which values are negotiated by protocols, and which values are visible contracts. Use Rocket Chip as the model for named config fragments, derived parameters, `require`-style legality checks, and resource/capability generation.
 
 ## Core Rule
 
@@ -22,6 +22,8 @@ Classify every parameter before changing it:
 | debug-only | instrumentation, trace, assertions | trace level, watchdog timeout |
 
 HW/SW ABI values need a single source of truth and a verification path through RTL, simulator, runtime, kernel, and tests.
+
+Generator-visible values need the same discipline. If a value controls topology, address range, source/tag width, cache shape, queue depth, optional feature ports, MMIO layout, or runtime capability, define its owner, derive dependent values in one place, and reject illegal combinations before RTL or simulator execution.
 
 ## Terminology Contract
 
@@ -62,6 +64,19 @@ Use GPGPU-Sim as the reference for ownership-based config grouping:
 
 If a config uses compact encoded strings like GPGPU-Sim cache or DRAM descriptors, provide parser validation and a readable expanded dump.
 
+## Rocket Chip Config Pattern
+
+Use Rocket Chip as the reference for generator-owned configuration:
+
+| Pattern | Rocket Chip anchor | Local rule |
+|---|---|---|
+| named fragments | `Configs.scala`, `WithNBigCores`, `WithNMemoryChannels`, `WithRoccExample` | Prefer small composable config fragments over copied whole configs. |
+| typed parameters | `RocketCoreParams`, `RocketTileParams`, `DCacheParams`, `L1CacheParams` | Keep related values in typed structs or schemas instead of loose constants. |
+| derived values | cache/tag/row/beat/xLen-derived fields | Derive widths, masks, source IDs, and queue indexes from source values in one place. |
+| legality checks | `require` in cache and tile parameter code | Fail early on illegal SIMT-group width, cacheline, bank, MSHR, queue, memory-map, or ABI combinations. |
+| negotiated protocols | Diplomacy nodes, `TransferSizes`, `AddressSet`, `IdRange` | Treat bus widths, address ranges, transfer sizes, and IDs as protocol contracts, not incidental constants. |
+| generated resources | DTS/resource binding, boot/debug/periphery config | Update capability/version/resource output when a public hardware feature changes. |
+
 ## Change Checklist
 
 For every config change:
@@ -72,6 +87,9 @@ For every config change:
 - Audit duplicate appearances across Verilog `define`, Verilog parameter, C `#define`, scripts, unit-test config, FPGA scripts, generated headers, and docs.
 - State whether public capability, version, or query output changes.
 - Remove duplicate hard-coded copies.
+- Centralize derived values such as active-mask width, source/tag width, cacheline/beat masks, queue index bits, and memory-map ranges.
+- Add legality checks for min/max values and unsupported combinations before generation.
+- If a protocol width, address range, or source ID range changes, update the matching monitor, trace schema, and runtime capability.
 - Record the config file path or digest when the value affects simulator, runtime, memory hierarchy, trace, or PPA reports.
 - Provide a readable expanded view for compact string parameters.
 - Test at least one small config and one target config.
@@ -85,6 +103,7 @@ For every config change:
 - Derived values should be generated from source values rather than copied by hand.
 - Changing a visible config without updating tests and capability reporting is a bug.
 - Simulator timing knobs must not silently become RTL or runtime-visible contracts.
+- Negotiated or generated protocol fields must not be duplicated as hand-written constants in RTL, simulator, or runtime code.
 - If a MMIO map exists, list the RTL decode path, host C/C++ constants, tests, and documentation consumer before changing any offset.
 - If a unit-test config format changes, update parser validation, generators, fixtures, and trace/regression expectations together.
 - If a conditional build flag changes an interface, document whether it is public, FPGA-only, debug-only, or test-only.
@@ -96,6 +115,8 @@ Use this skill immediately when you see:
 - lane, SIMT-group, core/CU, register, cache, or memory sizes copied in multiple files.
 - simulator and RTL using different constants.
 - runtime guessing hardware capability from build flags.
+- generated parameters copied into local constants after elaboration or code generation.
+- bus widths, source IDs, address sets, cacheline sizes, or queue depths that differ between producer, consumer, and monitor.
 - tests passing only under one hard-coded configuration.
 - PPA results whose config cannot be reconstructed.
 - trace, power, or simulator results without the config file or option dump that produced them.
@@ -107,6 +128,8 @@ Use this skill immediately when you see:
 - Updating RTL but leaving simulator, runtime, or tests with stale values.
 - Changing memory maps or CSR/DCR numbers without a capability or version story.
 - Running only the default config after changing parameterized logic.
+- Treating generated/negotiated values as comments instead of executable constraints.
+- Adding a config fragment without naming the tests and reports that prove it works.
 
 ## Local References
 
@@ -115,3 +138,5 @@ For deeper Vortex background tied to this skill, read `vortex_local.md` in this 
 For deeper MIAOW background tied to this skill, read `miao_local.md` in this directory. It explains the scattered constants in global definitions, dispatcher parameters, FPGA MMIO registers, Xilinx SDK offsets, unit-test config files, and SIAGen workload parameters.
 
 For deeper GPGPU-Sim background tied to this skill, read `gpgpusim_local.md` in this directory. It explains option registration, tested config files, runtime/core/memory/power/trace knobs, and compact string caveats.
+
+For Rocket Chip background tied to this skill, read `../../ref/skillref/rocket.md` and then inspect `../../ref_submodule/rocket-chip/src/main/scala/system/Configs.scala`, `tile/BaseTile.scala`, `tile/RocketTile.scala`, `rocket/HellaCache.scala`, `rocket/RocketCore.scala`, and `diplomacy/Parameters.scala` when needed.

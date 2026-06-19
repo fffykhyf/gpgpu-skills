@@ -7,7 +7,7 @@ description: Use when designing or debugging a GPGPU golden simulator, SimX-like
 
 ## Overview
 
-Use this skill when simulator behavior, instruction semantics, or trace comparison is the source of truth. The simulator should be an executable twin of the architecture and a practical oracle for RTL debug, not just a final-output checker.
+Use this skill when simulator behavior, instruction semantics, or trace comparison is the source of truth. The simulator should be an executable twin of the architecture and a practical oracle for RTL debug, not just a final-output checker. Use Rocket Chip as the reference for supplementing ISA or timing oracles with executable protocol monitors, constrained fuzzers, unit-test harnesses, and trace/resource checks.
 
 ## Core Rule
 
@@ -24,6 +24,8 @@ Every non-trivial RTL behavior needs either simulator behavior or a golden trace
 External functional traces and normalized per-SIMT-group RTL traces are valid as an early correctness loop, but they are not a cycle model.
 
 Functional semantics and timing behavior must stay separate. If the timing model or RTL shares structures with the functional oracle, make the shared schema explicit: kernel descriptor, instruction metadata, active lane mask, memory access, trace identity, and config.
+
+Not every oracle has to be a full GPU simulator. For memory, command queues, MMIO, and interconnect-like paths, define local executable contracts: request/response legality, source/tag lifetime, address alignment, mask correctness, ordering, replay, fault, and completion checks.
 
 ## Terminology Contract
 
@@ -51,6 +53,20 @@ Use GPGPU-Sim as the reference for separating oracle responsibilities:
 | Trace/debug | `Trace`, stats, component logs | normalized first-divergence artifacts |
 
 Do not edit the functional oracle to match a timing artifact until the architecture contract says the oracle was wrong.
+
+## Rocket Chip Checker Pattern
+
+Use Rocket Chip as the reference for local oracles around protocols and harnesses:
+
+| Checker type | Rocket Chip anchor | Local rule |
+|---|---|---|
+| protocol monitor | `tilelink/Monitor.scala` | Convert memory/control protocol rules into assertions, not prose. |
+| constrained fuzzer | `tilelink/Fuzzer.scala` | Generate legal randomized traffic with source/tag allocation and in-flight tracking. |
+| harness oracle | `system/TestHarness.scala`, `unittest/UnitTest.scala` | Give every hardware smoke test start, finish, timeout, memory/debug, and success semantics. |
+| trace sink | `trace/` | Emit stable trace records for command, issue, memory, completion, and fault paths. |
+| generated docs | docs `mdoc` flow | Keep reference docs and code examples close enough that drift is visible. |
+
+Use these checkers below the full golden simulator. A protocol monitor can catch a bad lane mask or source ID long before a final kernel output differs.
 
 ## Module Twin Map
 
@@ -90,8 +106,9 @@ If a field is omitted, say why it is not needed at this stage.
 3. Emit the smallest golden trace that exercises the behavior.
 4. Run RTL or the second backend on the same program, config, input memory, and launch shape.
 5. Diff ordered architectural effects first, then timing fields.
-6. Report the first divergent event with enough context to reproduce it.
-7. Decide whether simulator, RTL, memory path, runtime, or test harness violated the contract.
+6. Run applicable local protocol monitors or harness assertions so legality bugs are separated from semantic mismatches.
+7. Report the first divergent event with enough context to reproduce it.
+8. Decide whether simulator, RTL, memory path, runtime, config, protocol monitor, or test harness violated the contract.
 
 Do not edit the simulator merely to match RTL output. First decide which side violates the architecture contract. Trace comparison must also:
 
@@ -100,6 +117,7 @@ Do not edit the simulator merely to match RTL output. First decide which side vi
 - Distinguish content differences from missing trace or hang conditions.
 - Trace architectural side effects first: register writes, special register writes, memory load/store effects, branch, barrier, waitcnt, and retire PC.
 - Record the external oracle version, command, input memory, instruction memory, and launch/config files.
+- For memory/control paths, include protocol legality state: source/tag allocation, outstanding count, address/mask alignment, replay/nack/fault, and completion ordering.
 
 ## Local References
 
@@ -109,6 +127,8 @@ For deeper MIAOW background tied to this skill, read `miao_local.md` in this dir
 
 For deeper GPGPU-Sim background tied to this skill, read `gpgpusim_local.md` in this directory. It explains the `cuda-sim` functional oracle, timing model, shared `kernel_info_t`/`warp_inst_t` abstractions, trace schema, and functional-versus-timing caveats.
 
+For Rocket Chip background tied to this skill, read `../../ref/skillref/rocket.md` and then inspect `../../ref_submodule/rocket-chip/src/main/scala/tilelink/Monitor.scala`, `tilelink/Fuzzer.scala`, `unittest/UnitTest.scala`, `system/TestHarness.scala`, and `trace/` when needed.
+
 ## Common Mistakes
 
 - Comparing only final memory output when the first wrong writeback happened earlier.
@@ -117,3 +137,5 @@ For deeper GPGPU-Sim background tied to this skill, read `gpgpusim_local.md` in 
 - Keeping simulator structure unrelated to RTL, making trace diffs hard to map back.
 - Letting timing-model convenience code become the ISA oracle.
 - Declaring a fix without rerunning the reproducer and at least one regression.
+- Waiting for a full-kernel mismatch when a protocol monitor could have caught the invalid request at the source.
+- Using random traffic that does not respect legal source/tag, mask, ordering, and in-flight rules.

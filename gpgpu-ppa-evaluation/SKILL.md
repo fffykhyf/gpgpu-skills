@@ -7,7 +7,7 @@ description: Use when evaluating GPGPU performance, power, area, timing, energy,
 
 ## Overview
 
-Use this skill when a GPGPU change needs evidence beyond functional correctness. PPA conclusions must bind workload, backend, configuration, counters, activity, and reports into a controlled comparison.
+Use this skill when a GPGPU change needs evidence beyond functional correctness. PPA conclusions must bind workload, backend, configuration, counters, activity, and reports into a controlled comparison. Use Rocket Chip as the reference for keeping named configs, local perf events, cache/memory counters, traces, regression flows, and generated hardware evidence tied together.
 
 ## Core Rule
 
@@ -20,6 +20,8 @@ Do not claim a design is better without a baseline, variant, workload, configura
 | exploratory observation | multiple variables changed or incomplete counters; label as hypothesis |
 
 A credibility claim can cite ISA scope, benchmark capability, FPGA prototype data, and ASIC-style estimates, but it must also state relaxed design goals and comparison caveats.
+
+Any PPA claim must also identify the generated configuration and instrumentation contract. If a change affects protocol widths, source IDs, cache/MSHR resources, optional units, runtime queues, or memory maps, the report must say which counters or traces prove that the configured hardware was the hardware evaluated.
 
 ## Terminology Contract
 
@@ -49,6 +51,8 @@ Use canonical terms in config IDs, counter names, and PPA tables. Keep source al
 
 If multiple variables changed, split the experiment or label the result as exploratory.
 
+For generated designs, include the config fragment or option dump, derived topology summary, public capability/version output when present, and monitor status for the protocol under test.
+
 ## Correctness Before PPA
 
 Use this order:
@@ -72,9 +76,24 @@ Prefer adding counters before tuning:
 - load/store requests and latency
 - coalescer misses or merge rate
 - cache reads/writes, misses, bank stalls, MSHR stalls
-- runtime launch latency, memory latency, interconnect/L2/DRAM queue pressure, and trace sampling scope when modeled
+- replay, nack, kill, flush, TLB miss, uncached/MMIO, source/tag exhaustion, and ordering/fence stalls when modeled
+- runtime launch latency, command queue occupancy, completion latency, memory latency, interconnect/L2/DRAM queue pressure, and trace sampling scope when modeled
 
 If counters are missing, state whether the conclusion is a hypothesis or measured fact.
+
+## Rocket Chip Evidence Pattern
+
+Use Rocket Chip as the reference for placing evidence near the logic:
+
+| Evidence | Rocket Chip anchor | Local rule |
+|---|---|---|
+| core events | `RocketCore` event sets | Count issue, stalls, replay, flush, branch/divergence, and unit interlocks at the owner module. |
+| cache/memory events | `HellaCachePerfEvents`, DCache events | Count misses, grants/responses, blocked cycles, TLB misses, uncached/MMIO, and queue pressure in the memory path. |
+| trace path | `trace/` encoder/controller/sink | Preserve trace configuration, sampling scope, and event schema with the report. |
+| config comparison | named `Configs.scala` fragments | Compare named configs with one intended variable changed. |
+| harness/regression | `TestHarness`, `regression/`, Verilator support | Record the correctness gate and backend used before interpreting counters. |
+
+Borrow the evidence discipline, not Rocket's CPU-specific event meanings.
 
 ## GPGPU-Sim Evidence Loop
 
@@ -108,6 +127,8 @@ Simulator counters can support architecture hypotheses and bottleneck analysis. 
 - Using SAIF/VCD from a different workload or config.
 - Reporting AccelWattch, McPAT, or GPUWattch output without model version, config, activity source, and calibration status.
 - Keeping only summary numbers and losing the command or report path.
+- Adding counters far from the event owner, making them impossible to reconcile with trace or RTL behavior.
+- Comparing generated variants without recording the config fragment, derived topology, and protocol monitor status.
 
 ## Local References
 
@@ -116,3 +137,5 @@ For deeper Vortex background tied to this skill, read `vortex_local.md` in this 
 For deeper MIAOW background tied to this skill, read `miao_local.md` in this directory. It explains the MIAOW paper's FPGA, area, power, performance, OpenCL/Rodinia, and comparison evidence, plus the caveats that prevent overclaiming.
 
 For deeper GPGPU-Sim background tied to this skill, read `gpgpusim_local.md` in this directory. It explains reproducible config records, runtime/cycle/memory counters, trace sampling, AerialVision, AccelWattch, and power-model caveats.
+
+For Rocket Chip background tied to this skill, read `../../ref/skillref/rocket.md` and then inspect `../../ref_submodule/rocket-chip/src/main/scala/rocket/RocketCore.scala`, `rocket/HellaCache.scala`, `trace/`, `system/TestHarness.scala`, `regression/`, and `src/main/resources/csrc/` when needed.
