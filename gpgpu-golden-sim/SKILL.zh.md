@@ -23,6 +23,8 @@ description: 用于设计或调试 GPGPU golden simulator、SimX-like module twi
 
 External functional traces 和 normalized per-SIMT-group RTL traces 适合作为早期 correctness loop，但它们不是 cycle model。
 
+Functional semantics 和 timing behavior 必须保持分离。如果 timing model 或 RTL 与 functional oracle 共享结构，必须显式说明 shared schema：kernel descriptor、instruction metadata、active lane mask、memory access、trace identity 和 config。
+
 ## 术语契约
 
 Trace schema 和 mismatch report 使用统一术语；只有引用具体 backend 时保留参考实现原名。
@@ -34,6 +36,21 @@ Trace schema 和 mismatch report 使用统一术语；只有引用具体 backend
 | active lane mask | active mask、thread mask、`tmask`、`EXEC` mask | 一个事件上的 lane participation state |
 | CTA/workgroup | CTA、block、workgroup | launch、barrier 和 local-memory scope |
 | compute core/CU | core、CU、compute unit | 拥有 SIMT groups 的 trace source |
+
+## GPGPU-Sim Functional/Timing Split
+
+使用 GPGPU-Sim 作为 oracle 职责分离的参考：
+
+| 层 | GPGPU-Sim anchor | 本地对应 |
+|---|---|---|
+| Functional semantics | `src/cuda-sim/`、`instructions.cc`、`ptx_thread_info` | ISA oracle 和 architectural state |
+| Launch descriptor | `kernel_info_t` | kernel entry、args、grid/block、stream/queue、CTA progress |
+| Dynamic instruction event | `warp_inst_t` | 带 SIMT group、PC、active lane mask、operands 和 memory metadata 的 issued instruction |
+| Divergence state | `simt_stack` | active-mask 和 reconvergence oracle |
+| Timing model | `shader_core_ctx`、`scheduler_unit`、`ldst_unit` | 带 stalls 和 backpressure 的 cycle model 或 RTL trace |
+| Trace/debug | `Trace`、stats、component logs | normalized first-divergence artifacts |
+
+在 architecture contract 说明 oracle 错误之前，不要为了匹配 timing artifact 而修改 functional oracle。
 
 ## Module Twin Map
 
@@ -58,7 +75,7 @@ Trace schema 和 mismatch report 使用统一术语；只有引用具体 backend
 | 类别 | 字段 |
 |---|---|
 | identity | cycle 或 step、sequence ID 或 UUID、compute core/CU ID、simt_group_id |
-| control | PC、next PC、opcode、active lane mask、predicate mask |
+| control | launch 或 kernel ID、PC、next PC、opcode、active lane mask、predicate mask |
 | operands | source registers、source values、destination register |
 | commit | writeback valid、value、exception 或 illegal instruction |
 | memory | op、lane mask、address、byte enable、data、tag、response |
@@ -90,10 +107,13 @@ Trace schema 和 mismatch report 使用统一术语；只有引用具体 backend
 
 若想了解与本 skill 相关的 MIAOW 背景，请阅读本目录下的 `miao_local.md`。它说明 Multi2Sim trace flow、trace parser、tracemon data structures 和 print functions、trace comparator、regression runner，以及 MIAOW oracle 不能证明什么。
 
+若想了解与本 skill 相关的 GPGPU-Sim 背景，请阅读本目录下的 `gpgpusim_local.md`。它说明 `cuda-sim` functional oracle、timing model、shared `kernel_info_t`/`warp_inst_t` abstractions、trace schema 和 functional-versus-timing caveats。
+
 ## 常见错误
 
 - 只比较 final memory output，而第一个错误 writeback 早已发生。
 - 在 bug 出现后才添加 trace fields，而不是早期定义 minimal trace contract。
 - 在一个不清楚的 trace 中混合 functional correctness 和 timing fidelity。
 - Simulator 结构与 RTL 无关，导致 trace diffs 很难映射回模块。
+- 让 timing-model convenience code 变成 ISA oracle。
 - 没有 rerun reproducer 和至少一个 regression 就宣称修复。

@@ -48,6 +48,21 @@ Runtime API、launch records 和 ABI docs 使用统一术语；只有在 HAL bou
 
 这可以很小，但 simulator 和 RTL tests 必须保持同一个概念路径。
 
+## GPGPU-Sim Launch Model
+
+使用 GPGPU-Sim 作为不 poke RTL internals 的 software launch path 参考：
+
+| Runtime step | GPGPU-Sim anchor | 本地要求 |
+|---|---|---|
+| configure launch | `cudaConfigureCallInternal` | 捕获 grid/block、shared/local memory、stream/queue |
+| stage args | `cudaSetupArgumentInternal` | 记录 argument bytes、sizes、offsets 和 alignment |
+| create descriptor | `cudaLaunchInternal`、`kernel_info_t` | 解析 kernel entry 并创建稳定 kernel descriptor |
+| enqueue work | `stream_operation` | 排序 memcpy、launch、event、wait 和 completion |
+| backend admission | `gpu->can_start_kernel()`、launch latency | 按 capacity、latency 和 max concurrent kernels gate launch |
+| CTA dispatch | `issue_block2core()` | 分配 per-core resources 并初始化 SIMT groups |
+
+本地 runtime 可以使用比 CUDA/OpenCL 更简单的 API，但仍需要 launch config、argument staging、kernel lookup、queue operation、backend admission 和 completion semantics。
+
 ## Interface Layers
 
 | 层 | 职责 |
@@ -79,6 +94,7 @@ Runtime API、launch records 和 ABI docs 使用统一术语；只有在 HAL bou
 - RTL-sim launch test。
 - 展示 command、launch、completion ordering 的 trace。
 - bad args、invalid kernel、queue full 或 timeout 的 negative test。
+- 当对应限制存在时，测试 oversized CTA/workgroup、max concurrent kernels 或 backend admission failure。
 
 对于 launch 相关变更，优先选择一个同时跑过 simulator 和 RTL backend 的 workload。
 
@@ -88,6 +104,7 @@ Runtime API、launch records 和 ABI docs 使用统一术语；只有在 HAL bou
 - 让 testbench-only signal pokes 变成 API。
 - 修改 kernel argument layout 却不更新 simulator、RTL、runtime 和 tests。
 - 添加 async queues 或 events，却没有 ordering 和 completion semantics。
+- 把 launch latency、max concurrent kernels 或 resource admission 隐藏在 backend-only constants 中，而不是 config/runtime-visible behavior。
 - 把 cache flush 或 fence behavior 隐藏在临时 test code 中。
 
 ## 本地参考
@@ -95,3 +112,5 @@ Runtime API、launch records 和 ABI docs 使用统一术语；只有在 HAL bou
 若想了解与本 skill 相关的 Vortex 背景，请阅读本目录下的 `vortex_local.md`。它说明 handle-based runtime APIs、command processor control plane、kernel entry、CTA/workgroup dispatch 和 launch DCR programming。
 
 若想了解与本 skill 相关的 MIAOW 背景，请阅读本目录下的 `miao_local.md`。它说明 testbench soft dispatch、hard resource dispatch、FPGA AXI-lite control registers、Xilinx SDK command flow，以及 test hooks 和 public runtime contracts 的边界。
+
+若想了解与本 skill 相关的 GPGPU-Sim 背景，请阅读本目录下的 `gpgpusim_local.md`。它说明 CUDA/OpenCL runtime interception、launch stack handling、`kernel_info_t`、stream operations、functional/performance mode selection 和 launch admission。

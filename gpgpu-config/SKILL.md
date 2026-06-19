@@ -48,6 +48,20 @@ For common GPGPU value families, start with this classification:
 | unit-test config format | test ABI with parser validation |
 | conditional build flags | interface-changing, implementation-only, debug-only, or FPGA-only |
 
+## GPGPU-Sim Config Pattern
+
+Use GPGPU-Sim as the reference for ownership-based config grouping:
+
+| Group | GPGPU-Sim anchor | Local rule |
+|---|---|---|
+| functional/runtime | `-gpgpu_ptx_sim_mode`, stack/heap/sync/pending-launch limits, launch latency | Decide whether the value is simulator-private, runtime ABI, or device capability. |
+| shader core | `shader_core_config::reg_options()` | Keep topology, registers, scheduler, issue width, FU counts, and latencies tied to simulator/RTL consumers. |
+| memory | `memory_config::reg_options()` | Keep cache, shared memory, L2, memory partitions, address mapping, DRAM timing, and queues in one auditable family. |
+| trace/stat | `Trace`, `-gpgpu_runtime_stat`, `-gpgpu_memlatency_stat` | Treat observability knobs as part of experiment reproducibility. |
+| power | `power_config::reg_options()`, AccelWattch XML/mode options | Record power model version, config file, and calibration status before making energy claims. |
+
+If a config uses compact encoded strings like GPGPU-Sim cache or DRAM descriptors, provide parser validation and a readable expanded dump.
+
 ## Change Checklist
 
 For every config change:
@@ -58,6 +72,8 @@ For every config change:
 - Audit duplicate appearances across Verilog `define`, Verilog parameter, C `#define`, scripts, unit-test config, FPGA scripts, generated headers, and docs.
 - State whether public capability, version, or query output changes.
 - Remove duplicate hard-coded copies.
+- Record the config file path or digest when the value affects simulator, runtime, memory hierarchy, trace, or PPA reports.
+- Provide a readable expanded view for compact string parameters.
 - Test at least one small config and one target config.
 - Update PPA config IDs if the value affects evaluation.
 
@@ -68,6 +84,7 @@ For every config change:
 - Debug/test knobs must not become permanent architecture assumptions.
 - Derived values should be generated from source values rather than copied by hand.
 - Changing a visible config without updating tests and capability reporting is a bug.
+- Simulator timing knobs must not silently become RTL or runtime-visible contracts.
 - If a MMIO map exists, list the RTL decode path, host C/C++ constants, tests, and documentation consumer before changing any offset.
 - If a unit-test config format changes, update parser validation, generators, fixtures, and trace/regression expectations together.
 - If a conditional build flag changes an interface, document whether it is public, FPGA-only, debug-only, or test-only.
@@ -81,6 +98,7 @@ Use this skill immediately when you see:
 - runtime guessing hardware capability from build flags.
 - tests passing only under one hard-coded configuration.
 - PPA results whose config cannot be reconstructed.
+- trace, power, or simulator results without the config file or option dump that produced them.
 
 ## Common Mistakes
 
@@ -95,3 +113,5 @@ Use this skill immediately when you see:
 For deeper Vortex background tied to this skill, read `vortex_local.md` in this directory. It explains generated config/type sources, ABI-visible values, DCR/capability contracts, and backend config synchronization.
 
 For deeper MIAOW background tied to this skill, read `miao_local.md` in this directory. It explains the scattered constants in global definitions, dispatcher parameters, FPGA MMIO registers, Xilinx SDK offsets, unit-test config files, and SIAGen workload parameters.
+
+For deeper GPGPU-Sim background tied to this skill, read `gpgpusim_local.md` in this directory. It explains option registration, tested config files, runtime/core/memory/power/trace knobs, and compact string caveats.

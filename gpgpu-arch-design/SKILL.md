@@ -7,7 +7,7 @@ description: Use when planning, staging, or reviewing GPGPU architecture across 
 
 ## Overview
 
-Use this skill as the top-level guardrail for local GPGPU work. A GPGPU is a full-stack system, so architecture work must state how ISA, simulator, RTL, runtime, kernel ABI, configuration, tests, and PPA evidence stay aligned.
+Use this skill as the top-level guardrail for local GPGPU work. A GPGPU is a full-stack system, so architecture work must state how ISA, simulator, RTL, runtime, kernel ABI, configuration, tests, and PPA evidence stay aligned. Use GPGPU-Sim as the reference for execution-driven runtime, functional/timing simulator separation, configurable timing models, trace/statistics, and power-evidence plumbing.
 
 ## Core Rule
 
@@ -49,6 +49,7 @@ Every architecture design should include:
 - State contract: PC, active lane mask, SIMT group state, registers, memory, CSR/DCR, and launch state.
 - Config contract: classify each parameter as hardware-private, simulator-private, HW/SW ABI, test-only, or debug-only.
 - Launch contract: program image, kernel entry, args, grid/block dimensions, start, done, result, and synchronization path.
+- Simulation contract: functional oracle, timing model, shared kernel descriptor, trace schema, and backend mode selection.
 - Test gate: simulator smoke, RTL trace diff, runtime launch test, counter check, or PPA report.
 - Prototype credibility target: instruction unit tests, external golden trace, RTL simulation, FPGA smoke, benchmark run, synthesis report, or ASIC estimate.
 - Implementation anchors: name the modules or planned modules that own the claim.
@@ -68,13 +69,29 @@ Do not merge SIMT-group width, active-mask width, physical SIMD width, resident 
 ## Stage Order
 
 1. Define the project skeleton, ISA sketch, SIMT state, configuration boundary, and minimal launch path.
-2. Establish the simulator or golden trace before complex RTL.
+2. Establish the functional simulator or golden trace, kernel descriptor, and launch shape before complex RTL.
 3. Implement the minimal SIMT core: SIMT group state, active lane mask, scheduler, register file, ALU, commit.
 4. Add memory in stages: blocking LSU, lane masks and byte enables, outstanding tags, response demux, then coalescing/cache.
 5. Replace testbench pokes with a runtime or launch contract: load program, load args, start, wait, copy result.
 6. Add counters before tuning: cycles, instructions, SIMT-group stalls, scoreboard stalls, memory stalls, load/store counts.
 7. Add cache, VM, tensor, graphics, FPGA, or software ecosystem work only after the basic loop is debuggable.
 8. Use PPA only after correctness gates pass.
+
+## GPGPU-Sim Architecture Lens
+
+When GPGPU-Sim is the reference, map the proposal onto this chain:
+
+| Contract | GPGPU-Sim anchor | Local architecture question |
+|---|---|---|
+| Runtime entry | `cudaConfigureCallInternal`, `cudaSetupArgumentInternal`, `cudaLaunchInternal` | What object captures launch config and args before backend admission? |
+| Work queue | `stream_manager`, `stream_operation` | How are memcpy, kernel launch, event, wait, and completion ordered? |
+| Kernel descriptor | `kernel_info_t` | Where are entry, grid/block dimensions, stream ID, CTA progress, and resource requirements stored? |
+| Functional oracle | `cuda-sim` | Which executable model owns ISA and memory semantics? |
+| Timing model | `shader_core_ctx`, `scheduler_unit`, `warp_inst_t` | Which state is timing-only, and which state is architectural? |
+| Memory hierarchy | `ldst_unit`, `mem_fetch`, L1/L2/DRAM/ICNT | What request carrier preserves SIMT context through memory? |
+| Config/evidence | `option_parser`, `gpgpusim.config`, stats, trace, AccelWattch | Which workload, config, backend, counters, and power assumptions support the claim? |
+
+Treat GPGPU-Sim as an executable architecture reference. Translate its C++ timing behavior into RTL state, valid-ready, reset, flush, arbitration, and backpressure before using it as hardware guidance.
 
 ## Skill Routing
 
@@ -95,6 +112,8 @@ For deeper Vortex background tied to this skill, read `vortex_local.md` in this 
 
 For deeper MIAOW background tied to this skill, read `miao_local.md` in this directory. It explains the MIAOW paper scope, CU source anchors, trace/test loop, FPGA control path, and prototype credibility caveats relevant to architecture work.
 
+For deeper GPGPU-Sim background tied to this skill, read `gpgpusim_local.md` in this directory. It explains the execution-driven runtime path, functional/timing split, shader/memory hierarchy, config, trace/statistics, and power evidence relevant to architecture decisions.
+
 ## Common Mistakes
 
 - Drawing only an RTL block diagram and omitting runtime, config, tests, or counters.
@@ -102,3 +121,4 @@ For deeper MIAOW background tied to this skill, read `miao_local.md` in this dir
 - Adding cache, VM, tensor, OpenCL, HIP, Vulkan, or FPGA bring-up before a minimal SIMT loop is traceable.
 - Letting testbench-only internal pokes become the permanent runtime interface.
 - Changing several variables at once and calling the result an architecture conclusion.
+- Treating a C++ timing simulator path as synthesizable RTL without defining hardware state, handshakes, and reset/flush behavior.

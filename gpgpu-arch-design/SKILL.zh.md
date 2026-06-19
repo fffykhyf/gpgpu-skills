@@ -7,7 +7,7 @@ description: 用于规划、分阶段实现或评审 GPGPU 架构，范围包括
 
 ## 概览
 
-将本 skill 作为本地 GPGPU 工作的顶层护栏。GPGPU 是完整系统工程，因此架构工作必须说明 ISA、模拟器、RTL、runtime、kernel ABI、配置、测试和 PPA 证据如何保持一致。
+将本 skill 作为本地 GPGPU 工作的顶层护栏。GPGPU 是完整系统工程，因此架构工作必须说明 ISA、模拟器、RTL、runtime、kernel ABI、配置、测试和 PPA 证据如何保持一致。使用 GPGPU-Sim 作为 execution-driven runtime、functional/timing simulator 分层、可配置 timing model、trace/statistics 和 power evidence plumbing 的参考。
 
 ## 核心规则
 
@@ -49,6 +49,7 @@ description: 用于规划、分阶段实现或评审 GPGPU 架构，范围包括
 - State contract：PC、active lane mask、SIMT group state、registers、memory、CSR/DCR、launch state。
 - Config contract：将每个参数分类为 hardware-private、simulator-private、HW/SW ABI、test-only 或 debug-only。
 - Launch contract：program image、kernel entry、args、grid/block dimensions、start、done、result、synchronization path。
+- Simulation contract：functional oracle、timing model、shared kernel descriptor、trace schema 和 backend mode selection。
 - Test gate：simulator smoke、RTL trace diff、runtime launch test、counter check 或 PPA report。
 - Prototype credibility target：instruction unit tests、external golden trace、RTL simulation、FPGA smoke、benchmark run、synthesis report 或 ASIC estimate。
 - Implementation anchors：说明哪个模块或计划模块拥有该声明。
@@ -68,13 +69,29 @@ description: 用于规划、分阶段实现或评审 GPGPU 架构，范围包括
 ## 阶段顺序
 
 1. 定义项目骨架、ISA sketch、SIMT state、configuration boundary 和最小 launch path。
-2. 在复杂 RTL 之前建立 simulator 或 golden trace。
+2. 在复杂 RTL 之前建立 functional simulator 或 golden trace、kernel descriptor 和 launch shape。
 3. 实现最小 SIMT core：SIMT group state、active lane mask、scheduler、register file、ALU、commit。
 4. 分阶段加入 memory：blocking LSU、lane masks 和 byte enables、outstanding tags、response demux，然后再 coalescing/cache。
 5. 用 runtime 或 launch contract 替代 testbench pokes：load program、load args、start、wait、copy result。
 6. 在调优前加入 counters：cycles、instructions、SIMT-group stalls、scoreboard stalls、memory stalls、load/store counts。
 7. 只有在基本循环可调试后，才加入 cache、VM、tensor、graphics、FPGA 或软件生态工作。
 8. 只有 correctness gates 通过后才使用 PPA。
+
+## GPGPU-Sim 架构视角
+
+当以 GPGPU-Sim 为参考时，将方案映射到这条链路：
+
+| 契约 | GPGPU-Sim anchor | 本地架构问题 |
+|---|---|---|
+| Runtime entry | `cudaConfigureCallInternal`、`cudaSetupArgumentInternal`、`cudaLaunchInternal` | 后端接收前，哪个对象捕获 launch config 和 args？ |
+| Work queue | `stream_manager`、`stream_operation` | memcpy、kernel launch、event、wait 和 completion 如何排序？ |
+| Kernel descriptor | `kernel_info_t` | entry、grid/block dimensions、stream ID、CTA progress 和资源需求存在哪里？ |
+| Functional oracle | `cuda-sim` | 哪个可执行模型拥有 ISA 和 memory semantics？ |
+| Timing model | `shader_core_ctx`、`scheduler_unit`、`warp_inst_t` | 哪些状态只是 timing，哪些状态是 architectural？ |
+| Memory hierarchy | `ldst_unit`、`mem_fetch`、L1/L2/DRAM/ICNT | 哪个 request carrier 在 memory 层级中保留 SIMT context？ |
+| Config/evidence | `option_parser`、`gpgpusim.config`、stats、trace、AccelWattch | 哪个 workload、config、backend、counters 和 power assumptions 支撑结论？ |
+
+把 GPGPU-Sim 当作可执行架构参考。把它的 C++ timing behavior 用作硬件指导前，先翻译成 RTL state、valid-ready、reset、flush、arbitration 和 backpressure。
 
 ## Skill 路由
 
@@ -95,6 +112,8 @@ description: 用于规划、分阶段实现或评审 GPGPU 架构，范围包括
 
 若想了解与本 skill 相关的 MIAOW 背景，请阅读本目录下的 `miao_local.md`。它说明 MIAOW paper scope、CU source anchors、trace/test loop、FPGA control path，以及与架构工作相关的 prototype credibility caveats。
 
+若想了解与本 skill 相关的 GPGPU-Sim 背景，请阅读本目录下的 `gpgpusim_local.md`。它说明 execution-driven runtime path、functional/timing split、shader/memory hierarchy、config、trace/statistics 和与架构决策相关的 power evidence。
+
 ## 常见错误
 
 - 只画 RTL block diagram，却遗漏 runtime、config、tests 或 counters。
@@ -102,3 +121,4 @@ description: 用于规划、分阶段实现或评审 GPGPU 架构，范围包括
 - 在最小 SIMT loop 可 trace 之前加入 cache、VM、tensor、OpenCL、HIP、Vulkan 或 FPGA bring-up。
 - 让 testbench-only internal pokes 变成永久 runtime interface。
 - 一次改变多个变量，然后把结果称为架构结论。
+- 把 C++ timing simulator path 当成可综合 RTL，却没有定义 hardware state、handshakes 和 reset/flush 行为。

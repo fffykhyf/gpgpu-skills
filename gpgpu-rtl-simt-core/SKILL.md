@@ -50,6 +50,22 @@ Use canonical terms for local design contracts. Preserve source aliases only whe
 
 Avoid a single module that schedules, decodes, reads registers, executes, writes back, and drives memory.
 
+## GPGPU-Sim Translation Rules
+
+Use GPGPU-Sim's shader core as a state checklist, not an RTL template:
+
+| GPGPU-Sim anchor | RTL owner to define |
+|---|---|
+| `shd_warp_t` | resident SIMT-group table: valid, PC, active mask, waiting, outstanding stores, instruction buffer |
+| `simt_stack` | branch/divergence/reconvergence state and active-mask update rules |
+| `scheduler_unit::cycle()` | readiness equation, issue arbitration, stall reason, FU availability |
+| `scoreboard` | register dependency set/clear, flush, kill, and reset behavior |
+| `opndcoll_rfu_t` | operand collector, register-bank pressure, and read-port arbitration |
+| `issue_warp()` | accepted issue packet with SIMT context and scoreboard reserve |
+| `writeback()` | destination write, scoreboard release, pipeline count update, trace event |
+
+Translate every C++ queue, vector, and helper call into explicit capacity, valid-ready, reset, flush, and kill behavior.
+
 Before implementing issue or hazard logic, the state contract must also list the per-SIMT-group tables that own readiness:
 
 | Table | Owns |
@@ -82,6 +98,8 @@ For each instruction or uop class, state whether it changes:
 - memory request, response, fence, or replay state.
 - barrier, CTA, CSR, or launch-visible state.
 
+An issue packet should carry at least simt_group_id, PC, active lane mask, opcode/FU type, source and destination fields, memory metadata, scheduler or issue slot ID when relevant, and trace identity.
+
 ## Bring-Up Order
 
 1. Single SIMT group, single issue, ALU-only, no divergence.
@@ -98,10 +116,13 @@ For deeper Vortex background tied to this skill, read `vortex_local.md` in this 
 
 For deeper MIAOW background tied to this skill, read `miao_local.md` in this directory. It explains the CU RTL path, fetch and wavepool state, issue readiness equations, scoreboard dependency tables, EXEC/VCC/SCC/M0 ownership, FU writeback, and trace signals.
 
+For deeper GPGPU-Sim background tied to this skill, read `gpgpusim_local.md` in this directory. It explains `shd_warp_t`, `simt_stack`, scheduler readiness, dynamic `warp_inst_t` issue packets, scoreboard release, operand collection, and RTL translation caveats.
+
 ## Common Mistakes
 
 - Treating active mask as a temporary signal instead of core SIMT state.
 - Adding branch or barrier behavior without reconvergence or wakeup rules.
 - Hiding hazard behavior inside operand read logic.
 - Letting backpressure rely on implicit ordering between unrelated always blocks.
+- Copying GPGPU-Sim C++ timing order without specifying RTL handshakes, table capacity, and reset/flush behavior.
 - Debugging only through waveform browsing instead of simulator/RTL trace alignment.

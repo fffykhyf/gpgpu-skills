@@ -23,6 +23,8 @@ Every non-trivial RTL behavior needs either simulator behavior or a golden trace
 
 External functional traces and normalized per-SIMT-group RTL traces are valid as an early correctness loop, but they are not a cycle model.
 
+Functional semantics and timing behavior must stay separate. If the timing model or RTL shares structures with the functional oracle, make the shared schema explicit: kernel descriptor, instruction metadata, active lane mask, memory access, trace identity, and config.
+
 ## Terminology Contract
 
 Use canonical trace terms in schemas and mismatch reports. Keep reference names only when quoting a backend.
@@ -34,6 +36,21 @@ Use canonical trace terms in schemas and mismatch reports. Keep reference names 
 | active lane mask | active mask, thread mask, `tmask`, `EXEC` mask | lane participation state at an event |
 | CTA/workgroup | CTA, block, workgroup | launch/barrier/local-memory scope |
 | compute core/CU | core, CU, compute unit | trace source that owns SIMT groups |
+
+## GPGPU-Sim Functional/Timing Split
+
+Use GPGPU-Sim as the reference for separating oracle responsibilities:
+
+| Layer | GPGPU-Sim anchor | Local equivalent |
+|---|---|---|
+| Functional semantics | `src/cuda-sim/`, `instructions.cc`, `ptx_thread_info` | ISA oracle and architectural state |
+| Launch descriptor | `kernel_info_t` | kernel entry, args, grid/block, stream/queue, CTA progress |
+| Dynamic instruction event | `warp_inst_t` | issued instruction with SIMT group, PC, active lane mask, operands, memory metadata |
+| Divergence state | `simt_stack` | active-mask and reconvergence oracle |
+| Timing model | `shader_core_ctx`, `scheduler_unit`, `ldst_unit` | cycle model or RTL trace with stalls and backpressure |
+| Trace/debug | `Trace`, stats, component logs | normalized first-divergence artifacts |
+
+Do not edit the functional oracle to match a timing artifact until the architecture contract says the oracle was wrong.
 
 ## Module Twin Map
 
@@ -58,7 +75,7 @@ A useful trace record should include:
 | Category | Fields |
 |---|---|
 | identity | cycle or step, sequence ID or UUID, compute core/CU ID, simt_group_id |
-| control | PC, next PC, opcode, active lane mask, predicate mask |
+| control | launch or kernel ID, PC, next PC, opcode, active lane mask, predicate mask |
 | operands | source registers, source values, destination register |
 | commit | writeback valid, value, exception or illegal instruction |
 | memory | op, lane mask, address, byte enable, data, tag, response |
@@ -90,10 +107,13 @@ For deeper Vortex background tied to this skill, read `vortex_local.md` in this 
 
 For deeper MIAOW background tied to this skill, read `miao_local.md` in this directory. It explains the Multi2Sim trace flow, trace parser, tracemon data structures and print functions, trace comparator, regression runner, and what MIAOW's oracle does not prove.
 
+For deeper GPGPU-Sim background tied to this skill, read `gpgpusim_local.md` in this directory. It explains the `cuda-sim` functional oracle, timing model, shared `kernel_info_t`/`warp_inst_t` abstractions, trace schema, and functional-versus-timing caveats.
+
 ## Common Mistakes
 
 - Comparing only final memory output when the first wrong writeback happened earlier.
 - Adding trace fields only after a bug appears instead of defining a minimal trace contract early.
 - Mixing functional correctness and timing fidelity in one unclear trace.
 - Keeping simulator structure unrelated to RTL, making trace diffs hard to map back.
+- Letting timing-model convenience code become the ISA oracle.
 - Declaring a fix without rerunning the reproducer and at least one regression.

@@ -44,7 +44,7 @@ Use canonical terms in config IDs, counter names, and PPA tables. Keep source al
 | backend | simulator, RTL sim, synthesis, FPGA, or analytic model |
 | correctness | pass/fail, trace diff state, known limitations |
 | counters | cycles, instrs, IPC, stalls, load/store, cache, memory |
-| reports | area, timing, Fmax, power, SAIF/VCD, or model output |
+| reports | area, timing, Fmax, power, SAIF/VCD, trace, visualization, or model output |
 | interpretation | what the data supports and what it does not support |
 
 If multiple variables changed, split the experiment or label the result as exploratory.
@@ -72,8 +72,24 @@ Prefer adding counters before tuning:
 - load/store requests and latency
 - coalescer misses or merge rate
 - cache reads/writes, misses, bank stalls, MSHR stalls
+- runtime launch latency, memory latency, interconnect/L2/DRAM queue pressure, and trace sampling scope when modeled
 
 If counters are missing, state whether the conclusion is a hypothesis or measured fact.
+
+## GPGPU-Sim Evidence Loop
+
+Use GPGPU-Sim as the reference for simulator-based evidence:
+
+1. Record workload, input size, kernel name, launch shape, and runtime path.
+2. Record config file path or digest.
+3. Run correctness gate before reading performance.
+4. Collect core counters: cycles, instructions, issue rate, active/idle SIMT groups, scheduler stalls.
+5. Collect memory counters: load/store count, memory latency, cache hits/misses, MSHR stalls, ICNT/L2/DRAM pressure.
+6. Capture trace samples only with documented component/core/memory-partition sampling.
+7. If using AccelWattch or another power model, record model version, XML/config file, activity source, and calibration caveat.
+8. Compare against a baseline with one intended variable changed.
+
+Simulator counters can support architecture hypotheses and bottleneck analysis. They are not RTL timing closure or silicon power evidence by themselves.
 
 ## Power And Area Discipline
 
@@ -90,6 +106,7 @@ If counters are missing, state whether the conclusion is a hypothesis or measure
 - Comparing different configs or workloads and calling it an architecture win.
 - Treating simulator counters as silicon timing or power without caveats.
 - Using SAIF/VCD from a different workload or config.
+- Reporting AccelWattch, McPAT, or GPUWattch output without model version, config, activity source, and calibration status.
 - Keeping only summary numbers and losing the command or report path.
 
 ## Local References
@@ -97,3 +114,5 @@ If counters are missing, state whether the conclusion is a hypothesis or measure
 For deeper Vortex background tied to this skill, read `vortex_local.md` in this directory. It explains synthesis reports, counters, backend evidence, and full-stack reproducibility for PPA work.
 
 For deeper MIAOW background tied to this skill, read `miao_local.md` in this directory. It explains the MIAOW paper's FPGA, area, power, performance, OpenCL/Rodinia, and comparison evidence, plus the caveats that prevent overclaiming.
+
+For deeper GPGPU-Sim background tied to this skill, read `gpgpusim_local.md` in this directory. It explains reproducible config records, runtime/cycle/memory counters, trace sampling, AerialVision, AccelWattch, and power-model caveats.

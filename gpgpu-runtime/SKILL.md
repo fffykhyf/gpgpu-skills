@@ -48,6 +48,21 @@ Use canonical runtime terms in APIs, launch records, and ABI docs. Preserve back
 
 This can be small, but it must be the same conceptual path for simulator and RTL tests.
 
+## GPGPU-Sim Launch Model
+
+Use GPGPU-Sim as the reference for a software launch path that does not poke RTL internals:
+
+| Runtime step | GPGPU-Sim anchor | Local requirement |
+|---|---|---|
+| configure launch | `cudaConfigureCallInternal` | capture grid/block, shared/local memory, stream/queue |
+| stage args | `cudaSetupArgumentInternal` | record argument bytes, sizes, offsets, and alignment |
+| create descriptor | `cudaLaunchInternal`, `kernel_info_t` | resolve kernel entry and create a stable kernel descriptor |
+| enqueue work | `stream_operation` | order memcpy, launch, event, wait, and completion |
+| backend admission | `gpu->can_start_kernel()`, launch latency | gate launch by capacity, latency, and max concurrent kernels |
+| CTA dispatch | `issue_block2core()` | allocate per-core resources and initialize SIMT groups |
+
+A local runtime may use a simpler API than CUDA/OpenCL, but it still needs launch config, argument staging, kernel lookup, queue operation, backend admission, and completion semantics.
+
 ## Interface Layers
 
 | Layer | Owns |
@@ -79,6 +94,7 @@ Every runtime change needs at least one of:
 - RTL-sim launch test.
 - trace showing command, launch, and completion ordering.
 - negative test for bad args, invalid kernel, queue full, or timeout.
+- capacity test for oversized CTA/workgroup, max concurrent kernels, or backend admission failure when those limits exist.
 
 For launch-related changes, prefer one workload that runs through both simulator and RTL backend.
 
@@ -88,6 +104,7 @@ For launch-related changes, prefer one workload that runs through both simulator
 - Letting testbench-only signal pokes become the API.
 - Changing kernel argument layout without updating simulator, RTL, runtime, and tests.
 - Adding async queues or events without ordering and completion semantics.
+- Hiding launch latency, max concurrent kernels, or resource admission in backend-only constants instead of config/runtime-visible behavior.
 - Hiding cache flush or fence behavior inside ad hoc test code.
 
 ## Local References
@@ -95,3 +112,5 @@ For launch-related changes, prefer one workload that runs through both simulator
 For deeper Vortex background tied to this skill, read `vortex_local.md` in this directory. It explains handle-based runtime APIs, command processor control plane, kernel entry, CTA/workgroup dispatch, and launch DCR programming.
 
 For deeper MIAOW background tied to this skill, read `miao_local.md` in this directory. It explains testbench soft dispatch, hard resource dispatch, FPGA AXI-lite control registers, Xilinx SDK command flow, and the boundaries between test hooks and public runtime contracts.
+
+For deeper GPGPU-Sim background tied to this skill, read `gpgpusim_local.md` in this directory. It explains CUDA/OpenCL runtime interception, launch stack handling, `kernel_info_t`, stream operations, functional/performance mode selection, and launch admission.

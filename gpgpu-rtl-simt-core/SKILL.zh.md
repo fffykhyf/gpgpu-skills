@@ -50,6 +50,22 @@ description: 用于设计、编辑或评审 GPGPU SIMT RTL，包括 SIMT group l
 
 避免用一个模块同时完成 schedule、decode、read registers、execute、write back 和 drive memory。
 
+## GPGPU-Sim Translation Rules
+
+使用 GPGPU-Sim 的 shader core 作为 state checklist，而不是 RTL 模板：
+
+| GPGPU-Sim anchor | 需要定义的 RTL owner |
+|---|---|
+| `shd_warp_t` | resident SIMT-group table：valid、PC、active mask、waiting、outstanding stores、instruction buffer |
+| `simt_stack` | branch/divergence/reconvergence state 和 active-mask update rules |
+| `scheduler_unit::cycle()` | readiness equation、issue arbitration、stall reason、FU availability |
+| `scoreboard` | register dependency set/clear、flush、kill 和 reset behavior |
+| `opndcoll_rfu_t` | operand collector、register-bank pressure 和 read-port arbitration |
+| `issue_warp()` | 带 SIMT context 和 scoreboard reserve 的 accepted issue packet |
+| `writeback()` | destination write、scoreboard release、pipeline count update、trace event |
+
+把每个 C++ queue、vector 和 helper call 翻译成显式 capacity、valid-ready、reset、flush 和 kill behavior。
+
 在实现 issue 或 hazard 逻辑前，state contract 还必须列出拥有 readiness 的 per-SIMT-group tables：
 
 | 表 | 职责 |
@@ -82,6 +98,8 @@ ready = fu_lsu & valid & gpr_spr_ready & ~max_inflight & ~mem_wait & ~branch_wai
 - memory request、response、fence 或 replay state。
 - barrier、CTA、CSR 或 launch-visible state。
 
+Issue packet 至少应携带 simt_group_id、PC、active lane mask、opcode/FU type、source 和 destination fields、memory metadata、必要时的 scheduler 或 issue slot ID，以及 trace identity。
+
 ## Bring-Up 顺序
 
 1. Single SIMT group、single issue、ALU-only、无 divergence。
@@ -98,10 +116,13 @@ ready = fu_lsu & valid & gpr_spr_ready & ~max_inflight & ~mem_wait & ~branch_wai
 
 若想了解与本 skill 相关的 MIAOW 背景，请阅读本目录下的 `miao_local.md`。它说明 CU RTL path、fetch 与 wavepool state、issue readiness equations、scoreboard dependency tables、EXEC/VCC/SCC/M0 ownership、FU writeback 和 trace signals。
 
+若想了解与本 skill 相关的 GPGPU-Sim 背景，请阅读本目录下的 `gpgpusim_local.md`。它说明 `shd_warp_t`、`simt_stack`、scheduler readiness、dynamic `warp_inst_t` issue packets、scoreboard release、operand collection 和 RTL translation caveats。
+
 ## 常见错误
 
 - 把 active mask 当成临时信号，而不是 core SIMT state。
 - 添加 branch 或 barrier 行为，却没有 reconvergence 或 wakeup 规则。
 - 把 hazard 行为隐藏在 operand read logic 里。
 - 让 backpressure 依赖无关 always blocks 之间的隐式顺序。
+- 复制 GPGPU-Sim C++ timing order，却没有说明 RTL handshakes、table capacity 和 reset/flush behavior。
 - 只靠 waveform browsing 调试，而不是对齐 simulator/RTL trace。
