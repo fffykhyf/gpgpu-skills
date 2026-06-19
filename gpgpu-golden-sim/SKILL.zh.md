@@ -7,7 +7,7 @@ description: 用于设计或调试 GPGPU golden simulator、SimX-like module twi
 
 ## 概览
 
-当 simulator behavior、instruction semantics 或 trace comparison 是事实来源时使用本 skill。Simulator 应该是架构的 executable twin，也是 RTL debug 的实用 oracle，而不只是 final-output checker。使用 Rocket Chip 作为补充 ISA 或 timing oracle 的参考：executable protocol monitors、constrained fuzzers、unit-test harnesses 和 trace/resource checks。
+当 simulator behavior、instruction semantics 或 trace comparison 是事实来源时使用本 skill。Simulator 应该是架构的 executable twin，也是 RTL debug 的实用 oracle，而不只是 final-output checker。使用 Rocket Chip 作为补充 ISA 或 timing oracle 的参考：executable protocol monitors、constrained fuzzers、unit-test harnesses 和 trace/resource checks。使用 XiangShan-NEMU 作为 stable reference-model ABI、step-by-step difftest、skip/guided execution、store-commit events、checkpointing 和 first-divergence diagnosis 的参考。
 
 ## 核心规则
 
@@ -67,6 +67,21 @@ Trace schema 和 mismatch report 使用统一术语；只有引用具体 backend
 | generated docs | docs `mdoc` flow | 让 reference docs 和 code examples 足够接近，方便发现 drift。 |
 
 在完整 golden simulator 下方使用这些 checker。Protocol monitor 可以在 final kernel output 不同之前就抓到错误 lane mask 或 source ID。
+
+## XiangShan-NEMU Difftest 模式
+
+使用 XiangShan-NEMU 作为把 golden model 变成调试接口的参考：
+
+| Difftest 契约 | XiangShan-NEMU anchor | 本地 golden-sim 规则 |
+|---|---|---|
+| reference ABI | `src/cpu/difftest/ref.c` | 导出稳定的 init、memory copy、state copy、execute、status、interrupt 和 event-copy calls。 |
+| DUT adapter | `src/cpu/difftest/dut.c` | 通过稳定接口加载 reference model，并隔离 DUT-specific skip logic。 |
+| step compare | `difftest_step(pc, npc)` | 在 final kernel output 之前的中间事件边界进行比较。 |
+| state sync | `difftest_regcpy`、`difftest_csrcpy`、uarch status sync | 定义哪些 architectural、control、SIMT 和 memory state 可以 copy 或 query。 |
+| non-identical phases | skip-ref、skip-dut、guided exec | 将合法 mismatch windows 显式化，而不是忽略 failures。 |
+| long workload support | `src/checkpoint/`、SimPoint workflow | 对长 kernel 和 full-system tests 使用 checkpoints 或 sampled regions。 |
+
+对于 GPGPU 工作，将 register/CSR copy 翻译成 kernel launch state、SIMT group PC、active lane mask、registers、predicate state、barrier state、shared/global memory、memory commit、fault 和 replay events。Final output comparison 只是 smoke test，不是完整 oracle。
 
 ## Module Twin Map
 
@@ -129,6 +144,8 @@ Trace schema 和 mismatch report 使用统一术语；只有引用具体 backend
 
 若想了解与本 skill 相关的 Rocket Chip 背景，请阅读 `../../ref/skillref/rocket.md`，必要时查看 `../../ref_submodule/rocket-chip/src/main/scala/tilelink/Monitor.scala`、`tilelink/Fuzzer.scala`、`unittest/UnitTest.scala`、`system/TestHarness.scala` 和 `trace/`。
 
+若想了解与本 skill 相关的 XiangShan 背景，请阅读本目录下的 `xiangshan_local.md`。它说明 NEMU reference/DUT difftest APIs、step comparison、skip/guided execution、store commit、checkpoint/SimPoint flow，以及如何把这些思想翻译成 GPGPU intermediate-state comparison。
+
 ## 常见错误
 
 - 只比较 final memory output，而第一个错误 writeback 早已发生。
@@ -139,3 +156,4 @@ Trace schema 和 mismatch report 使用统一术语；只有引用具体 backend
 - 没有 rerun reproducer 和至少一个 regression 就宣称修复。
 - 等到 full-kernel mismatch 才发现错误，而不是让 protocol monitor 在源头抓住 invalid request。
 - 使用不遵守合法 source/tag、mask、ordering 和 in-flight rules 的随机流量。
+- 只比较 final memory output，而 XiangShan-style difftest boundary 本可以暴露第一个 divergent SIMT、memory、barrier 或 fault event。

@@ -7,7 +7,7 @@ description: Use when designing, editing, or reviewing GPGPU SIMT RTL such as SI
 
 ## Overview
 
-Use this skill for the minimal compute core of a GPGPU. Keep SIMT state explicit, keep module boundaries small, and keep RTL behavior comparable to the simulator trace. Use Rocket Chip as a reference for typed parameters, optional unit hooks, ready-valid interfaces, command/response arbitration, local perf events, and generated tile integration. Do not use Rocket's scalar in-order pipeline as a SIMT execution template.
+Use this skill for the minimal compute core of a GPGPU. Keep SIMT state explicit, keep module boundaries small, and keep RTL behavior comparable to the simulator trace. Use Rocket Chip as a reference for typed parameters, optional unit hooks, ready-valid interfaces, command/response arbitration, local perf events, and generated tile integration. Use XiangShan as a reference for backend state ownership, derived execution-unit ports, writeback consistency checks, trace/perf ownership, and memory replay boundaries. Do not use Rocket's scalar in-order pipeline or XiangShan's CPU OoO pipeline as a SIMT execution template.
 
 ## Core Rule
 
@@ -83,6 +83,21 @@ Use Rocket Chip as the reference for integrating optional units without blurring
 
 Borrow the integration pattern. Do not replace SIMT scheduler, active-mask, reconvergence, CTA, or lane semantics with CPU concepts.
 
+## XiangShan Backend State Pattern
+
+Use XiangShan's backend as a state-ownership checklist, not as a SIMT template:
+
+| Backend pattern | XiangShan anchor | Local RTL SIMT rule |
+|---|---|---|
+| module ownership | `Backend.scala`, `CtrlBlock.scala`, DataPath, Region | Keep scheduler, scoreboard, operand, register, FU, writeback, trace, and control recovery owners separate. |
+| derived issue/writeback | `BackendParams.scala` | Derive issue slots, read ports, writeback ports, and wakeup paths from configured FU/lane resources. |
+| config checks | `params.configChecks`, writeback-port `require`s | Reject missing writeback priority, port mismatch, and unsupported execution-unit combinations at generation time. |
+| recovery/control state | CtrlBlock redirect and snapshot recovery | Translate to SIMT branch/divergence/reconvergence, kill, replay, and barrier recovery ownership. |
+| vector metadata | VFPU and vector LSU docs/source | Borrow mask, element, merge, and exception metadata concepts for lane-level operations. |
+| local events | `TopDownGen.scala`, perf event wiring | Emit scheduler, scoreboard, FU, replay, and memory events near the module owner. |
+
+Do not add ROB, rename, or precise CPU commit to a SIMT core merely because XiangShan uses them. Translate the discipline into explicit SIMT group lifecycle, active lane mask, scoreboard, barrier, replay, and trace contracts.
+
 Before implementing issue or hazard logic, the state contract must also list the per-SIMT-group tables that own readiness:
 
 | Table | Owns |
@@ -139,6 +154,8 @@ For deeper GPGPU-Sim background tied to this skill, read `gpgpusim_local.md` in 
 
 For Rocket Chip background tied to this skill, read `../../ref/skillref/rocket.md` and then inspect `../../ref_submodule/rocket-chip/src/main/scala/rocket/RocketCore.scala`, `tile/RocketTile.scala`, `tile/BaseTile.scala`, `tile/LazyRoCC.scala`, and `rocket/HellaCache.scala` when needed.
 
+For XiangShan background tied to this skill, read `xiangshan_local.md` in this directory. It explains backend module ownership, `BackendParams` derived ports, writeback checks, CtrlBlock recovery, vector metadata, trace/perf hooks, and the CPU-specific pieces that must not be copied into SIMT RTL.
+
 ## Common Mistakes
 
 - Treating active mask as a temporary signal instead of core SIMT state.
@@ -149,3 +166,4 @@ For Rocket Chip background tied to this skill, read `../../ref/skillref/rocket.m
 - Debugging only through waveform browsing instead of simulator/RTL trace alignment.
 - Copying Rocket's scalar core structure instead of only borrowing its config, optional-unit, ready-valid, event, and integration patterns.
 - Adding an optional unit without decode, scoreboard, trace, perf, config, and protocol ownership.
+- Copying XiangShan's rename/ROB/precise-commit pipeline instead of translating its ownership checks into SIMT group, active lane mask, scoreboard, and barrier/replay rules.

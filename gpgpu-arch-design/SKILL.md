@@ -7,7 +7,7 @@ description: Use when planning, staging, or reviewing GPGPU architecture across 
 
 ## Overview
 
-Use this skill as the top-level guardrail for local GPGPU work. A GPGPU is a full-stack system, so architecture work must state how ISA, simulator, RTL, runtime, kernel ABI, configuration, tests, and PPA evidence stay aligned. Use GPGPU-Sim as the reference for execution-driven runtime, functional/timing simulator separation, configurable timing models, trace/statistics, and power-evidence plumbing. Use Rocket Chip as the reference for generator discipline: named configurations, negotiated bus/control protocols, tile/periphery boundaries, runtime-visible resources, protocol monitors, and test harness integration.
+Use this skill as the top-level guardrail for local GPGPU work. A GPGPU is a full-stack system, so architecture work must state how ISA, simulator, RTL, runtime, kernel ABI, configuration, tests, and PPA evidence stay aligned. Use GPGPU-Sim as the reference for execution-driven runtime, functional/timing simulator separation, configurable timing models, trace/statistics, and power-evidence plumbing. Use Rocket Chip as the reference for generator discipline: named configurations, negotiated bus/control protocols, tile/periphery boundaries, runtime-visible resources, protocol monitors, and test harness integration. Use XiangShan as the reference for high-complexity microarchitecture documentation: state ownership, generated parameters, core/tile/memory boundaries, LSQ replay, NEMU difftest, and HPM/TopDown evidence. Do not copy XiangShan's CPU OoO frontend, rename, ROB, or precise-commit semantics as SIMT semantics.
 
 ## Core Rule
 
@@ -112,6 +112,21 @@ Use Rocket Chip as the reference for turning architecture into a reproducible ge
 
 Do not copy Rocket's scalar CPU pipeline as a SIMT design. Borrow its generator, boundary, protocol, and verification discipline.
 
+## XiangShan State-Owner Lens
+
+Use XiangShan as the reference for documenting complex microarchitecture contracts without losing ownership boundaries:
+
+| Contract | XiangShan anchor | Local architecture question |
+|---|---|---|
+| core/tile boundary | `XSCore.scala`, `XSTile.scala` | Which block owns SIMT state, memory clients, runtime-visible status, trace, debug, and perf? |
+| derived microarchitecture | `Parameters.scala`, `BackendParams.scala`, `Configs.scala` | Which widths, queues, ports, and IDs are user parameters versus derived checks? |
+| backend ownership | `Backend.scala`, `CtrlBlock.scala`, `TopDownGen.scala` | Which unit owns redirect, flush, recovery, issue, writeback, trace, and bottleneck attribution? |
+| memory lifecycle | `MemBlock.scala`, `LSQWrapper.scala`, `LoadQueueReplay.scala` | What is the request, replay, violation, wakeup, and exception path through memory? |
+| executable reference | `xiangshan-nemu/src/cpu/difftest/*` | What intermediate state or event can be compared before final output? |
+| performance evidence | PDF HPM chapter, `TopDownGen.scala`, `PMParameters.scala` | Which owner emits each counter, and how does it roll up into a top-down explanation? |
+
+Borrow the state-owner, difftest, and counter discipline. Do not use XiangShan to justify CPU-specific branch prediction, rename, ROB, or hart/CSR behavior as a GPGPU architecture requirement.
+
 ## Skill Routing
 
 Use the narrower skill when the task is mostly about one boundary:
@@ -135,6 +150,8 @@ For deeper GPGPU-Sim background tied to this skill, read `gpgpusim_local.md` in 
 
 For Rocket Chip background tied to this skill, read `../../ref/skillref/rocket.md` and then inspect `../../ref_submodule/rocket-chip` when needed. Focus on `Configs.scala`, Diplomacy docs, `BaseTile.scala`, `RocketTile.scala`, `LazyRoCC.scala`, TileLink monitor/fuzzer, `ExampleRocketSystem.scala`, and `TestHarness.scala`.
 
+For XiangShan background tied to this skill, read `xiangshan_local.md` in this directory. It explains the XiangShan design-document sections, `XSCore`/`XSTile` boundaries, generated parameters, backend ownership, LSQ/replay, NEMU difftest, and HPM/TopDown lessons relevant to architecture decisions.
+
 ## Common Mistakes
 
 - Drawing only an RTL block diagram and omitting runtime, config, tests, or counters.
@@ -144,3 +161,4 @@ For Rocket Chip background tied to this skill, read `../../ref/skillref/rocket.m
 - Changing several variables at once and calling the result an architecture conclusion.
 - Treating a C++ timing simulator path as synthesizable RTL without defining hardware state, handshakes, and reset/flush behavior.
 - Hard-coding bus widths, source IDs, MMIO maps, or optional feature ports that should be generated, checked, or exposed as capabilities.
+- Copying XiangShan CPU mechanisms such as branch prediction, rename, ROB, or precise commit without translating them into SIMT group, CTA/workgroup, active lane mask, and kernel ABI contracts.

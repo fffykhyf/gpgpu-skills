@@ -7,7 +7,7 @@ description: Use when designing, editing, or reviewing GPGPU runtime, host/devic
 
 ## Overview
 
-Use this skill when host software, launch ABI, command submission, or kernel entry behavior defines the system boundary. Runtime work should turn a testbench-driven core into a reusable device interface without exposing RTL internals as public API. Use Rocket Chip as the reference for boot/reset resources, debug transport, MMIO/resource descriptions, TestHarness wiring, and RoCC-style command/response/memory/busy/interrupt accelerator control.
+Use this skill when host software, launch ABI, command submission, or kernel entry behavior defines the system boundary. Runtime work should turn a testbench-driven core into a reusable device interface without exposing RTL internals as public API. Use Rocket Chip as the reference for boot/reset resources, debug transport, MMIO/resource descriptions, TestHarness wiring, and RoCC-style command/response/memory/busy/interrupt accelerator control. Use XiangShan as the reference for reproducible build/run/difftest commands, reset/debug/trace/perf control surfaces, full-system images, checkpoint workflows, and separation between debug bring-up and public runtime ABI.
 
 ## Core Rule
 
@@ -102,6 +102,21 @@ Use Rocket Chip as the reference for SoC-visible runtime boundaries:
 
 RoCC is not a GPU runtime, but its command/response and busy/interrupt/fault discipline is directly useful for a GPGPU command queue or doorbell design.
 
+## XiangShan Runtime And Difftest Pattern
+
+Use XiangShan as the reference for making run and debug paths reproducible:
+
+| Runtime concern | XiangShan anchor | Local runtime rule |
+|---|---|---|
+| build/run entry | `README.md`, `make verilog`, `make emu`, `--diff` | Document exact simulator, RTL, and difftest launch commands with config names. |
+| visible control state | `XSCore.scala`, `XSTile.scala` | Expose reset, start, interrupt/status, fault, trace, perf, and power/debug paths through stable boundaries. |
+| full-system devices | `src/main/scala/device/` | Keep virtual devices, MMIO, memory images, and test harness resources separate from kernel ABI. |
+| interactive debug | `xspdb`, trace/debug interfaces | Provide repeatable watch, step, status, and trace hooks for bring-up without making them public ABI. |
+| reference model launch | XiangShan-NEMU `--diff` flow | Runtime tests should be able to enable/disable golden diff in a controlled way. |
+| checkpointing | NEMU checkpoint/SimPoint flow | Long workloads should have checkpoint or sampled-region support before becoming PPA evidence. |
+
+Do not treat XiangShan's CPU boot flow as a GPU kernel ABI. Borrow the command, image, debug, diff, checkpoint, and status discipline for a GPGPU launch path.
+
 ## Runtime Verification
 
 Every runtime change needs at least one of:
@@ -127,6 +142,7 @@ For launch-related changes, prefer one workload that runs through both simulator
 - Hiding cache flush or fence behavior inside ad hoc test code.
 - Adding MMIO registers without owner, reset value, side effect, capability/version, and test-harness coverage.
 - Treating debug/JTAG/DMI-style bring-up paths as the same thing as the public kernel launch API.
+- Copying XiangShan reset/boot/debug mechanics directly into the GPU runtime instead of defining a kernel descriptor, queue/doorbell, completion, fault, trace, and diff contract.
 
 ## Local References
 
@@ -137,3 +153,5 @@ For deeper MIAOW background tied to this skill, read `miao_local.md` in this dir
 For deeper GPGPU-Sim background tied to this skill, read `gpgpusim_local.md` in this directory. It explains CUDA/OpenCL runtime interception, launch stack handling, `kernel_info_t`, stream operations, functional/performance mode selection, and launch admission.
 
 For Rocket Chip background tied to this skill, read `../../ref/skillref/rocket.md` and then inspect `../../ref_submodule/rocket-chip/src/main/scala/tile/LazyRoCC.scala`, `system/ExampleRocketSystem.scala`, `system/TestHarness.scala`, `bootrom/`, `devices/debug/`, and `resources/` when needed.
+
+For XiangShan background tied to this skill, read `xiangshan_local.md` in this directory. It explains XiangShan build/run/difftest flow, reset/debug/trace/perf ports, virtual devices, full-system images, `xspdb`, checkpointing, and how these ideas translate to a GPGPU runtime boundary.

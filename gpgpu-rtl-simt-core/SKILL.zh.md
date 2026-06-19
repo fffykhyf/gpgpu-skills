@@ -7,7 +7,7 @@ description: 用于设计、编辑或评审 GPGPU SIMT RTL，包括 SIMT group l
 
 ## 概览
 
-用于 GPGPU 的最小 compute core 工作。保持 SIMT state 明确、模块边界小，并让 RTL 行为能够和 simulator trace 对齐。使用 Rocket Chip 作为 typed parameters、optional unit hooks、ready-valid interfaces、command/response arbitration、local perf events 和 generated tile integration 的参考。不要把 Rocket 的 scalar in-order pipeline 当作 SIMT execution template。
+用于 GPGPU 的最小 compute core 工作。保持 SIMT state 明确、模块边界小，并让 RTL 行为能够和 simulator trace 对齐。使用 Rocket Chip 作为 typed parameters、optional unit hooks、ready-valid interfaces、command/response arbitration、local perf events 和 generated tile integration 的参考。使用 XiangShan 作为 backend state ownership、derived execution-unit ports、writeback consistency checks、trace/perf ownership 和 memory replay boundaries 的参考。不要把 Rocket 的 scalar in-order pipeline 或 XiangShan 的 CPU OoO pipeline 当作 SIMT execution template。
 
 ## 核心规则
 
@@ -83,6 +83,21 @@ description: 用于设计、编辑或评审 GPGPU SIMT RTL，包括 SIMT group l
 
 借鉴 integration pattern；不要用 CPU concepts 替代 SIMT scheduler、active-mask、reconvergence、CTA 或 lane semantics。
 
+## XiangShan Backend State 模式
+
+使用 XiangShan backend 作为 state-ownership checklist，而不是 SIMT 模板：
+
+| Backend 模式 | XiangShan anchor | 本地 RTL SIMT 规则 |
+|---|---|---|
+| module ownership | `Backend.scala`、`CtrlBlock.scala`、DataPath、Region | 保持 scheduler、scoreboard、operand、register、FU、writeback、trace 和 control recovery owners 分离。 |
+| derived issue/writeback | `BackendParams.scala` | 从 configured FU/lane resources 派生 issue slots、read ports、writeback ports 和 wakeup paths。 |
+| config checks | `params.configChecks`、writeback-port `require`s | 在 generation time 拒绝 missing writeback priority、port mismatch 和 unsupported execution-unit combinations。 |
+| recovery/control state | CtrlBlock redirect 和 snapshot recovery | 翻译成 SIMT branch/divergence/reconvergence、kill、replay 和 barrier recovery ownership。 |
+| vector metadata | VFPU 和 vector LSU docs/source | 为 lane-level operations 借鉴 mask、element、merge 和 exception metadata concepts。 |
+| local events | `TopDownGen.scala`、perf event wiring | 在 module owner 附近发出 scheduler、scoreboard、FU、replay 和 memory events。 |
+
+不要仅因为 XiangShan 使用 ROB、rename 或 precise CPU commit，就把它们加入 SIMT core。应把纪律翻译成明确的 SIMT group lifecycle、active lane mask、scoreboard、barrier、replay 和 trace contracts。
+
 在实现 issue 或 hazard 逻辑前，state contract 还必须列出拥有 readiness 的 per-SIMT-group tables：
 
 | 表 | 职责 |
@@ -139,6 +154,8 @@ Issue packet 至少应携带 simt_group_id、PC、active lane mask、opcode/FU t
 
 若想了解与本 skill 相关的 Rocket Chip 背景，请阅读 `../../ref/skillref/rocket.md`，必要时查看 `../../ref_submodule/rocket-chip/src/main/scala/rocket/RocketCore.scala`、`tile/RocketTile.scala`、`tile/BaseTile.scala`、`tile/LazyRoCC.scala` 和 `rocket/HellaCache.scala`。
 
+若想了解与本 skill 相关的 XiangShan 背景，请阅读本目录下的 `xiangshan_local.md`。它说明 backend module ownership、`BackendParams` derived ports、writeback checks、CtrlBlock recovery、vector metadata、trace/perf hooks，以及不能复制进 SIMT RTL 的 CPU-specific pieces。
+
 ## 常见错误
 
 - 把 active mask 当成临时信号，而不是 core SIMT state。
@@ -149,3 +166,4 @@ Issue packet 至少应携带 simt_group_id、PC、active lane mask、opcode/FU t
 - 只靠 waveform browsing 调试，而不是对齐 simulator/RTL trace。
 - 复制 Rocket 的 scalar core structure，而不是只借鉴它的 config、optional-unit、ready-valid、event 和 integration patterns。
 - 添加 optional unit，却没有 decode、scoreboard、trace、perf、config 和 protocol ownership。
+- 复制 XiangShan 的 rename/ROB/precise-commit pipeline，而不是把 ownership checks 翻译成 SIMT group、active lane mask、scoreboard 和 barrier/replay 规则。

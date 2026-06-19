@@ -7,7 +7,7 @@ description: Use when designing, editing, or debugging GPGPU memory behavior inc
 
 ## Overview
 
-Use this skill for LSU and memory-system work. Start with a blocking, traceable path, then add tags, response demux, coalescing, banking, cache, MSHR, fences, or VM only when correctness traces and counters justify the next step. Use Rocket Chip's HellaCache, DCache, and TileLink as references for request/response schemas, source ID lifetime, replay/nack/kill semantics, ordering, protocol helpers, monitors, and constrained fuzzing.
+Use this skill for LSU and memory-system work. Start with a blocking, traceable path, then add tags, response demux, coalescing, banking, cache, MSHR, fences, or VM only when correctness traces and counters justify the next step. Use Rocket Chip's HellaCache, DCache, and TileLink as references for request/response schemas, source ID lifetime, replay/nack/kill semantics, ordering, protocol helpers, monitors, and constrained fuzzing. Use XiangShan as the reference for a fully documented LSU/LSQ/replay/cache/MMU/L2 lifecycle, especially replay-cause priority, violation handling, vector metadata, and counter attribution.
 
 ## Core Rule
 
@@ -85,6 +85,21 @@ Use Rocket Chip as the reference for making memory protocols explicit:
 
 Translate TileLink ideas into the local GPGPU protocol; do not assume a CPU cache coherence protocol is the GPU memory model.
 
+## XiangShan LSU Replay Pattern
+
+Use XiangShan as the reference for memory paths where replay, violation, and wakeup are first-class design objects:
+
+| Memory contract | XiangShan anchor | Local memory-path rule |
+|---|---|---|
+| backend-memory boundary | `MemBlock.scala` | Define issue, LSQ enqueue, commit, redirect, violation, exception, wakeup, writeback, and perf ports. |
+| load/store queue owner | `LSQWrapper.scala` | Keep load queue, store queue, bypass, forward, uncache, rollback, hint, and debug ownership explicit. |
+| replay cause enum | `LoadQueueReplay.scala` | Enumerate replay reasons and preserve priority ordering with deadlock reasoning. |
+| vector metadata | `VecReplayInfo`, vector LSU files | Carry per-element, mask, merge-buffer, offset, and active metadata when vector or lane replay exists. |
+| cache/TLB path | `DCacheWrapper.scala`, `cache/mmu/` | Derive source IDs, MSHR entries, TLB/PTW misses, uncache/MMIO, ECC, and prefetch fields from config. |
+| shared L2/backpressure | PDF CoupledL2 chapter, `L2Top.scala` | Document MSHR, retry/credit, MMIO bridge, error, and downstream protocol behavior. |
+
+Local GPGPU memory work should name replay causes such as coalescer retry, shared-memory bank conflict, TLB miss, cache miss, MSHR full, NoC backpressure, atomic serialization, uncache/MMIO, fault, and store/load ordering. If two causes can be true at once, write the priority and prove it cannot deadlock.
+
 A first blocking LSU should name its FSM states and trace:
 
 | Area | Required evidence |
@@ -135,6 +150,7 @@ Any non-blocking load must specify:
 - Treating final kernel output as the only memory correctness check.
 - Hand-coding beat/mask/source calculations in several places instead of centralizing derived protocol helpers.
 - Adding replay, nack, or out-of-order response support without a source/tag lifetime checker.
+- Adding replay causes without a XiangShan-style priority table, owner counter, and deadlock check.
 
 ## Local References
 
@@ -145,3 +161,5 @@ For deeper MIAOW background tied to this skill, read `miao_local.md` in this dir
 For deeper GPGPU-Sim background tied to this skill, read `gpgpusim_local.md` in this directory. It explains `ldst_unit`, `mem_fetch`, cache/MSHR status, L2/memory partitions, interconnect, DRAM timing, response routing, and memory statistics.
 
 For Rocket Chip background tied to this skill, read `../../ref/skillref/rocket.md` and then inspect `../../ref_submodule/rocket-chip/src/main/scala/rocket/HellaCache.scala`, `rocket/DCache.scala`, `tilelink/Bundles.scala`, `tilelink/Edges.scala`, `tilelink/Monitor.scala`, `tilelink/Fuzzer.scala`, and `diplomacy/Parameters.scala` when needed.
+
+For XiangShan background tied to this skill, read `xiangshan_local.md` in this directory. It explains the PDF LSU/DCache/MMU/CoupledL2 chapters, `MemBlock`, `LSQWrapper`, `LoadQueueReplay`, DCache parameters, TLB/PTW structure, vector replay metadata, and how to adapt those details to GPGPU memory paths.

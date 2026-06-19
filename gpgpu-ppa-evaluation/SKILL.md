@@ -7,7 +7,7 @@ description: Use when evaluating GPGPU performance, power, area, timing, energy,
 
 ## Overview
 
-Use this skill when a GPGPU change needs evidence beyond functional correctness. PPA conclusions must bind workload, backend, configuration, counters, activity, and reports into a controlled comparison. Use Rocket Chip as the reference for keeping named configs, local perf events, cache/memory counters, traces, regression flows, and generated hardware evidence tied together.
+Use this skill when a GPGPU change needs evidence beyond functional correctness. PPA conclusions must bind workload, backend, configuration, counters, activity, and reports into a controlled comparison. Use Rocket Chip as the reference for keeping named configs, local perf events, cache/memory counters, traces, regression flows, and generated hardware evidence tied together. Use XiangShan as the reference for HPM event ownership, TopDown bottleneck decomposition, checkpoint/SimPoint methodology, and careful separation between research prototype evidence and architecture claims.
 
 ## Core Rule
 
@@ -81,6 +81,21 @@ Prefer adding counters before tuning:
 
 If counters are missing, state whether the conclusion is a hypothesis or measured fact.
 
+## XiangShan HPM And TopDown Pattern
+
+Use XiangShan as the reference for evidence that explains why a result changed:
+
+| Evidence contract | XiangShan anchor | Local PPA rule |
+|---|---|---|
+| hardware event ownership | PDF HPM chapter, `PMParameters.scala` | Put counters near the module that owns the event, and document trigger conditions. |
+| counter selection | `mhpmcounter3-31`, HPM event selectors | Keep event selection, grouping, privilege/sample domain, and overflow behavior reproducible. |
+| top-down attribution | `TopDownGen.scala`, debugTopDown ports | Roll counters into bottleneck classes before claiming a specific optimization cause. |
+| memory bottlenecks | LSU/DCache/MMU/CoupledL2 chapters | Separate replay, TLB miss, DCache miss, MSHR full, uncache/MMIO, L2, and protocol stalls. |
+| workload sampling | NEMU checkpoint and SimPoint flow | Use checkpoints, sampled regions, and weights for long workloads instead of ad hoc partial runs. |
+| artifact discipline | XiangShan MICRO methodology | Tie functional verification, debug traces, performance validation, and artifact provenance together. |
+
+For local GPGPU work, translate frontend/backend/memory/cache into launch/dispatch, scheduler/issue, SIMT divergence, register/operand, LSU/coalescer, cache/TLB/NoC/DRAM, barrier, and atomic classes.
+
 ## Rocket Chip Evidence Pattern
 
 Use Rocket Chip as the reference for placing evidence near the logic:
@@ -129,6 +144,7 @@ Simulator counters can support architecture hypotheses and bottleneck analysis. 
 - Keeping only summary numbers and losing the command or report path.
 - Adding counters far from the event owner, making them impossible to reconcile with trace or RTL behavior.
 - Comparing generated variants without recording the config fragment, derived topology, and protocol monitor status.
+- Claiming a XiangShan-style top-down bottleneck without showing the counter owner, workload sample, config, and correctness gate behind it.
 
 ## Local References
 
@@ -139,3 +155,5 @@ For deeper MIAOW background tied to this skill, read `miao_local.md` in this dir
 For deeper GPGPU-Sim background tied to this skill, read `gpgpusim_local.md` in this directory. It explains reproducible config records, runtime/cycle/memory counters, trace sampling, AerialVision, AccelWattch, and power-model caveats.
 
 For Rocket Chip background tied to this skill, read `../../ref/skillref/rocket.md` and then inspect `../../ref_submodule/rocket-chip/src/main/scala/rocket/RocketCore.scala`, `rocket/HellaCache.scala`, `trace/`, `system/TestHarness.scala`, `regression/`, and `src/main/resources/csrc/` when needed.
+
+For XiangShan background tied to this skill, read `xiangshan_local.md` in this directory. It explains HPM/TopDown counters, backend and memory event ownership, NEMU instruction/profiling support, checkpoint/SimPoint flow, and how to adapt those evidence patterns to GPGPU PPA evaluation.

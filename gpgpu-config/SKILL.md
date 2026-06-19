@@ -7,7 +7,7 @@ description: Use when adding, editing, or reviewing GPGPU parameters, generated 
 
 ## Overview
 
-Use this skill when a value might drift across RTL, simulator, runtime, kernel, tests, or PPA scripts. Configuration work is not just replacing numbers with macros; it is deciding which values are private implementation knobs, which values are generated from typed parameters, which values are negotiated by protocols, and which values are visible contracts. Use Rocket Chip as the model for named config fragments, derived parameters, `require`-style legality checks, and resource/capability generation.
+Use this skill when a value might drift across RTL, simulator, runtime, kernel, tests, or PPA scripts. Configuration work is not just replacing numbers with macros; it is deciding which values are private implementation knobs, which values are generated from typed parameters, which values are negotiated by protocols, and which values are visible contracts. Use Rocket Chip as the model for named config fragments, derived parameters, `require`-style legality checks, and resource/capability generation. Use XiangShan as the model for large typed parameter surfaces, derived backend/cache/memory widths, config-time checks, and printed/auditable generated microarchitecture.
 
 ## Core Rule
 
@@ -77,6 +77,21 @@ Use Rocket Chip as the reference for generator-owned configuration:
 | negotiated protocols | Diplomacy nodes, `TransferSizes`, `AddressSet`, `IdRange` | Treat bus widths, address ranges, transfer sizes, and IDs as protocol contracts, not incidental constants. |
 | generated resources | DTS/resource binding, boot/debug/periphery config | Update capability/version/resource output when a public hardware feature changes. |
 
+## XiangShan Derived-Parameter Pattern
+
+Use XiangShan as the reference for keeping a wide configuration surface auditable:
+
+| Pattern | XiangShan anchor | Local rule |
+|---|---|---|
+| named configs | `top/Configs.scala`, `BaseConfig`, `MinimalConfig` | Keep target, minimal, and experiment configs named and reproducible. |
+| typed core params | `XSCoreParameters` in `Parameters.scala` | Group ISA feature flags, widths, queue sizes, memory settings, and optional units in one typed surface. |
+| derived backend ports | `BackendParams.scala` | Derive issue, wakeup, read/write port, writeback, and dispatch counts from execution-unit configs. |
+| cache/MMU params | `DCacheParameters`, TLB/L2TLB params | Derive tag/index/source widths, ECC bits, MSHR IDs, and cache-control ranges from source values. |
+| legality checks | `require`, `configChecks` | Fail before generation when queue, bank, port, power-of-two, or ID-range combinations are illegal. |
+| auditable output | backend config prints, perf parameter wiring | Dump generated topology and derived counts when they affect experiments or debug. |
+
+For local GPGPU work, add a derived-value owner before adding a new public knob. If a parameter affects active lane mask width, source/tag width, queue capacity, register file ports, cache shape, runtime capabilities, or PPA labels, it needs a legality check and an expanded dump.
+
 ## Change Checklist
 
 For every config change:
@@ -140,3 +155,5 @@ For deeper MIAOW background tied to this skill, read `miao_local.md` in this dir
 For deeper GPGPU-Sim background tied to this skill, read `gpgpusim_local.md` in this directory. It explains option registration, tested config files, runtime/core/memory/power/trace knobs, and compact string caveats.
 
 For Rocket Chip background tied to this skill, read `../../ref/skillref/rocket.md` and then inspect `../../ref_submodule/rocket-chip/src/main/scala/system/Configs.scala`, `tile/BaseTile.scala`, `tile/RocketTile.scala`, `rocket/HellaCache.scala`, `rocket/RocketCore.scala`, and `diplomacy/Parameters.scala` when needed.
+
+For XiangShan background tied to this skill, read `xiangshan_local.md` in this directory. It explains `Configs.scala`, `XSCoreParameters`, `BackendParams`, DCache/MMU/L2 parameters, legality checks, and the configuration drift lessons relevant to GPGPU config work.

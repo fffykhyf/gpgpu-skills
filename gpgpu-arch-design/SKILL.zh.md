@@ -7,7 +7,7 @@ description: 用于规划、分阶段实现或评审 GPGPU 架构，范围包括
 
 ## 概览
 
-将本 skill 作为本地 GPGPU 工作的顶层护栏。GPGPU 是完整系统工程，因此架构工作必须说明 ISA、模拟器、RTL、runtime、kernel ABI、配置、测试和 PPA 证据如何保持一致。使用 GPGPU-Sim 作为 execution-driven runtime、functional/timing simulator 分层、可配置 timing model、trace/statistics 和 power evidence plumbing 的参考。使用 Rocket Chip 作为 generator discipline 的参考：named configurations、negotiated bus/control protocols、tile/periphery boundaries、runtime-visible resources、protocol monitors 和 test harness integration。
+将本 skill 作为本地 GPGPU 工作的顶层护栏。GPGPU 是完整系统工程，因此架构工作必须说明 ISA、模拟器、RTL、runtime、kernel ABI、配置、测试和 PPA 证据如何保持一致。使用 GPGPU-Sim 作为 execution-driven runtime、functional/timing simulator 分层、可配置 timing model、trace/statistics 和 power evidence plumbing 的参考。使用 Rocket Chip 作为 generator discipline 的参考：named configurations、negotiated bus/control protocols、tile/periphery boundaries、runtime-visible resources、protocol monitors 和 test harness integration。使用 XiangShan 作为复杂微结构文档参考：state ownership、generated parameters、core/tile/memory boundaries、LSQ replay、NEMU difftest 和 HPM/TopDown evidence。不要把 XiangShan 的 CPU OoO frontend、rename、ROB 或 precise-commit 语义复制成 SIMT 语义。
 
 ## 核心规则
 
@@ -112,6 +112,21 @@ description: 用于规划、分阶段实现或评审 GPGPU 架构，范围包括
 
 不要把 Rocket 的 scalar CPU pipeline 复制成 SIMT 设计；借鉴的是它的 generator、boundary、protocol 和 verification discipline。
 
+## XiangShan State-Owner 视角
+
+使用 XiangShan 作为复杂微结构契约文档化的参考，重点是不要丢失 ownership boundary：
+
+| 契约 | XiangShan anchor | 本地架构问题 |
+|---|---|---|
+| core/tile boundary | `XSCore.scala`、`XSTile.scala` | 哪个 block 拥有 SIMT state、memory clients、runtime-visible status、trace、debug 和 perf？ |
+| derived microarchitecture | `Parameters.scala`、`BackendParams.scala`、`Configs.scala` | 哪些 width、queue、port 和 ID 是用户参数，哪些是派生检查？ |
+| backend ownership | `Backend.scala`、`CtrlBlock.scala`、`TopDownGen.scala` | 哪个 unit 拥有 redirect、flush、recovery、issue、writeback、trace 和 bottleneck attribution？ |
+| memory lifecycle | `MemBlock.scala`、`LSQWrapper.scala`、`LoadQueueReplay.scala` | memory request、replay、violation、wakeup 和 exception path 是什么？ |
+| executable reference | `xiangshan-nemu/src/cpu/difftest/*` | final output 之前可以比较哪个中间状态或事件？ |
+| performance evidence | PDF HPM 章节、`TopDownGen.scala`、`PMParameters.scala` | 每个 counter 由哪个 owner 发出，并如何汇总成 top-down explanation？ |
+
+借鉴 state-owner、difftest 和 counter discipline。不要用 XiangShan 来证明 CPU-specific branch prediction、rename、ROB 或 hart/CSR 行为是 GPGPU 架构要求。
+
 ## Skill 路由
 
 当任务主要集中在某个边界时，使用更窄的 skill：
@@ -135,6 +150,8 @@ description: 用于规划、分阶段实现或评审 GPGPU 架构，范围包括
 
 若想了解与本 skill 相关的 Rocket Chip 背景，请阅读 `../../ref/skillref/rocket.md`，必要时再查看 `../../ref_submodule/rocket-chip`。重点关注 `Configs.scala`、Diplomacy docs、`BaseTile.scala`、`RocketTile.scala`、`LazyRoCC.scala`、TileLink monitor/fuzzer、`ExampleRocketSystem.scala` 和 `TestHarness.scala`。
 
+若想了解与本 skill 相关的 XiangShan 背景，请阅读本目录下的 `xiangshan_local.md`。它说明 XiangShan 设计文档章节、`XSCore`/`XSTile` 边界、generated parameters、backend ownership、LSQ/replay、NEMU difftest 和与架构决策相关的 HPM/TopDown lessons。
+
 ## 常见错误
 
 - 只画 RTL block diagram，却遗漏 runtime、config、tests 或 counters。
@@ -144,3 +161,4 @@ description: 用于规划、分阶段实现或评审 GPGPU 架构，范围包括
 - 一次改变多个变量，然后把结果称为架构结论。
 - 把 C++ timing simulator path 当成可综合 RTL，却没有定义 hardware state、handshakes 和 reset/flush 行为。
 - 硬编码本应生成、检查或作为 capability 暴露的 bus widths、source IDs、MMIO maps 或 optional feature ports。
+- 复制 XiangShan 的 branch prediction、rename、ROB 或 precise commit 等 CPU 机制，却没有把它们翻译成 SIMT group、CTA/workgroup、active lane mask 和 kernel ABI 契约。
