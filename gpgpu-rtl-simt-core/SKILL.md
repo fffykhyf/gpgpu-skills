@@ -152,7 +152,7 @@ For deeper MIAOW background tied to this skill, read `miao_local.md` in this dir
 
 For deeper GPGPU-Sim background tied to this skill, read `gpgpusim_local.md` in this directory. It explains `shd_warp_t`, `simt_stack`, scheduler readiness, dynamic `warp_inst_t` issue packets, scoreboard release, operand collection, and RTL translation caveats.
 
-For Rocket Chip background tied to this skill, read `../../ref/skillref/rocket.md` and then inspect `../../ref_submodule/rocket-chip/src/main/scala/rocket/RocketCore.scala`, `tile/RocketTile.scala`, `tile/BaseTile.scala`, `tile/LazyRoCC.scala`, and `rocket/HellaCache.scala` when needed.
+For deeper Rocket Chip background tied to this skill, read `rocket_local.md` in this directory. It explains typed core/tile params, optional-unit hooks, ready-valid command/response wiring, RoCC arbitration, HellaCache IO, local perf events, and SIMT translation caveats.
 
 For XiangShan background tied to this skill, read `xiangshan_local.md` in this directory. It explains backend module ownership, `BackendParams` derived ports, writeback checks, CtrlBlock recovery, vector metadata, trace/perf hooks, and the CPU-specific pieces that must not be copied into SIMT RTL.
 

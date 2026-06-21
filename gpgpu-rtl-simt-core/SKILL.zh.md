@@ -152,7 +152,7 @@ Issue packet 至少应携带 simt_group_id、PC、active lane mask、opcode/FU t
 
 若想了解与本 skill 相关的 GPGPU-Sim 背景，请阅读本目录下的 `gpgpusim_local.md`。它说明 `shd_warp_t`、`simt_stack`、scheduler readiness、dynamic `warp_inst_t` issue packets、scoreboard release、operand collection 和 RTL translation caveats。
 
-若想了解与本 skill 相关的 Rocket Chip 背景，请阅读 `../../ref/skillref/rocket.md`，必要时查看 `../../ref_submodule/rocket-chip/src/main/scala/rocket/RocketCore.scala`、`tile/RocketTile.scala`、`tile/BaseTile.scala`、`tile/LazyRoCC.scala` 和 `rocket/HellaCache.scala`。
+若想了解与本 skill 相关的 Rocket Chip 背景，请阅读本目录下的 `rocket_local.md`。它说明 typed core/tile params、optional-unit hooks、ready-valid command/response wiring、RoCC arbitration、HellaCache IO、local perf events 和 SIMT translation caveats。
 
 若想了解与本 skill 相关的 XiangShan 背景，请阅读本目录下的 `xiangshan_local.md`。它说明 backend module ownership、`BackendParams` derived ports、writeback checks、CtrlBlock recovery、vector metadata、trace/perf hooks，以及不能复制进 SIMT RTL 的 CPU-specific pieces。
 

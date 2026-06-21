@@ -154,6 +154,6 @@ For deeper MIAOW background tied to this skill, read `miao_local.md` in this dir
 
 For deeper GPGPU-Sim background tied to this skill, read `gpgpusim_local.md` in this directory. It explains reproducible config records, runtime/cycle/memory counters, trace sampling, AerialVision, AccelWattch, and power-model caveats.
 
-For Rocket Chip background tied to this skill, read `../../ref/skillref/rocket.md` and then inspect `../../ref_submodule/rocket-chip/src/main/scala/rocket/RocketCore.scala`, `rocket/HellaCache.scala`, `trace/`, `system/TestHarness.scala`, `regression/`, and `src/main/resources/csrc/` when needed.
+For deeper Rocket Chip background tied to this skill, read `rocket_local.md` in this directory. It explains local perf events, HellaCache counters, trace infrastructure, named configs, TestHarness/regression/Verilator support, and how to bind PPA evidence to config and workload.
 
 For XiangShan background tied to this skill, read `xiangshan_local.md` in this directory. It explains HPM/TopDown counters, backend and memory event ownership, NEMU instruction/profiling support, checkpoint/SimPoint flow, and how to adapt those evidence patterns to GPGPU PPA evaluation.

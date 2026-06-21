@@ -148,7 +148,7 @@ For deeper MIAOW background tied to this skill, read `miao_local.md` in this dir
 
 For deeper GPGPU-Sim background tied to this skill, read `gpgpusim_local.md` in this directory. It explains the execution-driven runtime path, functional/timing split, shader/memory hierarchy, config, trace/statistics, and power evidence relevant to architecture decisions.
 
-For Rocket Chip background tied to this skill, read `../../ref/skillref/rocket.md` and then inspect `../../ref_submodule/rocket-chip` when needed. Focus on `Configs.scala`, Diplomacy docs, `BaseTile.scala`, `RocketTile.scala`, `LazyRoCC.scala`, TileLink monitor/fuzzer, `ExampleRocketSystem.scala`, and `TestHarness.scala`.
+For deeper Rocket Chip background tied to this skill, read `rocket_local.md` in this directory. It explains SoC generator structure, config/Diplomacy, tile/core/periphery boundaries, RoCC, TileLink monitor/fuzzer, runtime resources, and test harness lessons relevant to architecture decisions.
 
 For XiangShan background tied to this skill, read `xiangshan_local.md` in this directory. It explains the XiangShan design-document sections, `XSCore`/`XSTile` boundaries, generated parameters, backend ownership, LSQ/replay, NEMU difftest, and HPM/TopDown lessons relevant to architecture decisions.
 

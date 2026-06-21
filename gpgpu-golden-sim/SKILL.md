@@ -142,7 +142,7 @@ For deeper MIAOW background tied to this skill, read `miao_local.md` in this dir
 
 For deeper GPGPU-Sim background tied to this skill, read `gpgpusim_local.md` in this directory. It explains the `cuda-sim` functional oracle, timing model, shared `kernel_info_t`/`warp_inst_t` abstractions, trace schema, and functional-versus-timing caveats.
 
-For Rocket Chip background tied to this skill, read `../../ref/skillref/rocket.md` and then inspect `../../ref_submodule/rocket-chip/src/main/scala/tilelink/Monitor.scala`, `tilelink/Fuzzer.scala`, `unittest/UnitTest.scala`, `system/TestHarness.scala`, and `trace/` when needed.
+For deeper Rocket Chip background tied to this skill, read `rocket_local.md` in this directory. It explains TileLink monitors, constrained fuzzers, UnitTest/TestHarness contracts, trace sinks, and how to use protocol oracles alongside a GPGPU golden simulator.
 
 For XiangShan background tied to this skill, read `xiangshan_local.md` in this directory. It explains the NEMU reference/DUT difftest APIs, step comparison, skip/guided execution, store commit, checkpoint/SimPoint flow, and how to translate those ideas into GPGPU intermediate-state comparison.
 

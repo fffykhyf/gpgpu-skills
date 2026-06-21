@@ -152,6 +152,6 @@ For deeper MIAOW background tied to this skill, read `miao_local.md` in this dir
 
 For deeper GPGPU-Sim background tied to this skill, read `gpgpusim_local.md` in this directory. It explains CUDA/OpenCL runtime interception, launch stack handling, `kernel_info_t`, stream operations, functional/performance mode selection, and launch admission.
 
-For Rocket Chip background tied to this skill, read `../../ref/skillref/rocket.md` and then inspect `../../ref_submodule/rocket-chip/src/main/scala/tile/LazyRoCC.scala`, `system/ExampleRocketSystem.scala`, `system/TestHarness.scala`, `bootrom/`, `devices/debug/`, and `resources/` when needed.
+For deeper Rocket Chip background tied to this skill, read `rocket_local.md` in this directory. It explains RoCC command/response/memory/busy/interrupt patterns, BootROM/reset/debug/resource exposure, ExampleRocketSystem/TestHarness wiring, and runtime-facing control-plane lessons.
 
 For XiangShan background tied to this skill, read `xiangshan_local.md` in this directory. It explains XiangShan build/run/difftest flow, reset/debug/trace/perf ports, virtual devices, full-system images, `xspdb`, checkpointing, and how these ideas translate to a GPGPU runtime boundary.

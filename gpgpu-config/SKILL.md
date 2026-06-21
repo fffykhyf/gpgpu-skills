@@ -154,6 +154,6 @@ For deeper MIAOW background tied to this skill, read `miao_local.md` in this dir
 
 For deeper GPGPU-Sim background tied to this skill, read `gpgpusim_local.md` in this directory. It explains option registration, tested config files, runtime/core/memory/power/trace knobs, and compact string caveats.
 
-For Rocket Chip background tied to this skill, read `../../ref/skillref/rocket.md` and then inspect `../../ref_submodule/rocket-chip/src/main/scala/system/Configs.scala`, `tile/BaseTile.scala`, `tile/RocketTile.scala`, `rocket/HellaCache.scala`, `rocket/RocketCore.scala`, and `diplomacy/Parameters.scala` when needed.
+For deeper Rocket Chip background tied to this skill, read `rocket_local.md` in this directory. It explains Config fragments, typed params, Diplomacy negotiation, RocketTile/Core/DCache params, derived fields, legality checks, and resource/capability drift lessons.
 
 For XiangShan background tied to this skill, read `xiangshan_local.md` in this directory. It explains `Configs.scala`, `XSCoreParameters`, `BackendParams`, DCache/MMU/L2 parameters, legality checks, and the configuration drift lessons relevant to GPGPU config work.

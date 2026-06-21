@@ -142,7 +142,7 @@ Trace schema 和 mismatch report 使用统一术语；只有引用具体 backend
 
 若想了解与本 skill 相关的 GPGPU-Sim 背景，请阅读本目录下的 `gpgpusim_local.md`。它说明 `cuda-sim` functional oracle、timing model、shared `kernel_info_t`/`warp_inst_t` abstractions、trace schema 和 functional-versus-timing caveats。
 
-若想了解与本 skill 相关的 Rocket Chip 背景，请阅读 `../../ref/skillref/rocket.md`，必要时查看 `../../ref_submodule/rocket-chip/src/main/scala/tilelink/Monitor.scala`、`tilelink/Fuzzer.scala`、`unittest/UnitTest.scala`、`system/TestHarness.scala` 和 `trace/`。
+若想了解与本 skill 相关的 Rocket Chip 背景，请阅读本目录下的 `rocket_local.md`。它说明 TileLink monitors、constrained fuzzers、UnitTest/TestHarness contracts、trace sinks，以及如何把 protocol oracles 与 GPGPU golden simulator 配合使用。
 
 若想了解与本 skill 相关的 XiangShan 背景，请阅读本目录下的 `xiangshan_local.md`。它说明 NEMU reference/DUT difftest APIs、step comparison、skip/guided execution、store commit、checkpoint/SimPoint flow，以及如何把这些思想翻译成 GPGPU intermediate-state comparison。
 

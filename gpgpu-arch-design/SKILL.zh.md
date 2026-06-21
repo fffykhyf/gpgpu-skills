@@ -148,7 +148,7 @@ description: 用于规划、分阶段实现或评审 GPGPU 架构，范围包括
 
 若想了解与本 skill 相关的 GPGPU-Sim 背景，请阅读本目录下的 `gpgpusim_local.md`。它说明 execution-driven runtime path、functional/timing split、shader/memory hierarchy、config、trace/statistics 和与架构决策相关的 power evidence。
 
-若想了解与本 skill 相关的 Rocket Chip 背景，请阅读 `../../ref/skillref/rocket.md`，必要时再查看 `../../ref_submodule/rocket-chip`。重点关注 `Configs.scala`、Diplomacy docs、`BaseTile.scala`、`RocketTile.scala`、`LazyRoCC.scala`、TileLink monitor/fuzzer、`ExampleRocketSystem.scala` 和 `TestHarness.scala`。
+若想了解与本 skill 相关的 Rocket Chip 背景，请阅读本目录下的 `rocket_local.md`。它说明 SoC generator structure、config/Diplomacy、tile/core/periphery boundaries、RoCC、TileLink monitor/fuzzer、runtime resources，以及与架构决策相关的 test harness lessons。
 
 若想了解与本 skill 相关的 XiangShan 背景，请阅读本目录下的 `xiangshan_local.md`。它说明 XiangShan 设计文档章节、`XSCore`/`XSTile` 边界、generated parameters、backend ownership、LSQ/replay、NEMU difftest 和与架构决策相关的 HPM/TopDown lessons。
 

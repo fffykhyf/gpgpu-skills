@@ -160,6 +160,6 @@ For deeper MIAOW background tied to this skill, read `miao_local.md` in this dir
 
 For deeper GPGPU-Sim background tied to this skill, read `gpgpusim_local.md` in this directory. It explains `ldst_unit`, `mem_fetch`, cache/MSHR status, L2/memory partitions, interconnect, DRAM timing, response routing, and memory statistics.
 
-For Rocket Chip background tied to this skill, read `../../ref/skillref/rocket.md` and then inspect `../../ref_submodule/rocket-chip/src/main/scala/rocket/HellaCache.scala`, `rocket/DCache.scala`, `tilelink/Bundles.scala`, `tilelink/Edges.scala`, `tilelink/Monitor.scala`, `tilelink/Fuzzer.scala`, and `diplomacy/Parameters.scala` when needed.
+For deeper Rocket Chip background tied to this skill, read `rocket_local.md` in this directory. It explains HellaCache/DCache request-response fields, nack/replay/ordered/store-pending behavior, TileLink bundles/edges/monitors/fuzzers, source-ID lifetime, and memory protocol lessons.
 
 For XiangShan background tied to this skill, read `xiangshan_local.md` in this directory. It explains the PDF LSU/DCache/MMU/CoupledL2 chapters, `MemBlock`, `LSQWrapper`, `LoadQueueReplay`, DCache parameters, TLB/PTW structure, vector replay metadata, and how to adapt those details to GPGPU memory paths.
