@@ -1,0 +1,28 @@
+table: minimal_vertical_slice_preset
+version: v4
+preset_id: MINIMAL_VERTICAL_SLICE_GPGPU
+purpose: Small end-to-end SIMT GPU prototype.
+default_parameters:
+  sm_count: 4
+  allowed_sm_count: [1, 4]
+  warp_size: 8
+  warps_per_sm: 4
+  registers_per_thread: 32
+  pipeline: IF_ID_EX_MEM_WB
+  scheduler: ROUND_ROBIN
+  divergence: SIMT_STACK_JOIN
+  memory: GLOBAL_LOAD_STORE_ONLY_FIRST
+  frontend: PYTHON_CUDA_LIKE_SUBSET
+  assembler: REQUIRED
+  verilator_smoke: REQUIRED
+required_vertical_slice:
+  - compile_kernel_to_program_image
+  - rtl_sim_smoke_test
+  - memory_dump_golden_check
+non_goals:
+  - coherent_cache
+  - full_cuda
+  - virtual_memory
+  - atomics_initially
+  - tensor_core
+  - DRAM_controller_accuracy

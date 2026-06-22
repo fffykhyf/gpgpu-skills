@@ -7,6 +7,7 @@ This repository defines an IR-centered GPGPU design compiler flow.
 1. Reproduce a GPGPU from a complete spec.
 2. Design a GPGPU from intent through candidate synthesis and closure.
 3. Prevent hidden defaults, unstable outputs, and uncontrolled model inference.
+4. Provide a runnable vertical-slice proof path for CUDA-like kernel -> program image -> RTL simulation -> memory dump -> golden check.
 
 ## Top-Level Skills
 
@@ -23,6 +24,8 @@ This repository defines an IR-centered GPGPU design compiler flow.
 ## Flow
 
 Intent -> Candidate -> Spec -> State -> Contract -> Validation -> Closure
+
+Vertical-slice prototype path: CUDA-like Python kernel -> frontend -> assembler -> program.hex -> RTL simulation -> memory dump -> Python golden check.
 
 ## Shared Assets
 

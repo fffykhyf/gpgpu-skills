@@ -16,4 +16,7 @@ rules:
   - rule_id: memory_response_wakeup
     consumes: [memory_request_state, scoreboard_state]
     produces: [register_state, scoreboard_state]
+  - rule_id: memory_stall_release
+    consumes: [memory_request_state, scoreboard_state, pipeline_state]
+    produces: [pipeline_state, scoreboard_state]
 failure_rule: missing rule emits MISSING_TRANSITION_RULE

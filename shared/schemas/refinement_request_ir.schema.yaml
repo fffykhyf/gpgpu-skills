@@ -5,7 +5,7 @@ required: [schema_version, request_id, root_cause, affected_state_field, failed_
 properties:
   repair_type:
     type: enum
-    values: [SPEC_FIELD_FIX, STATE_RULE_FIX, ARTIFACT_MAPPING_FIX, RUNTIME_ABI_FIX, MEMORY_CONTRACT_FIX, RTL_FIX, GOLDEN_SIM_FIX, ARCHITECTURE_REFINEMENT]
+    values: [SPEC_FIELD_FIX, STATE_RULE_FIX, ARTIFACT_MAPPING_FIX, RUNTIME_ABI_FIX, SOFTWARE_STACK_FIX, MEMORY_CONTRACT_FIX, RTL_FIX, GOLDEN_SIM_FIX, ARCHITECTURE_REFINEMENT]
 failure_rules:
   missing_owner: UNROUTED_FAILURE
   direct_state_mutation: FORBIDDEN_REPAIR_ACTION

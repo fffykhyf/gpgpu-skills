@@ -2,7 +2,7 @@
 
 ## Purpose
 
-Bind address spaces, consistency, atomic, fence, fault, and cache/global interface semantics from MEMORY_MODEL_IR.
+Bind address spaces, consistency, atomic, fence, fault, cache/global interface semantics, and memory_request_lifecycle from MEMORY_MODEL_IR.
 
 ## Required Inputs
 

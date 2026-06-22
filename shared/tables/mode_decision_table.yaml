@@ -8,6 +8,11 @@ decisions:
     mode: DESIGN
     next_skill: gpgpu-architecture-synthesizer
     requires_subpass: Design Intent Lock
+  - match: vertical_slice_prototype_goal
+    mode: DESIGN
+    prototype_kind: VERTICAL_SLICE_PROTOTYPE
+    next_skill: gpgpu-architecture-synthesizer
+    required_targets: [compile_kernel_to_program_image, rtl_sim_smoke_test, memory_dump_golden_check]
   - match: patch_against_locked_ir
     mode: PATCH_REQUEST
     next_skill: gpgpu-closure-refinement-engine

@@ -1,0 +1,27 @@
+schema_version: v4
+candidate_id: vibe-minimal-vertical-slice-candidate-001
+source_intent_hash: expected-vibe-intent-hash
+selected_preset: MINIMAL_VERTICAL_SLICE_GPGPU
+parameter_set:
+  sm_count: 4
+  warp_size: 8
+  max_warps_per_sm: 4
+  scheduler_policy: ROUND_ROBIN
+  issue_width: 1
+  pipeline: IF_ID_EX_MEM_WB
+  register_file: {registers_per_thread: 32, integer_width_bits: 32}
+  divergence: SIMT_STACK_JOIN
+  memory_hierarchy: {cache_policy: DIRECT_MAPPED_L1, global_interface_bits: 64, load_store_path: LDW_STW_GLOBAL_ONLY_FIRST}
+  frontend: PYTHON_CUDA_LIKE_SUBSET
+  assembler: REQUIRED
+  verilator_smoke: REQUIRED
+requirement_coverage_matrix:
+  compile_kernel_to_program_image: covered
+  rtl_sim_smoke_test: covered
+  memory_dump_golden_check: covered
+  full_cuda: non_goal
+constraint_proof: {WARP_WIDTH_MATCHES_ACTIVE_MASK: pass, MEMORY_REQUEST_WIDTH_LIMIT: pass, PRESET_SUPPORTS_REQUIRED_FEATURES: pass}
+quality_estimate: {area: low, verification_effort: medium, end_to_end_credibility: high}
+rejected_alternatives: [MINIMAL_SIMT_CORE, MULTI_WARP_SINGLE_SM]
+unresolved_risks: [limited_frontend_subset, simplified_memory_model]
+provenance: DESIGN_PRESET

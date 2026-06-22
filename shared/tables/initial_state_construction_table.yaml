@@ -9,6 +9,7 @@ constructors:
   scoreboard_state: empty at reset
   register_state: from SPEC_IR.register_file
   memory_request_state: empty outstanding table
+  simt_stack_state: empty stack per warp
   csr_state: from SPEC_IR.csr_dcr
   launch_state: from SPEC_IR.launch_abi
   pipeline_state: reset state

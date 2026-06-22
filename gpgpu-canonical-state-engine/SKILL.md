@@ -7,7 +7,7 @@ description: Use when locked SPEC_IR must become deterministic GPU_STATE_IR or w
 
 ## Role
 
-This skill converts static spec truth into the only execution-state truth consumed by runtime, memory, implementation, and closure passes.
+This skill converts static spec truth into the only execution-state truth consumed by runtime, memory, implementation, and closure passes. It expands SIMT, pipeline, scoreboard, and memory stall state into trace-diffable fields.
 
 ## Position in Flow
 
@@ -35,6 +35,7 @@ This skill owns:
 - State transition rule binding
 - State invariant checking
 - Snapshot schema generation
+- Trace-diffable pc_table, exec_mask_table, warp_active, warp_halted, scheduler cursor, scoreboard, simt_stack_state, pipeline_registers, memory_stall_state, and performance counters
 
 ## Forbidden Actions
 
@@ -67,6 +68,7 @@ The output must satisfy:
 - Scheduler references valid resident warps
 - Scoreboard dependencies reference existing registers and events
 - Outstanding memory request tags are unique
+- pc_table, exec_mask_table, simt_stack_state, pipeline_registers, and memory_stall_state are present in snapshots
 
 ## Failure Modes
 

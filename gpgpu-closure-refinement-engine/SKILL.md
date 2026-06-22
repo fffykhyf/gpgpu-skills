@@ -1,13 +1,13 @@
 ---
 name: gpgpu-closure-refinement-engine
-description: Use when architecture candidates, locked specs, state, artifact reports, runtime/memory/implementation validation, PPA evidence, and trace divergences must be accepted, rejected, or routed to refinement.
+description: Use when architecture candidates, locked specs, state, artifact reports, runtime/memory/implementation validation, vertical-slice evidence, PPA evidence, and trace divergences must be accepted, rejected, or routed to refinement.
 ---
 
 # GPGPU Closure Refinement Engine
 
 ## Role
 
-This skill is the final acceptance, failure attribution, and refinement-request compiler pass.
+This skill is the final acceptance, failure attribution, and refinement-request compiler pass. It classifies Vibe-derived failures such as documentation drift, declared tests not run, app compile failures, and unbound magic constants.
 
 ## Position in Flow
 
@@ -65,7 +65,9 @@ This skill must use:
 - shared/tables/closure_gate_table.yaml
 - shared/tables/verdict_decision_table.yaml
 - shared/tables/failure_taxonomy_table.yaml
+- shared/tables/vibe_failure_taxonomy_table.yaml
 - shared/tables/repair_routing_table.yaml
+- shared/tables/vertical_slice_validation_table.yaml
 
 ## Required Schemas
 
@@ -80,6 +82,7 @@ The output must satisfy:
 - Every failed gate has owner, affected field, evidence, and repair route
 - Hard correctness failures reject
 - Repairable trace failures refine
+- DOC_ARTIFACT_DRIFT, ISA_ENCODING_DRIFT, DECLARED_TEST_NOT_RUN, APP_COMPILE_FAIL, MAGIC_CONSTANT_UNBOUND, FRONTEND_RUNTIME_MAPPING_MISMATCH, and MEMORY_DUMP_CONTRACT_MISMATCH have explicit repair owners
 
 ## Failure Modes
 
@@ -88,6 +91,13 @@ This skill must emit:
 - HARD_CORRECTNESS_FAIL
 - REPAIRABLE_TRACE_FAIL
 - UNROUTED_FAILURE
+- DOC_ARTIFACT_DRIFT
+- ISA_ENCODING_DRIFT
+- DECLARED_TEST_NOT_RUN
+- APP_COMPILE_FAIL
+- MAGIC_CONSTANT_UNBOUND
+- FRONTEND_RUNTIME_MAPPING_MISMATCH
+- MEMORY_DUMP_CONTRACT_MISMATCH
 - INSUFFICIENT_SKILL_ASSET
 
 ## Report Schema
@@ -113,6 +123,8 @@ This skill is incomplete unless the following exist:
 - shared/tables/closure_gate_table.yaml
 - shared/tables/verdict_decision_table.yaml
 - shared/tables/failure_taxonomy_table.yaml
+- shared/tables/vibe_failure_taxonomy_table.yaml
 - shared/tables/repair_routing_table.yaml
+- shared/tables/vertical_slice_validation_table.yaml
 
 When a required schema, table, example, or test is missing, emit `INSUFFICIENT_SKILL_ASSET` rather than inventing behavior.

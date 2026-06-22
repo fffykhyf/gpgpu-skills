@@ -1,13 +1,13 @@
 ---
 name: gpgpu-spec-lock
-description: Use when a human spec or synthesized spec draft must become complete, unambiguous, provenance-bearing SPEC_IR with no hidden defaults.
+description: Use when a human spec or synthesized spec draft must become complete, unambiguous, provenance-bearing SPEC_IR with no hidden defaults or ISA source-of-truth drift.
 ---
 
 # GPGPU Spec Lock
 
 ## Role
 
-This skill locks static architecture facts. It parses and validates, but it does not design missing fields.
+This skill locks static architecture facts. It parses and validates, but it does not design missing fields. It also locks isa_source_of_truth so docs, assembler, disassembler, compiler tables, and RTL defines are derived artifacts rather than independent truth sources.
 
 ## Position in Flow
 
@@ -37,6 +37,7 @@ Produces:
 
 This skill owns:
 - ISA
+- isa_source_of_truth
 - warp model
 - thread/block/grid model
 - scheduler policy
@@ -59,6 +60,7 @@ This skill must not:
 
 This skill must use:
 - shared/tables/spec_required_field_table.yaml
+- shared/tables/source_of_truth_generation_table.yaml
 - shared/tables/enum_table.yaml
 - shared/tables/provenance_table.yaml
 
@@ -76,6 +78,7 @@ The output must satisfy:
 - All enums resolved
 - Every field has provenance
 - Field order and hash are stable
+- isa_source_of_truth.owner is SPEC_IR.isa and generated_artifacts are not accepted as independent truth sources
 
 ## Failure Modes
 
@@ -85,6 +88,7 @@ This skill must emit:
 - UNKNOWN_ENUM_REJECT
 - FORBIDDEN_PROVENANCE
 - CONFLICTING_SPEC_FIELD
+- SOURCE_OF_TRUTH_DRIFT
 - INSUFFICIENT_SKILL_ASSET
 
 ## Report Schema
@@ -107,6 +111,7 @@ This skill is incomplete unless the following exist:
 - provenance_rules.md
 - shared/schemas/spec_ir.schema.yaml
 - shared/tables/spec_required_field_table.yaml
+- shared/tables/source_of_truth_generation_table.yaml
 - shared/tables/enum_table.yaml
 - shared/tables/provenance_table.yaml
 

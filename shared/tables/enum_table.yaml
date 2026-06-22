@@ -3,7 +3,7 @@ version: v4
 enums:
   mode: [REPRODUCE, DESIGN, PATCH_REQUEST, TRACE_DEBUG]
   verdict: [ACCEPT, REJECT, REFINE_REQUIRED, INSUFFICIENT_EVIDENCE]
-  architecture_preset: [MINIMAL_SIMT_CORE, MULTI_WARP_SINGLE_SM]
+  architecture_preset: [MINIMAL_SIMT_CORE, MULTI_WARP_SINGLE_SM, MINIMAL_VERTICAL_SLICE_GPGPU]
   scheduler_policy: [ROUND_ROBIN, SCOREBOARD_ROUND_ROBIN]
   cache_policy: [NONE, DIRECT_MAPPED_L1]
   memory_space: [global, shared, local, constant]

@@ -7,6 +7,9 @@ cases:
   - id: vague_goal_routes_to_design_intent_lock
     input: fixtures/vague_goal_routes_to_design_intent_lock.yaml
     expected_verdict: REJECT
+  - id: vertical_slice_prototype_routes_to_design
+    input: fixtures/vertical_slice_prototype_routes_to_design.yaml
+    expected_verdict: REJECT
   - id: patch_request_routes_to_patch
     input: fixtures/patch_request_routes_to_patch.yaml
     expected_verdict: REJECT

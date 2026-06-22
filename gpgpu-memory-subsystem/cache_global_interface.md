@@ -2,7 +2,7 @@
 
 ## Purpose
 
-Validate cache request/response contract, global memory interface, atomics, faults, and retry behavior.
+Validate cache request/response contract, global memory interface, atomics, faults, miss/ready handshake, request replay, and retry behavior.
 
 ## Required Inputs
 

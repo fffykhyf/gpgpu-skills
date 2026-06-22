@@ -5,4 +5,4 @@ mappings:
   launch_state: runtime.launch_descriptor
   csr_state: runtime.mmio_csr
   fault_state: runtime.fault_status
-explicit_unused: [warp_state, pc_state, active_mask_state, scheduler_state, scoreboard_state, register_state, memory_request_state, pipeline_state]
+explicit_unused: [warp_state, pc_state, active_mask_state, scheduler_state, scoreboard_state, simt_stack_state, register_state, memory_request_state, pipeline_state]

@@ -2,7 +2,7 @@
 
 ## Purpose
 
-For DESIGN mode, normalize the user's goals into DESIGN_INTENT_IR. Required fields are objective, non_goals, workload_profile, target_platform, hard_constraints, soft_constraints, required_features, optional_features, validation_target, and prototype_credibility_target.
+For DESIGN mode, normalize the user's goals into DESIGN_INTENT_IR. Required fields are objective, non_goals, workload_profile, target_platform, hard_constraints, soft_constraints, required_features, optional_features, validation_target, prototype_kind, and prototype_credibility_target. For VERTICAL_SLICE_PROTOTYPE, require compile_kernel_to_program_image, rtl_sim_smoke_test, and memory_dump_golden_check.
 
 ## Required Inputs
 

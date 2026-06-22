@@ -7,6 +7,7 @@ mappings:
   active_mask_state: sim.active_mask
   scheduler_state: sim.scheduler
   scoreboard_state: sim.scoreboard
+  simt_stack_state: sim.simt_stack
   register_state: sim.registers
   memory_request_state: sim.memory_events
   csr_state: sim.csr

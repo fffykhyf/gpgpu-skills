@@ -2,7 +2,7 @@
 
 ## Purpose
 
-Classify the request using shared/tables/mode_decision_table.yaml. A complete spec routes to REPRODUCE, a vague design goal routes to DESIGN, an edit against locked IR routes to PATCH_REQUEST, and trace or divergence evidence routes to TRACE_DEBUG.
+Classify the request using shared/tables/mode_decision_table.yaml. A complete spec routes to REPRODUCE, a vague design goal routes to DESIGN, a runnable end-to-end prototype request routes to DESIGN with prototype_kind VERTICAL_SLICE_PROTOTYPE, an edit against locked IR routes to PATCH_REQUEST, and trace or divergence evidence routes to TRACE_DEBUG.
 
 ## Required Inputs
 

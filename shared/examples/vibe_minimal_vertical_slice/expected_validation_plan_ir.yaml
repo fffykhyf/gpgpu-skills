@@ -1,0 +1,8 @@
+schema_version: v4
+runtime_tests: [app_compile_smoke, assembler_smoke, program_hex_load_smoke]
+memory_tests: [memory_request_lifecycle_pass, duplicate_memory_request_reject, memory_dump_compare_pass]
+implementation_tests: [rtl_sim_smoke, branch_active_mask_trace_pass, scoreboard_stall_trace_pass]
+vertical_slice_tests: [debug_gid_test, load_store_test, divergence_test, vecmul_test]
+closure_gates: [cross_artifact_consistency_gate, declared_test_coverage_gate, runtime_validation, memory_validation, implementation_validation, vertical_slice_validation]
+declared_test_coverage_gate: {declared_tests: [debug_gid, load_store, divergence, vecmul], runner_tests: [debug_gid, load_store, divergence, vecmul], compile_or_generate_required: true}
+trace_requirements: [cycle, warp_id, pc, instruction, active_mask, memory_request, register_writes]

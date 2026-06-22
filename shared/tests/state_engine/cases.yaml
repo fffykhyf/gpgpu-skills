@@ -4,6 +4,9 @@ cases:
   - id: minimal_simt_initial_state_pass
     input: fixtures/minimal_simt_initial_state_pass.yaml
     expected_verdict: PASS
+  - id: trace_diffable_state_fields_pass
+    input: fixtures/trace_diffable_state_fields_pass.yaml
+    expected_verdict: PASS
   - id: active_mask_width_matches_warp_width
     input: fixtures/active_mask_width_matches_warp_width.yaml
     expected_verdict: REJECT

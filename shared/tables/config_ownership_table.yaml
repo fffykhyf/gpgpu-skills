@@ -6,4 +6,12 @@ parameters:
   trace_enable: {owner: gpgpu-artifact-contract-engine, visibility: debug_only, consumers: [validation]}
   simulator_seed: {owner: gpgpu-artifact-contract-engine, visibility: simulator_private, consumers: [sim]}
   test_timeout_cycles: {owner: gpgpu-artifact-contract-engine, visibility: test_only, consumers: [validation]}
+  total_threads: {owner: gpgpu-runtime-validator, visibility: hw_sw_abi, consumers: [runtime, validation]}
+  block_dim: {owner: gpgpu-runtime-validator, visibility: hw_sw_abi, consumers: [runtime, validation]}
+  base_data_addr: {owner: gpgpu-runtime-validator, visibility: test_only, consumers: [runtime, validation]}
+  base_a: {owner: gpgpu-runtime-validator, visibility: test_only, consumers: [runtime, validation]}
+  base_b: {owner: gpgpu-runtime-validator, visibility: test_only, consumers: [runtime, validation]}
+  base_c: {owner: gpgpu-runtime-validator, visibility: test_only, consumers: [runtime, validation]}
+  memory_dump_range: {owner: gpgpu-implementation-validator, visibility: test_only, consumers: [validation]}
+  finish_delay_cycles: {owner: gpgpu-implementation-validator, visibility: test_only, consumers: [rtl, validation]}
 on_missing_owner: CONFIG_OWNER_MISSING

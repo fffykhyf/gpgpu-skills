@@ -1,0 +1,13 @@
+schema: SOFTWARE_STACK_CONTRACT_IR
+version: v4
+required: [schema_version, frontend_subset_contract, assembler_contract, program_image_contract, kernel_test_app_contract, golden_output_contract]
+properties:
+  frontend_subset_contract: {required: [language_subset, thread_id_intrinsics, supported_control_flow, unsupported_features]}
+  assembler_contract: {required: [opcode_source, symbol_policy, error_policy]}
+  program_image_contract: {required: [format, entry_symbol, load_address, section_layout]}
+  kernel_test_app_contract: {required: [declared_tests, runner_tests, argument_binding, data_layout]}
+  golden_output_contract: {required: [checker, output_region, comparison_policy]}
+failure_rules:
+  app_compile_fail: APP_COMPILE_FAIL
+  declared_test_not_run: DECLARED_TEST_NOT_RUN
+  frontend_runtime_mapping_mismatch: FRONTEND_RUNTIME_MAPPING_MISMATCH

@@ -9,3 +9,7 @@ invariants:
     expression: scheduler_state.eligible_warps subset_of warp_state.resident_warps
   - id: memory_request_tags_unique
     expression: unique(memory_request_state.request_tags)
+  - id: simt_stack_depth_within_limit
+    expression: simt_stack_state.depth <= SPEC_IR.warp_model.max_simt_stack_depth
+  - id: duplicate_request_prevention
+    expression: no_duplicate_serviced_request(memory_request_state.serviced_tracking)

@@ -1,13 +1,13 @@
 ---
 name: gpgpu-front-end
-description: Use when a user request, optional spec, optional trace, or patch request must be routed into the GPGPU compiler flow and design intent must be locked without architecture inference.
+description: Use when a user request, optional spec, optional trace, patch request, or runnable vertical-slice prototype request must be routed into the GPGPU compiler flow and design intent must be locked without architecture inference.
 ---
 
 # GPGPU Front End
 
 ## Role
 
-This skill is the entry compiler pass. It classifies the request and, for DESIGN mode, locks design intent into a bounded IR before any architecture synthesis occurs.
+This skill is the entry compiler pass. It classifies the request and, for DESIGN mode, locks design intent into a bounded IR before any architecture synthesis occurs. Requests for a runnable CUDA-like kernel to RTL simulation proof are classified as VERTICAL_SLICE_PROTOTYPE intent.
 
 ## Position in Flow
 
@@ -41,6 +41,7 @@ Produces:
 
 This skill owns:
 - Mode classification: REPRODUCE, DESIGN, PATCH_REQUEST, TRACE_DEBUG
+- Prototype intent classification: VERTICAL_SLICE_PROTOTYPE
 - Design intent fields: objective, non-goals, workload, platform, constraints, verification target
 - Routing evidence and rejected routes
 
@@ -56,6 +57,7 @@ This skill must not:
 This skill must use:
 - shared/tables/mode_decision_table.yaml
 - shared/tables/enum_table.yaml
+- shared/tables/end_to_end_smoke_test_table.yaml
 
 ## Required Schemas
 
@@ -69,6 +71,7 @@ The output must satisfy:
 - Every routed request has exactly one mode
 - DESIGN_INTENT_IR contains no architecture parameters
 - PATCH_REQUEST and TRACE_DEBUG preserve evidence anchors
+- VERTICAL_SLICE_PROTOTYPE requests set prototype_credibility_target to compile_kernel_to_program_image, rtl_sim_smoke_test, and memory_dump_golden_check
 
 ## Failure Modes
 
@@ -97,6 +100,8 @@ This skill is incomplete unless the following exist:
 - shared/schemas/mode_selection_ir.schema.yaml
 - shared/schemas/design_intent_ir.schema.yaml
 - shared/tables/mode_decision_table.yaml
+- shared/tables/end_to_end_smoke_test_table.yaml
+- shared/examples/vibe_minimal_vertical_slice/input_request.md
 - shared/tests/front_end/cases.yaml
 
 When a required schema, table, example, or test is missing, emit `INSUFFICIENT_SKILL_ASSET` rather than inventing behavior.

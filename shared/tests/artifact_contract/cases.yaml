@@ -4,6 +4,12 @@ cases:
   - id: all_state_fields_mapped_pass
     input: fixtures/all_state_fields_mapped_pass.yaml
     expected_verdict: PASS
+  - id: cross_artifact_consistency_pass
+    input: fixtures/cross_artifact_consistency_pass.yaml
+    expected_verdict: PASS
+  - id: declared_test_coverage_gate_pass
+    input: fixtures/declared_test_coverage_gate_pass.yaml
+    expected_verdict: PASS
   - id: missing_mapping_fail_closed
     input: fixtures/missing_mapping_fail_closed.yaml
     expected_verdict: REJECT
@@ -15,6 +21,9 @@ cases:
     expected_verdict: REJECT
   - id: debug_only_leaks_to_abi_reject
     input: fixtures/debug_only_leaks_to_abi_reject.yaml
+    expected_verdict: REJECT
+  - id: magic_constant_unbound_reject
+    input: fixtures/magic_constant_unbound_reject.yaml
     expected_verdict: REJECT
 common_reject_rules:
   - missing field must not be invented

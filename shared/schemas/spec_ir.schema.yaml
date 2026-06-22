@@ -1,11 +1,14 @@
 schema: SPEC_IR
 version: v4
 type: object
-required: [schema_version, design_identity, source_kind, isa, warp_model, thread_block_grid_model, scheduler_policy, register_file, memory_hierarchy, csr_dcr, launch_abi, config_defaults, debug_test_hooks, provenance, canonical_hash]
+required: [schema_version, design_identity, source_kind, isa, isa_source_of_truth, warp_model, thread_block_grid_model, scheduler_policy, register_file, memory_hierarchy, csr_dcr, launch_abi, config_defaults, debug_test_hooks, provenance, canonical_hash]
 properties:
   source_kind: {type: enum, values: [HUMAN_SPEC, SYNTHESIZED_SPEC_DRAFT]}
   isa:
     required: [profile, operation_classes, encoding_policy]
+  isa_source_of_truth:
+    owner: SPEC_IR.isa
+    required: [owner, generated_artifacts, generation_table]
   warp_model:
     required: [width, active_mask_width, reconvergence_model]
   scheduler_policy:
@@ -24,3 +27,4 @@ failure_rules:
   forbidden_provenance: FORBIDDEN_PROVENANCE
   conflicting_field: CONFLICTING_SPEC_FIELD
   unstable_hash: CANONICAL_HASH_UNSTABLE
+  source_of_truth_drift: SOURCE_OF_TRUTH_DRIFT

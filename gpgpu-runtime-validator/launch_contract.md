@@ -2,7 +2,7 @@
 
 ## Purpose
 
-Validate program image, kernel entry, command queue, doorbell/start, grid/block dimensions, and launch resource admission.
+Validate CUDA-like frontend subset, app compile smoke, assembler smoke, program image layout, kernel entry, command queue, doorbell/start, grid/block dimensions, argument binding, launch resource admission, memory dump contract, and golden_output_contract.
 
 ## Required Inputs
 

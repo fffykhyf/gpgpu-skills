@@ -1,0 +1,24 @@
+schema_version: v4
+design_identity: vibe-minimal-vertical-slice
+source_spec_hash: expected-vibe-spec-hash
+warp_state:
+  resident_warps: [0,1,2,3]
+  warp_width: 8
+  per_warp_status: {0: reset, 1: reset, 2: reset, 3: reset}
+  pc_table: {0: kernel_entry, 1: kernel_entry, 2: kernel_entry, 3: kernel_entry}
+  exec_mask_table: {0: "11111111", 1: "11111111", 2: "11111111", 3: "11111111"}
+  warp_active: "1111"
+  warp_halted: "0000"
+thread_state: {thread_ids: range_0_127, block_ids: [0,1,2,3], grid_ids: [0]}
+pc_state: {per_warp_pc: {0: kernel_entry, 1: kernel_entry, 2: kernel_entry, 3: kernel_entry}}
+active_mask_state: {mask_width: 8, per_warp_active_mask: {0: "11111111", 1: "11111111", 2: "11111111", 3: "11111111"}}
+scheduler_state: {policy: ROUND_ROBIN, eligible_warps: [0,1,2,3], selected_warp: null, current_fetch_warp: 0, next_fetch_warp: 1}
+scoreboard_state: {pending_registers: [], register_pending: {0: [], 1: [], 2: [], 3: []}, wakeup_events: []}
+simt_stack_state: {entries: [], depth: 0}
+register_state: {register_file_size: 32, per_thread_registers: zeroed}
+memory_request_state: {outstanding_requests: [], request_tags: [], lane_masks: [], serviced_tracking: []}
+csr_state: {start: 0, done: 0, fault: 0, kernel_entry: null}
+launch_state: {grid_dim: [4,1,1], block_dim: [32,1,1], kernel_entry: null, completion: pending, fault: none}
+pipeline_state: {pipeline_registers: reset, memory_stall_state: none, performance_counters: zeroed}
+fault_state: none
+canonical_hash: expected-vibe-state-hash

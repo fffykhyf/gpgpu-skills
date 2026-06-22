@@ -4,3 +4,4 @@ lesson_files:
   - gpgpusim_lessons.yaml
   - rocket_lessons.yaml
   - xiangshan_lessons.yaml
+  - vibe_gpu_lessons.yaml

@@ -2,7 +2,7 @@
 
 ## Purpose
 
-Populate warp_state, thread_state, pc_state, active_mask_state, scheduler_state, scoreboard_state, register_state, memory_request_state, csr_state, launch_state, pipeline_state, and fault_state.
+Populate warp_state, thread_state, pc_state, active_mask_state, scheduler_state, scoreboard_state, register_state, memory_request_state, csr_state, launch_state, pipeline_state, simt_stack_state, and fault_state. Required trace-diff fields include pc_table, exec_mask_table, warp_active, warp_halted, current_fetch_warp, next_fetch_warp, register_pending, pipeline_registers, memory_stall_state, and performance_counters.
 
 ## Required Inputs
 

@@ -1,3 +1,3 @@
 schema_version: v4
 verdict: ACCEPT
-gate_results: {requirement_coverage: pass, spec_lock: pass, state_invariants: pass, artifact_mapping: pass, runtime_validation: pass, memory_validation: pass, implementation_validation: pass, ppa: pass, stability: pass}
+gate_results: {requirement_coverage: pass, spec_lock: pass, state_invariants: pass, artifact_mapping: pass, cross_artifact_consistency_gate: pass, declared_test_coverage_gate: pass, runtime_validation: pass, memory_validation: pass, implementation_validation: pass, vertical_slice_validation: pass, ppa: pass, stability: pass}

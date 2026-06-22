@@ -43,7 +43,7 @@ User Request / Spec
 
 ## Shared Assets
 
-`shared/schemas/` defines IR contracts. `shared/tables/` defines decisions and mappings. `shared/examples/` contains end-to-end expected outputs. `shared/tests/` contains per-skill regression cases plus `validate_v4_assets.py`. `shared/references/` converts project references into lesson/rule/evidence entries.
+`shared/schemas/` defines IR contracts. `shared/tables/` defines decisions and mappings. `shared/examples/` contains end-to-end expected outputs, including `vibe_minimal_vertical_slice`. `shared/tests/` contains per-skill regression cases plus `validate_v4_assets.py`. `shared/references/` converts project references into lesson/rule/evidence entries.
 
 ## Fail-Closed Principle
 

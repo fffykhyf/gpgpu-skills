@@ -1,0 +1,19 @@
+table: software_stack_contract_table
+version: v4
+contracts:
+  frontend_subset_contract:
+    required: [threadIdx.x, blockIdx.x, blockDim.x, gridDim.x, if, for, integer_arithmetic, global_load_store]
+    forbidden: [full_cuda, dynamic_parallelism, inline_asm_initially]
+  assembler_contract:
+    source_of_truth: SPEC_IR.isa
+    required_outputs: [assembly_listing, program_hex, symbol_map]
+  program_image_contract:
+    required_fields: [entry_symbol, text_base, data_base, hex_word_width, loader_endianness]
+  kernel_test_app_contract:
+    required_fields: [compile_or_generate_step, input_data_layout, output_data_layout, runner_binding]
+  golden_output_contract:
+    required_fields: [checker_entrypoint, output_region, comparison_policy, tolerance_policy]
+failure_rules:
+  app_compile_fail: APP_COMPILE_FAIL
+  mapping_mismatch: FRONTEND_RUNTIME_MAPPING_MISMATCH
+  memory_dump_mismatch: MEMORY_DUMP_CONTRACT_MISMATCH

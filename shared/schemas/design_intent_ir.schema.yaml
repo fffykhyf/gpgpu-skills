@@ -1,7 +1,7 @@
 schema: DESIGN_INTENT_IR
 version: v4
 type: object
-required: [schema_version, intent_id, objective, non_goals, workload_profile, target_platform, hard_constraints, soft_constraints, required_features, optional_features, validation_target, prototype_credibility_target, provenance]
+required: [schema_version, intent_id, objective, non_goals, workload_profile, target_platform, hard_constraints, soft_constraints, required_features, optional_features, validation_target, prototype_kind, prototype_credibility_target, provenance]
 forbidden_fields: [warp_size, sm_count, cache_policy, scheduler_policy, isa_encoding, memory_hierarchy, register_file_size, rtl_pipeline]
 properties:
   objective: {type: string, min_length: 1}
@@ -13,7 +13,10 @@ properties:
   required_features: {type: list[string]}
   optional_features: {type: list[string]}
   validation_target: {type: list[string]}
-  prototype_credibility_target: {type: enum, values: [TOY, TEACHING_RTL, RESEARCH_PROTOTYPE, SYNTHESIS_READY]}
+  prototype_kind: {type: enum, values: [DOCUMENT_ONLY, VERTICAL_SLICE_PROTOTYPE]}
+  prototype_credibility_target:
+    type: list[string]
+    values: [compile_kernel_to_program_image, rtl_sim_smoke_test, memory_dump_golden_check, trace_diff_debug]
   provenance: {type: list[FIELD_PROVENANCE]}
 failure_rules:
   forbidden_architecture_field: FORBIDDEN_ARCHITECTURE_FIELD

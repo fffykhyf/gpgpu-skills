@@ -9,6 +9,7 @@ fields:
   active_mask_state: [rtl, sim, validation]
   scheduler_state: [rtl, sim, validation]
   scoreboard_state: [rtl, sim, memory, validation]
+  simt_stack_state: [rtl, sim, validation]
   register_state: [rtl, sim, validation]
   memory_request_state: [rtl, sim, memory, validation]
   csr_state: [rtl, runtime, sim, validation]

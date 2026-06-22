@@ -9,3 +9,6 @@ owners:
   memory_ordering: gpgpu-memory-subsystem
   rtl_trace: gpgpu-implementation-validator
   closure_verdict: gpgpu-closure-refinement-engine
+  source_of_truth_generation: gpgpu-spec-lock
+  software_stack_contract: gpgpu-runtime-validator
+  vertical_slice_validation: gpgpu-implementation-validator

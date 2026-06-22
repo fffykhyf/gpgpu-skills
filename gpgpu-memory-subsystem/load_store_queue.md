@@ -2,7 +2,7 @@
 
 ## Purpose
 
-Validate LSQ admission, outstanding request table, request/response tags, replay, and backpressure.
+Validate LSQ admission, outstanding request table, request/response tags, replay, backpressure, serviced_tracking, response_match_policy, duplicate_request_prevention, and stall_release_condition.
 
 ## Required Inputs
 

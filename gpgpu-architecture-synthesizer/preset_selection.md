@@ -2,7 +2,7 @@
 
 ## Purpose
 
-Select only MINIMAL_SIMT_CORE or MULTI_WARP_SINGLE_SM in v4 baseline. Unsupported presets must reject or emit refinement evidence instead of being improvised.
+Select only MINIMAL_SIMT_CORE, MULTI_WARP_SINGLE_SM, or MINIMAL_VERTICAL_SLICE_GPGPU in v4 baseline. Use MINIMAL_VERTICAL_SLICE_GPGPU only when the intent requires compile_kernel_to_program_image, rtl_sim_smoke_test, and memory_dump_golden_check. Unsupported presets must reject or emit refinement evidence instead of being improvised.
 
 ## Required Inputs
 

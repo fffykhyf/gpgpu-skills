@@ -2,7 +2,8 @@
 """Validate the GPGPU skill v4 repository contract."""
 
 from pathlib import Path
-from typing import List
+from typing import Dict, List
+
 
 ROOT = Path(__file__).resolve().parents[2]
 
@@ -56,6 +57,9 @@ SCHEMAS = [
     "rtl_mapping_ir.schema.yaml",
     "sim_behavior_ir.schema.yaml",
     "runtime_contract_ir.schema.yaml",
+    "software_stack_contract_ir.schema.yaml",
+    "program_image_contract_ir.schema.yaml",
+    "test_app_contract_ir.schema.yaml",
     "memory_model_ir.schema.yaml",
     "config_binding_ir.schema.yaml",
     "memory_subsystem_ir.schema.yaml",
@@ -73,10 +77,16 @@ TABLES = [
     "provenance_table.yaml",
     "mode_decision_table.yaml",
     "architecture_preset_library.yaml",
+    "minimal_vertical_slice_preset.yaml",
     "hard_constraint_table.yaml",
     "quality_target_table.yaml",
     "requirement_owner_table.yaml",
     "spec_required_field_table.yaml",
+    "source_of_truth_generation_table.yaml",
+    "cross_artifact_consistency_table.yaml",
+    "software_stack_contract_table.yaml",
+    "end_to_end_smoke_test_table.yaml",
+    "vertical_slice_validation_table.yaml",
     "initial_state_construction_table.yaml",
     "state_transition_rule_table.yaml",
     "state_invariant_table.yaml",
@@ -98,6 +108,7 @@ TABLES = [
     "closure_gate_table.yaml",
     "verdict_decision_table.yaml",
     "failure_taxonomy_table.yaml",
+    "vibe_failure_taxonomy_table.yaml",
     "repair_routing_table.yaml",
 ]
 
@@ -116,6 +127,7 @@ TEST_DIRS = [
 EXAMPLE_DIRS = [
     "reproduce_minimal_simt",
     "design_minimal_teaching_gpgpu",
+    "vibe_minimal_vertical_slice",
 ]
 
 REFERENCE_LESSONS = [
@@ -124,8 +136,97 @@ REFERENCE_LESSONS = [
     "gpgpusim_lessons.yaml",
     "rocket_lessons.yaml",
     "xiangshan_lessons.yaml",
+    "vibe_gpu_lessons.yaml",
     "reference_lesson_index.yaml",
 ]
+
+VIBE_EXAMPLE_FILES = [
+    "input_request.md",
+    "expected_design_intent_ir.yaml",
+    "expected_arch_candidate_ir.yaml",
+    "expected_spec_ir.yaml",
+    "expected_gpu_state_ir.yaml",
+    "expected_artifact_contract_report.yaml",
+    "expected_runtime_contract_ir.yaml",
+    "expected_memory_subsystem_ir.yaml",
+    "expected_validation_plan_ir.yaml",
+    "expected_closure_report.yaml",
+]
+
+VIBE_REQUIRED_TEXT: Dict[str, List[str]] = {
+    "gpgpu-front-end/SKILL.md": [
+        "VERTICAL_SLICE_PROTOTYPE",
+        "compile_kernel_to_program_image",
+    ],
+    "gpgpu-architecture-synthesizer/SKILL.md": [
+        "MINIMAL_VERTICAL_SLICE_GPGPU",
+        "shared/tables/minimal_vertical_slice_preset.yaml",
+    ],
+    "gpgpu-spec-lock/SKILL.md": [
+        "isa_source_of_truth",
+        "shared/tables/source_of_truth_generation_table.yaml",
+    ],
+    "gpgpu-canonical-state-engine/SKILL.md": [
+        "pc_table",
+        "simt_stack_state",
+        "memory_stall_state",
+    ],
+    "gpgpu-artifact-contract-engine/SKILL.md": [
+        "cross_artifact_consistency_gate",
+        "declared_test_coverage_gate",
+    ],
+    "gpgpu-runtime-validator/SKILL.md": [
+        "frontend_subset_contract",
+        "program_image_contract",
+        "golden_output_contract",
+    ],
+    "gpgpu-memory-subsystem/SKILL.md": [
+        "memory_request_lifecycle",
+        "duplicate_request_prevention",
+    ],
+    "gpgpu-implementation-validator/SKILL.md": [
+        "app_compile_smoke",
+        "memory_dump_compare",
+    ],
+    "gpgpu-closure-refinement-engine/SKILL.md": [
+        "DOC_ARTIFACT_DRIFT",
+        "DECLARED_TEST_NOT_RUN",
+        "MAGIC_CONSTANT_UNBOUND",
+    ],
+    "shared/schemas/spec_ir.schema.yaml": ["isa_source_of_truth"],
+    "shared/schemas/gpu_state_ir.schema.yaml": [
+        "pc_table",
+        "exec_mask_table",
+        "simt_stack_state",
+        "pipeline_registers",
+        "memory_stall_state",
+    ],
+    "shared/schemas/runtime_contract_ir.schema.yaml": [
+        "software_stack_contract",
+        "program_image_contract",
+        "test_app_contract",
+    ],
+    "shared/schemas/memory_subsystem_ir.schema.yaml": [
+        "memory_request_lifecycle",
+        "duplicate_request_prevention",
+    ],
+    "shared/schemas/validation_plan_ir.schema.yaml": [
+        "declared_test_coverage_gate",
+        "vertical_slice_tests",
+    ],
+    "shared/tables/architecture_preset_library.yaml": [
+        "MINIMAL_VERTICAL_SLICE_GPGPU",
+    ],
+    "shared/tables/closure_gate_table.yaml": [
+        "declared_test_coverage_gate",
+        "cross_artifact_consistency_gate",
+    ],
+    "shared/tables/failure_taxonomy_table.yaml": [
+        "DOC_ARTIFACT_DRIFT",
+        "APP_COMPILE_FAIL",
+        "FRONTEND_RUNTIME_MAPPING_MISMATCH",
+    ],
+}
 
 
 def require(path: Path, failures: List[str]) -> None:
@@ -174,9 +275,12 @@ def main() -> int:
         if path.exists() and not list(path.iterdir()):
             failures.append(f"empty example directory: {path.relative_to(ROOT)}")
 
+    for filename in VIBE_EXAMPLE_FILES:
+        require(ROOT / "shared" / "examples" / "vibe_minimal_vertical_slice" / filename, failures)
+
     require_text(
         ROOT / "shared" / "flow" / "gpgpu_design_flow.md",
-        ["## Reproduce Path", "## Design From Intent Path"],
+        ["## Reproduce Path", "## Design From Intent Path", "## Vertical Slice Prototype Path"],
         failures,
     )
 
@@ -185,9 +289,16 @@ def main() -> int:
 
     require_text(
         ROOT / "README.md",
-        ["# GPGPU Skills", "Intent -> Candidate -> Spec -> State -> Contract -> Validation -> Closure"],
+        [
+            "# GPGPU Skills",
+            "Intent -> Candidate -> Spec -> State -> Contract -> Validation -> Closure",
+            "Vertical-slice prototype path",
+        ],
         failures,
     )
+
+    for rel_path, needles in VIBE_REQUIRED_TEXT.items():
+        require_text(ROOT / rel_path, needles, failures)
 
     if failures:
         print("GPGPU skill v4 asset contract failed:")

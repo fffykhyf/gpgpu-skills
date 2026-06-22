@@ -2,7 +2,7 @@
 
 ## Purpose
 
-Emit downstream contracts for RTL, simulator, runtime, memory subsystem, validation plan, and PPA counters.
+Emit downstream contracts for RTL, simulator, runtime, software stack, program image, test app, memory subsystem, validation plan, and PPA counters. Validate cross_artifact_consistency_gate and declared_test_coverage_gate before closure.
 
 ## Required Inputs
 

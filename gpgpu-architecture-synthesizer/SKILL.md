@@ -1,13 +1,13 @@
 ---
 name: gpgpu-architecture-synthesizer
-description: Use when DESIGN_INTENT_IR must be converted into a bounded architecture candidate using preset tables, hard constraints, scoring rules, and provenance.
+description: Use when DESIGN_INTENT_IR must be converted into a bounded architecture candidate using preset tables, hard constraints, scoring rules, provenance, or a minimal vertical-slice GPGPU preset.
 ---
 
 # GPGPU Architecture Synthesizer
 
 ## Role
 
-This skill creates architecture candidates only. It never creates final spec truth and must route every candidate through gpgpu-spec-lock.
+This skill creates architecture candidates only. It never creates final spec truth and must route every candidate through gpgpu-spec-lock. It owns the MINIMAL_VERTICAL_SLICE_GPGPU preset for end-to-end prototype credibility.
 
 ## Position in Flow
 
@@ -47,13 +47,14 @@ This skill owns:
 This skill must not:
 - Emit SPEC_IR or GPU_STATE_IR
 - Bypass gpgpu-spec-lock
-- Invent topology outside shared/tables/architecture_preset_library.yaml
+- Invent topology outside shared/tables/architecture_preset_library.yaml or shared/tables/minimal_vertical_slice_preset.yaml
 - Use COMMON_GPU_DEFAULT, MODEL_GUESS, UNKNOWN, or IMPLICIT_DEFAULT provenance
 
 ## Required Tables
 
 This skill must use:
 - shared/tables/architecture_preset_library.yaml
+- shared/tables/minimal_vertical_slice_preset.yaml
 - shared/tables/hard_constraint_table.yaml
 - shared/tables/quality_target_table.yaml
 - shared/tables/requirement_owner_table.yaml
@@ -74,6 +75,7 @@ The output must satisfy:
 - Every intent requirement has an owner or explicit non-goal
 - Hard constraints pass before scoring
 - Every generated parameter has allowed provenance
+- MINIMAL_VERTICAL_SLICE_GPGPU includes frontend, assembler, program image, RTL simulation, and memory dump validation contracts
 
 ## Failure Modes
 
@@ -106,6 +108,7 @@ This skill is incomplete unless the following exist:
 - shared/schemas/arch_candidate_ir.schema.yaml
 - shared/schemas/synthesized_spec_draft.schema.yaml
 - shared/tables/architecture_preset_library.yaml
+- shared/tables/minimal_vertical_slice_preset.yaml
 - shared/tables/hard_constraint_table.yaml
 - shared/tables/quality_target_table.yaml
 - shared/tables/requirement_owner_table.yaml

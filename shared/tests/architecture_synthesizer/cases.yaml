@@ -7,6 +7,9 @@ cases:
   - id: multi_warp_single_sm_candidate_pass
     input: fixtures/multi_warp_single_sm_candidate_pass.yaml
     expected_verdict: PASS
+  - id: minimal_vertical_slice_candidate_pass
+    input: fixtures/minimal_vertical_slice_candidate_pass.yaml
+    expected_verdict: PASS
   - id: unsupported_feature_reject
     input: fixtures/unsupported_feature_reject.yaml
     expected_verdict: REJECT

@@ -1,0 +1,7 @@
+schema: TEST_APP_CONTRACT_IR
+version: v4
+required: [schema_version, declared_tests, runner_binding, compile_or_generate_step, input_data_layout, output_data_layout, memory_dump_contract, golden_checker]
+failure_rules:
+  declared_test_not_run: DECLARED_TEST_NOT_RUN
+  app_compile_fail: APP_COMPILE_FAIL
+  memory_dump_mismatch: MEMORY_DUMP_CONTRACT_MISMATCH

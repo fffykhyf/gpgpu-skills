@@ -10,6 +10,15 @@ cases:
   - id: scoreboard_stall_trace_pass
     input: fixtures/scoreboard_stall_trace_pass.yaml
     expected_verdict: PASS
+  - id: vertical_slice_smoke_pass
+    input: fixtures/vertical_slice_smoke_pass.yaml
+    expected_verdict: PASS
+  - id: memory_dump_compare_pass
+    input: fixtures/memory_dump_compare_pass.yaml
+    expected_verdict: PASS
+  - id: declared_test_not_run_reject
+    input: fixtures/declared_test_not_run_reject.yaml
+    expected_verdict: REJECT
   - id: rtl_golden_first_divergence_detected
     input: fixtures/rtl_golden_first_divergence_detected.yaml
     expected_verdict: REFINE_REQUIRED

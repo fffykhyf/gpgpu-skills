@@ -13,6 +13,12 @@ cases:
   - id: load_response_wakes_scoreboard
     input: fixtures/load_response_wakes_scoreboard.yaml
     expected_verdict: REJECT
+  - id: memory_request_lifecycle_pass
+    input: fixtures/memory_request_lifecycle_pass.yaml
+    expected_verdict: PASS
+  - id: duplicate_memory_request_reject
+    input: fixtures/duplicate_memory_request_reject.yaml
+    expected_verdict: REJECT
   - id: fence_ordering_pass
     input: fixtures/fence_ordering_pass.yaml
     expected_verdict: PASS

@@ -1,4 +1,9 @@
 schema: MEMORY_SUBSYSTEM_IR
 version: v4
-required: [schema_version, address_spaces, coalescer, load_store_queue, outstanding_request_table, shared_memory, cache_global_interface, atomic_unit, fence_ordering, scoreboard_wakeup, backpressure]
-failure_rules: {tag_mismatch: REQUEST_TAG_MISMATCH}
+required: [schema_version, address_spaces, coalescer, load_store_queue, outstanding_request_table, memory_request_lifecycle, request_replay_policy, shared_memory, cache_global_interface, atomic_unit, fence_ordering, scoreboard_wakeup, backpressure]
+properties:
+  memory_request_lifecycle:
+    required: [issue_condition, outstanding_tracking, replay_or_serviced_policy, response_match_policy, scoreboard_wakeup_condition, duplicate_request_prevention, stall_release_condition]
+  request_replay_policy:
+    required: [on_pipeline_stall, serviced_tracking, response_matching]
+failure_rules: {tag_mismatch: REQUEST_TAG_MISMATCH, duplicate_request: DUPLICATE_MEMORY_REQUEST, missing_stall_release: MEMORY_STALL_RELEASE_MISSING}

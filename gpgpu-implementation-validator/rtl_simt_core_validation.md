@@ -2,7 +2,7 @@
 
 ## Purpose
 
-Validate fetch, decode, issue, execute, writeback, scheduler, active mask, scoreboard, register, CSR, pipeline, and memory request interface events.
+Validate fetch, decode, issue, execute, writeback, scheduler, active mask, scoreboard, register, CSR, pipeline, memory request interface events, and vertical-slice smoke tests: app_compile_smoke, assembler_smoke, program_hex_load_smoke, rtl_sim_smoke, memory_dump_compare, and waveform_or_trace_required.
 
 ## Required Inputs
 

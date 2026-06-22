@@ -13,6 +13,12 @@ cases:
   - id: repairable_trace_fail_refine_required
     input: fixtures/repairable_trace_fail_refine_required.yaml
     expected_verdict: REFINE_REQUIRED
+  - id: doc_artifact_drift_reject
+    input: fixtures/doc_artifact_drift_reject.yaml
+    expected_verdict: REJECT
+  - id: declared_test_not_run_reject
+    input: fixtures/declared_test_not_run_reject.yaml
+    expected_verdict: REJECT
   - id: failure_routed_to_correct_owner_skill
     input: fixtures/failure_routed_to_correct_owner_skill.yaml
     expected_verdict: PASS

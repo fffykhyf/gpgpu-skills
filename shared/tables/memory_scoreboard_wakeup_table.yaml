@@ -5,3 +5,11 @@ wakeups:
   atomic_response: {matches: request_tag, action: write_result_and_clear_pending}
   store_ack: {matches: request_tag, action: clear_store_slot}
   memory_fault: {matches: request_tag, action: poison_destination_and_raise_fault}
+request_lifecycle:
+  issue_condition: instruction_valid and active_mask_nonzero and scoreboard_allows_issue
+  outstanding_tracking: request_tag plus warp_id plus instruction_id
+  replay_or_serviced_policy: do_not_duplicate_serviced_request
+  response_match_policy: response_tag matches outstanding_request.tag
+  scoreboard_wakeup_condition: matching load_or_atomic_response_valid
+  duplicate_request_prevention: serviced_tracking_required_on_pipeline_stall
+  stall_release_condition: response_matched or fault_recorded

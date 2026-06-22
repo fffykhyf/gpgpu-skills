@@ -4,6 +4,12 @@ cases:
   - id: complete_spec_pass
     input: fixtures/complete_spec_pass.yaml
     expected_verdict: PASS
+  - id: isa_source_of_truth_lock_pass
+    input: fixtures/isa_source_of_truth_lock_pass.yaml
+    expected_verdict: PASS
+  - id: source_of_truth_drift_reject
+    input: fixtures/source_of_truth_drift_reject.yaml
+    expected_verdict: REJECT
   - id: missing_warp_size_reject
     input: fixtures/missing_warp_size_reject.yaml
     expected_verdict: REJECT

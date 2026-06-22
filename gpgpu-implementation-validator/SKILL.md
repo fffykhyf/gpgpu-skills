@@ -1,13 +1,13 @@
 ---
 name: gpgpu-implementation-validator
-description: Use when RTL SIMT core and golden simulator traces must be validated against GPU_STATE_IR, mapping contracts, memory subsystem behavior, and validation plans.
+description: Use when RTL SIMT core, app-to-hex vertical slices, memory dump checks, and golden simulator traces must be validated against GPU_STATE_IR, mapping contracts, memory subsystem behavior, and validation plans.
 ---
 
 # GPGPU Implementation Validator
 
 ## Role
 
-This skill validates RTL and golden simulator behavior against canonical state. It merges the former RTL SIMT core and golden sim responsibilities.
+This skill validates RTL and golden simulator behavior against canonical state. It merges the former RTL SIMT core and golden sim responsibilities and requires an app -> asm -> hex -> RTL sim -> memory dump path for vertical-slice prototypes.
 
 ## Position in Flow
 
@@ -27,6 +27,9 @@ Consumes:
 - SIM_BEHAVIOR_IR
 - MEMORY_SUBSYSTEM_IR
 - VALIDATION_PLAN_IR
+- SOFTWARE_STACK_CONTRACT_IR
+- PROGRAM_IMAGE_CONTRACT_IR
+- TEST_APP_CONTRACT_IR
 - trace
 
 ## Output IR
@@ -36,6 +39,7 @@ Produces:
 - RTL_VALIDATION_REPORT
 - GOLDEN_SIM_REPORT
 - FIRST_DIVERGENCE_REPORT
+- VERTICAL_SLICE_VALIDATION_REPORT
 
 ## Owned Decisions
 
@@ -44,6 +48,12 @@ This skill owns:
 - Golden simulator validation
 - RTL-vs-golden first divergence
 - Trace event consistency
+- app_compile_smoke
+- assembler_smoke
+- program_hex_load_smoke
+- rtl_sim_smoke
+- memory_dump_compare
+- waveform_or_trace_required
 
 ## Forbidden Actions
 
@@ -59,6 +69,8 @@ This skill must use:
 - shared/tables/rtl_validation_gate_table.yaml
 - shared/tables/golden_sim_trace_field_table.yaml
 - shared/tables/first_divergence_taxonomy.yaml
+- shared/tables/end_to_end_smoke_test_table.yaml
+- shared/tables/vertical_slice_validation_table.yaml
 
 ## Required Schemas
 
@@ -73,6 +85,7 @@ The output must satisfy:
 - Active mask updates match transition rules
 - Scoreboard stalls and wakeups match memory subsystem contract
 - Trace fields cover mandatory semantic fields
+- Vertical-slice tests produce program.hex, rtl_sim_trace or waveform, memory_dump, and golden comparison evidence
 
 ## Failure Modes
 
@@ -81,6 +94,10 @@ This skill must emit:
 - GOLDEN_SIM_REDEFINES_ISA
 - FIRST_DIVERGENCE_DETECTED
 - TRACE_FIELD_MISSING
+- APP_COMPILE_FAIL
+- PROGRAM_HEX_LOAD_FAIL
+- MEMORY_DUMP_CONTRACT_MISMATCH
+- DECLARED_TEST_NOT_RUN
 - INSUFFICIENT_SKILL_ASSET
 
 ## Report Schema
@@ -107,5 +124,7 @@ This skill is incomplete unless the following exist:
 - shared/tables/rtl_validation_gate_table.yaml
 - shared/tables/golden_sim_trace_field_table.yaml
 - shared/tables/first_divergence_taxonomy.yaml
+- shared/tables/end_to_end_smoke_test_table.yaml
+- shared/tables/vertical_slice_validation_table.yaml
 
 When a required schema, table, example, or test is missing, emit `INSUFFICIENT_SKILL_ASSET` rather than inventing behavior.

@@ -1,0 +1,14 @@
+schema_version: v4
+intent_id: vibe-minimal-vertical-slice
+objective: runnable end-to-end SIMT GPGPU prototype
+non_goals: [full_cuda, coherent_cache, virtual_memory, atomics_initially, tensor_core, dram_controller_accuracy]
+workload_profile: {kernels: [debug_gid, load_store, divergence, vecmul], control_flow: loops_and_simple_divergence}
+target_platform: SIMULATION_ONLY
+hard_constraints: [compile_kernel_to_program_image, rtl_sim_smoke_test, memory_dump_golden_check, no_hidden_defaults]
+soft_constraints: [small_rtl, easy_trace_debug, single_repo_flow]
+required_features: [cuda_like_frontend_subset, assembler, program_hex, simt_stack_join, global_load_store, memory_dump_golden_check]
+optional_features: [matmul_smoke]
+validation_target: [debug_gid_test, load_store_test, divergence_test, vecmul_test]
+prototype_kind: VERTICAL_SLICE_PROTOTYPE
+prototype_credibility_target: [compile_kernel_to_program_image, rtl_sim_smoke_test, memory_dump_golden_check]
+provenance: USER_CONSTRAINT

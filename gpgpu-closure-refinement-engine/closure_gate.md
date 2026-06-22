@@ -2,7 +2,7 @@
 
 ## Purpose
 
-Evaluate coverage, spec lock, state invariant, artifact mapping, runtime, memory, implementation, PPA, and stability gates.
+Evaluate coverage, spec lock, state invariant, artifact mapping, cross_artifact_consistency_gate, declared_test_coverage_gate, runtime, memory, implementation, vertical-slice validation, PPA, and stability gates.
 
 ## Required Inputs
 

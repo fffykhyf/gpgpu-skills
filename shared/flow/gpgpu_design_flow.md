@@ -42,6 +42,23 @@ gpgpu-spec-lock
 
 After SPEC_IR, the path rejoins the reproduce path. The synthesizer must not skip spec-lock.
 
+## Vertical Slice Prototype Path
+
+Input: a request to run a minimal GPU demo end to end.
+
+```text
+CUDA-like Python kernel
+  -> frontend_subset_contract
+  -> assembler_contract
+  -> program.hex / PROGRAM_IMAGE_CONTRACT_IR
+  -> RTL sim smoke
+  -> memory dump
+  -> golden_output_contract
+  -> closure
+```
+
+This path uses `MINIMAL_VERTICAL_SLICE_GPGPU`, `software_stack_contract_table.yaml`, `end_to_end_smoke_test_table.yaml`, and `vertical_slice_validation_table.yaml`. It must still pass `SPEC_IR -> GPU_STATE_IR -> artifact contract -> validation closure`; the runnable demo is evidence, not a second source of truth.
+
 ## Fail Closed Policy
 
 Missing schema, missing table row, hidden default, unsupported enum, forbidden provenance, and unmapped state fields must reject or emit `INSUFFICIENT_SKILL_ASSET`. They must not be repaired by model inference.

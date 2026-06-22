@@ -3,6 +3,8 @@ version: v4
 required_fields:
   - isa.profile
   - isa.operation_classes
+  - isa_source_of_truth.owner
+  - isa_source_of_truth.generated_artifacts
   - warp_model.width
   - warp_model.active_mask_width
   - warp_model.reconvergence_model

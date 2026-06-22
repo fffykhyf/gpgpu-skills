@@ -6,3 +6,7 @@ tests:
   - grid_dim_mismatch_reject
   - missing_completion_path_reject
   - fault_reporting_contract_pass
+  - app_compile_smoke
+  - assembler_smoke
+  - program_hex_load_smoke
+  - memory_dump_compare

@@ -9,5 +9,6 @@ soft_constraints: [small_area, easy_trace_debug]
 required_features: [simt_execution, integer_alu, global_load_store, launch_completion]
 optional_features: [shared_memory]
 validation_target: [single_warp_integer_trace_pass, valid_kernel_launch_pass]
-prototype_credibility_target: TEACHING_RTL
+prototype_kind: VERTICAL_SLICE_PROTOTYPE
+prototype_credibility_target: [compile_kernel_to_program_image, rtl_sim_smoke_test, memory_dump_golden_check]
 provenance: USER_CONSTRAINT

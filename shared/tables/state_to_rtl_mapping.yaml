@@ -6,6 +6,7 @@ mappings:
   active_mask_state: rtl.mask_stack
   scheduler_state: rtl.scheduler
   scoreboard_state: rtl.scoreboard
+  simt_stack_state: rtl.simt_stack
   register_state: rtl.register_file
   memory_request_state: rtl.lsu_interface
   csr_state: rtl.csr_file

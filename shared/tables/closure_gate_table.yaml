@@ -5,9 +5,12 @@ gates:
   - spec_lock
   - state_invariants
   - artifact_mapping
+  - cross_artifact_consistency_gate
+  - declared_test_coverage_gate
   - runtime_validation
   - memory_validation
   - implementation_validation
+  - vertical_slice_validation
   - ppa
   - stability
-hard_correctness_gates: [spec_lock, state_invariants, artifact_mapping, runtime_validation, memory_validation, implementation_validation]
+hard_correctness_gates: [spec_lock, state_invariants, artifact_mapping, cross_artifact_consistency_gate, declared_test_coverage_gate, runtime_validation, memory_validation, implementation_validation, vertical_slice_validation]

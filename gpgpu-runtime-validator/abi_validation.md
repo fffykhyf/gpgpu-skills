@@ -2,7 +2,7 @@
 
 ## Purpose
 
-Check argument layout, scalar size, pointer size, alignment, ABI version, and CSR/runtime interface ownership.
+Check argument layout, scalar size, pointer size, alignment, ABI version, CSR/runtime interface ownership, blockIdx/threadIdx/blockDim/gridDim mapping, total_threads, block_dim, and base address bindings.
 
 ## Required Inputs
 

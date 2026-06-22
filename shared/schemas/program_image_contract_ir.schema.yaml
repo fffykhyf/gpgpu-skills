@@ -1,0 +1,6 @@
+schema: PROGRAM_IMAGE_CONTRACT_IR
+version: v4
+required: [schema_version, encoding_source_hash, section_layout, entry_symbol, load_address, parameter_binding, hex_format, loader_contract]
+failure_rules:
+  source_drift: ISA_ENCODING_DRIFT
+  load_fail: PROGRAM_HEX_LOAD_FAIL

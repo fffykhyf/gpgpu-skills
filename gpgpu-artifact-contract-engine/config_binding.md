@@ -2,7 +2,7 @@
 
 ## Purpose
 
-Classify config fields as hardware_private, simulator_private, hw_sw_abi, test_only, or debug_only. Validate owner and allowed consumers.
+Classify config fields as hardware_private, simulator_private, hw_sw_abi, test_only, or debug_only. Validate owner and allowed consumers. Magic constants such as total_threads, block_dim, base_data_addr, base_a, base_b, base_c, dump_range, and finish_delay must be bound through CONFIG_BINDING_IR or rejected as MAGIC_CONSTANT_UNBOUND.
 
 ## Required Inputs
 

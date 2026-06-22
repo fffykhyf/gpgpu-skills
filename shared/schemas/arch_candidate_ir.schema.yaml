@@ -5,7 +5,7 @@ required: [schema_version, candidate_id, source_intent_hash, selected_preset, pa
 properties:
   selected_preset:
     type: enum
-    values: [MINIMAL_SIMT_CORE, MULTI_WARP_SINGLE_SM]
+    values: [MINIMAL_SIMT_CORE, MULTI_WARP_SINGLE_SM, MINIMAL_VERTICAL_SLICE_GPGPU]
   parameter_set:
     required: [sm_count, warp_size, max_warps_per_sm, scheduler_policy, register_file, shared_memory, memory_hierarchy, isa_profile, launch_abi]
   provenance:

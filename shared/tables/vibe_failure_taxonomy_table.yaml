@@ -1,0 +1,38 @@
+table: vibe_failure_taxonomy_table
+version: v4
+failure_types:
+  DOC_ARTIFACT_DRIFT:
+    failed_gate: cross_artifact_consistency_gate
+    repair_owner_skill: gpgpu-artifact-contract-engine
+    secondary_owner_skill: gpgpu-spec-lock
+  ISA_ENCODING_DRIFT:
+    failed_gate: cross_artifact_consistency_gate
+    repair_owner_skill: gpgpu-spec-lock
+    secondary_owner_skill: gpgpu-artifact-contract-engine
+  DECLARED_TEST_NOT_RUN:
+    failed_gate: declared_test_coverage_gate
+    repair_owner_skill: gpgpu-implementation-validator
+    secondary_owner_skill: gpgpu-artifact-contract-engine
+  APP_COMPILE_FAIL:
+    failed_gate: declared_test_coverage_gate
+    repair_owner_skill: gpgpu-runtime-validator
+    secondary_owner_skill: gpgpu-artifact-contract-engine
+  MAGIC_CONSTANT_UNBOUND:
+    failed_gate: config_binding
+    repair_owner_skill: gpgpu-artifact-contract-engine
+    secondary_owner_skill: gpgpu-runtime-validator
+  FRONTEND_RUNTIME_MAPPING_MISMATCH:
+    failed_gate: runtime_validation
+    repair_owner_skill: gpgpu-runtime-validator
+    secondary_owner_skill: gpgpu-front-end
+  MEMORY_DUMP_CONTRACT_MISMATCH:
+    failed_gate: vertical_slice_validation
+    repair_owner_skill: gpgpu-implementation-validator
+    secondary_owner_skill: gpgpu-runtime-validator
+example:
+  failure_type: APP_COMPILE_FAIL
+  failed_gate: declared_test_coverage_gate
+  affected_artifact: apps/app_fp8_test.py
+  root_cause: assembler_api_missing_program_id
+  repair_owner_skill: gpgpu-runtime-validator
+  secondary_owner_skill: gpgpu-artifact-contract-engine

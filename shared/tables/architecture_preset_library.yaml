@@ -41,4 +41,30 @@ presets:
       isa_profile: RV32I_SIMT_BASE
       launch_abi: SIMPLE_MMIO_DOORBELL_V1
     provenance: DESIGN_PRESET
-unsupported_presets: [MULTI_SM_GPGPU, FPGA_SMALL_GPGPU, TENSOR_EXTENDED_GPGPU]
+  - preset_id: MINIMAL_VERTICAL_SLICE_GPGPU
+    description: Small end-to-end SIMT GPU prototype with CUDA-like frontend, assembler, program image, RTL simulation, and golden memory dump check.
+    parameters:
+      sm_count: 4
+      allowed_sm_count: [1, 4]
+      warp_size: 8
+      max_warps_per_sm: 4
+      scheduler_policy: ROUND_ROBIN
+      issue_width: 1
+      pipeline: IF_ID_EX_MEM_WB
+      register_file:
+        registers_per_thread: 32
+        integer_width_bits: 32
+      divergence: SIMT_STACK_JOIN
+      memory_hierarchy:
+        cache_policy: DIRECT_MAPPED_L1
+        global_interface_bits: 64
+        load_store_path: LDW_STW_GLOBAL_ONLY_FIRST
+      frontend: PYTHON_CUDA_LIKE_SUBSET
+      assembler: REQUIRED
+      verilator_smoke: REQUIRED
+      memory_dump_golden_check: REQUIRED
+      isa_profile: VERTICAL_SLICE_SIMT_BASE
+      launch_abi: SIMPLE_MMIO_DOORBELL_V1
+    non_goals: [coherent_cache, full_cuda, virtual_memory, atomics_initially, tensor_core, dram_controller_accuracy]
+    provenance: DESIGN_PRESET
+unsupported_presets: [FPGA_SMALL_GPGPU, TENSOR_EXTENDED_GPGPU]
