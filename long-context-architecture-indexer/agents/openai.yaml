@@ -1,0 +1,4 @@
+interface:
+  display_name: "Long Context Architecture Indexer"
+  short_description: "Produce standard evidence packages from large inputs"
+  default_prompt: "Use $long-context-architecture-indexer in document or repository mode with a focus, depth, and questions to produce a standard evidence package."
