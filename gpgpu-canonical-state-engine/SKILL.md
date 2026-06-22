@@ -1,114 +1,103 @@
 ---
 name: gpgpu-canonical-state-engine
-description: Use when locked SPEC_IR must become deterministic GPU_STATE_IR or when canonical GPU state invariants, transitions, snapshots, and FSM APIs must be checked.
+description: Use when locked SPEC_IR must become deterministic GPU_STATE_IR or when canonical state invariants, transitions, snapshots, and FSM APIs must be checked.
 ---
 
 # GPGPU Canonical State Engine
 
-## Skill Role
+## Role
 
-This skill is the canonical state construction pass.
+This skill converts static spec truth into the only execution-state truth consumed by runtime, memory, implementation, and closure passes.
 
-```text
-SPEC_IR -> GPU_STATE_IR
-```
+## Position in Flow
 
-It creates the only execution state truth consumed by runtime, memory, RTL, golden sim, config, and transform passes.
+Upstream:
+- gpgpu-spec-lock SPEC_IR
+
+Downstream:
+- gpgpu-artifact-contract-engine
 
 ## Input IR
 
-Input must be locked `SPEC_IR` from `gpgpu-spec-lock`.
-
-Reject:
-
-- free-form prose
-- `ARCH_CANDIDATE_IR`
-- synthesized draft text
-- partially locked spec
-- missing provenance
+Consumes:
+- SPEC_IR
 
 ## Output IR
 
-Emit:
+Produces:
+- GPU_STATE_IR
+- STATE_CONSTRUCTION_REPORT
 
-```text
-GPU_STATE_IR = {
-  schema_version,
-  design_identity,
-  source_spec_hash,
-  synthesis_candidate_id,
-  warp_state,
-  scheduler_state,
-  memory_state,
-  register_state,
-  scoreboard_state,
-  execution_units,
-  execution_pipeline_state,
-  launch_state,
-  csr_state
-}
-```
+## Owned Decisions
 
-`synthesis_candidate_id` is trace metadata only and must not affect execution semantics.
-
-## Allowed Transformations
-
-Use only FSM API:
-
-| API | Behavior |
-|---|---|
-| `init(spec_ir)` | Create the initial canonical state. |
-| `apply(event)` | Apply one event through a rule table. |
-| `transition(rule_id)` | Execute one named transition. |
-| `validate_invariants()` | Check state invariants before and after transitions. |
-| `snapshot()` | Emit deterministic, serializable, diffable state. |
+This skill owns:
+- Initial state construction
+- State transition rule binding
+- State invariant checking
+- Snapshot schema generation
 
 ## Forbidden Actions
 
-- Do not plan architecture.
-- Do not evaluate quality.
-- Do not select templates.
-- Do not absorb candidate-only quality estimates.
-- Do not create state fields absent from `SPEC_IR`.
-- Do not modify state because RTL or runtime would be easier.
+This skill must not:
+- Plan architecture
+- Evaluate quality
+- Select templates
+- Absorb candidate-only quality estimates
+- Create state fields absent from SPEC_IR
+- Modify state for RTL or runtime convenience
+
+## Required Tables
+
+This skill must use:
+- shared/tables/initial_state_construction_table.yaml
+- shared/tables/state_transition_rule_table.yaml
+- shared/tables/state_invariant_table.yaml
+
+## Required Schemas
+
+This skill must validate:
+- shared/schemas/spec_ir.schema.yaml
+- shared/schemas/gpu_state_ir.schema.yaml
 
 ## Required Invariants
 
-- Each valid warp has one PC and one active mask.
-- Active mask width equals `SPEC_IR.warp_model.width`.
-- Scheduler references only valid resident warps.
-- Scoreboard dependencies reference existing registers and owning events.
-- Outstanding memory request tags are unique.
-- Launch resources do not exceed locked config defaults.
-- CSR and fault state are deterministic for the same event sequence.
-- `GPU_STATE_IR` contains no candidate-only quality data.
+The output must satisfy:
+- Active mask width equals warp width
+- Resident warp slots match SPEC_IR
+- Scheduler references valid resident warps
+- Scoreboard dependencies reference existing registers and events
+- Outstanding memory request tags are unique
 
 ## Failure Modes
 
-Reject when:
-
-- `SPEC_IR` is incomplete
-- state schema cannot be fully populated
-- transition rule is missing
-- invariant fails
-- downstream pass asks to reinterpret state
+This skill must emit:
+- STATE_CONSTRUCTION_REJECT
+- MISSING_TRANSITION_RULE
+- STATE_INVARIANT_FAIL
+- INVALID_SCHEDULER_STATE
+- INSUFFICIENT_SKILL_ASSET
 
 ## Report Schema
 
-```text
-STATE_ENGINE_REPORT = {
-  source_spec_hash,
-  gpu_state_hash,
-  initialized_fields,
-  rejected_fields,
-  invariant_results,
-  transition_rule_table_version,
-  verdict
-}
-```
+The report must include:
+- verdict
+- consumed_ir_hash
+- produced_ir_hash
+- initialized_fields
+- invariant_results
+- failed_fields
+- missing_assets
+- downstream_contract
 
-`verdict = STATE_EMITTED | REJECTED`.
+## Concrete Assets Required
 
-## Downstream Contract
+This skill is incomplete unless the following exist:
+- gpu_state_ir_contract.md
+- state_transition_rules.md
+- state_invariants.md
+- shared/schemas/gpu_state_ir.schema.yaml
+- shared/tables/initial_state_construction_table.yaml
+- shared/tables/state_transition_rule_table.yaml
+- shared/tables/state_invariant_table.yaml
 
-All downstream passes must consume `GPU_STATE_IR` and may not recover architecture facts from `SPEC_IR`, `ARCH_CANDIDATE_IR`, or prose.
+When a required schema, table, example, or test is missing, emit `INSUFFICIENT_SKILL_ASSET` rather than inventing behavior.

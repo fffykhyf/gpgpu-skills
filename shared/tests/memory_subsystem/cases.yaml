@@ -1,0 +1,26 @@
+suite: memory_subsystem
+version: v4
+cases:
+  - id: coalesced_global_load_pass
+    input: fixtures/coalesced_global_load_pass.yaml
+    expected_verdict: PASS
+  - id: partial_lane_mask_store_pass
+    input: fixtures/partial_lane_mask_store_pass.yaml
+    expected_verdict: PASS
+  - id: shared_memory_bank_conflict_detected
+    input: fixtures/shared_memory_bank_conflict_detected.yaml
+    expected_verdict: REFINE_REQUIRED
+  - id: load_response_wakes_scoreboard
+    input: fixtures/load_response_wakes_scoreboard.yaml
+    expected_verdict: REJECT
+  - id: fence_ordering_pass
+    input: fixtures/fence_ordering_pass.yaml
+    expected_verdict: PASS
+  - id: request_tag_mismatch_reject
+    input: fixtures/request_tag_mismatch_reject.yaml
+    expected_verdict: REJECT
+common_reject_rules:
+  - missing field must not be invented
+  - hidden default must be rejected
+  - forbidden inference must be rejected
+  - conflicts must fail closed

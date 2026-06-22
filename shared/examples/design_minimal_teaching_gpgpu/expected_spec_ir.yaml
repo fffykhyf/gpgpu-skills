@@ -1,0 +1,2 @@
+include: ../reproduce_minimal_simt/expected_spec_ir.yaml
+source_kind: SYNTHESIZED_SPEC_DRAFT

@@ -1,0 +1,21 @@
+schema: DESIGN_INTENT_IR
+version: v4
+type: object
+required: [schema_version, intent_id, objective, non_goals, workload_profile, target_platform, hard_constraints, soft_constraints, required_features, optional_features, validation_target, prototype_credibility_target, provenance]
+forbidden_fields: [warp_size, sm_count, cache_policy, scheduler_policy, isa_encoding, memory_hierarchy, register_file_size, rtl_pipeline]
+properties:
+  objective: {type: string, min_length: 1}
+  non_goals: {type: list[string]}
+  workload_profile: {type: object}
+  target_platform: {type: enum, values: [TEACHING, FPGA_SMALL, ASIC_PROTOTYPE, SIMULATION_ONLY]}
+  hard_constraints: {type: list[constraint]}
+  soft_constraints: {type: list[constraint]}
+  required_features: {type: list[string]}
+  optional_features: {type: list[string]}
+  validation_target: {type: list[string]}
+  prototype_credibility_target: {type: enum, values: [TOY, TEACHING_RTL, RESEARCH_PROTOTYPE, SYNTHESIS_READY]}
+  provenance: {type: list[FIELD_PROVENANCE]}
+failure_rules:
+  forbidden_architecture_field: FORBIDDEN_ARCHITECTURE_FIELD
+  missing_required_field: INSUFFICIENT_REQUEST
+  ambiguous_objective: AMBIGUOUS_INTENT

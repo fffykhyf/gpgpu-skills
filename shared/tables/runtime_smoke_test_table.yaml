@@ -1,0 +1,8 @@
+table: runtime_smoke_test_table
+version: v4
+tests:
+  - valid_kernel_launch_pass
+  - invalid_argument_layout_reject
+  - grid_dim_mismatch_reject
+  - missing_completion_path_reject
+  - fault_reporting_contract_pass

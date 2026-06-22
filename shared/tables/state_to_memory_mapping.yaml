@@ -1,0 +1,9 @@
+table: state_to_memory_mapping
+version: v4
+mappings:
+  warp_state: memory.lane_context
+  active_mask_state: memory.lane_mask
+  scoreboard_state: memory.scoreboard_wakeup
+  memory_request_state: memory.request_table
+  fault_state: memory.fault_contract
+explicit_unused: [thread_state, pc_state, scheduler_state, register_state, csr_state, launch_state, pipeline_state]

@@ -1,0 +1,23 @@
+suite: implementation_validator
+version: v4
+cases:
+  - id: single_warp_integer_trace_pass
+    input: fixtures/single_warp_integer_trace_pass.yaml
+    expected_verdict: PASS
+  - id: branch_active_mask_trace_pass
+    input: fixtures/branch_active_mask_trace_pass.yaml
+    expected_verdict: PASS
+  - id: scoreboard_stall_trace_pass
+    input: fixtures/scoreboard_stall_trace_pass.yaml
+    expected_verdict: PASS
+  - id: rtl_golden_first_divergence_detected
+    input: fixtures/rtl_golden_first_divergence_detected.yaml
+    expected_verdict: REFINE_REQUIRED
+  - id: golden_sim_redefines_isa_reject
+    input: fixtures/golden_sim_redefines_isa_reject.yaml
+    expected_verdict: REJECT
+common_reject_rules:
+  - missing field must not be invented
+  - hidden default must be rejected
+  - forbidden inference must be rejected
+  - conflicts must fail closed

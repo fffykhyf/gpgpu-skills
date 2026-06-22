@@ -1,0 +1,23 @@
+suite: closure_refinement
+version: v4
+cases:
+  - id: all_gates_pass_accept
+    input: fixtures/all_gates_pass_accept.yaml
+    expected_verdict: PASS
+  - id: missing_evidence_insufficient
+    input: fixtures/missing_evidence_insufficient.yaml
+    expected_verdict: INSUFFICIENT_EVIDENCE
+  - id: hard_correctness_fail_reject
+    input: fixtures/hard_correctness_fail_reject.yaml
+    expected_verdict: REJECT
+  - id: repairable_trace_fail_refine_required
+    input: fixtures/repairable_trace_fail_refine_required.yaml
+    expected_verdict: REFINE_REQUIRED
+  - id: failure_routed_to_correct_owner_skill
+    input: fixtures/failure_routed_to_correct_owner_skill.yaml
+    expected_verdict: PASS
+common_reject_rules:
+  - missing field must not be invented
+  - hidden default must be rejected
+  - forbidden inference must be rejected
+  - conflicts must fail closed

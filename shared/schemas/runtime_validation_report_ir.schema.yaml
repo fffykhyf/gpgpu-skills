@@ -1,0 +1,4 @@
+schema: RUNTIME_VALIDATION_REPORT_IR
+version: v4
+required: [schema_version, verdict, consumed_ir_hash, produced_ir_hash, launch_contract_report, runtime_smoke_trace, failed_fields]
+verdict_values: [PASS, REJECT, INSUFFICIENT_EVIDENCE]

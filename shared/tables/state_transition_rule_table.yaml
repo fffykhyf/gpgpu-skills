@@ -1,0 +1,19 @@
+table: state_transition_rule_table
+version: v4
+rules:
+  - rule_id: launch_admit
+    consumes: [launch_state]
+    produces: [warp_state, pc_state, active_mask_state]
+  - rule_id: issue_instruction
+    consumes: [scheduler_state, scoreboard_state, pc_state]
+    produces: [pipeline_state, scoreboard_state]
+  - rule_id: branch_update_mask
+    consumes: [active_mask_state, pc_state]
+    produces: [active_mask_state, pc_state]
+  - rule_id: memory_request_issue
+    consumes: [memory_request_state, active_mask_state, scoreboard_state]
+    produces: [memory_request_state, scoreboard_state]
+  - rule_id: memory_response_wakeup
+    consumes: [memory_request_state, scoreboard_state]
+    produces: [register_state, scoreboard_state]
+failure_rule: missing rule emits MISSING_TRANSITION_RULE

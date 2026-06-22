@@ -1,0 +1,4 @@
+schema: MEMORY_SUBSYSTEM_IR
+version: v4
+required: [schema_version, address_spaces, coalescer, load_store_queue, outstanding_request_table, shared_memory, cache_global_interface, atomic_unit, fence_ordering, scoreboard_wakeup, backpressure]
+failure_rules: {tag_mismatch: REQUEST_TAG_MISMATCH}

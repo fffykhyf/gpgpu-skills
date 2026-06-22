@@ -1,0 +1,44 @@
+table: architecture_preset_library
+version: v4
+presets:
+  - preset_id: MINIMAL_SIMT_CORE
+    description: Single SM, single resident warp, teaching-friendly integer SIMT core.
+    parameters:
+      sm_count: 1
+      warp_size: 8
+      max_warps_per_sm: 1
+      scheduler_policy: ROUND_ROBIN
+      issue_width: 1
+      register_file:
+        registers_per_thread: 16
+        integer_width_bits: 32
+      shared_memory:
+        bytes_per_sm: 0
+        banks: 0
+      memory_hierarchy:
+        cache_policy: NONE
+        global_interface_bits: 32
+      isa_profile: RV32I_SIMT_MINIMAL
+      launch_abi: SIMPLE_MMIO_DOORBELL_V1
+    provenance: DESIGN_PRESET
+  - preset_id: MULTI_WARP_SINGLE_SM
+    description: Single SM with multiple resident warps, scoreboard wakeup, and optional direct-mapped L1.
+    parameters:
+      sm_count: 1
+      warp_size: 8
+      max_warps_per_sm: 4
+      scheduler_policy: SCOREBOARD_ROUND_ROBIN
+      issue_width: 1
+      register_file:
+        registers_per_thread: 32
+        integer_width_bits: 32
+      shared_memory:
+        bytes_per_sm: 4096
+        banks: 4
+      memory_hierarchy:
+        cache_policy: DIRECT_MAPPED_L1
+        global_interface_bits: 64
+      isa_profile: RV32I_SIMT_BASE
+      launch_abi: SIMPLE_MMIO_DOORBELL_V1
+    provenance: DESIGN_PRESET
+unsupported_presets: [MULTI_SM_GPGPU, FPGA_SMALL_GPGPU, TENSOR_EXTENDED_GPGPU]

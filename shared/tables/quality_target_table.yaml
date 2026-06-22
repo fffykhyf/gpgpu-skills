@@ -1,0 +1,6 @@
+table: quality_target_table
+version: v4
+targets:
+  teaching_minimal: {priority: clarity, ppa_weight: low, verification_weight: high}
+  fpga_small: {priority: area, ppa_weight: high, verification_weight: high}
+  research_prototype: {priority: extensibility, ppa_weight: medium, verification_weight: high}

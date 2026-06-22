@@ -1,0 +1,12 @@
+table: verdict_decision_table
+version: v4
+decisions:
+  - condition: all_gates_pass
+    verdict: ACCEPT
+  - condition: missing_required_evidence
+    verdict: INSUFFICIENT_EVIDENCE
+  - condition: hard_correctness_gate_failed
+    verdict: REJECT
+  - condition: repairable_trace_failure
+    verdict: REFINE_REQUIRED
+allowed_verdicts: [ACCEPT, REJECT, REFINE_REQUIRED, INSUFFICIENT_EVIDENCE]

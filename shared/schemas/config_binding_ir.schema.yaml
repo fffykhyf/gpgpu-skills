@@ -1,0 +1,5 @@
+schema: CONFIG_BINDING_IR
+version: v4
+required: [schema_version, parameters, owners, visibility, consumers]
+visibility_values: [hardware_private, simulator_private, hw_sw_abi, test_only, debug_only]
+failure_rules: {missing_owner: CONFIG_OWNER_MISSING, debug_leak: DEBUG_ONLY_LEAKS_TO_ABI}

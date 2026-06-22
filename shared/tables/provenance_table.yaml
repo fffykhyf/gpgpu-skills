@@ -1,0 +1,7 @@
+table: provenance_table
+version: v4
+allowed:
+  human_spec: [USER_SPEC, EXPLICIT_DEFAULT]
+  synthesized: [USER_CONSTRAINT, DESIGN_PRESET, SOLVER_DERIVED, REPAIR_DERIVED]
+forbidden: [UNKNOWN, COMMON_GPU_DEFAULT, MODEL_GUESS, IMPLICIT_DEFAULT]
+failure_rule: forbidden provenance emits FORBIDDEN_PROVENANCE

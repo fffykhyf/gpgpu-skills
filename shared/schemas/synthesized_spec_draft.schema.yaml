@@ -1,0 +1,10 @@
+schema: SYNTHESIZED_SPEC_DRAFT
+version: v4
+type: object
+required: [schema_version, draft_id, source_candidate_id, spec_fields, completeness_claim, unresolved_fields, provenance]
+properties:
+  completeness_claim: {type: enum, values: [COMPLETE_FOR_SPEC_LOCK, INCOMPLETE_REQUIRES_REFINEMENT]}
+  unresolved_fields: {type: list[string]}
+failure_rules:
+  unresolved_required_field: INSUFFICIENT_SPEC
+  forbidden_provenance: FORBIDDEN_PROVENANCE

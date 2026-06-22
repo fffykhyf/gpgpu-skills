@@ -1,141 +1,113 @@
 ---
 name: gpgpu-architecture-synthesizer
-description: Use when DESIGN_INTENT_IR must be converted into a bounded GPGPU architecture candidate using fixed templates, constraint tables, enum tables, and provenance.
+description: Use when DESIGN_INTENT_IR must be converted into a bounded architecture candidate using preset tables, hard constraints, scoring rules, and provenance.
 ---
 
 # GPGPU Architecture Synthesizer
 
-## Skill Role
+## Role
 
-This skill is the constrained DESIGN-mode synthesis pass.
+This skill creates architecture candidates only. It never creates final spec truth and must route every candidate through gpgpu-spec-lock.
 
-```text
-DESIGN_INTENT_IR -> ARCH_CANDIDATE_IR + synthesized_spec_draft
-```
+## Position in Flow
 
-It creates candidates only. It does not create final truth.
+Upstream:
+- gpgpu-front-end DESIGN_INTENT_IR
+
+Downstream:
+- gpgpu-spec-lock consumes SYNTHESIZED_SPEC_DRAFT
 
 ## Input IR
 
-Required inputs:
-
-- `DESIGN_INTENT_IR`
-- architecture preset library
-- hard constraint table
-- quality target table
-- enum table
+Consumes:
+- DESIGN_INTENT_IR
+- architecture_preset_library
+- hard_constraint_table
+- quality_target_table
+- requirement_owner_table
 
 ## Output IR
 
-Emit:
+Produces:
+- ARCH_CANDIDATE_IR
+- SYNTHESIZED_SPEC_DRAFT
+- ARCH_SYNTHESIS_REPORT
 
-```text
-ARCH_CANDIDATE_IR = {
-  candidate_id,
-  ARCH_IR,
-  synthesized_spec_draft,
-  constraint_proof,
-  requirement_coverage_matrix,
-  quality_estimate,
-  rejected_alternatives,
-  unresolved_risks
-}
-```
+## Owned Decisions
 
-## Allowed Transformations
-
-### Stage 1: Requirement Coverage
-
-Map each design requirement to an architecture owner or explicit non-goal.
-
-### Stage 2: Template Selection
-
-Select only from fixed templates:
-
-```text
-MINIMAL_SIMT_CORE
-MULTI_WARP_SINGLE_SM
-MULTI_SM_GPGPU
-FPGA_SMALL_GPGPU
-TENSOR_EXTENDED_GPGPU
-```
-
-v2 minimum implementation may support only:
-
-```text
-MINIMAL_SIMT_CORE
-MULTI_WARP_SINGLE_SM
-```
-
-### Stage 3: Parameter Allocation
-
-Allocate fields such as warp size, max warps per SM, register file size, shared memory size, issue width, scheduler count, LSU depth, and cache policy.
-
-Every parameter must cite:
-
-```text
-USER_CONSTRAINT
-DESIGN_PRESET
-SOLVER_DERIVED
-REPAIR_DERIVED
-```
-
-### Stage 4: Hard Constraint Checking
-
-Check hard constraints before quality scoring.
-
-### Stage 5: Quality Scoring
-
-Emit risk estimates only after hard constraints pass.
+This skill owns:
+- Requirement coverage
+- Preset selection
+- Parameter allocation
+- Hard constraint checking
+- Candidate scoring
 
 ## Forbidden Actions
 
-- Do not output `GPU_STATE_IR`.
-- Do not bypass `gpgpu-spec-lock`.
-- Do not invent topology outside the template library.
-- Do not use `COMMON_GPU_DEFAULT`, `MODEL_GUESS`, or `UNKNOWN` provenance.
-- Do not continue to quality scoring after hard constraint failure.
+This skill must not:
+- Emit SPEC_IR or GPU_STATE_IR
+- Bypass gpgpu-spec-lock
+- Invent topology outside shared/tables/architecture_preset_library.yaml
+- Use COMMON_GPU_DEFAULT, MODEL_GUESS, UNKNOWN, or IMPLICIT_DEFAULT provenance
+
+## Required Tables
+
+This skill must use:
+- shared/tables/architecture_preset_library.yaml
+- shared/tables/hard_constraint_table.yaml
+- shared/tables/quality_target_table.yaml
+- shared/tables/requirement_owner_table.yaml
+- shared/tables/enum_table.yaml
+- shared/tables/provenance_table.yaml
+
+## Required Schemas
+
+This skill must validate:
+- shared/schemas/design_intent_ir.schema.yaml
+- shared/schemas/arch_candidate_ir.schema.yaml
+- shared/schemas/synthesized_spec_draft.schema.yaml
 
 ## Required Invariants
 
-- Every intent requirement has an owner or explicit non-goal.
-- `warp_size == active_mask_width` is satisfied or rejected.
-- `issue_width <= execution_unit_ports`.
-- Memory request width does not exceed memory interface width.
-- ISA operation classes have execution-unit owners.
-- ABI-visible constants appear in `config_contract.hw_sw_abi`.
+The output must satisfy:
+- ARCH_CANDIDATE_IR != SPEC_IR
+- Every intent requirement has an owner or explicit non-goal
+- Hard constraints pass before scoring
+- Every generated parameter has allowed provenance
 
 ## Failure Modes
 
-Emit `REJECTED_ARCH_CANDIDATE` when:
-
-- a required feature has no owner
-- template cannot support a hard requirement
-- hard constraints fail
-- any parameter lacks allowed provenance
-- synthesized draft cannot be made complete without inference
+This skill must emit:
+- REJECTED_ARCH_CANDIDATE
+- UNSUPPORTED_REQUIREMENT
+- HARD_CONSTRAINT_FAIL
+- FORBIDDEN_PROVENANCE
+- INSUFFICIENT_SKILL_ASSET
 
 ## Report Schema
 
-```text
-ARCH_SYNTHESIS_REPORT = {
-  candidate_id,
-  selected_template,
-  requirement_coverage_matrix,
-  constraint_proof,
-  rejected_alternatives,
-  quality_estimate,
-  unresolved_risks,
-  verdict
-}
-```
+The report must include:
+- verdict
+- candidate_id
+- consumed_ir_hash
+- produced_ir_hash
+- selected_preset
+- constraint_proof
+- failed_fields
+- missing_assets
+- downstream_contract
 
-`verdict = CANDIDATE_EMITTED | REJECTED_ARCH_CANDIDATE`.
+## Concrete Assets Required
 
-## Downstream Contract
+This skill is incomplete unless the following exist:
+- preset_selection.md
+- parameter_allocation.md
+- candidate_scoring.md
+- shared/schemas/arch_candidate_ir.schema.yaml
+- shared/schemas/synthesized_spec_draft.schema.yaml
+- shared/tables/architecture_preset_library.yaml
+- shared/tables/hard_constraint_table.yaml
+- shared/tables/quality_target_table.yaml
+- shared/tables/requirement_owner_table.yaml
 
-Downstream must treat `ARCH_CANDIDATE_IR` as candidate evidence only. The next truth-forming pass is:
-
-```text
-synthesized_spec_draft -> gpgpu-spec-lock -> SPEC_IR
-```
+When a required schema, table, example, or test is missing, emit `INSUFFICIENT_SKILL_ASSET` rather than inventing behavior.

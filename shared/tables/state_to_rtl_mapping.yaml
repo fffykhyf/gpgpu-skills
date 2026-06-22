@@ -1,0 +1,15 @@
+table: state_to_rtl_mapping
+version: v4
+mappings:
+  warp_state: rtl.warp_table
+  pc_state: rtl.fetch_pc_file
+  active_mask_state: rtl.mask_stack
+  scheduler_state: rtl.scheduler
+  scoreboard_state: rtl.scoreboard
+  register_state: rtl.register_file
+  memory_request_state: rtl.lsu_interface
+  csr_state: rtl.csr_file
+  launch_state: rtl.launch_controller
+  pipeline_state: rtl.pipeline_regs
+  fault_state: rtl.fault_unit
+explicit_unused: [thread_state]

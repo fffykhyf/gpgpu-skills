@@ -1,0 +1,15 @@
+schema_version: v4
+design_identity: minimal-simt-v4
+source_kind: HUMAN_SPEC
+isa: {profile: RV32I_SIMT_MINIMAL, operation_classes: [integer_alu, branch, global_load, global_store, csr], encoding_policy: fixed32}
+warp_model: {width: 8, active_mask_width: 8, reconvergence_model: stackless_single_path}
+thread_block_grid_model: {grid_dim: [1, 1, 1], block_dim: [8, 1, 1]}
+scheduler_policy: {policy: ROUND_ROBIN, issue_width: 1, max_warps_per_sm: 1}
+register_file: {registers_per_thread: 16, integer_width_bits: 32}
+memory_hierarchy: {address_spaces: [global, local, constant], cache_policy: NONE, shared_memory: disabled}
+csr_dcr: {registers: [start, done, fault, kernel_entry]}
+launch_abi: {abi_version: SIMPLE_MMIO_DOORBELL_V1, argument_layout: flat32, completion_path: done_csr, fault_path: fault_csr}
+config_defaults: {trace_enable: false}
+debug_test_hooks: {trace_schema: v4_minimal}
+provenance: USER_SPEC
+canonical_hash: expected-stable-spec-hash

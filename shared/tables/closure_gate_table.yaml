@@ -1,0 +1,13 @@
+table: closure_gate_table
+version: v4
+gates:
+  - requirement_coverage
+  - spec_lock
+  - state_invariants
+  - artifact_mapping
+  - runtime_validation
+  - memory_validation
+  - implementation_validation
+  - ppa
+  - stability
+hard_correctness_gates: [spec_lock, state_invariants, artifact_mapping, runtime_validation, memory_validation, implementation_validation]

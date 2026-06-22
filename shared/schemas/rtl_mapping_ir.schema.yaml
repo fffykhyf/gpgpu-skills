@@ -1,0 +1,4 @@
+schema: RTL_MAPPING_IR
+version: v4
+required: [schema_version, source_state_hash, modules, interfaces, state_field_mapping, explicit_unused]
+failure_rules: {missing_mapping: MISSING_MAPPING_FAIL_CLOSED}

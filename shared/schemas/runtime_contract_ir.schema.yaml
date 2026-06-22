@@ -1,0 +1,4 @@
+schema: RUNTIME_CONTRACT_IR
+version: v4
+required: [schema_version, abi_version, program_image, kernel_entry, argument_layout, grid_block_contract, command_queue, doorbell, completion, fault_reporting]
+failure_rules: {invalid_layout: INVALID_ARGUMENT_LAYOUT, missing_completion: MISSING_COMPLETION_PATH}

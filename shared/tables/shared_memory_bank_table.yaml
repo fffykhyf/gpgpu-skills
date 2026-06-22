@@ -1,0 +1,7 @@
+table: shared_memory_bank_table
+version: v4
+bank_model:
+  bank_count_field: MEMORY_MODEL_IR.shared_memory_banks
+  bank_index: (address / word_bytes) % bank_count
+  conflict_policy: detect_and_serialize
+  broadcast_policy: same_address_no_conflict

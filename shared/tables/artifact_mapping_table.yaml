@@ -1,0 +1,18 @@
+table: artifact_mapping_table
+version: v4
+coverage_rule: every GPU_STATE_IR field must be mapped or explicit_unused
+artifacts: [rtl, sim, runtime, memory, config, validation, ppa]
+fields:
+  warp_state: [rtl, sim, validation]
+  thread_state: [sim, runtime, validation]
+  pc_state: [rtl, sim, validation]
+  active_mask_state: [rtl, sim, validation]
+  scheduler_state: [rtl, sim, validation]
+  scoreboard_state: [rtl, sim, memory, validation]
+  register_state: [rtl, sim, validation]
+  memory_request_state: [rtl, sim, memory, validation]
+  csr_state: [rtl, runtime, sim, validation]
+  launch_state: [runtime, rtl, sim, validation]
+  pipeline_state: [rtl, sim, validation]
+  fault_state: [runtime, rtl, sim, validation]
+on_missing: MISSING_MAPPING_FAIL_CLOSED

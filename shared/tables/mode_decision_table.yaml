@@ -1,0 +1,17 @@
+table: mode_decision_table
+version: v4
+decisions:
+  - match: complete_spec
+    mode: REPRODUCE
+    next_skill: gpgpu-spec-lock
+  - match: vague_design_goal
+    mode: DESIGN
+    next_skill: gpgpu-architecture-synthesizer
+    requires_subpass: Design Intent Lock
+  - match: patch_against_locked_ir
+    mode: PATCH_REQUEST
+    next_skill: gpgpu-closure-refinement-engine
+  - match: trace_or_divergence
+    mode: TRACE_DEBUG
+    next_skill: gpgpu-closure-refinement-engine
+forbidden_outputs: [warp_size, sm_count, cache_policy, scheduler_policy, isa_encoding, memory_hierarchy, register_file_size, rtl_pipeline]

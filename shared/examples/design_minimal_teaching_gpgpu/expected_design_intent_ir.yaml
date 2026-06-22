@@ -1,0 +1,13 @@
+schema_version: v4
+intent_id: design-minimal-teaching-gpgpu
+objective: minimal RTL-simulatable teaching GPGPU
+non_goals: [multi_sm_scaling, tensor_units, production_cache_hierarchy]
+workload_profile: {kernels: [integer_vector_add], control_flow: simple_branching}
+target_platform: TEACHING
+hard_constraints: [rtl_simulatable, explicit_launch_abi, no_hidden_defaults]
+soft_constraints: [small_area, easy_trace_debug]
+required_features: [simt_execution, integer_alu, global_load_store, launch_completion]
+optional_features: [shared_memory]
+validation_target: [single_warp_integer_trace_pass, valid_kernel_launch_pass]
+prototype_credibility_target: TEACHING_RTL
+provenance: USER_CONSTRAINT

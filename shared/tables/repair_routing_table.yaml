@@ -1,0 +1,8 @@
+table: repair_routing_table
+version: v4
+routes:
+  active_mask_divergence: {owner: gpgpu-implementation-validator, repair_type: RTL_FIX}
+  missing_mapping: {owner: gpgpu-artifact-contract-engine, repair_type: ARTIFACT_MAPPING_FIX}
+  hidden_default: {owner: gpgpu-spec-lock, repair_type: SPEC_FIELD_FIX}
+  memory_tag_mismatch: {owner: gpgpu-memory-subsystem, repair_type: MEMORY_CONTRACT_FIX}
+  invalid_argument_layout: {owner: gpgpu-runtime-validator, repair_type: RUNTIME_ABI_FIX}

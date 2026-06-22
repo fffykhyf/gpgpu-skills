@@ -1,0 +1,12 @@
+table: memory_ordering_table
+version: v4
+rules:
+  - id: fence_orders_prior_global_ops
+    before: [global_load, global_store, atomic]
+    after: [fence]
+  - id: same_thread_program_order
+    scope: thread
+    ordered: true
+  - id: different_warps_unordered_without_fence
+    scope: warp
+    ordered: false

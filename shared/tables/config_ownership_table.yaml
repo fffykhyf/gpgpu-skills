@@ -1,0 +1,9 @@
+table: config_ownership_table
+version: v4
+parameters:
+  warp_size: {owner: gpgpu-spec-lock, visibility: hw_sw_abi, consumers: [runtime, rtl, sim, validation]}
+  max_warps_per_sm: {owner: gpgpu-spec-lock, visibility: hardware_private, consumers: [rtl, sim, validation]}
+  trace_enable: {owner: gpgpu-artifact-contract-engine, visibility: debug_only, consumers: [validation]}
+  simulator_seed: {owner: gpgpu-artifact-contract-engine, visibility: simulator_private, consumers: [sim]}
+  test_timeout_cycles: {owner: gpgpu-artifact-contract-engine, visibility: test_only, consumers: [validation]}
+on_missing_owner: CONFIG_OWNER_MISSING

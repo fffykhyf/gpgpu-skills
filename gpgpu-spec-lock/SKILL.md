@@ -1,115 +1,113 @@
 ---
 name: gpgpu-spec-lock
-description: Use when a human GPGPU spec or synthesized spec draft must become complete, unambiguous, provenance-bearing SPEC_IR with no implicit defaults.
+description: Use when a human spec or synthesized spec draft must become complete, unambiguous, provenance-bearing SPEC_IR with no hidden defaults.
 ---
 
 # GPGPU Spec Lock
 
-## Skill Role
+## Role
 
-This skill is the spec locking pass.
+This skill locks static architecture facts. It parses and validates, but it does not design missing fields.
 
-```text
-spec.md | synthesized_spec_draft -> SPEC_IR
-```
+## Position in Flow
 
-It stabilizes architecture facts. It does not design missing facts.
+Upstream:
+- Human complete spec
+- gpgpu-architecture-synthesizer SYNTHESIZED_SPEC_DRAFT
+
+Downstream:
+- gpgpu-canonical-state-engine
 
 ## Input IR
 
-Input source kind:
-
-```text
-source_kind = HUMAN_SPEC | SYNTHESIZED_SPEC_DRAFT
-```
-
-Allowed input:
-
-- human-written `spec.md`
-- synthesized spec draft from `gpgpu-architecture-synthesizer`
-- enum tables
-- field provenance table when source is synthesized
+Consumes:
+- HUMAN_SPEC
+- SYNTHESIZED_SPEC_DRAFT
+- enum_table
+- provenance_table
+- spec_required_field_table
 
 ## Output IR
 
-Emit:
+Produces:
+- SPEC_IR
+- SPEC_LOCK_REPORT
 
-```text
-SPEC_IR = {
-  schema_version,
-  source_kind,
-  design_identity,
-  ISA,
-  warp_model,
-  memory_hierarchy,
-  scheduling_policy,
-  config_defaults,
-  ABI_launch_contract,
-  provenance
-}
-```
+## Owned Decisions
 
-## Allowed Transformations
-
-- Parse prose into candidate fields.
-- Resolve fields only against declared enum tables.
-- Convert explicit defaults into locked scalar, enum, or table values.
-- Attach `FIELD_PROVENANCE` to each field.
-- Reject conflicts instead of choosing between them.
-
-When `source_kind = SYNTHESIZED_SPEC_DRAFT`, every generated value must cite:
-
-```text
-USER_CONSTRAINT
-DESIGN_PRESET
-SOLVER_DERIVED
-REPAIR_DERIVED
-```
+This skill owns:
+- ISA
+- warp model
+- thread/block/grid model
+- scheduler policy
+- register file
+- memory hierarchy
+- CSR/DCR
+- launch ABI
+- config defaults
+- debug/test hooks
 
 ## Forbidden Actions
 
-- Do not infer missing warp size, scheduler, memory hierarchy, ISA, or cache policy.
-- Do not accept `UNKNOWN`, `COMMON_GPU_DEFAULT`, `MODEL_GUESS`, or `IMPLICIT_DEFAULT` provenance.
-- Do not pass free-form prose to `gpgpu-canonical-state-engine`.
-- Do not emit `GPU_STATE_IR`.
-- Do not relax requirements because the draft came from a synthesizer.
+This skill must not:
+- Infer missing warp size, scheduler, memory hierarchy, ISA, or cache policy
+- Accept hidden defaults or forbidden provenance
+- Emit GPU_STATE_IR
+- Pass free-form prose downstream
+
+## Required Tables
+
+This skill must use:
+- shared/tables/spec_required_field_table.yaml
+- shared/tables/enum_table.yaml
+- shared/tables/provenance_table.yaml
+
+## Required Schemas
+
+This skill must validate:
+- shared/schemas/spec_ir.schema.yaml
+- shared/schemas/synthesized_spec_draft.schema.yaml
 
 ## Required Invariants
 
-- All required fields are present.
-- All enums are resolved.
-- All defaults are explicit.
-- Every field has provenance.
-- `SPEC_IR` contains no ambiguous natural language.
-- Repeated locking of the same input is byte-stable.
+The output must satisfy:
+- No ambiguity
+- No hidden default
+- All enums resolved
+- Every field has provenance
+- Field order and hash are stable
 
 ## Failure Modes
 
-Reject when:
-
-- a required field is missing
-- enum value is unresolved
-- provenance is absent or forbidden
-- two fields conflict
-- synthesized draft needs inference to become complete
+This skill must emit:
+- INSUFFICIENT_SPEC
+- HIDDEN_DEFAULT_REJECT
+- UNKNOWN_ENUM_REJECT
+- FORBIDDEN_PROVENANCE
+- CONFLICTING_SPEC_FIELD
+- INSUFFICIENT_SKILL_ASSET
 
 ## Report Schema
 
-```text
-SPEC_LOCK_REPORT = {
-  source_kind,
-  input_hash,
-  spec_ir_hash,
-  locked_fields,
-  rejected_fields,
-  missing_fields,
-  provenance_failures,
-  verdict
-}
-```
+The report must include:
+- verdict
+- source_kind
+- consumed_ir_hash
+- produced_ir_hash
+- locked_fields
+- failed_fields
+- missing_assets
+- downstream_contract
 
-`verdict = LOCKED | REJECTED`.
+## Concrete Assets Required
 
-## Downstream Contract
+This skill is incomplete unless the following exist:
+- spec_ir_contract.md
+- canonical_serialization.md
+- provenance_rules.md
+- shared/schemas/spec_ir.schema.yaml
+- shared/tables/spec_required_field_table.yaml
+- shared/tables/enum_table.yaml
+- shared/tables/provenance_table.yaml
 
-`gpgpu-canonical-state-engine` may consume only `SPEC_IR`, not original prose or synthesized draft text.
+When a required schema, table, example, or test is missing, emit `INSUFFICIENT_SKILL_ASSET` rather than inventing behavior.

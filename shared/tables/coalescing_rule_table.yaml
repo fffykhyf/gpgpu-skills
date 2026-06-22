@@ -1,0 +1,15 @@
+table: coalescing_rule_table
+version: v4
+rules:
+  - id: coalesced_global_load
+    address_space: global
+    condition: contiguous_active_lanes_same_segment
+    result: single_transaction
+  - id: partial_lane_mask_store
+    address_space: global
+    condition: inactive_lanes_present
+    result: byte_enable_from_active_mask
+  - id: divergent_addresses
+    address_space: global
+    condition: multiple_segments
+    result: split_transactions

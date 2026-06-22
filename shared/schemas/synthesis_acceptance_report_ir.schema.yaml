@@ -1,0 +1,14 @@
+schema: SYNTHESIS_ACCEPTANCE_REPORT_IR
+version: v4
+type: object
+required: [schema_version, verdict, consumed_ir_hash, produced_ir_hash, gate_results, failed_fields, missing_assets, downstream_contract]
+properties:
+  verdict:
+    type: enum
+    values: [ACCEPT, REJECT, REFINE_REQUIRED, INSUFFICIENT_EVIDENCE]
+  gate_results:
+    required: [requirement_coverage, spec_lock, state_invariants, artifact_mapping, runtime_validation, memory_validation, implementation_validation, ppa, stability]
+failure_rules:
+  missing_evidence: INSUFFICIENT_EVIDENCE
+  hard_correctness_fail: REJECT
+  repairable_trace_fail: REFINE_REQUIRED

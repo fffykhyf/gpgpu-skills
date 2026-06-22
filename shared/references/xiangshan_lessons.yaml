@@ -1,0 +1,14 @@
+lessons:
+  - lesson_id: XIANGSHAN_VALIDATION_001
+    source_project: XiangShan
+    applies_to:
+      - gpgpu-canonical-state-engine
+      - gpgpu-implementation-validator
+    topic: validation_closure
+    principle: "Pipeline and trace validation should route failures to fields, rules, and owners."
+    do:
+      - "Bind behavior through SPEC_IR, GPU_STATE_IR, and explicit contract tables."
+    do_not:
+      - "Let a downstream implementation invent behavior not visible to validation."
+    evidence_anchor:
+      - "ref/skillref/xiangshan.md"

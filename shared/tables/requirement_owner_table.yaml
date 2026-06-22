@@ -1,0 +1,11 @@
+table: requirement_owner_table
+version: v4
+owners:
+  simt_execution: gpgpu-architecture-synthesizer
+  launch_abi: gpgpu-spec-lock
+  canonical_state: gpgpu-canonical-state-engine
+  artifact_mapping: gpgpu-artifact-contract-engine
+  runtime_launch: gpgpu-runtime-validator
+  memory_ordering: gpgpu-memory-subsystem
+  rtl_trace: gpgpu-implementation-validator
+  closure_verdict: gpgpu-closure-refinement-engine

@@ -1,0 +1,8 @@
+table: failure_taxonomy_table
+version: v4
+failures:
+  active_mask_divergence: {field: warp_state.active_mask, category: trace_correctness}
+  missing_mapping: {field: artifact_mapping, category: contract_coverage}
+  hidden_default: {field: spec_ir.provenance, category: spec_correctness}
+  memory_tag_mismatch: {field: memory_request_state.request_tags, category: memory_correctness}
+  invalid_argument_layout: {field: launch_state.argument_layout, category: runtime_abi}

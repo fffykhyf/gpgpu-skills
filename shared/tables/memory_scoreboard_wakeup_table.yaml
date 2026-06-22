@@ -1,0 +1,7 @@
+table: memory_scoreboard_wakeup_table
+version: v4
+wakeups:
+  load_response: {matches: request_tag, action: clear_destination_register_pending}
+  atomic_response: {matches: request_tag, action: write_result_and_clear_pending}
+  store_ack: {matches: request_tag, action: clear_store_slot}
+  memory_fault: {matches: request_tag, action: poison_destination_and_raise_fault}

@@ -1,0 +1,20 @@
+table: spec_required_field_table
+version: v4
+required_fields:
+  - isa.profile
+  - isa.operation_classes
+  - warp_model.width
+  - warp_model.active_mask_width
+  - warp_model.reconvergence_model
+  - thread_block_grid_model.grid_dim
+  - thread_block_grid_model.block_dim
+  - scheduler_policy.policy
+  - scheduler_policy.issue_width
+  - register_file.registers_per_thread
+  - memory_hierarchy.address_spaces
+  - memory_hierarchy.cache_policy
+  - csr_dcr.registers
+  - launch_abi.argument_layout
+  - launch_abi.completion_path
+  - config_defaults
+failure_rule: missing required fields emit INSUFFICIENT_SPEC

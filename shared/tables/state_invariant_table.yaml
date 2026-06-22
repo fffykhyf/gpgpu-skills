@@ -1,0 +1,11 @@
+table: state_invariant_table
+version: v4
+invariants:
+  - id: active_mask_width_matches_warp_width
+    expression: active_mask_state.mask_width == warp_state.warp_width
+  - id: resident_warp_slots_match_spec
+    expression: len(warp_state.resident_warps) <= SPEC_IR.scheduler_policy.max_warps_per_sm
+  - id: scheduler_references_valid_warps
+    expression: scheduler_state.eligible_warps subset_of warp_state.resident_warps
+  - id: memory_request_tags_unique
+    expression: unique(memory_request_state.request_tags)

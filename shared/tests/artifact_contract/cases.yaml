@@ -1,0 +1,23 @@
+suite: artifact_contract
+version: v4
+cases:
+  - id: all_state_fields_mapped_pass
+    input: fixtures/all_state_fields_mapped_pass.yaml
+    expected_verdict: PASS
+  - id: missing_mapping_fail_closed
+    input: fixtures/missing_mapping_fail_closed.yaml
+    expected_verdict: REJECT
+  - id: config_owner_missing_reject
+    input: fixtures/config_owner_missing_reject.yaml
+    expected_verdict: REJECT
+  - id: abi_field_reinterpreted_reject
+    input: fixtures/abi_field_reinterpreted_reject.yaml
+    expected_verdict: REJECT
+  - id: debug_only_leaks_to_abi_reject
+    input: fixtures/debug_only_leaks_to_abi_reject.yaml
+    expected_verdict: REJECT
+common_reject_rules:
+  - missing field must not be invented
+  - hidden default must be rejected
+  - forbidden inference must be rejected
+  - conflicts must fail closed

@@ -1,0 +1,23 @@
+suite: state_engine
+version: v4
+cases:
+  - id: minimal_simt_initial_state_pass
+    input: fixtures/minimal_simt_initial_state_pass.yaml
+    expected_verdict: PASS
+  - id: active_mask_width_matches_warp_width
+    input: fixtures/active_mask_width_matches_warp_width.yaml
+    expected_verdict: REJECT
+  - id: resident_warp_slots_match_spec
+    input: fixtures/resident_warp_slots_match_spec.yaml
+    expected_verdict: REJECT
+  - id: invalid_scheduler_state_reject
+    input: fixtures/invalid_scheduler_state_reject.yaml
+    expected_verdict: REJECT
+  - id: missing_transition_rule_reject
+    input: fixtures/missing_transition_rule_reject.yaml
+    expected_verdict: REJECT
+common_reject_rules:
+  - missing field must not be invented
+  - hidden default must be rejected
+  - forbidden inference must be rejected
+  - conflicts must fail closed
