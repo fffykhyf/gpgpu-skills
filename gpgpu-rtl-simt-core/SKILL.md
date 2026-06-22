@@ -3,167 +3,170 @@ name: gpgpu-rtl-simt-core
 description: Use when designing, editing, or reviewing GPGPU SIMT RTL such as SIMT group lifecycle, PC, active masks, IPDOM, split/join, fetch/decode, scheduler, scoreboard, operands, register file, functional units, valid-ready, stall, flush, or commit behavior.
 ---
 
-# GPGPU RTL SIMT Core
+# GPGPU RTL SIMT Execution State Machine Skill
 
-## Overview
+## 1. Objective
 
-Use this skill for the minimal compute core of a GPGPU. Keep SIMT state explicit, keep module boundaries small, and keep RTL behavior comparable to the simulator trace. Use Rocket Chip as a reference for typed parameters, optional unit hooks, ready-valid interfaces, command/response arbitration, local perf events, and generated tile integration. Use XiangShan as a reference for backend state ownership, derived execution-unit ports, writeback consistency checks, trace/perf ownership, and memory replay boundaries. Do not use Rocket's scalar in-order pipeline or XiangShan's CPU OoO pipeline as a SIMT execution template.
+Implement the compute core as a warp/SIMT execution FSM whose PC, active mask, register, scoreboard, memory, and pipeline state transitions are traceable against the semantic oracle.
 
-## Core Rule
+## 2. Input Contract
 
-For every RTL change, define the state contract before editing logic:
+Input is an RTL execution intent with config digest, launch descriptor shape, instruction subset, oracle trace requirement, memory request contract, and target bring-up gate.
 
-- PC per SIMT group.
-- Active lane mask and predicate behavior.
-- SIMT group lifecycle: inactive, ready, issued, waiting, barrier, replay, done.
-- IPDOM, split, join, branch, and reconvergence state if control flow changes.
-- Register file read/writeback and write conflict rules.
-- Scoreboard set, clear, flush, reset, and kill rules.
-- Pipeline valid-ready, stall, flush, reset, and kill behavior.
-- Optional feature ownership: decode hook, issue packet fields, ports, config bit, trace field, perf event, and test gate.
-- Protocol boundary: request/response fields, source/tag lifetime, nack/replay/kill priority, and monitor point for LSU or control-plane interfaces.
+## 3. SIMT State Model
 
-If these cannot be stated cleanly, the module boundary is too broad or the architecture contract is incomplete.
-
-## Terminology Contract
-
-Use canonical terms for local design contracts. Preserve source aliases only when naming Vortex or MIAOW signals.
-
-| Canonical term | Source aliases | RTL contract |
+| State | Owner | Consumers |
 |---|---|---|
-| SIMT group | warp, wavefront, wave | scheduling unit with one PC and active lane mask |
-| simt_group_id | warp ID, `wfid`, wave ID, wavefront tag | table index for readiness, waits, trace, and completion |
-| active lane mask | active mask, thread mask, `tmask`, `EXEC` mask | lane participation state owned by scheduler/divergence/exec logic |
-| CTA/workgroup | CTA, block, workgroup | barrier and launch context containing SIMT groups |
-| compute core/CU | core, CU, compute unit | owner of resident SIMT groups and execution units |
+| PC per SIMT group | fetch/divergence unit | instruction fetch, trace, branch update |
+| active lane mask | divergence/predicate unit | decode, issue, FU lanes, memory coalescer, trace |
+| register file | register/operand unit | operand read, writeback, oracle diff |
+| scoreboard/dependency graph | issue/writeback/hazard unit | scheduler readiness, operand read, replay |
+| pending memory ops | LSU/memory interface | scheduler wait, response demux, writeback |
+| barrier/replay state | CTA/workgroup control and replay owner | scheduler readiness, pipeline kill/reissue |
+| pipeline registers | fetch/decode/issue/execute/writeback units | valid-ready, stall, flush, trace |
 
-## Preferred Pipeline Boundaries
+Keep these owners separate enough that each state transition can be tested and traced.
 
-| Stage or unit | Responsibility |
-|---|---|
-| schedule | choose a ready SIMT group, expose stall reason, track lifecycle |
-| fetch | request instruction by PC and handle I-cache response |
-| decode | turn instruction bits into control fields |
-| issue | buffer decoded instructions, check hazards, select issue slots |
-| operands | read registers without hiding hazard ownership |
-| dispatcher | route issue slots to ALU/FPU/LSU/SFU/TCU |
-| execute | produce unit results and memory requests |
-| commit | apply writeback, update scoreboard, emit trace |
-| integration shell | expose configured ports, debug/perf/trace, runtime-visible status, and protocol monitor hooks |
+## 4. Mandatory Five Questions
 
-Avoid a single module that schedules, decodes, reads registers, executes, writes back, and drives memory.
+For every RTL change answer:
 
-## GPGPU-Sim Translation Rules
+1. What state exists? Name the SIMT group, mask, register, dependency, memory, or pipeline state.
+2. Who produces it? Name the RTL unit and accepted input event.
+3. Who consumes it? Name scheduler, FU, LSU, writeback, runtime status, trace, or PPA counter.
+4. How does it change? Define reset, issue, stall, completion, replay, flush, kill, and done transitions.
+5. How do we verify it? Name oracle diff, assertion, unit test, trace check, or regression.
 
-Use GPGPU-Sim's shader core as a state checklist, not an RTL template:
+## 5. Transformation Rules: Pipeline FSM
 
-| GPGPU-Sim anchor | RTL owner to define |
-|---|---|
-| `shd_warp_t` | resident SIMT-group table: valid, PC, active mask, waiting, outstanding stores, instruction buffer |
-| `simt_stack` | branch/divergence/reconvergence state and active-mask update rules |
-| `scheduler_unit::cycle()` | readiness equation, issue arbitration, stall reason, FU availability |
-| `scoreboard` | register dependency set/clear, flush, kill, and reset behavior |
-| `opndcoll_rfu_t` | operand collector, register-bank pressure, and read-port arbitration |
-| `issue_warp()` | accepted issue packet with SIMT context and scoreboard reserve |
-| `writeback()` | destination write, scoreboard release, pipeline count update, trace event |
-
-Translate every C++ queue, vector, and helper call into explicit capacity, valid-ready, reset, flush, and kill behavior.
-
-## Rocket Chip RTL Integration Pattern
-
-Use Rocket Chip as the reference for integrating optional units without blurring ownership:
-
-| Pattern | Rocket Chip anchor | Local SIMT rule |
-|---|---|---|
-| typed core params | `RocketCoreParams`, `RocketTileParams` | Keep feature flags, widths, counters, and optional ports in a typed config surface. |
-| optional decode hooks | Rocket decode table with optional M/A/F/D/RoCC/vector features | New uop classes must declare decode, issue, scoreboard, writeback, trace, and test effects together. |
-| ready-valid interfaces | `DecoupledIO`, `HellaCacheIO`, RoCC cmd/resp | Define backpressure, kill, nack, replay, exception, and response arbitration explicitly. |
-| accelerator command path | `LazyRoCC.scala` command router and response arbiter | Treat external or optional execution units as command/response clients with busy, fault, and interrupt/status semantics. |
-| local events | Rocket event sets and cache perf events | Add perf events close to scheduler, scoreboard, LSU, and FU owners. |
-
-Borrow the integration pattern. Do not replace SIMT scheduler, active-mask, reconvergence, CTA, or lane semantics with CPU concepts.
-
-## XiangShan Backend State Pattern
-
-Use XiangShan's backend as a state-ownership checklist, not as a SIMT template:
-
-| Backend pattern | XiangShan anchor | Local RTL SIMT rule |
-|---|---|---|
-| module ownership | `Backend.scala`, `CtrlBlock.scala`, DataPath, Region | Keep scheduler, scoreboard, operand, register, FU, writeback, trace, and control recovery owners separate. |
-| derived issue/writeback | `BackendParams.scala` | Derive issue slots, read ports, writeback ports, and wakeup paths from configured FU/lane resources. |
-| config checks | `params.configChecks`, writeback-port `require`s | Reject missing writeback priority, port mismatch, and unsupported execution-unit combinations at generation time. |
-| recovery/control state | CtrlBlock redirect and snapshot recovery | Translate to SIMT branch/divergence/reconvergence, kill, replay, and barrier recovery ownership. |
-| vector metadata | VFPU and vector LSU docs/source | Borrow mask, element, merge, and exception metadata concepts for lane-level operations. |
-| local events | `TopDownGen.scala`, perf event wiring | Emit scheduler, scoreboard, FU, replay, and memory events near the module owner. |
-
-Do not add ROB, rename, or precise CPU commit to a SIMT core merely because XiangShan uses them. Translate the discipline into explicit SIMT group lifecycle, active lane mask, scoreboard, barrier, replay, and trace contracts.
-
-Before implementing issue or hazard logic, the state contract must also list the per-SIMT-group tables that own readiness:
-
-| Table | Owns |
-|---|---|
-| valid entry | decoded instruction residency and removal on halt, branch, waitcnt, barrier, or issue |
-| FU class | SALU, SIMD, SIMF, LSU destination for the resident instruction |
-| GPR dependency | SGPR/VGPR source and destination readiness |
-| SPR dependency | EXEC, VCC, SCC, M0 readiness |
-| memory wait | LSU in-flight block and release by done simt_group_id |
-| branch wait | branch issued but not resolved |
-| barrier wait | CTA/workgroup barrier arrival and release |
-| in-flight limit | maximum outstanding instruction or finished-SIMT-group state |
-
-Use an explicit readiness equation. A concrete LSU issue condition is:
+The baseline pipeline state machine is:
 
 ```text
-ready = fu_lsu & valid & gpr_spr_ready & ~max_inflight & ~mem_wait & ~branch_wait & ~barrier_wait
+fetch -> decode -> issue -> execute -> writeback
 ```
 
-For non-LSU units, remove only the wait terms that truly do not apply. Do not collapse these owners into a single unexplainable `ready`.
+| Stage | Input state | Transformation | Output state | Gate |
+|---|---|---|---|---|
+| fetch | ready SIMT group and PC | request instruction, handle stall/flush | instruction word and PC trace | fetch trace matches oracle PC |
+| decode | instruction word/config | produce uop, operands, FU class, control metadata | decode packet | illegal/unsupported op test |
+| issue | decoded packet, mask, scoreboard, FU availability | reserve dependencies and select FU | issue packet | scoreboard set/assertion |
+| execute | issue packet | compute ALU/FPU/SFU/control or memory request | result, branch update, memory op | oracle semantic diff |
+| writeback | result or memory response | update register file, scoreboard, PC/mask/done state | committed trace event | trace diff and dependency release |
 
-## Instruction Impact Checklist
+Every valid-ready boundary must define stall, flush, kill, replay, and reset priority.
 
-For each instruction or uop class, state whether it changes:
+## 6. Warp Scheduler Policy
 
-- PC or next PC.
-- active lane mask, predicate mask, split/join stack, or SIMT group status.
-- integer, floating, vector, or predicate registers.
-- scoreboard or in-flight state.
-- memory request, response, fence, or replay state.
-- barrier, CTA, CSR, or launch-visible state.
-- protocol-visible fields such as source/tag, byte mask, lane mask, ordering, exception, or completion status.
-- perf/debug/trace counters or runtime-visible status.
+Scheduler readiness must be an explicit equation over owned state. Example:
 
-An issue packet should carry at least simt_group_id, PC, active lane mask, opcode/FU type, source and destination fields, memory metadata, scheduler or issue slot ID when relevant, and trace identity.
+```text
+ready =
+  valid
+  & instruction_available
+  & active_mask_nonzero
+  & scoreboard_sources_ready
+  & fu_available
+  & ~memory_wait
+  & ~barrier_wait
+  & ~replay_wait
+  & ~done
+```
 
-## Bring-Up Order
+For each scheduler policy, state:
 
-1. Single SIMT group, single issue, ALU-only, no divergence.
-2. Multi-SIMT-group round-robin scheduler.
-3. Register writeback and scoreboard.
-4. Active mask and predicated execution.
-5. Branch plus simplified divergence/reconvergence state.
-6. LSU connection through the memory-path contract.
-7. Barrier, CTA/workgroup dispatch, and full SIMT group lifecycle.
+- arbitration rule: round-robin, age, priority, or fixed.
+- fairness/deadlock assumption.
+- stall reason priority.
+- how branch, barrier, memory, and replay states block or release readiness.
+- counters produced for PPA.
 
-## Local References
+## 7. Hazard Rules
 
-For deeper Vortex background tied to this skill, read `vortex_local.md` in this directory. It explains SIMT state, scheduler/fetch/decode/issue/execute/commit boundaries, and simulator-aligned RTL contracts.
+| Hazard | Rule |
+|---|---|
+| RAW | issue only when all source dependencies are clear or bypass is explicitly defined |
+| WAR/WAW | define whether pipeline is in-order enough to avoid them or add dependency tracking |
+| scoreboard set | reserve destination before accepted issue |
+| scoreboard clear | clear only on owning writeback/kill/flush transition |
+| memory dependency | pending memory op owns wait state until response/fault/replay/fence completion |
+| divergence | branch updates PC/mask/reconvergence state atomically with trace event |
+| replay/kill | replay must preserve or reconstruct issue packet and dependency state |
+| barrier | CTA/workgroup arrival/release must not strand active SIMT groups |
 
-For deeper MIAOW background tied to this skill, read `miao_local.md` in this directory. It explains the CU RTL path, fetch and wavepool state, issue readiness equations, scoreboard dependency tables, EXEC/VCC/SCC/M0 ownership, FU writeback, and trace signals.
+## 8. Issue Packet Contract
 
-For deeper GPGPU-Sim background tied to this skill, read `gpgpusim_local.md` in this directory. It explains `shd_warp_t`, `simt_stack`, scheduler readiness, dynamic `warp_inst_t` issue packets, scoreboard release, operand collection, and RTL translation caveats.
+An accepted issue packet must carry:
 
-For deeper Rocket Chip background tied to this skill, read `rocket_local.md` in this directory. It explains typed core/tile params, optional-unit hooks, ready-valid command/response wiring, RoCC arbitration, HellaCache IO, local perf events, and SIMT translation caveats.
+- kernel ID, compute core/CU ID, simt_group_id.
+- PC and next-PC metadata.
+- active lane mask and predicate mask.
+- opcode, FU class, instruction modifiers.
+- source/destination register IDs and register class.
+- scoreboard reservation metadata.
+- memory metadata: op, address-space class, width, lane mask, ordering/fence bits.
+- trace identity and scheduler/issue-slot ID.
+- kill/replay eligibility.
 
-For XiangShan background tied to this skill, read `xiangshan_local.md` in this directory. It explains backend module ownership, `BackendParams` derived ports, writeback checks, CtrlBlock recovery, vector metadata, trace/perf hooks, and the CPU-specific pieces that must not be copied into SIMT RTL.
+Missing fields must be justified by the current bring-up stage.
 
-## Common Mistakes
+## 9. State Evolution
 
-- Treating active mask as a temporary signal instead of core SIMT state.
-- Adding branch or barrier behavior without reconvergence or wakeup rules.
-- Hiding hazard behavior inside operand read logic.
-- Letting backpressure rely on implicit ordering between unrelated always blocks.
-- Copying GPGPU-Sim C++ timing order without specifying RTL handshakes, table capacity, and reset/flush behavior.
-- Debugging only through waveform browsing instead of simulator/RTL trace alignment.
-- Copying Rocket's scalar core structure instead of only borrowing its config, optional-unit, ready-valid, event, and integration patterns.
-- Adding an optional unit without decode, scoreboard, trace, perf, config, and protocol ownership.
-- Copying XiangShan's rename/ROB/precise-commit pipeline instead of translating its ownership checks into SIMT group, active lane mask, scoreboard, and barrier/replay rules.
+| Event | State change |
+|---|---|
+| launch dispatch | allocate SIMT group, initialize PC/mask/register context, clear scoreboard and pending memory |
+| accepted issue | reserve destination, mark pipeline/FU busy, emit issue trace |
+| ALU writeback | update register file, clear dependency, advance PC, emit commit trace |
+| branch/divergence | update PC, active mask, reconvergence state, flush younger invalid work |
+| memory issue | allocate pending memory entry, send memory request, block dependent readiness |
+| memory response | demux by tag, update registers or fault state, clear pending memory/dependency |
+| replay/nack | restore issue eligibility while preserving architectural state |
+| barrier arrive/release | update CTA/workgroup barrier state and scheduler readiness |
+| halt/done | mark SIMT group done and release resources deterministically |
+| reset/kill | clear or restore owned state according to priority table |
+
+## 10. Output Contract: Execution Trace Output
+
+RTL trace must include:
+
+- fetch/decode/issue/writeback records.
+- PC, active mask, opcode, simt_group_id, scheduler decision, stall reason.
+- scoreboard set/clear and dependency graph events.
+- register writeback value and destination.
+- memory issue/response/fault tags.
+- branch/divergence and barrier events.
+- config digest and launch descriptor identity.
+
+## 11. Verification Gate
+
+| Gate | Required proof |
+|---|---|
+| smoke | single SIMT group ALU-only trace matches oracle |
+| scheduling | multi-SIMT group policy and stall reasons are deterministic |
+| dependency | RAW and writeback scoreboard tests pass, including negative hazard case |
+| mask/divergence | predicated and branch traces match oracle PC/mask transitions |
+| memory interface | issue packet and memory request trace match memory-path contract |
+| reset/flush/kill | priority table is asserted and covered |
+| trace diff | first divergence tool can map RTL event to oracle event |
+
+## 12. Design Evidence Layer
+
+Use references only as evidence:
+
+| Evidence | Use |
+|---|---|
+| GPGPU-Sim | behavioral evidence for warp state, SIMT stack, scheduler, scoreboard, issue/writeback traces |
+| Rocket Chip | structural reference for typed params, optional hooks, ready-valid interfaces, events, integration shells |
+| Vortex/MIAOW | implementation anchors for GPU SIMT pipeline boundaries, issue equations, trace signals |
+| XiangShan | tradeoff justification for state ownership, derived issue/writeback ports, recovery, counter placement |
+| golden sim | semantic evidence for PC/mask/register/memory side effects |
+
+Do not copy CPU rename, ROB, scalar commit, or framework chapter structure into SIMT design.
+
+## 13. Failure Modes
+
+- Active mask is treated as temporary datapath instead of architectural SIMT state.
+- Scheduler readiness collapses all dependency causes into one opaque `ready`.
+- Scoreboard clears on the wrong response or survives kill/reset incorrectly.
+- Branch updates PC without atomic mask/reconvergence state.
+- Memory tags do not preserve SIMT group, lane mask, and destination.
+- Waveform-only debug replaces oracle trace diff.

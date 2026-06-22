@@ -3,157 +3,173 @@ name: gpgpu-ppa-evaluation
 description: Use when evaluating GPGPU performance, power, area, timing, energy, counters, bottlenecks, workload matrices, SAIF or VCD activity, synthesis reports, FPGA results, McPAT, GPUWattch, AccelWattch, or architecture tradeoffs.
 ---
 
-# GPGPU PPA Evaluation
+# GPGPU PPA Evidence Compiler Skill
 
-## Overview
+## 1. Objective
 
-Use this skill when a GPGPU change needs evidence beyond functional correctness. PPA conclusions must bind workload, backend, configuration, counters, activity, and reports into a controlled comparison. Use Rocket Chip as the reference for keeping named configs, local perf events, cache/memory counters, traces, regression flows, and generated hardware evidence tied together. Use XiangShan as the reference for HPM event ownership, TopDown bottleneck decomposition, checkpoint/SimPoint methodology, and careful separation between research prototype evidence and architecture claims.
+Compile verified traces, counters, reports, and workload metadata into controlled performance, power, and area claims with causal feedback to architecture, config, RTL, memory, or runtime.
 
-## Core Rule
+## 2. Input Contract
 
-Do not claim a design is better without a baseline, variant, workload, configuration, backend, metric, evidence path, and interpretation. Classify the result before reporting it:
+Input is an evaluation intent with baseline candidate, variant candidate, workload, backend, config digest, correctness gate, metric target, and expected feedback owner.
 
-| Claim | Required evidence |
+## 3. PPA State Model
+
+PPA evidence must preserve the GPU state that caused the metric:
+
+| Evidence state | Required binding |
 |---|---|
-| optimization claim | controlled baseline and variant with one intended variable changed |
-| credibility claim | working correctness path plus RTL, FPGA, synthesis, benchmark, or power/area evidence showing the prototype is real |
-| exploratory observation | multiple variables changed or incomplete counters; label as hypothesis |
+| launch state | kernel image, args, grid/block shape, queue timeline, launch latency |
+| compute state | PC/mask/register effects, issued SIMT groups, occupancy, divergence |
+| dependency state | scoreboard stalls, operand stalls, replay, barrier, hazard graph counters |
+| memory state | load/store count, coalescing, cache hits/misses, MSHR, bank, NoC/L2/DRAM pressure |
+| pipeline state | fetch/decode/issue/execute/writeback utilization and stalls |
+| config state | source config, derived topology, ABI version, backend, commit/report path |
+| physical state | area hierarchy, timing/Fmax/WNS, power/energy, activity source |
 
-A credibility claim can cite ISA scope, benchmark capability, FPGA prototype data, and ASIC-style estimates, but it must also state relaxed design goals and comparison caveats.
+## 4. Mandatory Five Questions
 
-Any PPA claim must also identify the generated configuration and instrumentation contract. If a change affects protocol widths, source IDs, cache/MSHR resources, optional units, runtime queues, or memory maps, the report must say which counters or traces prove that the configured hardware was the hardware evaluated.
+For every PPA claim answer:
 
-## Terminology Contract
+1. What state exists? Name workload, config, launch, compute, memory, dependency, pipeline, or physical state.
+2. Who produces it? Trace, counter owner, synthesis tool, power model, runtime, or benchmark harness.
+3. Who consumes it? Architecture decision, config update, RTL/memory/runtime feedback, or report.
+4. How does it change? Define baseline-to-variant controlled diff and causal path.
+5. How do we verify it? Name correctness gate, counter audit, report provenance, and reproducibility command.
 
-Use canonical terms in config IDs, counter names, and PPA tables. Keep source aliases only when reporting a specific backend counter.
+## 5. Baseline Definition
 
-| Canonical term | Source aliases | Evaluation meaning |
-|---|---|---|
-| SIMT group | warp, wavefront, wave | scheduling group counted for issue, stalls, occupancy, and launch shape |
-| simt_group_id | warp ID, `wfid`, wave ID, wavefront tag | trace/counter identity when per-group data is reported |
-| active lane mask | active mask, thread mask, `tmask`, `EXEC` mask | lane utilization and divergence evidence |
-| CTA/workgroup | CTA, block, workgroup | workload launch unit and local-memory/barrier scope |
-| compute core/CU | core, CU, compute unit | resource unit for area, power, counters, and occupancy |
+Baseline must be strict:
 
-## Minimum Evaluation Record
+- exact commit and config digest.
+- backend: golden sim, RTL sim, FPGA, synthesis, analytic model, or power model.
+- workload and input size.
+- launch shape and runtime path.
+- correctness status and trace/regression gate.
+- metric collection commands and report paths.
+- known limitations and unsupported features.
 
-| Field | Required content |
+No baseline means no improvement claim.
+
+## 6. Variant Definition
+
+Variant must be a controlled diff:
+
+- one intended architecture/config/RTL/memory/runtime variable changed.
+- all unrelated config, workload, tool, and backend inputs held constant.
+- generated topology summary recorded.
+- monitor/assertion status preserved.
+- if multiple variables changed, label result exploratory and split follow-up experiments.
+
+## 7. Workload Model
+
+A workload record must contain:
+
+- kernel or benchmark name and version.
+- input data, memory image, and random seeds.
+- launch dimensions and local/shared memory.
+- runtime queue/event/fence path.
+- warmup, sampling, checkpoint, or region selection.
+- correctness oracle and expected output/trace status.
+
+## 8. Metric Model
+
+| Metric class | Required fields |
 |---|---|
-| config_id | commit, build flags, compute core/CU, SIMT-group/thread, memory/cache, ISA/features |
-| baseline | unchanged reference with exact command or report path |
-| variant | changed design with one intended variable changed |
-| workload | kernel or benchmark, input size, launch shape, memory image |
-| backend | simulator, RTL sim, synthesis, FPGA, or analytic model |
-| correctness | pass/fail, trace diff state, known limitations |
-| counters | cycles, instrs, IPC, stalls, load/store, cache, memory |
-| reports | area, timing, Fmax, power, SAIF/VCD, trace, visualization, or model output |
-| interpretation | what the data supports and what it does not support |
+| latency | total cycles/time, launch latency, kernel cycles, memory latency, queue wait |
+| throughput | IPC, issued SIMT groups, active lanes, occupancy, memory bandwidth |
+| energy | power model, activity source, duration, dynamic/static split, calibration caveat |
+| area | hierarchy, technology/device, resource type, generated features, utilization |
+| timing | target clock, achieved Fmax, WNS/TNS, critical path owner, constraints |
 
-If multiple variables changed, split the experiment or label the result as exploratory.
+Counters must name producer modules, trigger conditions, and reset/sample windows.
 
-For generated designs, include the config fragment or option dump, derived topology summary, public capability/version output when present, and monitor status for the protocol under test.
+## 9. Transformation Rules: Causal Attribution Engine
 
-## Correctness Before PPA
+Attribute performance changes into controlled buckets:
 
-Use this order:
+| Bucket | Evidence required |
+|---|---|
+| scheduler gain | fewer scheduler idle cycles, higher ready SIMT groups, lower scoreboard stalls |
+| memory gain | lower memory latency, fewer misses/replays/bank conflicts/MSHR stalls, higher coalescing efficiency |
+| compute gain | higher FU utilization, lower execute latency, fewer issue/operand stalls |
+| launch/runtime gain | lower queue wait, launch latency, transfer/fence overhead |
+| config effect | topology/resource change tied to generated config and capability output |
+| artifact/noise | tool variance, workload sampling, frequency change, incorrect baseline, missing correctness gate |
 
-1. Correctness gate: smoke/regression/trace diff passes.
-2. Performance gate: counters explain the observed speedup or slowdown.
-3. Area/timing gate: synthesis or FPGA reports show resource and frequency impact.
-4. Power/energy gate: vectorless or activity-annotated estimate is identified.
+Do not claim cause from a single summary speedup number.
 
-An incorrect design's IPC is not useful evidence.
+## 10. State Evolution
 
-## Counter Schema
+PPA state evolves from verified baseline and variant records into a causal evidence graph. Each metric change must be traced to a changed GPU state, then routed as feedback to the contract owner that can act on it.
 
-Prefer adding counters before tuning:
+## 11. Evidence Graph
 
-- total cycles and committed instructions
-- IPC and issued SIMT groups
-- scheduler idle and active SIMT groups
-- scoreboard, operand, ALU/FPU/LSU/SFU/TCU stalls
-- branch and divergence counts
-- load/store requests and latency
-- coalescer misses or merge rate
-- cache reads/writes, misses, bank stalls, MSHR stalls
-- replay, nack, kill, flush, TLB miss, uncached/MMIO, source/tag exhaustion, and ordering/fence stalls when modeled
-- runtime launch latency, command queue occupancy, completion latency, memory latency, interconnect/L2/DRAM queue pressure, and trace sampling scope when modeled
+Every report should build this graph:
 
-If counters are missing, state whether the conclusion is a hypothesis or measured fact.
+```text
+controlled diff
+  -> changed GPU state
+  -> changed counter/trace event
+  -> changed metric
+  -> supported claim
+  -> feedback target
+```
 
-## XiangShan HPM And TopDown Pattern
+Example feedback targets:
 
-Use XiangShan as the reference for evidence that explains why a result changed:
+- architecture: revise state contract or invariant.
+- config: add derived parameter, legality check, or config ID field.
+- runtime: change launch/queue/fence behavior.
+- golden sim: add trace field or semantic/timing check.
+- RTL: fix scheduler, pipeline, scoreboard, or counter owner.
+- memory: fix coalescer/cache/MSHR/replay/fence behavior.
 
-| Evidence contract | XiangShan anchor | Local PPA rule |
-|---|---|---|
-| hardware event ownership | PDF HPM chapter, `PMParameters.scala` | Put counters near the module that owns the event, and document trigger conditions. |
-| counter selection | `mhpmcounter3-31`, HPM event selectors | Keep event selection, grouping, privilege/sample domain, and overflow behavior reproducible. |
-| top-down attribution | `TopDownGen.scala`, debugTopDown ports | Roll counters into bottleneck classes before claiming a specific optimization cause. |
-| memory bottlenecks | LSU/DCache/MMU/CoupledL2 chapters | Separate replay, TLB miss, DCache miss, MSHR full, uncache/MMIO, L2, and protocol stalls. |
-| workload sampling | NEMU checkpoint and SimPoint flow | Use checkpoints, sampled regions, and weights for long workloads instead of ad hoc partial runs. |
-| artifact discipline | XiangShan MICRO methodology | Tie functional verification, debug traces, performance validation, and artifact provenance together. |
+## 12. Output Contract
 
-For local GPGPU work, translate frontend/backend/memory/cache into launch/dispatch, scheduler/issue, SIMT divergence, register/operand, LSU/coalescer, cache/TLB/NoC/DRAM, barrier, and atomic classes.
+PPA output must include:
 
-## Rocket Chip Evidence Pattern
+- baseline record.
+- variant record.
+- workload model.
+- metric table.
+- correctness gate status.
+- counter/trace provenance.
+- area/timing/power provenance where used.
+- causal attribution graph.
+- limitations and next feedback target.
 
-Use Rocket Chip as the reference for placing evidence near the logic:
+## 13. Verification Gate
 
-| Evidence | Rocket Chip anchor | Local rule |
-|---|---|---|
-| core events | `RocketCore` event sets | Count issue, stalls, replay, flush, branch/divergence, and unit interlocks at the owner module. |
-| cache/memory events | `HellaCachePerfEvents`, DCache events | Count misses, grants/responses, blocked cycles, TLB misses, uncached/MMIO, and queue pressure in the memory path. |
-| trace path | `trace/` encoder/controller/sink | Preserve trace configuration, sampling scope, and event schema with the report. |
-| config comparison | named `Configs.scala` fragments | Compare named configs with one intended variable changed. |
-| harness/regression | `TestHarness`, `regression/`, Verilator support | Record the correctness gate and backend used before interpreting counters. |
+| Gate | Required proof |
+|---|---|
+| correctness | baseline and variant pass smoke/regression/oracle trace gate |
+| reproducibility | commands, config digests, report paths, workload inputs are recorded |
+| controlled diff | exactly one intended variable changed or result is labeled exploratory |
+| counter audit | counters map to owner modules and explain metric direction |
+| physical audit | tool/device/technology/clock/activity source are recorded |
+| attribution | evidence graph connects state change to metric change |
+| feedback | next architecture/config/RTL/memory/runtime action is identified |
 
-Borrow the evidence discipline, not Rocket's CPU-specific event meanings.
+## 14. Design Evidence Layer
 
-## GPGPU-Sim Evidence Loop
+Use references only as evidence:
 
-Use GPGPU-Sim as the reference for simulator-based evidence:
+| Evidence | Use |
+|---|---|
+| GPGPU-Sim/AccelWattch | behavioral and power-model evidence for simulator counters, traces, activity, model caveats |
+| Rocket Chip | structural reference for local perf events, generated configs, harness/regression evidence |
+| Vortex/MIAOW | implementation anchors for GPU synthesis, FPGA, benchmark, and prototype credibility evidence |
+| XiangShan | tradeoff justification for HPM ownership, top-down bottleneck decomposition, checkpoint methodology |
+| papers | empirical justification only when baseline, variant, workload, and limitations are comparable |
 
-1. Record workload, input size, kernel name, launch shape, and runtime path.
-2. Record config file path or digest.
-3. Run correctness gate before reading performance.
-4. Collect core counters: cycles, instructions, issue rate, active/idle SIMT groups, scheduler stalls.
-5. Collect memory counters: load/store count, memory latency, cache hits/misses, MSHR stalls, ICNT/L2/DRAM pressure.
-6. Capture trace samples only with documented component/core/memory-partition sampling.
-7. If using AccelWattch or another power model, record model version, XML/config file, activity source, and calibration caveat.
-8. Compare against a baseline with one intended variable changed.
+Frameworks and papers support evidence nodes; they must not be report sections that replace causal analysis.
 
-Simulator counters can support architecture hypotheses and bottleneck analysis. They are not RTL timing closure or silicon power evidence by themselves.
+## 15. Failure Modes
 
-## Power And Area Discipline
-
-- Report target clock, tool, device or technology, and build flags.
-- Distinguish vectorless power from SAIF/VCD-annotated power.
-- Keep SAIF/VCD tied to the workload that produced it.
-- Record WNS and estimated Fmax, not only "timing passed".
-- Preserve hierarchical area and power when the change is localized.
-- When comparing to a commercial GPU or paper number, state process node, clock, CU count, memory system, compiler/runtime path, workload, estimation method, and which goals were relaxed. Do not imply PPA optimality from a research prototype credibility number.
-
-## Common Mistakes
-
-- Reporting speedup without cycle and stall breakdown.
-- Comparing different configs or workloads and calling it an architecture win.
-- Treating simulator counters as silicon timing or power without caveats.
-- Using SAIF/VCD from a different workload or config.
-- Reporting AccelWattch, McPAT, or GPUWattch output without model version, config, activity source, and calibration status.
-- Keeping only summary numbers and losing the command or report path.
-- Adding counters far from the event owner, making them impossible to reconcile with trace or RTL behavior.
-- Comparing generated variants without recording the config fragment, derived topology, and protocol monitor status.
-- Claiming a XiangShan-style top-down bottleneck without showing the counter owner, workload sample, config, and correctness gate behind it.
-
-## Local References
-
-For deeper Vortex background tied to this skill, read `vortex_local.md` in this directory. It explains synthesis reports, counters, backend evidence, and full-stack reproducibility for PPA work.
-
-For deeper MIAOW background tied to this skill, read `miao_local.md` in this directory. It explains the MIAOW paper's FPGA, area, power, performance, OpenCL/Rodinia, and comparison evidence, plus the caveats that prevent overclaiming.
-
-For deeper GPGPU-Sim background tied to this skill, read `gpgpusim_local.md` in this directory. It explains reproducible config records, runtime/cycle/memory counters, trace sampling, AerialVision, AccelWattch, and power-model caveats.
-
-For deeper Rocket Chip background tied to this skill, read `rocket_local.md` in this directory. It explains local perf events, HellaCache counters, trace infrastructure, named configs, TestHarness/regression/Verilator support, and how to bind PPA evidence to config and workload.
-
-For XiangShan background tied to this skill, read `xiangshan_local.md` in this directory. It explains HPM/TopDown counters, backend and memory event ownership, NEMU instruction/profiling support, checkpoint/SimPoint flow, and how to adapt those evidence patterns to GPGPU PPA evaluation.
+- Speedup is reported without baseline, variant, workload, config, and correctness gate.
+- Multiple variables changed but claim is written as a causal conclusion.
+- Simulator counters are treated as silicon timing or power.
+- SAIF/VCD, power model, or synthesis report is detached from workload/config.
+- Counter names exist but producer modules and trigger conditions are unknown.
+- PPA feedback does not route back to a specific contract owner.

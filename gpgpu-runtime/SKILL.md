@@ -3,155 +3,143 @@ name: gpgpu-runtime
 description: Use when designing, editing, or reviewing GPGPU runtime, host/device launch, driver API, command queue, MMIO or DCR control, doorbell, DMA, buffer, module, kernel handle, kernel entry, args, grid/block/CTA/workgroup dispatch, event, fence, cache flush, or synchronization behavior.
 ---
 
-# GPGPU Runtime
+# GPGPU Runtime Skill
 
-## Overview
+## 1. Objective
 
-Use this skill when host software, launch ABI, command submission, or kernel entry behavior defines the system boundary. Runtime work should turn a testbench-driven core into a reusable device interface without exposing RTL internals as public API. Use Rocket Chip as the reference for boot/reset resources, debug transport, MMIO/resource descriptions, TestHarness wiring, and RoCC-style command/response/memory/busy/interrupt accelerator control. Use XiangShan as the reference for reproducible build/run/difftest commands, reset/debug/trace/perf control surfaces, full-system images, checkpoint workflows, and separation between debug bring-up and public runtime ABI.
+Split runtime work into R0 launch ABI definition and R1 execution backend so host software transforms launch intent into deterministic GPU launch state without exposing RTL internals.
 
-## Core Rule
+## 2. Input Contract
 
-Define the launch contract before building features around it:
+Input is a launch/runtime intent with config digest, kernel image expectations, argument model, memory spaces, queue/control-plane needs, target backend, and required synchronization/fault behavior.
 
-- how the program or module is loaded
-- how the kernel entry PC is selected
-- how arguments are staged and addressed
-- how grid, CTA/workgroup, SIMT group, and thread IDs are derived
-- how memory buffers move between host and device
-- how start, completion, fence, event, and cache flush are observed
-- how reset, boot/program load, debug, fault, capability/version, and interrupt/status paths are exposed
-- which parts are public API, backend transport, and test-only scaffolding
+## 3. Runtime State Model
 
-No formal runtime interface should depend on poking internal RTL signals.
+Map every runtime decision into canonical GPU state:
 
-## Terminology Contract
-
-Use canonical runtime terms in APIs, launch records, and ABI docs. Preserve backend names only at the HAL boundary.
-
-| Canonical term | Source aliases | Runtime meaning |
-|---|---|---|
-| SIMT group | warp, wavefront, wave | execution group launched inside a CTA/workgroup |
-| simt_group_id | warp ID, `wfid`, wave ID, wavefront tag | per-launch or per-core identity for a SIMT group |
-| active lane mask | active mask, thread mask, `tmask`, `EXEC` mask | initial or runtime lane participation state |
-| CTA/workgroup | CTA, block, workgroup | launch group with block/workgroup IDs and local memory |
-| compute core/CU | core, CU, compute unit | device execution resource |
-
-## Minimal Launch State Machine
-
-1. Open device or simulator backend.
-2. Allocate or map device buffers.
-3. Load program/module and resolve kernel entry.
-4. Stage kernel arguments.
-5. Program grid/block/CTA/workgroup dimensions and local memory size.
-6. Submit launch through a queue or explicit start command.
-7. Wait for completion with a defined status/event path.
-8. Copy results back and release resources.
-
-This can be small, but it must be the same conceptual path for simulator and RTL tests.
-
-## GPGPU-Sim Launch Model
-
-Use GPGPU-Sim as the reference for a software launch path that does not poke RTL internals:
-
-| Runtime step | GPGPU-Sim anchor | Local requirement |
-|---|---|---|
-| configure launch | `cudaConfigureCallInternal` | capture grid/block, shared/local memory, stream/queue |
-| stage args | `cudaSetupArgumentInternal` | record argument bytes, sizes, offsets, and alignment |
-| create descriptor | `cudaLaunchInternal`, `kernel_info_t` | resolve kernel entry and create a stable kernel descriptor |
-| enqueue work | `stream_operation` | order memcpy, launch, event, wait, and completion |
-| backend admission | `gpu->can_start_kernel()`, launch latency | gate launch by capacity, latency, and max concurrent kernels |
-| CTA dispatch | `issue_block2core()` | allocate per-core resources and initialize SIMT groups |
-
-A local runtime may use a simpler API than CUDA/OpenCL, but it still needs launch config, argument staging, kernel lookup, queue operation, backend admission, and completion semantics.
-
-## Interface Layers
-
-| Layer | Owns |
+| Runtime state | Canonical GPU state |
 |---|---|
-| public runtime API | device, buffer, module, kernel, queue, event handles |
-| transport HAL | backend open/close, register read/write, host memory allocation |
-| command/control plane | queue entries, doorbells, DCR/MMIO writes, DMA, launch, fence, event |
-| kernel ABI | entry PC, args pointer, grid/block IDs, CTA/workgroup state, local memory |
-| resource/capability plane | version, device properties, memory map, queue limits, debug/perf/trace availability |
-| debug/bring-up plane | reset vector or program-load path, debug transport, fault readout, timeout and success reporting |
-| tests | one launch workload that runs through the public path |
+| device/capability state | config-visible limits, memory map, queue limits, feature bits, version |
+| module/kernel state | kernel image, entry PC, instruction memory, symbol table, required resources |
+| argument state | argument bytes, alignment, pointer mapping, constant/local/shared memory bindings |
+| launch state | grid/block dimensions, CTA/workgroup IDs, SIMT group allocation, local memory size |
+| queue state | command records, ordering, doorbell/MMIO/DCR writes, backend admission, dependencies |
+| execution state | running/completed/faulted kernel, event/fence, timeout, interrupt/status, cache visibility |
 
-Keep these layers separate so a new backend does not rewrite the API.
+## 4. Mandatory Five Questions
 
-Classify the early control-plane form before changing launch behavior:
+For every runtime change answer:
 
-| Mode | Allowed use | Risk |
-|---|---|---|
-| testbench C hook | unit-test setup, direct SGPR/VGPR initialization, fast trace regressions | becomes a fake public API |
-| hard dispatcher | resource allocation, SIMT-group tags, VGPR/SGPR/LDS/GDS bases, done/deallocation | config drift with compute core/CU capacity |
-| FPGA MMIO control | program load, register/memory init, start, done, memory-service handshake | host offsets drift from RTL decode |
+1. What state exists? Name ABI, queue, launch, memory, completion, or fault state.
+2. Who produces it? Host API, loader, queue builder, MMIO writer, backend, or device.
+3. Who consumes it? Golden sim, RTL dispatcher, memory path, kernel code, event/fence wait, or PPA.
+4. How does it change? Define state transition and ordering semantics.
+5. How do we verify it? Name ABI fixture, launch smoke, negative test, trace, or backend diff.
 
-Even the smallest runtime/control plane must define program load, state initialization, dispatch fields, start, done/status, memory service, result readback, and cleanup. Test-only internal pokes must be labeled test-only.
+## 5. R0: Launch ABI Contract
 
-## Rocket Chip Control-Plane Pattern
+R0 must execute before backend-specific runtime work.
 
-Use Rocket Chip as the reference for SoC-visible runtime boundaries:
+| ABI field | Contract |
+|---|---|
+| kernel image format | image bytes, text/data sections, symbol names, entry PC, required ISA/config version |
+| grid/block model | grid dims, block dims, CTA/workgroup IDs, lane/thread IDs, SIMT group partitioning |
+| warp dispatch model | simt_group_width, active lane initialization, resident limits, resource allocation |
+| argument layout | byte layout, alignment, scalar/pointer encoding, constant memory, local/shared memory metadata |
+| memory space mapping | global, shared/LDS, local, constant, MMIO/uncached spaces and host pointer translation |
+| synchronization model | barriers, fences, event semantics, cache flush/visibility, completion/fault reporting |
+| capability model | queryable limits, feature bits, memory map, queue count/depth, ABI version |
 
-| Pattern | Rocket Chip anchor | Local runtime rule |
-|---|---|---|
-| boot/reset resource | `bootrom/`, reset vector, `ExampleRocketSystem` | Define how code/data enters the device and what reset state software can rely on. |
-| debug transport | `devices/debug/`, DMI/JTAG/SBA | Provide a debug/fault/status path that is not confused with the public launch API. |
-| resource exposure | DTS/resource binding, clock/resource files | Expose capabilities, queue limits, memory map, and optional features through a queryable/versioned path. |
-| accelerator command | `LazyRoCC.scala` | Model launch/control as command, response, memory access, busy, interrupt, exception, and optional-port semantics. |
-| harness connection | `system/TestHarness.scala`, SimAXIMem/debug/success wiring | Keep simulator and RTL tests connected through the same public-facing control concepts. |
+R0 output is a backend-neutral kernel descriptor plus argument and memory fixtures that golden sim and RTL can consume.
 
-RoCC is not a GPU runtime, but its command/response and busy/interrupt/fault discipline is directly useful for a GPGPU command queue or doorbell design.
+## 6. R1: Runtime Execution Layer
 
-## XiangShan Runtime And Difftest Pattern
+R1 may start only after R0 is stable.
 
-Use XiangShan as the reference for making run and debug paths reproducible:
+| Execution component | Contract |
+|---|---|
+| command queue | command type, order, dependencies, queue full behavior, cancellation/error handling |
+| MMIO/DCR/doorbell | register offsets, reset values, side effects, write ordering, capability exposure |
+| kernel dispatch engine | resource admission, CTA/workgroup allocation, SIMT group creation, start state |
+| DMA/buffer movement | allocation, copy direction, alignment, ownership, cache visibility |
+| event/fence system | wait, signal, timeout, interrupt/status, memory-ordering guarantee |
+| completion tracking | success, fault code, first fault event, trace identity, cleanup |
+| backend HAL | simulator, RTL sim, FPGA, or device transport behind the same runtime state model |
 
-| Runtime concern | XiangShan anchor | Local runtime rule |
-|---|---|---|
-| build/run entry | `README.md`, `make verilog`, `make emu`, `--diff` | Document exact simulator, RTL, and difftest launch commands with config names. |
-| visible control state | `XSCore.scala`, `XSTile.scala` | Expose reset, start, interrupt/status, fault, trace, perf, and power/debug paths through stable boundaries. |
-| full-system devices | `src/main/scala/device/` | Keep virtual devices, MMIO, memory images, and test harness resources separate from kernel ABI. |
-| interactive debug | `xspdb`, trace/debug interfaces | Provide repeatable watch, step, status, and trace hooks for bring-up without making them public ABI. |
-| reference model launch | XiangShan-NEMU `--diff` flow | Runtime tests should be able to enable/disable golden diff in a controlled way. |
-| checkpointing | NEMU checkpoint/SimPoint flow | Long workloads should have checkpoint or sampled-region support before becoming PPA evidence. |
+R1 output is an execution timeline: queue admission, launch start, memory visibility events, completion/fault, and result readback.
 
-Do not treat XiangShan's CPU boot flow as a GPU kernel ABI. Borrow the command, image, debug, diff, checkpoint, and status discipline for a GPGPU launch path.
+## 7. Transformation Rules
 
-## Runtime Verification
+Runtime transforms state in this order:
 
-Every runtime change needs at least one of:
+```text
+host intent -> R0 ABI descriptor -> backend command -> device launch state -> execution state -> completion/fence state
+```
 
-- host API smoke test.
-- simulator launch test.
-- RTL-sim launch test.
-- trace showing command, launch, and completion ordering.
-- negative test for bad args, invalid kernel, queue full, or timeout.
-- capacity test for oversized CTA/workgroup, max concurrent kernels, or backend admission failure when those limits exist.
-- capability/version test when public resources, queue limits, memory maps, or optional features change.
-- debug/fault/status test for invalid command, memory fault, timeout, or forced interrupt when those paths exist.
+Rules:
 
-For launch-related changes, prefer one workload that runs through both simulator and RTL backend.
+- Host API must never poke internal PC, register, scoreboard, or memory signals directly.
+- Kernel descriptor must carry entry PC, launch dims, args pointer, resource limits, config digest, and ABI version.
+- Queue operations must preserve ordering between memcpy, launch, event, wait, fence, and completion.
+- Backend admission must reject oversized CTA/workgroup, missing resources, unsupported ISA/config, and queue full conditions.
+- Faults must be visible as runtime state, not only simulator logs or RTL waveforms.
 
-## Common Mistakes
+## 8. State Evolution
 
-- Treating runtime as a script instead of a hardware/software contract.
-- Letting testbench-only signal pokes become the API.
-- Changing kernel argument layout without updating simulator, RTL, runtime, and tests.
-- Adding async queues or events without ordering and completion semantics.
-- Hiding launch latency, max concurrent kernels, or resource admission in backend-only constants instead of config/runtime-visible behavior.
-- Hiding cache flush or fence behavior inside ad hoc test code.
-- Adding MMIO registers without owner, reset value, side effect, capability/version, and test-harness coverage.
-- Treating debug/JTAG/DMI-style bring-up paths as the same thing as the public kernel launch API.
-- Copying XiangShan reset/boot/debug mechanics directly into the GPU runtime instead of defining a kernel descriptor, queue/doorbell, completion, fault, trace, and diff contract.
+| Transition | Producer | Consumer | Verification |
+|---|---|---|---|
+| `closed -> open` | device open/HAL init | runtime API | capability query test |
+| `module bytes -> kernel descriptor` | loader | golden sim/RTL backend | ABI fixture compare |
+| `args -> packed argument memory` | host API | kernel code/golden sim | layout unit test |
+| `launch descriptor -> queue command` | queue builder | backend scheduler | queue trace |
+| `queued -> admitted` | backend admission | dispatch engine | capacity negative test |
+| `admitted -> running` | doorbell/MMIO/start command | RTL/golden sim | launch smoke |
+| `running -> complete/fault` | backend/device | event/fence wait | completion/fault test |
+| `complete -> visible results` | fence/cache flush/readback | host API/PPA | result and trace check |
 
-## Local References
+## 9. Output Contract
 
-For deeper Vortex background tied to this skill, read `vortex_local.md` in this directory. It explains handle-based runtime APIs, command processor control plane, kernel entry, CTA/workgroup dispatch, and launch DCR programming.
+Runtime work must emit:
 
-For deeper MIAOW background tied to this skill, read `miao_local.md` in this directory. It explains testbench soft dispatch, hard resource dispatch, FPGA AXI-lite control registers, Xilinx SDK command flow, and the boundaries between test hooks and public runtime contracts.
+- R0 launch ABI document or fixture.
+- kernel descriptor schema.
+- generated/runtime header for ABI-visible config values.
+- command queue and MMIO/DCR contract when R1 exists.
+- trace fields for command, launch, admission, completion, fence, and fault.
+- negative tests for invalid kernel, bad args, queue full, timeout, or unsupported config when applicable.
 
-For deeper GPGPU-Sim background tied to this skill, read `gpgpusim_local.md` in this directory. It explains CUDA/OpenCL runtime interception, launch stack handling, `kernel_info_t`, stream operations, functional/performance mode selection, and launch admission.
+## 10. Verification Gate
 
-For deeper Rocket Chip background tied to this skill, read `rocket_local.md` in this directory. It explains RoCC command/response/memory/busy/interrupt patterns, BootROM/reset/debug/resource exposure, ExampleRocketSystem/TestHarness wiring, and runtime-facing control-plane lessons.
+Minimum gates:
 
-For XiangShan background tied to this skill, read `xiangshan_local.md` in this directory. It explains XiangShan build/run/difftest flow, reset/debug/trace/perf ports, virtual devices, full-system images, `xspdb`, checkpointing, and how these ideas translate to a GPGPU runtime boundary.
+| Gate | Required proof |
+|---|---|
+| R0 ABI gate | same descriptor and arg bytes consumed by golden sim and at least one backend fixture |
+| R1 launch gate | one workload goes through public API, queue/doorbell, completion, and result readback |
+| ordering gate | memcpy/launch/event/wait/fence ordering appears in trace |
+| capacity gate | oversized launch or queue full produces defined error state |
+| fault gate | invalid command, illegal memory, timeout, or forced fault reports stable runtime state |
+| cross-backend gate | simulator and RTL backend use the same R0 descriptor where both exist |
+
+## 11. Design Evidence Layer
+
+Use references only as evidence:
+
+| Evidence | Use |
+|---|---|
+| GPGPU-Sim | behavioral evidence for configure-call, argument staging, kernel descriptor, stream operation, backend admission |
+| Rocket Chip | structural reference for command/response, busy/interrupt/fault, resource exposure, test harness boundaries |
+| Vortex/MIAOW | implementation anchors for DCR/MMIO launch control, command processors, FPGA bring-up boundaries |
+| XiangShan | evidence for reproducible run/debug/difftest/checkpoint workflows, not a GPU ABI template |
+| CUDA/PTX | ABI constraint for kernel images, args, launch dimensions, memory spaces, and synchronization |
+
+Framework evidence must validate R0/R1 contracts instead of becoming standalone sections.
+
+## 12. Failure Modes
+
+- Launch ABI and backend execution are mixed, making simulator and RTL consume different descriptors.
+- Testbench pokes become the public runtime API.
+- Argument layout changes without updating golden sim, RTL, runtime headers, and tests.
+- Events/fences exist without ordering or memory-visibility semantics.
+- MMIO offsets lack reset value, side effect, version, and negative tests.
+- Backend logs show faults but runtime state reports success.

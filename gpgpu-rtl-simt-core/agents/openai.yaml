@@ -1,4 +1,4 @@
 interface:
   display_name: "GPGPU RTL SIMT Core"
-  short_description: "Design and review SIMT core RTL state, pipeline, and hazards."
-  default_prompt: "Review a GPGPU SIMT RTL core change."
+  short_description: "Specify SIMT RTL as an execution state machine."
+  default_prompt: "Use $gpgpu-rtl-simt-core to specify SIMT RTL as an execution state machine."

@@ -1,157 +1,133 @@
 ---
 name: gpgpu-runtime
-description: 用于设计、编辑或评审 GPGPU runtime、host/device launch、driver API、command queue、MMIO 或 DCR control、doorbell、DMA、buffer、module、kernel handle、kernel entry、args、grid/block/CTA/workgroup dispatch、event、fence、cache flush 或 synchronization behavior。
+description: 用于设计、修改或评审 GPGPU runtime、host/device launch、driver API、command queue、MMIO 或 DCR control、doorbell、DMA、buffer、module、kernel handle、kernel entry、args、grid/block/CTA/workgroup dispatch、event、fence、cache flush 或 synchronization behavior。
 ---
 
-# GPGPU Runtime
+# GPGPU Runtime Skill
 
-## 概览
+## 1. Objective
 
-当 host software、launch ABI、command submission 或 kernel entry behavior 定义系统边界时使用本 skill。Runtime 工作应把 testbench-driven core 转换成可复用 device interface，同时不要把 RTL internals 暴露为 public API。使用 Rocket Chip 作为 boot/reset resources、debug transport、MMIO/resource descriptions、TestHarness wiring 和 RoCC-style command/response/memory/busy/interrupt accelerator control 的参考。使用 XiangShan 作为 reproducible build/run/difftest commands、reset/debug/trace/perf control surfaces、full-system images、checkpoint workflows，以及区分 debug bring-up 和 public runtime ABI 的参考。
+把 runtime 拆成 R0 launch ABI definition 和 R1 execution backend，让 host software 把 launch intent 转换成 deterministic GPU launch state，同时不暴露 RTL internals。
 
-## 核心规则
+## 2. Input Contract
 
-在围绕 launch 构建功能前，先定义 launch contract：
+输入是 launch/runtime intent，必须包含 config digest、kernel image expectations、argument model、memory spaces、queue/control-plane needs、target backend，以及 required synchronization/fault behavior。
 
-- program 或 module 如何加载
-- kernel entry PC 如何选择
-- arguments 如何 staged 和 addressed
-- grid、CTA/workgroup、SIMT group 和 thread IDs 如何派生
-- memory buffers 如何在 host 和 device 间移动
-- start、completion、fence、event、cache flush 如何被观察
-- reset、boot/program load、debug、fault、capability/version 和 interrupt/status paths 如何暴露
-- 哪些部分是 public API、backend transport、test-only scaffolding
+## 3. Runtime State Model
 
-正式 runtime interface 不应依赖 poking internal RTL signals。
-
-## 术语契约
-
-Runtime API、launch records 和 ABI docs 使用统一术语；只有在 HAL boundary 保留 backend 名称。
-
-| 统一术语 | 源码别名 | Runtime 含义 |
-|---|---|---|
-| SIMT group | warp、wavefront、wave | 在 CTA/workgroup 内启动的 execution group |
-| simt_group_id | warp ID、`wfid`、wave ID、wavefront tag | launch 或 core 内的 SIMT group identity |
-| active lane mask | active mask、thread mask、`tmask`、`EXEC` mask | initial 或 runtime lane participation state |
-| CTA/workgroup | CTA、block、workgroup | 带 block/workgroup IDs 和 local memory 的 launch group |
-| compute core/CU | core、CU、compute unit | device execution resource |
-
-## 最小 Launch State Machine
-
-1. 打开 device 或 simulator backend。
-2. 分配或映射 device buffers。
-3. 加载 program/module 并解析 kernel entry。
-4. Stage kernel arguments。
-5. 配置 grid/block/CTA/workgroup dimensions 和 local memory size。
-6. 通过 queue 或 explicit start command 提交 launch。
-7. 通过定义好的 status/event path 等待 completion。
-8. 拷回结果并释放资源。
-
-这可以很小，但 simulator 和 RTL tests 必须保持同一个概念路径。
-
-## GPGPU-Sim Launch Model
-
-使用 GPGPU-Sim 作为不 poke RTL internals 的 software launch path 参考：
-
-| Runtime step | GPGPU-Sim anchor | 本地要求 |
-|---|---|---|
-| configure launch | `cudaConfigureCallInternal` | 捕获 grid/block、shared/local memory、stream/queue |
-| stage args | `cudaSetupArgumentInternal` | 记录 argument bytes、sizes、offsets 和 alignment |
-| create descriptor | `cudaLaunchInternal`、`kernel_info_t` | 解析 kernel entry 并创建稳定 kernel descriptor |
-| enqueue work | `stream_operation` | 排序 memcpy、launch、event、wait 和 completion |
-| backend admission | `gpu->can_start_kernel()`、launch latency | 按 capacity、latency 和 max concurrent kernels gate launch |
-| CTA dispatch | `issue_block2core()` | 分配 per-core resources 并初始化 SIMT groups |
-
-本地 runtime 可以使用比 CUDA/OpenCL 更简单的 API，但仍需要 launch config、argument staging、kernel lookup、queue operation、backend admission 和 completion semantics。
-
-## Interface Layers
-
-| 层 | 职责 |
+| Runtime state | Canonical GPU state |
 |---|---|
-| public runtime API | device、buffer、module、kernel、queue、event handles |
-| transport HAL | backend open/close、register read/write、host memory allocation |
-| command/control plane | queue entries、doorbells、DCR/MMIO writes、DMA、launch、fence、event |
-| kernel ABI | entry PC、args pointer、grid/block IDs、CTA/workgroup state、local memory |
-| resource/capability plane | version、device properties、memory map、queue limits、debug/perf/trace availability |
-| debug/bring-up plane | reset vector 或 program-load path、debug transport、fault readout、timeout 和 success reporting |
-| tests | 一个通过 public path 运行的 launch workload |
+| device/capability state | config-visible limits、memory map、queue limits、feature bits、version |
+| module/kernel state | kernel image、entry PC、instruction memory、symbol table、required resources |
+| argument state | argument bytes、alignment、pointer mapping、constant/local/shared memory bindings |
+| launch state | grid/block dimensions、CTA/workgroup IDs、SIMT group allocation、local memory size |
+| queue state | command records、ordering、doorbell/MMIO/DCR writes、backend admission、dependencies |
+| execution state | running/completed/faulted kernel、event/fence、timeout、interrupt/status、cache visibility |
 
-保持这些层分离，这样新增 backend 不需要重写 API。
+## 4. 固定五问
 
-修改 launch 行为前，先分类当前使用的 early control-plane form：
+每个 runtime change 必须回答：
 
-| 模式 | 允许用途 | 风险 |
-|---|---|---|
-| testbench C hook | unit-test setup、直接 SGPR/VGPR initialization、快速 trace regressions | 变成假的 public API |
-| hard dispatcher | resource allocation、SIMT-group tags、VGPR/SGPR/LDS/GDS bases、done/deallocation | 与 compute core/CU capacity 产生 config drift |
-| FPGA MMIO control | program load、register/memory init、start、done、memory-service handshake | host offsets 与 RTL decode 漂移 |
+1. What state exists? 指明 ABI、queue、launch、memory、completion 或 fault state。
+2. Who produces it? Host API、loader、queue builder、MMIO writer、backend 或 device。
+3. Who consumes it? Golden sim、RTL dispatcher、memory path、kernel code、event/fence wait 或 PPA。
+4. How does it change? 定义 state transition 和 ordering semantics。
+5. How do we verify it? 指明 ABI fixture、launch smoke、negative test、trace 或 backend diff。
 
-即使是最小 runtime/control plane，也必须定义 program load、state initialization、dispatch fields、start、done/status、memory service、result readback 和 cleanup。Test-only internal pokes 必须标注为 test-only。
+## 5. R0: Launch ABI Contract
 
-## Rocket Chip Control-Plane 模式
+R0 必须先于 backend-specific runtime 工作执行。
 
-使用 Rocket Chip 作为 SoC-visible runtime boundaries 的参考：
+| ABI field | Contract |
+|---|---|
+| kernel image format | image bytes、text/data sections、symbol names、entry PC、required ISA/config version |
+| grid/block model | grid dims、block dims、CTA/workgroup IDs、lane/thread IDs、SIMT group partitioning |
+| warp dispatch model | simt_group_width、active lane initialization、resident limits、resource allocation |
+| argument layout | byte layout、alignment、scalar/pointer encoding、constant memory、local/shared metadata |
+| memory space mapping | global、shared/LDS、local、constant、MMIO/uncached spaces、host pointer translation |
+| synchronization model | barriers、fences、event semantics、cache flush/visibility、completion/fault reporting |
+| capability model | queryable limits、feature bits、memory map、queue count/depth、ABI version |
 
-| 模式 | Rocket Chip anchor | 本地 runtime 规则 |
-|---|---|---|
-| boot/reset resource | `bootrom/`、reset vector、`ExampleRocketSystem` | 定义 code/data 如何进入 device，以及 reset state 中软件可以依赖什么。 |
-| debug transport | `devices/debug/`、DMI/JTAG/SBA | 提供不要和 public launch API 混淆的 debug/fault/status path。 |
-| resource exposure | DTS/resource binding、clock/resource files | 通过 queryable/versioned path 暴露 capabilities、queue limits、memory map 和 optional features。 |
-| accelerator command | `LazyRoCC.scala` | 将 launch/control 建模为 command、response、memory access、busy、interrupt、exception 和 optional-port semantics。 |
-| harness connection | `system/TestHarness.scala`、SimAXIMem/debug/success wiring | 让 simulator 和 RTL tests 通过同一组 public-facing control concepts 连接。 |
+R0 输出 backend-neutral kernel descriptor，以及 golden sim 和 RTL 都能消费的 argument/memory fixtures。
 
-RoCC 不是 GPU runtime，但它的 command/response、busy/interrupt/fault 纪律可以直接借鉴到 GPGPU command queue 或 doorbell design。
+## 6. R1: Runtime Execution Layer
 
-## XiangShan Runtime 和 Difftest 模式
+R1 只能在 R0 稳定后开始。
 
-使用 XiangShan 作为让 run 和 debug paths 可复现的参考：
+| Execution component | Contract |
+|---|---|
+| command queue | command type、order、dependencies、queue full behavior、cancellation/error handling |
+| MMIO/DCR/doorbell | register offsets、reset values、side effects、write ordering、capability exposure |
+| kernel dispatch engine | resource admission、CTA/workgroup allocation、SIMT group creation、start state |
+| DMA/buffer movement | allocation、copy direction、alignment、ownership、cache visibility |
+| event/fence system | wait、signal、timeout、interrupt/status、memory-ordering guarantee |
+| completion tracking | success、fault code、first fault event、trace identity、cleanup |
+| backend HAL | simulator、RTL sim、FPGA 或 device transport，隐藏在同一 runtime state model 后 |
 
-| Runtime concern | XiangShan anchor | 本地 runtime 规则 |
-|---|---|---|
-| build/run entry | `README.md`、`make verilog`、`make emu`、`--diff` | 用 config names 文档化 exact simulator、RTL 和 difftest launch commands。 |
-| visible control state | `XSCore.scala`、`XSTile.scala` | 通过稳定边界暴露 reset、start、interrupt/status、fault、trace、perf 和 power/debug paths。 |
-| full-system devices | `src/main/scala/device/` | 将 virtual devices、MMIO、memory images 和 test harness resources 与 kernel ABI 分离。 |
-| interactive debug | `xspdb`、trace/debug interfaces | 提供可复现的 watch、step、status 和 trace hooks 用于 bring-up，但不要让它们变成 public ABI。 |
-| reference model launch | XiangShan-NEMU `--diff` flow | Runtime tests 应能以受控方式打开或关闭 golden diff。 |
-| checkpointing | NEMU checkpoint/SimPoint flow | 长 workload 在成为 PPA evidence 前应有 checkpoint 或 sampled-region support。 |
+R1 输出 execution timeline：queue admission、launch start、memory visibility events、completion/fault、result readback。
 
-不要把 XiangShan 的 CPU boot flow 当作 GPU kernel ABI。借鉴 command、image、debug、diff、checkpoint 和 status discipline，用于 GPGPU launch path。
+## 7. Transformation Rules
 
-## Runtime 验证
+```text
+host intent -> R0 ABI descriptor -> backend command -> device launch state -> execution state -> completion/fence state
+```
 
-每个 runtime 变更至少需要以下之一：
+- Host API 不能直接 poke internal PC、register、scoreboard 或 memory signals。
+- Kernel descriptor 必须携带 entry PC、launch dims、args pointer、resource limits、config digest、ABI version。
+- Queue operations 必须保持 memcpy、launch、event、wait、fence、completion 的 ordering。
+- Backend admission 必须拒绝 oversized CTA/workgroup、missing resources、unsupported ISA/config、queue full。
+- Fault 必须作为 runtime state 可见，而不是只存在于 simulator logs 或 RTL waveforms。
 
-- host API smoke test。
-- simulator launch test。
-- RTL-sim launch test。
-- 展示 command、launch、completion ordering 的 trace。
-- bad args、invalid kernel、queue full 或 timeout 的 negative test。
-- 当对应限制存在时，测试 oversized CTA/workgroup、max concurrent kernels 或 backend admission failure。
-- public resources、queue limits、memory maps 或 optional features 变化时，增加 capability/version test。
-- 当对应路径存在时，增加 invalid command、memory fault、timeout 或 forced interrupt 的 debug/fault/status test。
+## 8. State Evolution
 
-对于 launch 相关变更，优先选择一个同时跑过 simulator 和 RTL backend 的 workload。
+| Transition | Producer | Consumer | Verification |
+|---|---|---|---|
+| `closed -> open` | device open/HAL init | runtime API | capability query test |
+| `module bytes -> kernel descriptor` | loader | golden sim/RTL backend | ABI fixture compare |
+| `args -> packed argument memory` | host API | kernel code/golden sim | layout unit test |
+| `launch descriptor -> queue command` | queue builder | backend scheduler | queue trace |
+| `queued -> admitted` | backend admission | dispatch engine | capacity negative test |
+| `admitted -> running` | doorbell/MMIO/start command | RTL/golden sim | launch smoke |
+| `running -> complete/fault` | backend/device | event/fence wait | completion/fault test |
+| `complete -> visible results` | fence/cache flush/readback | host API/PPA | result and trace check |
 
-## 常见错误
+## 9. Output Contract
 
-- 把 runtime 当成脚本，而不是 hardware/software contract。
-- 让 testbench-only signal pokes 变成 API。
-- 修改 kernel argument layout 却不更新 simulator、RTL、runtime 和 tests。
-- 添加 async queues 或 events，却没有 ordering 和 completion semantics。
-- 把 launch latency、max concurrent kernels 或 resource admission 隐藏在 backend-only constants 中，而不是 config/runtime-visible behavior。
-- 把 cache flush 或 fence behavior 隐藏在临时 test code 中。
-- 添加 MMIO registers，却没有 owner、reset value、side effect、capability/version 和 test-harness coverage。
-- 把 debug/JTAG/DMI-style bring-up paths 当成 public kernel launch API。
-- 直接复制 XiangShan reset/boot/debug mechanics 到 GPU runtime，而不是定义 kernel descriptor、queue/doorbell、completion、fault、trace 和 diff contract。
+- R0 launch ABI document 或 fixture。
+- kernel descriptor schema。
+- ABI-visible config values 的 generated/runtime header。
+- command queue 和 MMIO/DCR contract（若存在 R1）。
+- command、launch、admission、completion、fence、fault trace fields。
+- invalid kernel、bad args、queue full、timeout、unsupported config 的 negative tests。
 
-## 本地参考
+## 10. Verification Gate
 
-若想了解与本 skill 相关的 Vortex 背景，请阅读本目录下的 `vortex_local.md`。它说明 handle-based runtime APIs、command processor control plane、kernel entry、CTA/workgroup dispatch 和 launch DCR programming。
+| Gate | Required proof |
+|---|---|
+| R0 ABI gate | golden sim 和至少一个 backend fixture 消费相同 descriptor/arg bytes |
+| R1 launch gate | 一个 workload 走 public API、queue/doorbell、completion、result readback |
+| ordering gate | memcpy/launch/event/wait/fence ordering 出现在 trace |
+| capacity gate | oversized launch 或 queue full 产生定义好的 error state |
+| fault gate | invalid command、illegal memory、timeout 或 forced fault 报告稳定 runtime state |
+| cross-backend gate | simulator 和 RTL backend 使用相同 R0 descriptor |
 
-若想了解与本 skill 相关的 MIAOW 背景，请阅读本目录下的 `miao_local.md`。它说明 testbench soft dispatch、hard resource dispatch、FPGA AXI-lite control registers、Xilinx SDK command flow，以及 test hooks 和 public runtime contracts 的边界。
+## 11. Design Evidence Layer
 
-若想了解与本 skill 相关的 GPGPU-Sim 背景，请阅读本目录下的 `gpgpusim_local.md`。它说明 CUDA/OpenCL runtime interception、launch stack handling、`kernel_info_t`、stream operations、functional/performance mode selection 和 launch admission。
+| Evidence | Use |
+|---|---|
+| GPGPU-Sim | configure-call、argument staging、kernel descriptor、stream operation、backend admission 的 behavioral evidence |
+| Rocket Chip | command/response、busy/interrupt/fault、resource exposure、test harness boundaries 的 structural reference |
+| Vortex/MIAOW | DCR/MMIO launch control、command processor、FPGA bring-up boundary 的 implementation anchors |
+| XiangShan | reproducible run/debug/difftest/checkpoint workflow 的 evidence，不是 GPU ABI template |
+| CUDA/PTX | kernel image、args、launch dims、memory spaces、sync 的 ABI constraint |
 
-若想了解与本 skill 相关的 Rocket Chip 背景，请阅读本目录下的 `rocket_local.md`。它说明 RoCC command/response/memory/busy/interrupt patterns、BootROM/reset/debug/resource exposure、ExampleRocketSystem/TestHarness wiring 和 runtime-facing control-plane lessons。
+Framework evidence 只能验证 R0/R1 contract，不能成为独立章节。
 
-若想了解与本 skill 相关的 XiangShan 背景，请阅读本目录下的 `xiangshan_local.md`。它说明 XiangShan build/run/difftest flow、reset/debug/trace/perf ports、virtual devices、full-system images、`xspdb`、checkpointing，以及这些思想如何翻译到 GPGPU runtime boundary。
+## 12. Failure Modes
+
+- launch ABI 和 backend execution 混在一起，导致 simulator/RTL 消费不同 descriptor。
+- testbench poke 变成 public runtime API。
+- argument layout 改变却不更新 golden sim、RTL、runtime headers 和 tests。
+- event/fence 存在但没有 ordering 或 memory-visibility semantics。
+- MMIO offsets 缺 reset value、side effect、version 和 negative tests。
+- backend logs 显示 fault，但 runtime state 报告 success。

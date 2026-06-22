@@ -3,157 +3,151 @@ name: gpgpu-golden-sim
 description: 用于设计或调试 GPGPU golden simulator、SimX-like module twin、instruction semantics、trace schema、RTL-vs-simulator comparison、execution mismatch、first divergence 或 regression workflow。
 ---
 
-# GPGPU Golden Simulator
+# GPGPU Semantic Oracle Engine Skill
 
-## 概览
+## 1. Objective
 
-当 simulator behavior、instruction semantics 或 trace comparison 是事实来源时使用本 skill。Simulator 应该是架构的 executable twin，也是 RTL debug 的实用 oracle，而不只是 final-output checker。使用 Rocket Chip 作为补充 ISA 或 timing oracle 的参考：executable protocol monitors、constrained fuzzers、unit-test harnesses 和 trace/resource checks。使用 XiangShan-NEMU 作为 stable reference-model ABI、step-by-step difftest、skip/guided execution、store-commit events、checkpointing 和 first-divergence diagnosis 的参考。
+定义 GPU state transition 的可执行 semantic ground truth，并生成 canonical traces 来暴露 oracle、RTL、runtime 和 memory behavior 的 first divergence。
 
-## 核心规则
+## 2. Input Contract
 
-每个非平凡 RTL 行为在被信任前，都需要 simulator behavior 或 golden trace。对于 bug，在提出硬件修复前先找到 reference 和 implementation 之间的 first divergence。使用能证明当前阶段的最小 oracle：
+输入是 ISA、launch 或 trace intent，必须包含 config digest、R0 launch descriptor、instruction subset、memory spaces、expected oracle granularity 和 target comparison backend。
 
-| 阶段 | Oracle | 使用场景 |
+## 3. ISA Semantic Contract
+
+ISA contract 是 primary。每条 instruction 必须定义：
+
+- input state：PC、active lane mask、predicate state、register operands、memory operands、launch-visible state。
+- transformation：per-lane semantics、scalar/vector behavior、mask behavior、exceptions/illegal cases。
+- output state：next PC、register writes、predicate/mask updates、memory request/effect、scoreboard-visible completion、trace event。
+- unsupported behavior：明确拒绝的 opcode、address space、barrier、atomic 或 sync mode。
+
+不要为了匹配 RTL timing artifact 修改 ISA semantics，除非 architecture contract 证明 oracle 错了。
+
+## 4. Oracle State Model
+
+| State | Producer | Consumer |
 |---|---|---|
-| G0 | hand-written expected side effects | 极小 ALU、branch 或 LSU unit tests |
-| G1 | external ISA simulator trace | 在完整本地 simulator 出现前扩展指令覆盖 |
-| G2 | normalized per-SIMT-group trace | 调试 multi-SIMT-group RTL effects |
-| G3 | module-level golden model | scoreboard、LSU、branch 或 barrier ownership 被测试 |
-| G4 | cycle-aware simulator | stalls、counters 和 PPA interpretation 依赖 timing |
+| PC per SIMT group | launch descriptor、branch/divergence rules | fetch/decode oracle、RTL trace diff |
+| active lane mask | launch、predicate execution、divergence/reconvergence | instruction semantics、memory coalescing、trace |
+| register file | launch initialization、writeback semantics | subsequent instructions、RTL diff |
+| scoreboard/dependency graph | timing-aware issue/completion model | RTL hazard checks、stall attribution |
+| memory hierarchy state | memory semantic model、cache/coalescer model | loads/stores/atomics/fences、memory trace |
+| launch state | R0 launch ABI descriptor | kernel entry、IDs、args、memory spaces |
+| execution pipeline state | optional cycle model | timing trace、PPA counters |
 
-External functional traces 和 normalized per-SIMT-group RTL traces 适合作为早期 correctness loop，但它们不是 cycle model。
+## 5. 固定五问
 
-Functional semantics 和 timing behavior 必须保持分离。如果 timing model 或 RTL 与 functional oracle 共享结构，必须显式说明 shared schema：kernel descriptor、instruction metadata、active lane mask、memory access、trace identity 和 config。
+每个 oracle feature 必须回答：
 
-并非每个 oracle 都必须是完整 GPU simulator。对于 memory、command queue、MMIO 和 interconnect-like paths，应定义局部可执行契约：request/response legality、source/tag lifetime、address alignment、mask correctness、ordering、replay、fault 和 completion checks。
+1. What state exists? 指明 architectural 或 timing state。
+2. Who produces it? Launch ABI、decoder、instruction semantic rule、memory model 或 timing model。
+3. Who consumes it? Next instruction、RTL diff、memory path、runtime 或 PPA。
+4. How does it change? 定义 transition rules、ordering 和 illegal cases。
+5. How do we verify it? 指明 unit test、oracle trace、cross-backend diff 或 first-divergence test。
 
-## 术语契约
+## 6. Transformation Rules: Warp Execution Model
 
-Trace schema 和 mismatch report 使用统一术语；只有引用具体 backend 时保留参考实现原名。
+Semantic execution 以 SIMT group event 排序：
 
-| 统一术语 | 源码别名 | Trace 含义 |
-|---|---|---|
-| SIMT group | warp、wavefront、wave | 带一个 PC 和 active lane mask 的 scheduled execution stream |
-| simt_group_id | warp ID、`wfid`、wave ID、wavefront tag | 用来分组 trace events 的稳定 identity |
-| active lane mask | active mask、thread mask、`tmask`、`EXEC` mask | 一个事件上的 lane participation state |
-| CTA/workgroup | CTA、block、workgroup | launch、barrier 和 local-memory scope |
-| compute core/CU | core、CU、compute unit | 拥有 SIMT groups 的 trace source |
+```text
+fetch PC -> decode -> apply active mask/predicate -> read operands -> execute semantics -> emit effects -> update PC/mask/register/memory state
+```
 
-## GPGPU-Sim Functional/Timing Split
+Cycle-aware extension 可以建模 scheduler stalls、scoreboard waits、memory waits 和 backpressure，但 functional semantics 与 timing state 必须在 trace schema 中分离。
 
-使用 GPGPU-Sim 作为 oracle 职责分离的参考：
+## 7. Memory Ordering Model
 
-| 层 | GPGPU-Sim anchor | 本地对应 |
-|---|---|---|
-| Functional semantics | `src/cuda-sim/`、`instructions.cc`、`ptx_thread_info` | ISA oracle 和 architectural state |
-| Launch descriptor | `kernel_info_t` | kernel entry、args、grid/block、stream/queue、CTA progress |
-| Dynamic instruction event | `warp_inst_t` | 带 SIMT group、PC、active lane mask、operands 和 memory metadata 的 issued instruction |
-| Divergence state | `simt_stack` | active-mask 和 reconvergence oracle |
-| Timing model | `shader_core_ctx`、`scheduler_unit`、`ldst_unit` | 带 stalls 和 backpressure 的 cycle model 或 RTL trace |
-| Trace/debug | `Trace`、stats、component logs | normalized first-divergence artifacts |
-
-在 architecture contract 说明 oracle 错误之前，不要为了匹配 timing artifact 而修改 functional oracle。
-
-## Rocket Chip Checker 模式
-
-使用 Rocket Chip 作为 protocols 和 harnesses 周围局部 oracle 的参考：
-
-| Checker 类型 | Rocket Chip anchor | 本地规则 |
-|---|---|---|
-| protocol monitor | `tilelink/Monitor.scala` | 将 memory/control protocol rules 写成 assertions，而不是 prose。 |
-| constrained fuzzer | `tilelink/Fuzzer.scala` | 生成 legal randomized traffic，并维护 source/tag allocation 和 in-flight tracking。 |
-| harness oracle | `system/TestHarness.scala`、`unittest/UnitTest.scala` | 每个 hardware smoke test 都要有 start、finish、timeout、memory/debug 和 success semantics。 |
-| trace sink | `trace/` | 为 command、issue、memory、completion 和 fault paths 输出稳定 trace records。 |
-| generated docs | docs `mdoc` flow | 让 reference docs 和 code examples 足够接近，方便发现 drift。 |
-
-在完整 golden simulator 下方使用这些 checker。Protocol monitor 可以在 final kernel output 不同之前就抓到错误 lane mask 或 source ID。
-
-## XiangShan-NEMU Difftest 模式
-
-使用 XiangShan-NEMU 作为把 golden model 变成调试接口的参考：
-
-| Difftest 契约 | XiangShan-NEMU anchor | 本地 golden-sim 规则 |
-|---|---|---|
-| reference ABI | `src/cpu/difftest/ref.c` | 导出稳定的 init、memory copy、state copy、execute、status、interrupt 和 event-copy calls。 |
-| DUT adapter | `src/cpu/difftest/dut.c` | 通过稳定接口加载 reference model，并隔离 DUT-specific skip logic。 |
-| step compare | `difftest_step(pc, npc)` | 在 final kernel output 之前的中间事件边界进行比较。 |
-| state sync | `difftest_regcpy`、`difftest_csrcpy`、uarch status sync | 定义哪些 architectural、control、SIMT 和 memory state 可以 copy 或 query。 |
-| non-identical phases | skip-ref、skip-dut、guided exec | 将合法 mismatch windows 显式化，而不是忽略 failures。 |
-| long workload support | `src/checkpoint/`、SimPoint workflow | 对长 kernel 和 full-system tests 使用 checkpoints 或 sampled regions。 |
-
-对于 GPGPU 工作，将 register/CSR copy 翻译成 kernel launch state、SIMT group PC、active lane mask、registers、predicate state、barrier state、shared/global memory、memory commit、fault 和 replay events。Final output comparison 只是 smoke test，不是完整 oracle。
-
-## Module Twin Map
-
-对每个新 RTL block，说明 simulator 是否有对应 owner：
-
-| 硬件概念 | 需要定义的 simulator owner |
+| Operation | Required contract |
 |---|---|
-| SIMT-group scheduler、PC、masks、barriers | scheduler 或 SIMT-group state model |
-| decode 和 instruction expansion | decoder 和 sequencer |
-| scoreboard 和 hazards | scoreboard model |
-| register read/writeback | operand 或 register-file model |
-| ALU/FPU/SFU/LSU/TCU | functional unit model |
-| memory hierarchy | LSU、coalescer、cache、memory model |
-| launch 和 CTA/workgroup dispatch | runtime/KMU/CTA/workgroup model |
+| load | address space、active lanes、byte enables、return value、fault behavior、ordering scope |
+| store | lane mask、byte enables、data merge、visibility、fault behavior |
+| atomic | serialization scope、return value、mask restrictions、ordering |
+| fence/flush | affected address spaces、host/device visibility、cache/coherence state |
+| local/shared memory | CTA/workgroup scope，timing-aware 时可建模 bank conflict |
+| global memory | ordering、coalescing-neutral semantic result、fault model |
 
-避免使用绕开 timing/module boundary 的中央 interpreter。ISA semantics 应靠近拥有对应行为的单元。
+Memory timing detail 属于 timing trace field，不应成为 ISA semantic result，除非它改变 legal architectural behavior。
 
-## Trace Contract
+## 8. Divergence Model
 
-有用的 trace record 应包含：
+Oracle 必须拥有：
 
-| 类别 | 字段 |
+- branch condition per lane。
+- active mask split 和 reconvergence target。
+- PC stack 或等价 reconvergence state。
+- join behavior。
+- predicated instruction 的 mask state。
+- illegal divergence 或 unsupported control-flow cases。
+
+Divergence trace 必须包含 old PC/mask、branch target/fallthrough、new PC/mask 和 reconvergence metadata。
+
+## 9. State Evolution
+
+Oracle state 从 launch initialization 演化为有序 SIMT events。每个 event 读取 PC/mask/register/memory state，应用 instruction 和 memory semantics，emit trace record，并更新 next PC、mask、register file、memory state 以及 optional timing/dependency state。
+
+## 10. Trace Schema
+
+| Category | Fields |
 |---|---|
-| identity | cycle 或 step、sequence ID 或 UUID、compute core/CU ID、simt_group_id |
-| control | launch 或 kernel ID、PC、next PC、opcode、active lane mask、predicate mask |
-| operands | source registers、source values、destination register |
-| commit | writeback valid、value、exception 或 illegal instruction |
-| memory | op、lane mask、address、byte enable、data、tag、response |
-| scheduling | scoreboard block、operand block、memory block、barrier block、replay |
+| identity | step/cycle、sequence ID、kernel ID、compute core/CU ID、simt_group_id |
+| control | PC、next PC、opcode、active lane mask、predicate mask、divergence action |
+| registers | source regs/values、destination regs/values、predicate/special register writes |
+| memory | op、address space、lane addresses、byte masks、data、tag/source、response/fault |
+| dependencies | scoreboard set/clear、dependency graph edge、stall reason |
+| launch | grid/block IDs、args pointer、local/shared memory base、resource allocation |
+| pipeline | fetch/decode/issue/execute/writeback state（cycle-aware 时） |
 
-如果省略某个字段，说明为什么当前阶段不需要它。
+省略字段时必须说明当前 gate 为什么不需要。
 
-## First-Divergence 工作流
+## 11. First-Divergence Detection Engine
 
-1. 在实现前定义 instruction semantics：inputs、outputs、state changes、illegal cases、mask behavior。
-2. 在复杂 RTL 前添加或更新 simulator behavior。
-3. 发出能覆盖该行为的最小 golden trace。
-4. 用同一 program、config、input memory 和 launch shape 跑 RTL 或第二个 backend。
-5. 先 diff ordered architectural effects，再看 timing fields。
-6. 运行适用的 local protocol monitors 或 harness assertions，把 legality bugs 和 semantic mismatches 分开。
-7. 报告第一个 divergent event，并给出足够复现上下文。
-8. 判断是 simulator、RTL、memory path、runtime、config、protocol monitor 还是 test harness 违反了契约。
+1. 用同一 kernel image、config、args、input memory、launch shape 运行 oracle 和 implementation。
+2. 先把 trace normalize 成 canonical records。
+3. 先比较 architectural effects：PC/mask、register writes、memory effects、barriers、faults。
+4. architectural effects 匹配后再比较 timing fields。
+5. 报告 first divergent event：producer、consumer、expected state、observed state、suspected contract。
+6. 路由到 config、runtime R0/R1、RTL SIMT core、memory path 或 oracle semantics。
 
-不要为了匹配 RTL output 而编辑 simulator。先判断哪一边违反了 architecture contract。Trace comparison 还必须：
+Final memory output 只是 smoke test，不是充分 oracle。
 
-- 比较前 normalize external traces；不要直接 diff raw simulator logs 和 RTL logs。
-- 保持 per-SIMT-group streams 或稳定 identity fields，避免 interleaving 掩盖 first divergence。
-- 区分 content differences 和 missing trace/hang conditions。
-- 先 trace architectural side effects：register writes、special register writes、memory load/store effects、branch、barrier、waitcnt、retire PC。
-- 记录 external oracle version、command、input memory、instruction memory 和 launch/config files。
-- 对 memory/control paths，记录 protocol legality state：source/tag allocation、outstanding count、address/mask alignment、replay/nack/fault 和 completion ordering。
+## 12. Output Contract: Oracle Output
 
-## 本地参考
+- instruction trace。
+- memory trace。
+- SIMT group/warp state trace。
+- 控制流存在时的 divergence trace。
+- cycle-aware 时的 timing/stall trace。
+- config digest、runtime ABI descriptor、input memory digest、reproduce command。
 
-若想了解与本 skill 相关的 Vortex 背景，请阅读本目录下的 `vortex_local.md`。它说明 SimX executable twin 和 module-aligned simulator/RTL contracts。
+## 13. Verification Gate
 
-若想了解与本 skill 相关的 MIAOW 背景，请阅读本目录下的 `miao_local.md`。它说明 Multi2Sim trace flow、trace parser、tracemon data structures 和 print functions、trace comparator、regression runner，以及 MIAOW oracle 不能证明什么。
+| Gate | Required proof |
+|---|---|
+| instruction gate | side effects、masks、illegal cases 的 unit tests |
+| launch gate | oracle 精确消费 R0 descriptor 和 argument bytes |
+| trace gate | trace schema 包含当前 RTL/memory diff 所需 fields |
+| first-divergence gate | 已知 mismatch 报告 first wrong event，而不是最终 symptom |
+| memory gate | loads/stores/atomics/fences 匹配 memory contract |
+| regression gate | fix 后 reproducer 和至少一个 non-regression case 通过 |
 
-若想了解与本 skill 相关的 GPGPU-Sim 背景，请阅读本目录下的 `gpgpusim_local.md`。它说明 `cuda-sim` functional oracle、timing model、shared `kernel_info_t`/`warp_inst_t` abstractions、trace schema 和 functional-versus-timing caveats。
+## 14. Design Evidence Layer
 
-若想了解与本 skill 相关的 Rocket Chip 背景，请阅读本目录下的 `rocket_local.md`。它说明 TileLink monitors、constrained fuzzers、UnitTest/TestHarness contracts、trace sinks，以及如何把 protocol oracles 与 GPGPU golden simulator 配合使用。
+| Evidence | Use |
+|---|---|
+| GPGPU-Sim | functional/timing split、kernel descriptor、warp instruction trace、divergence 的 behavioral evidence |
+| Rocket Chip | executable monitors、constrained fuzzers、harnesses、trace sinks 的 structural reference |
+| Vortex/MIAOW | SimX-like module twins、trace parser/comparator loop 的 implementation anchors |
+| XiangShan-NEMU | reference ABI、step comparison、skip/guided execution、checkpointing 的 tradeoff evidence |
+| CUDA/PTX | instruction semantics、memory spaces、masks、barriers 的 ISA/ABI constraint |
 
-若想了解与本 skill 相关的 XiangShan 背景，请阅读本目录下的 `xiangshan_local.md`。它说明 NEMU reference/DUT difftest APIs、step comparison、skip/guided execution、store commit、checkpoint/SimPoint flow，以及如何把这些思想翻译成 GPGPU intermediate-state comparison。
+Evidence 用来验证 oracle contracts，不能作为顶层 framework 章节。
 
-## 常见错误
+## 15. Failure Modes
 
-- 只比较 final memory output，而第一个错误 writeback 早已发生。
-- 在 bug 出现后才添加 trace fields，而不是早期定义 minimal trace contract。
-- 在一个不清楚的 trace 中混合 functional correctness 和 timing fidelity。
-- Simulator 结构与 RTL 无关，导致 trace diffs 很难映射回模块。
-- 让 timing-model convenience code 变成 ISA oracle。
-- 没有 rerun reproducer 和至少一个 regression 就宣称修复。
-- 等到 full-kernel mismatch 才发现错误，而不是让 protocol monitor 在源头抓住 invalid request。
-- 使用不遵守合法 source/tag、mask、ordering 和 in-flight rules 的随机流量。
-- 只比较 final memory output，而 XiangShan-style difftest boundary 本可以暴露第一个 divergent SIMT、memory、barrier 或 fault event。
+- oracle 只是 final-output checker，无法定位 first divergence。
+- functional semantics 和 timing behavior 共享隐藏 mutable state。
+- trace interleaving 缺少稳定 SIMT group identity。
+- memory trace 丢失 lane mask、byte enable、address space 或 destination register。
+- RTL timing behavior 被复制成 oracle semantics。
+- unsupported instruction 用 placeholder behavior 静默执行。

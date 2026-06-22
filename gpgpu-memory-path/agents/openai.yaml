@@ -1,4 +1,4 @@
 interface:
   display_name: "GPGPU Memory Path"
-  short_description: "Design and debug LSU, masks, memory traces, coalescing, and cache."
-  default_prompt: "Design or debug a GPGPU memory-path change."
+  short_description: "Specify GPGPU memory as a state machine."
+  default_prompt: "Use $gpgpu-memory-path to specify GPGPU memory as a state machine."

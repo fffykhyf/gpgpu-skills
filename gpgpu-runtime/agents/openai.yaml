@@ -1,4 +1,4 @@
 interface:
   display_name: "GPGPU Runtime"
-  short_description: "Design and review host/device launch, runtime APIs, queues, events, and kernel ABI."
-  default_prompt: "Design or review a GPGPU runtime or launch-contract change."
+  short_description: "Split GPGPU launch ABI and backend runtime."
+  default_prompt: "Use $gpgpu-runtime to split GPGPU launch ABI and backend runtime."

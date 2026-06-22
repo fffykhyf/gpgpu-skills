@@ -3,163 +3,159 @@ name: gpgpu-memory-path
 description: Use when designing, editing, or debugging GPGPU memory behavior including LSU frontend/backend, lane masks, byte enables, outstanding requests, response demux, stores, loads, coalescing, banking, cache, MSHR, fences, stalls, or memory traces.
 ---
 
-# GPGPU Memory Path
+# GPGPU Memory State Machine Skill
 
-## Overview
+## 1. Objective
 
-Use this skill for LSU and memory-system work. Start with a blocking, traceable path, then add tags, response demux, coalescing, banking, cache, MSHR, fences, or VM only when correctness traces and counters justify the next step. Use Rocket Chip's HellaCache, DCache, and TileLink as references for request/response schemas, source ID lifetime, replay/nack/kill semantics, ordering, protocol helpers, monitors, and constrained fuzzing. Use XiangShan as the reference for a fully documented LSU/LSQ/replay/cache/MMU/L2 lifecycle, especially replay-cause priority, violation handling, vector metadata, and counter attribution.
+Implement memory as a state machine over address spaces, lane masks, cache/coalescer state, outstanding requests, ordering, and responses, rather than as a list of LSU/cache/NoC blocks.
 
-## Core Rule
+## 2. Input Contract
 
-Every memory request must be traceable by SIMT context:
+Input is a memory behavior intent with issue packet schema, config digest, address spaces, mask/byte rules, ordering/fence requirements, cache/coalescer scope, and oracle alignment target.
 
-- compute core/CU ID, simt_group_id, PC or instruction ID
-- active lane mask
-- per-lane address or coalesced address
-- byte enable and access width
-- store data or load response data
-- destination register or request tag
-- source ID or outstanding index lifetime
-- response ordering rule
-- stall, nack, replay, kill, fence, flush, or exception reason when relevant
-- address space, translation state, and cacheability/MMIO classification when relevant
-- cache/memory status when modeled: hit, miss, reservation fail, MSHR full, queue full, ICNT full, or DRAM wait
+## 3. Memory State Model
 
-Do not make a memory optimization if the current trace and counters cannot show the problem it solves.
-
-For non-trivial memory paths, define a protocol schema in addition to the trace: op, size, address, byte mask, active lane mask, data, tag/source ID, ordering scope, cacheability, fault fields, and response metadata. Treat this as an executable contract with assertions or monitors.
-
-## Terminology Contract
-
-Use canonical terms for memory traces and tags. Keep source aliases only when naming RTL signals.
-
-| Canonical term | Source aliases | Memory-path meaning |
-|---|---|---|
-| SIMT group | warp, wavefront, wave | execution group that issues memory operations |
-| simt_group_id | warp ID, `wfid`, wave ID, wavefront tag | request/response identity for a resident SIMT group |
-| active lane mask | active mask, lane mask, thread mask, `EXEC` mask | lanes that participate in a load/store |
-| CTA/workgroup | CTA, block, workgroup | local-memory and barrier scope |
-| compute core/CU | core, CU, compute unit | memory-client owner |
-
-## Frontend And Backend Split
-
-| Area | Owns |
+| State | Fields |
 |---|---|
-| LSU frontend | AGU, address classification, byte enable, store-data alignment, fence lock, response formatting |
-| Memory scheduler/backend | request queue, outstanding tag/index buffer, optional coalescing, batching, out-of-order response demux |
-| Cache/bank layer | bank dispatch, hit/miss handling, MSHR, merge crossbar, flush, deadlock prevention |
-| Protocol/check layer | source/tag validity, alignment, mask legality, ordering, replay/nack/fault, monitor/fuzzer hooks |
+| address space state | global, shared/LDS, local, constant, MMIO/uncached, cacheability, translation/fault status |
+| coherence/visibility state | host/device visibility, fence scope, flush state, atomic serialization, cache ownership when modeled |
+| cache line state | tag, valid/dirty, sector bits, MSHR ownership, fill/evict state |
+| outstanding request table | tag/source ID, simt_group_id, PC, op, lane mask, byte mask, destination, response route |
+| coalescer state | per-lane address groups, segment merge, split requests, partial response mapping |
+| pipeline state | issue, coalesce, tag lookup, miss/refill, response, retire/replay |
+| hazard state | bank conflict, miss, queue full, ordering wait, replay/nack, fault, deadlock watchdog |
 
-Keep this split visible in simulator, RTL, trace, and tests.
+## 4. Mandatory Five Questions
 
-## GPGPU-Sim Memory Lifecycle
+For every memory change answer:
 
-Use GPGPU-Sim as the reference for a staged request path:
+1. What state exists? Name address, cache, outstanding, coalescer, ordering, or pipeline state.
+2. Who produces it? LSU, coalescer, cache, interconnect, DRAM, response demux, or runtime fence.
+3. Who consumes it? SIMT scheduler, register writeback, cache, runtime, oracle, trace, or PPA.
+4. How does it change? Define issue, merge, miss, fill, response, replay, fence, flush, and fault transitions.
+5. How do we verify it? Name memory trace, monitor, oracle alignment, directed test, or counter check.
 
-| Stage | GPGPU-Sim anchor | Local rule |
-|---|---|---|
-| issue to LSU | `ldst_unit` input pipeline | capture SIMT group, PC, op, active lane mask, destination |
-| space split | `shared_cycle`, `constant_cycle`, `texture_cycle`, `memory_cycle` | classify memory space before cache behavior |
-| request carrier | `mem_fetch` | preserve SIMT context, tag, address, size, op, status, and response route |
-| L1/cache | `process_cache_access`, `gpu-cache` | distinguish hit, miss, hit-reserved, reservation fail, MSHR/miss-queue pressure |
-| interconnect | `icnt_wrapper`, cluster injection | expose routing and backpressure instead of assuming free network |
-| L2/partition | `memory_sub_partition` | define L2 queues, sector split, and DRAM admission |
-| DRAM | `dram_t`, `dram_sched` | define bank timing, scheduling, return queue |
-| response | response FIFO, store ack, writeback | demux by tag to SIMT group, lane mask, and destination |
-| stats | memory latency/cache/DRAM stats | measure before claiming optimization |
+## 5. Access Contract
 
-Do not collapse these owners into a single black-box memory model once the design grows beyond a blocking LSU.
+Every access must carry:
 
-## Rocket Chip Memory Contract
+- kernel ID, compute core/CU ID, simt_group_id, PC or instruction ID.
+- op: load, store, atomic, fence, flush, prefetch, or unsupported.
+- address space and cacheability.
+- active lane mask, per-lane address, byte enable, width, alignment.
+- store data or destination register mapping.
+- tag/source ID and response route.
+- ordering scope and fence/atomic semantics.
+- fault/replay/kill eligibility.
 
-Use Rocket Chip as the reference for making memory protocols explicit:
+## 6. Warp Coalescing Rule
 
-| Contract | Rocket Chip anchor | Local rule |
-|---|---|---|
-| request schema | `HellaCacheReq`, TileLink A/C channels | Carry op, size, address, mask, data, tag/source ID, privilege/address-space, and no-response/no-allocate semantics explicitly. |
-| response schema | `HellaCacheResp`, TileLink D channel | Carry data, replay, denied/fault, metadata, destination, and source/sink identity explicitly. |
-| exceptional flow | DCache kill/nack/replay/flush/probe/release/grant | Specify behavior for kill, flush, nack, replay, fence, fault, uncached/MMIO, and outstanding requests. |
-| derived helpers | `tilelink/Edges.scala` | Centralize beat, mask, first/last/done, source, and address calculations. |
-| executable checks | `tilelink/Monitor.scala`, `tilelink/Fuzzer.scala` | Add monitors and constrained random traffic before claiming protocol robustness. |
-| resource params | `DCacheParams`, MSHR/MMIO/source ID ranges | Configure and check queue depths, MSHRs, MMIO slots, and source/tag ranges in one place. |
+Coalescing is a transformation from lane accesses to one or more memory transactions:
 
-Translate TileLink ideas into the local GPGPU protocol; do not assume a CPU cache coherence protocol is the GPU memory model.
+```text
+lane requests + active mask -> segment groups -> memory transactions -> partial responses -> per-lane writeback/fault
+```
 
-## XiangShan LSU Replay Pattern
+Rules:
 
-Use XiangShan as the reference for memory paths where replay, violation, and wakeup are first-class design objects:
+- Semantic result must match uncoalesced per-lane execution.
+- Coalesced transactions must preserve byte enables, lane ownership, destination mapping, and fault metadata.
+- Partial responses must retire only the lanes they cover.
+- Replays must restore lane ownership without duplicating stores or dropping load destinations.
 
-| Memory contract | XiangShan anchor | Local memory-path rule |
-|---|---|---|
-| backend-memory boundary | `MemBlock.scala` | Define issue, LSQ enqueue, commit, redirect, violation, exception, wakeup, writeback, and perf ports. |
-| load/store queue owner | `LSQWrapper.scala` | Keep load queue, store queue, bypass, forward, uncache, rollback, hint, and debug ownership explicit. |
-| replay cause enum | `LoadQueueReplay.scala` | Enumerate replay reasons and preserve priority ordering with deadlock reasoning. |
-| vector metadata | `VecReplayInfo`, vector LSU files | Carry per-element, mask, merge-buffer, offset, and active metadata when vector or lane replay exists. |
-| cache/TLB path | `DCacheWrapper.scala`, `cache/mmu/` | Derive source IDs, MSHR entries, TLB/PTW misses, uncache/MMIO, ECC, and prefetch fields from config. |
-| shared L2/backpressure | PDF CoupledL2 chapter, `L2Top.scala` | Document MSHR, retry/credit, MMIO bridge, error, and downstream protocol behavior. |
+## 7. Transformation Rules: Memory Pipeline
 
-Local GPGPU memory work should name replay causes such as coalescer retry, shared-memory bank conflict, TLB miss, cache miss, MSHR full, NoC backpressure, atomic serialization, uncache/MMIO, fault, and store/load ordering. If two causes can be true at once, write the priority and prove it cannot deadlock.
+The canonical memory FSM is:
 
-A first blocking LSU should name its FSM states and trace:
+```text
+issue -> coalesce -> tag -> miss -> fill -> retire
+```
 
-| Area | Required evidence |
+| Stage | Input state | Transformation | Output state |
+|---|---|---|---|
+| issue | SIMT issue packet | validate op, masks, address space, alignment | memory request candidate |
+| coalesce | per-lane requests | group/split lanes into transactions | transaction list and lane map |
+| tag | transaction | allocate outstanding entry/source ID | in-flight request |
+| miss | cache/bank/interconnect state | hit, miss, queue, replay, bank conflict, fault | response wait or replay |
+| fill | downstream response | update cache/MSHR/outstanding table | response payload |
+| retire | response payload | write back loads, commit stores/atomics, clear waits | memory trace and scheduler release |
+
+For a blocking LSU, keep the same stages but allow only one in-flight request.
+
+## 8. Hazard Model
+
+| Hazard | Required rule |
 |---|---|
-| issue capture | simt_group_id, PC, opcode, memory format, destination, SGPR/VGPR class |
-| address generation | scalar base, vector offset, immediate, thread id, LDS base, global/LDS bit |
-| lane control | active lane mask, skipped lanes, per-lane address vector |
-| request | read/write enable, address, write data, write mask, tag |
-| response | ack, tag, read data, destination register, writeback mask |
-| completion | done simt_group_id, retire PC, memory wait release, trace event |
+| bank conflict | conflict detection, stall/replay priority, counter owner |
+| cache miss | MSHR allocation, miss queue full behavior, fill ownership |
+| response ordering | in-order or out-of-order rule, tag lifetime, demux assertion |
+| memory dependency | load/store/atomic/fence ordering scope and scoreboard interaction |
+| queue pressure | full conditions, backpressure path, no-drop assertion |
+| replay/nack | replay cause enum, priority, state restoration, deadlock proof |
+| fault | address/access fault state, per-lane reporting, completion semantics |
+| flush/kill | outstanding request behavior, response ignore or drain rule |
 
-Only after this path passes load/store, masked-lane, global/LDS, and SGPR/VGPR writeback tests should coalescing, cache, MSHR, or VM be treated as implementation work rather than speculation.
+If two hazards can be true together, define priority and the trace field that records it.
 
-## Stage Order
+## 9. State Evolution
 
-| Stage | Capability | Gate |
-|---|---|---|
-| M0 | blocking scalar load/store | single-lane load/store trace is correct |
-| M1 | lane mask and byte enable | partial lane and access-width tests pass |
-| M2 | vector lane memory | each lane address, data, and mask is traceable |
-| M3 | outstanding loads | tag or index buffer routes out-of-order responses |
-| M4 | coalescing | merge rate, replay, and partial response are explainable |
-| M5 | bank/cache/MSHR/L2/ICNT | hit, miss, full queue, routing, and deadlock tests exist |
-| M6 | fence/flush/VM | ordering, translation, and unsupported behavior are explicit |
+| Event | State change |
+|---|---|
+| LSU accepts issue packet | capture PC, mask, op, address metadata, destination |
+| address generation | produce per-lane addresses and byte masks |
+| coalescer accepts | allocate lane-to-transaction map |
+| tag allocation | create outstanding request entry and block dependent SIMT group |
+| cache hit | return response or store commit through retire stage |
+| cache miss/MSHR allocate | track fill state and downstream route |
+| replay/nack/full | preserve request and release/retry according to priority |
+| response arrives | demux by tag/source to SIMT group, lane mask, destination |
+| retire | update register file or store visibility, clear memory wait |
+| fence/flush | update ordering/coherence state and runtime visibility |
+| fault | record per-lane fault and completion/failure state |
 
-Skip stages only when the user asks for a focused study and the missing assumptions are documented.
+## 10. Output Contract: Memory Trace Schema
 
-## Non-Blocking Load Requirements
+Trace records must include:
 
-Any non-blocking load must specify:
+- identity: kernel ID, core/CU, simt_group_id, PC, sequence ID.
+- access: op, address space, active lane mask, per-lane address or coalesced segment, byte mask, width.
+- data: store data, load response, destination register/lane map.
+- state: outstanding tag/source ID, cache hit/miss, MSHR, bank, queue, replay/fault reason.
+- ordering: fence/atomic scope, visibility event, response ordering.
+- completion: writeback mask, store commit, fault, scheduler release, latency/counter fields.
 
-- tag or index-buffer allocation and release.
-- maximum outstanding requests.
-- source ID or tag visibility at every queue, coalescer, cache, interconnect, and response point.
-- response demux path back to SIMT group, lane mask, and destination.
-- behavior on flush, kill, fence, exception, or queue-full.
-- behavior on cache reservation failure, interconnect backpressure, and response FIFO full when those layers exist.
-- watchdog, assertion, or test that catches deadlock.
-- monitor or trace assertion for tag reuse, mask legality, alignment, replay, and response completion.
+## 11. Verification Gate
 
-## Common Mistakes
+| Gate | Required proof |
+|---|---|
+| M0 blocking | single-lane load/store trace matches oracle |
+| mask/byte | partial lanes and mixed access widths preserve byte enables |
+| vector lanes | per-lane address/data/writeback is traceable |
+| outstanding | tag/source checker catches reuse and routes out-of-order responses |
+| coalescing | coalesced result matches uncoalesced oracle and records merge/split rate |
+| cache/MSHR | hit, miss, full, fill, and replay states are covered |
+| ordering | fence/atomic/flush tests prove visibility and dependency rules |
+| GPGPU-Sim alignment | behavioral evidence matches semantic contract where used as oracle/reference |
 
-- Adding cache before a working blocking LSU.
-- Assuming in-order responses after introducing outstanding requests.
-- Coalescing without preserving per-lane writeback, byte enables, and exception behavior.
-- Losing the original SIMT-group/lane/destination metadata in the request tag.
-- Reporting one generic memory stall after adding cache, interconnect, L2, or DRAM queues.
-- Treating final kernel output as the only memory correctness check.
-- Hand-coding beat/mask/source calculations in several places instead of centralizing derived protocol helpers.
-- Adding replay, nack, or out-of-order response support without a source/tag lifetime checker.
-- Adding replay causes without a XiangShan-style priority table, owner counter, and deadlock check.
+## 12. Design Evidence Layer
 
-## Local References
+Use references only as evidence:
 
-For deeper Vortex background tied to this skill, read `vortex_local.md` in this directory. It explains the LSU scheduler, memory unit, coalescer/cache/MSHR boundaries, and full-stack memory contracts.
+| Evidence | Use |
+|---|---|
+| GPGPU-Sim | behavioral evidence for LSU lifecycle, `mem_fetch`-like context preservation, cache/MSHR/DRAM stats |
+| Rocket Chip | structural reference for explicit request/response schemas, source ID lifetime, monitors/fuzzers |
+| Vortex/MIAOW | implementation anchors for GPU LSU, coalescer, memory-unit, trace and FPGA memory paths |
+| XiangShan | tradeoff justification for replay cause priority, LSQ lifecycle, vector metadata, counter attribution |
+| golden sim | semantic oracle for uncoalesced memory effects and ordering |
 
-For deeper MIAOW background tied to this skill, read `miao_local.md` in this directory. It explains the MIAOW LSU opcode decoder, address calculator, op-manager FSM, simple memory model, trace signals, and limitations.
+Evidence validates memory contracts; it must not structure the skill as cache/LSU/framework chapters.
 
-For deeper GPGPU-Sim background tied to this skill, read `gpgpusim_local.md` in this directory. It explains `ldst_unit`, `mem_fetch`, cache/MSHR status, L2/memory partitions, interconnect, DRAM timing, response routing, and memory statistics.
+## 13. Failure Modes
 
-For deeper Rocket Chip background tied to this skill, read `rocket_local.md` in this directory. It explains HellaCache/DCache request-response fields, nack/replay/ordered/store-pending behavior, TileLink bundles/edges/monitors/fuzzers, source-ID lifetime, and memory protocol lessons.
-
-For XiangShan background tied to this skill, read `xiangshan_local.md` in this directory. It explains the PDF LSU/DCache/MMU/CoupledL2 chapters, `MemBlock`, `LSQWrapper`, `LoadQueueReplay`, DCache parameters, TLB/PTW structure, vector replay metadata, and how to adapt those details to GPGPU memory paths.
+- Cache is added before a traceable blocking LSU exists.
+- Tag/source ID is reused before all responses retire.
+- Coalescer drops per-lane byte enable, destination, or fault metadata.
+- Store completion is confused with response acceptance.
+- Fence/flush only changes test code, not memory visibility state.
+- Memory stalls are counted generically after adding distinct hazards.

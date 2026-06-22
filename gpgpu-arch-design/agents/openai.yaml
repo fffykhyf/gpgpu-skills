@@ -1,4 +1,4 @@
 interface:
   display_name: "GPGPU Arch Design"
-  short_description: "Stage GPGPU architecture work across ISA, SIMT, RTL, runtime, and evaluation."
-  default_prompt: "Plan or review a staged GPGPU architecture design task."
+  short_description: "Orchestrate contract-first GPGPU design state."
+  default_prompt: "Use $gpgpu-arch-design to orchestrate a contract-first GPGPU design."

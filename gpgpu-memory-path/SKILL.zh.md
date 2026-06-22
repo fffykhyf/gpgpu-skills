@@ -1,165 +1,155 @@
 ---
 name: gpgpu-memory-path
-description: 用于设计、编辑或调试 GPGPU memory 行为，包括 LSU frontend/backend、lane masks、byte enables、outstanding requests、response demux、stores、loads、coalescing、banking、cache、MSHR、fences、stalls 或 memory traces。
+description: 用于设计、修改或调试 GPGPU memory behavior，包括 LSU frontend/backend、lane masks、byte enables、outstanding requests、response demux、stores、loads、coalescing、banking、cache、MSHR、fences、stalls 或 memory traces。
 ---
 
-# GPGPU Memory Path
+# GPGPU Memory State Machine Skill
 
-## 概览
+## 1. Objective
 
-用于 LSU 和 memory-system 工作。先从 blocking、traceable path 开始；只有当 correctness traces 和 counters 能证明下一步有必要时，再加入 tags、response demux、coalescing、banking、cache、MSHR、fences 或 VM。使用 Rocket Chip 的 HellaCache、DCache 和 TileLink 作为 request/response schemas、source ID lifetime、replay/nack/kill semantics、ordering、protocol helpers、monitors 和 constrained fuzzing 的参考。使用 XiangShan 作为完整 LSU/LSQ/replay/cache/MMU/L2 lifecycle 的参考，尤其关注 replay-cause priority、violation handling、vector metadata 和 counter attribution。
+把 memory 实现成 address spaces、lane masks、cache/coalescer state、outstanding requests、ordering 和 responses 上的 state machine，而不是 LSU/cache/NoC 子系统列表。
 
-## 核心规则
+## 2. Input Contract
 
-每个 memory request 都必须能通过 SIMT context 追踪：
+输入是 memory behavior intent，必须包含 issue packet schema、config digest、address spaces、mask/byte rules、ordering/fence requirements、cache/coalescer scope 和 oracle alignment target。
 
-- compute core/CU ID、simt_group_id、PC 或 instruction ID
-- active lane mask
-- per-lane address 或 coalesced address
-- byte enable 和 access width
-- store data 或 load response data
-- destination register 或 request tag
-- source ID 或 outstanding index lifetime
-- response ordering rule
-- relevant stall、nack、replay、kill、fence、flush 或 exception reason
-- relevant address space、translation state 和 cacheability/MMIO classification
-- 建模后还要记录 cache/memory status：hit、miss、reservation fail、MSHR full、queue full、ICNT full 或 DRAM wait
+## 3. Memory State Model
 
-如果当前 trace 和 counters 不能展示某个 memory optimization 要解决的问题，就不要做该优化。
-
-对于非平凡 memory path，还要在 trace 之外定义 protocol schema：op、size、address、byte mask、active lane mask、data、tag/source ID、ordering scope、cacheability、fault fields 和 response metadata。把它当成带 assertions 或 monitors 的 executable contract。
-
-## 术语契约
-
-Memory traces 和 tags 使用统一术语；只有命名 RTL 信号时保留源码别名。
-
-| 统一术语 | 源码别名 | Memory-path 含义 |
-|---|---|---|
-| SIMT group | warp、wavefront、wave | 发出 memory operations 的 execution group |
-| simt_group_id | warp ID、`wfid`、wave ID、wavefront tag | resident SIMT group 的 request/response identity |
-| active lane mask | active mask、lane mask、thread mask、`EXEC` mask | 参与 load/store 的 lanes |
-| CTA/workgroup | CTA、block、workgroup | local-memory 和 barrier scope |
-| compute core/CU | core、CU、compute unit | memory-client owner |
-
-## Frontend 和 Backend 拆分
-
-| 区域 | 职责 |
+| State | Fields |
 |---|---|
-| LSU frontend | AGU、address classification、byte enable、store-data alignment、fence lock、response formatting |
-| Memory scheduler/backend | request queue、outstanding tag/index buffer、optional coalescing、batching、out-of-order response demux |
-| Cache/bank layer | bank dispatch、hit/miss handling、MSHR、merge crossbar、flush、deadlock prevention |
-| Protocol/check layer | source/tag validity、alignment、mask legality、ordering、replay/nack/fault、monitor/fuzzer hooks |
+| address space state | global、shared/LDS、local、constant、MMIO/uncached、cacheability、translation/fault status |
+| coherence/visibility state | host/device visibility、fence scope、flush state、atomic serialization、cache ownership |
+| cache line state | tag、valid/dirty、sector bits、MSHR ownership、fill/evict state |
+| outstanding request table | tag/source ID、simt_group_id、PC、op、lane mask、byte mask、destination、response route |
+| coalescer state | per-lane address groups、segment merge、split requests、partial response mapping |
+| pipeline state | issue、coalesce、tag lookup、miss/refill、response、retire/replay |
+| hazard state | bank conflict、miss、queue full、ordering wait、replay/nack、fault、deadlock watchdog |
 
-在 simulator、RTL、trace 和 tests 中保持这个拆分可见。
+## 4. 固定五问
 
-## GPGPU-Sim Memory Lifecycle
+每个 memory change 必须回答：
 
-使用 GPGPU-Sim 作为 staged request path 的参考：
+1. What state exists? 指明 address、cache、outstanding、coalescer、ordering 或 pipeline state。
+2. Who produces it? LSU、coalescer、cache、interconnect、DRAM、response demux 或 runtime fence。
+3. Who consumes it? SIMT scheduler、register writeback、cache、runtime、oracle、trace 或 PPA。
+4. How does it change? 定义 issue、merge、miss、fill、response、replay、fence、flush、fault transitions。
+5. How do we verify it? 指明 memory trace、monitor、oracle alignment、directed test 或 counter check。
 
-| 阶段 | GPGPU-Sim anchor | 本地规则 |
-|---|---|---|
-| issue to LSU | `ldst_unit` input pipeline | 捕获 SIMT group、PC、op、active lane mask、destination |
-| space split | `shared_cycle`、`constant_cycle`、`texture_cycle`、`memory_cycle` | 在 cache behavior 之前先分类 memory space |
-| request carrier | `mem_fetch` | 保留 SIMT context、tag、address、size、op、status 和 response route |
-| L1/cache | `process_cache_access`、`gpu-cache` | 区分 hit、miss、hit-reserved、reservation fail、MSHR/miss-queue pressure |
-| interconnect | `icnt_wrapper`、cluster injection | 暴露 routing 和 backpressure，不要假设 network 免费 |
-| L2/partition | `memory_sub_partition` | 定义 L2 queues、sector split 和 DRAM admission |
-| DRAM | `dram_t`、`dram_sched` | 定义 bank timing、scheduling、return queue |
-| response | response FIFO、store ack、writeback | 按 tag demux 回 SIMT group、lane mask 和 destination |
-| stats | memory latency/cache/DRAM stats | 做 optimization claim 前先测量 |
+## 5. Access Contract
 
-当设计超过 blocking LSU 后，不要把这些 owner 折叠成一个黑盒 memory model。
+每个 access 必须携带：
 
-## Rocket Chip Memory Contract
+- kernel ID、compute core/CU ID、simt_group_id、PC 或 instruction ID。
+- op：load、store、atomic、fence、flush、prefetch 或 unsupported。
+- address space 和 cacheability。
+- active lane mask、per-lane address、byte enable、width、alignment。
+- store data 或 destination register mapping。
+- tag/source ID 和 response route。
+- ordering scope 和 fence/atomic semantics。
+- fault/replay/kill eligibility。
 
-使用 Rocket Chip 作为显式化 memory protocols 的参考：
+## 6. Warp Coalescing Rule
 
-| 契约 | Rocket Chip anchor | 本地规则 |
-|---|---|---|
-| request schema | `HellaCacheReq`、TileLink A/C channels | 显式携带 op、size、address、mask、data、tag/source ID、privilege/address-space，以及 no-response/no-allocate semantics。 |
-| response schema | `HellaCacheResp`、TileLink D channel | 显式携带 data、replay、denied/fault、metadata、destination 和 source/sink identity。 |
-| exceptional flow | DCache kill/nack/replay/flush/probe/release/grant | 说明 kill、flush、nack、replay、fence、fault、uncached/MMIO 和 outstanding requests 行为。 |
-| derived helpers | `tilelink/Edges.scala` | 集中计算 beat、mask、first/last/done、source 和 address。 |
-| executable checks | `tilelink/Monitor.scala`、`tilelink/Fuzzer.scala` | 在声明 protocol robustness 前加入 monitors 和 constrained random traffic。 |
-| resource params | `DCacheParams`、MSHR/MMIO/source ID ranges | 在一个地方配置并检查 queue depths、MSHRs、MMIO slots 和 source/tag ranges。 |
+Coalescing 是从 lane accesses 到 one or more memory transactions 的 transformation：
 
-把 TileLink 思路翻译成本地 GPGPU protocol；不要假设 CPU cache coherence protocol 就是 GPU memory model。
+```text
+lane requests + active mask -> segment groups -> memory transactions -> partial responses -> per-lane writeback/fault
+```
 
-## XiangShan LSU Replay 模式
+- Semantic result 必须匹配 uncoalesced per-lane execution。
+- Coalesced transactions 必须保留 byte enables、lane ownership、destination mapping、fault metadata。
+- Partial responses 只能 retire 覆盖到的 lanes。
+- Replays 必须恢复 lane ownership，不能重复 store 或丢 load destination。
 
-使用 XiangShan 作为 memory path 中 replay、violation 和 wakeup 都是一等设计对象的参考：
+## 7. Transformation Rules: Memory Pipeline
 
-| Memory 契约 | XiangShan anchor | 本地 memory-path 规则 |
-|---|---|---|
-| backend-memory boundary | `MemBlock.scala` | 定义 issue、LSQ enqueue、commit、redirect、violation、exception、wakeup、writeback 和 perf ports。 |
-| load/store queue owner | `LSQWrapper.scala` | 保持 load queue、store queue、bypass、forward、uncache、rollback、hint 和 debug ownership 显式。 |
-| replay cause enum | `LoadQueueReplay.scala` | 枚举 replay reasons，并保留带 deadlock reasoning 的 priority ordering。 |
-| vector metadata | `VecReplayInfo`、vector LSU files | 当存在 vector 或 lane replay 时，携带 per-element、mask、merge-buffer、offset 和 active metadata。 |
-| cache/TLB path | `DCacheWrapper.scala`、`cache/mmu/` | 从 config 派生 source IDs、MSHR entries、TLB/PTW misses、uncache/MMIO、ECC 和 prefetch fields。 |
-| shared L2/backpressure | PDF CoupledL2 章节、`L2Top.scala` | 文档化 MSHR、retry/credit、MMIO bridge、error 和 downstream protocol behavior。 |
+```text
+issue -> coalesce -> tag -> miss -> fill -> retire
+```
 
-本地 GPGPU memory 工作应命名 replay causes，例如 coalescer retry、shared-memory bank conflict、TLB miss、cache miss、MSHR full、NoC backpressure、atomic serialization、uncache/MMIO、fault 和 store/load ordering。若两个 cause 可同时为真，必须写出优先级并证明不会死锁。
+| Stage | Input state | Transformation | Output state |
+|---|---|---|---|
+| issue | SIMT issue packet | validate op、masks、address space、alignment | memory request candidate |
+| coalesce | per-lane requests | group/split lanes into transactions | transaction list and lane map |
+| tag | transaction | allocate outstanding entry/source ID | in-flight request |
+| miss | cache/bank/interconnect state | hit、miss、queue、replay、bank conflict、fault | response wait or replay |
+| fill | downstream response | update cache/MSHR/outstanding table | response payload |
+| retire | response payload | write back loads、commit stores/atomics、clear waits | memory trace and scheduler release |
 
-第一版 blocking LSU 应命名自己的 FSM states，并 trace：
+Blocking LSU 也使用同一 stages，只允许一个 in-flight request。
 
-| 区域 | 必要证据 |
+## 8. Hazard Model
+
+| Hazard | Required rule |
 |---|---|
-| issue capture | simt_group_id、PC、opcode、memory format、destination、SGPR/VGPR class |
-| address generation | scalar base、vector offset、immediate、thread id、LDS base、global/LDS bit |
-| lane control | active lane mask、skipped lanes、per-lane address vector |
-| request | read/write enable、address、write data、write mask、tag |
-| response | ack、tag、read data、destination register、writeback mask |
-| completion | done simt_group_id、retire PC、memory wait release、trace event |
+| bank conflict | conflict detection、stall/replay priority、counter owner |
+| cache miss | MSHR allocation、miss queue full behavior、fill ownership |
+| response ordering | in-order/out-of-order rule、tag lifetime、demux assertion |
+| memory dependency | load/store/atomic/fence ordering scope 和 scoreboard interaction |
+| queue pressure | full conditions、backpressure path、no-drop assertion |
+| replay/nack | replay cause enum、priority、state restoration、deadlock proof |
+| fault | address/access fault state、per-lane reporting、completion semantics |
+| flush/kill | outstanding request behavior、response ignore 或 drain rule |
 
-只有当该路径通过 load/store、masked-lane、global/LDS、SGPR/VGPR writeback 测试后，coalescing、cache、MSHR 或 VM 才应被当作实现工作，而不是推测。
+多个 hazard 可同时为真时，必须定义 priority 和 trace field。
 
-## 阶段顺序
+## 9. State Evolution
 
-| 阶段 | 能力 | Gate |
-|---|---|---|
-| M0 | blocking scalar load/store | single-lane load/store trace 正确 |
-| M1 | lane mask 和 byte enable | partial lane 和 access-width tests 通过 |
-| M2 | vector lane memory | 每个 lane address、data、mask 都可追踪 |
-| M3 | outstanding loads | tag 或 index buffer 能路由 out-of-order responses |
-| M4 | coalescing | merge rate、replay、partial response 可解释 |
-| M5 | bank/cache/MSHR/L2/ICNT | hit、miss、full queue、routing、deadlock tests 存在 |
-| M6 | fence/flush/VM | ordering、translation、unsupported behavior 明确 |
+| Event | State change |
+|---|---|
+| LSU accepts issue packet | capture PC、mask、op、address metadata、destination |
+| address generation | produce per-lane addresses and byte masks |
+| coalescer accepts | allocate lane-to-transaction map |
+| tag allocation | create outstanding request entry and block dependent SIMT group |
+| cache hit | return response 或 store commit through retire stage |
+| cache miss/MSHR allocate | track fill state and downstream route |
+| replay/nack/full | preserve request and release/retry by priority |
+| response arrives | demux by tag/source to SIMT group、lane mask、destination |
+| retire | update register file 或 store visibility，clear memory wait |
+| fence/flush | update ordering/coherence state and runtime visibility |
+| fault | record per-lane fault and completion/failure state |
 
-只有当用户要求聚焦研究且缺失假设已文档化时，才能跳过阶段。
+## 10. Output Contract: Memory Trace Schema
 
-## Non-Blocking Load 要求
+Trace records 必须包含 identity、access、data、state、ordering、completion：
 
-任何 non-blocking load 都必须说明：
+- identity：kernel ID、core/CU、simt_group_id、PC、sequence ID。
+- access：op、address space、active lane mask、per-lane address/coalesced segment、byte mask、width。
+- data：store data、load response、destination register/lane map。
+- state：outstanding tag/source ID、cache hit/miss、MSHR、bank、queue、replay/fault reason。
+- ordering：fence/atomic scope、visibility event、response ordering。
+- completion：writeback mask、store commit、fault、scheduler release、latency/counter fields。
 
-- tag 或 index-buffer allocation 和 release。
-- maximum outstanding requests。
-- 每个 queue、coalescer、cache、interconnect 和 response 点上的 source ID 或 tag visibility。
-- response demux 回到 SIMT group、lane mask 和 destination 的路径。
-- flush、kill、fence、exception 或 queue-full 行为。
-- 当对应层级存在时，说明 cache reservation failure、interconnect backpressure 和 response FIFO full 行为。
-- 捕获 deadlock 的 watchdog、assertion 或 test。
-- 针对 tag reuse、mask legality、alignment、replay 和 response completion 的 monitor 或 trace assertion。
+## 11. Verification Gate
 
-## 常见错误
+| Gate | Required proof |
+|---|---|
+| M0 blocking | single-lane load/store trace matches oracle |
+| mask/byte | partial lanes 和 mixed access widths 保留 byte enables |
+| vector lanes | per-lane address/data/writeback traceable |
+| outstanding | tag/source checker 捕捉 reuse 并 route out-of-order responses |
+| coalescing | coalesced result matches uncoalesced oracle，并记录 merge/split rate |
+| cache/MSHR | hit、miss、full、fill、replay states covered |
+| ordering | fence/atomic/flush tests 证明 visibility/dependency rules |
+| GPGPU-Sim alignment | 作为 oracle/reference 时 behavioral evidence 匹配 semantic contract |
 
-- 在 working blocking LSU 之前添加 cache。
-- 引入 outstanding requests 后仍假设 in-order responses。
-- 做 coalescing 时丢失 per-lane writeback、byte enables 和 exception behavior。
-- 在 request tag 中丢掉原始 SIMT-group/lane/destination metadata。
-- 添加 cache、interconnect、L2 或 DRAM queues 后仍只报告一个 generic memory stall。
-- 把 final kernel output 当成唯一 memory correctness check。
-- 在多个地方手写 beat/mask/source calculations，而不是集中派生 protocol helpers。
-- 添加 replay、nack 或 out-of-order response support，却没有 source/tag lifetime checker。
-- 添加 replay causes，却没有 XiangShan 风格的 priority table、owner counter 和 deadlock check。
+## 12. Design Evidence Layer
 
-## 本地参考
+| Evidence | Use |
+|---|---|
+| GPGPU-Sim | LSU lifecycle、`mem_fetch` context preservation、cache/MSHR/DRAM stats 的 behavioral evidence |
+| Rocket Chip | request/response schemas、source ID lifetime、monitors/fuzzers 的 structural reference |
+| Vortex/MIAOW | GPU LSU、coalescer、memory-unit、trace/FPGA memory paths 的 implementation anchors |
+| XiangShan | replay cause priority、LSQ lifecycle、vector metadata、counter attribution 的 tradeoff justification |
+| golden sim | uncoalesced memory effects 和 ordering 的 semantic oracle |
 
-若想了解与本 skill 相关的 Vortex 背景，请阅读本目录下的 `vortex_local.md`。它说明 LSU scheduler、memory unit、coalescer/cache/MSHR boundaries 和 full-stack memory contracts。
+Evidence 验证 memory contract；不能把 skill 组织成 cache/LSU/framework chapters。
 
-若想了解与本 skill 相关的 MIAOW 背景，请阅读本目录下的 `miao_local.md`。它说明 MIAOW LSU opcode decoder、address calculator、op-manager FSM、simple memory model、trace signals 和 limitations。
+## 13. Failure Modes
 
-若想了解与本 skill 相关的 GPGPU-Sim 背景，请阅读本目录下的 `gpgpusim_local.md`。它说明 `ldst_unit`、`mem_fetch`、cache/MSHR status、L2/memory partitions、interconnect、DRAM timing、response routing 和 memory statistics。
-
-若想了解与本 skill 相关的 Rocket Chip 背景，请阅读本目录下的 `rocket_local.md`。它说明 HellaCache/DCache request-response fields、nack/replay/ordered/store-pending behavior、TileLink bundles/edges/monitors/fuzzers、source-ID lifetime 和 memory protocol lessons。
-
-若想了解与本 skill 相关的 XiangShan 背景，请阅读本目录下的 `xiangshan_local.md`。它说明 PDF 中的 LSU/DCache/MMU/CoupledL2 章节、`MemBlock`、`LSQWrapper`、`LoadQueueReplay`、DCache parameters、TLB/PTW structure、vector replay metadata，以及如何把这些细节适配到 GPGPU memory paths。
+- cache 在 traceable blocking LSU 前加入。
+- tag/source ID 在所有 response retire 前复用。
+- coalescer 丢 per-lane byte enable、destination 或 fault metadata。
+- store completion 与 response acceptance 混淆。
+- fence/flush 只改 test code，不改变 memory visibility state。
+- 添加 distinct hazards 后仍只计一个 generic memory stall。
