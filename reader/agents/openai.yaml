@@ -1,0 +1,4 @@
+interface:
+  display_name: "Reader"
+  short_description: "Read deeply and produce concise evidence handoffs"
+  default_prompt: "Use $reader with mode, depth, output_profile: human-handoff, focus, questions, and corpus to produce a concise evidence handoff."
