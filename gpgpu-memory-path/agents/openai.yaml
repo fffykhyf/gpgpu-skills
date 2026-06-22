@@ -1,4 +1,4 @@
 interface:
   display_name: "GPGPU Memory Path"
-  short_description: "Specify GPGPU memory as a state machine."
-  default_prompt: "Use $gpgpu-memory-path to specify GPGPU memory as a state machine."
+  short_description: "Execute GPU_STATE memory behavior and traces."
+  default_prompt: "Use $gpgpu-memory-path to execute GPU_STATE memory behavior and emit memory traces."

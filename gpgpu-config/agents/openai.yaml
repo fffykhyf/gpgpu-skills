@@ -1,4 +1,4 @@
 interface:
   display_name: "GPGPU Config"
-  short_description: "Compile GPGPU intent into typed config IR."
-  default_prompt: "Use $gpgpu-config to compile GPGPU intent into typed config IR."
+  short_description: "Validate locked config defaults against GPU_STATE."
+  default_prompt: "Use $gpgpu-config to validate locked config defaults against GPU_STATE."

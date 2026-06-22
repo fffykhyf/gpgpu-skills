@@ -1,4 +1,4 @@
 interface:
   display_name: "GPGPU Runtime"
-  short_description: "Split GPGPU launch ABI and backend runtime."
-  default_prompt: "Use $gpgpu-runtime to split GPGPU launch ABI and backend runtime."
+  short_description: "Interpret GPU_STATE launch semantics into traces."
+  default_prompt: "Use $gpgpu-runtime to interpret GPU_STATE launch semantics into an execution trace."

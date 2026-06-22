@@ -1,0 +1,5 @@
+interface:
+  display_name: "GPGPU Spec Lock"
+  short_description: "Lock prose GPU specs into ambiguity-free SPEC_IR."
+  default_prompt: "Use $gpgpu-spec-lock to lock prose GPGPU specs into ambiguity-free SPEC_IR."
+

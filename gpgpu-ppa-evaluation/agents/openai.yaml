@@ -1,4 +1,0 @@
-interface:
-  display_name: "GPGPU PPA Evaluation"
-  short_description: "Compile PPA evidence into causal GPGPU claims."
-  default_prompt: "Use $gpgpu-ppa-evaluation to compile PPA evidence into causal GPGPU claims."

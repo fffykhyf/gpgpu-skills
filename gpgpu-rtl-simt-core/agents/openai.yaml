@@ -1,4 +1,4 @@
 interface:
   display_name: "GPGPU RTL SIMT Core"
-  short_description: "Specify SIMT RTL as an execution state machine."
-  default_prompt: "Use $gpgpu-rtl-simt-core to specify SIMT RTL as an execution state machine."
+  short_description: "Execute pure SIMT hardware from GPU_STATE."
+  default_prompt: "Use $gpgpu-rtl-simt-core to execute pure SIMT hardware from GPU_STATE and emit hardware traces."

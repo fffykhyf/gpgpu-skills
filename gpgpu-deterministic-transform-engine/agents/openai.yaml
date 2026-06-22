@@ -1,0 +1,5 @@
+interface:
+  display_name: "GPGPU Deterministic Transform Engine"
+  short_description: "Map GPU_STATE to artifacts using fixed tables."
+  default_prompt: "Use $gpgpu-deterministic-transform-engine to map GPU_STATE to downstream artifacts using fixed tables."
+

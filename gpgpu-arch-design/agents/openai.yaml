@@ -1,4 +1,0 @@
-interface:
-  display_name: "GPGPU Arch Design"
-  short_description: "Orchestrate contract-first GPGPU design state."
-  default_prompt: "Use $gpgpu-arch-design to orchestrate a contract-first GPGPU design."

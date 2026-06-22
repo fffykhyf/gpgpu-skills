@@ -1,4 +1,4 @@
 interface:
   display_name: "GPGPU Golden Sim"
-  short_description: "Build semantic oracle traces for GPGPU state."
-  default_prompt: "Use $gpgpu-golden-sim to define semantic oracle traces for GPGPU state."
+  short_description: "Validate simulator artifacts against GPU_STATE."
+  default_prompt: "Use $gpgpu-golden-sim to validate simulator artifacts against GPU_STATE."
