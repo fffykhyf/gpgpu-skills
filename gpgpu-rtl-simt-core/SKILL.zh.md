@@ -1,84 +1,97 @@
 ---
 name: gpgpu-rtl-simt-core
-description: 用于从 GPU_STATE 和 kernel 执行 pure GPGPU SIMT hardware model，产生 cycle-level simulation、hardware trace、pipeline events、stalls 或 writeback traces。
+description: 用于从 GPU_STATE_IR 和 RTL mapping IR 执行或检查 SIMT hardware model，包括 pipeline、scheduler、scoreboard、memory interface 和 implementability report。
 ---
 
-# GPGPU RTL SIMT Pure Hardware Execution Model
+# GPGPU RTL SIMT Core
 
-## Objective
+## Skill Role
 
-执行 `GPU_STATE` 所规定的 hardware model。
+本 skill 是 pure hardware execution model pass。
 
 ```text
-input:  GPU_STATE + kernel
-output: cycle_level_simulation + hardware_trace
+GPU_STATE_IR + RTL_MAPPING_IR + kernel
+  -> cycle_level_simulation + hardware_trace + rtl_implementability_report
 ```
 
-本 skill 是 pure implementation layer。禁止 reinterpret architecture、modify canonical state、choose scheduling policy、alter memory hierarchy 或发明 transform-engine 未输出的 RTL structures。
+它实现 mapped state，不重新解释架构。
 
-## Input Contract
+## Input IR
 
-输入必须包含：
+必须输入：
 
-- `GPU_STATE` snapshot and hash。
-- kernel image and launch identity。
-- 来自 `gpgpu-deterministic-transform-engine` 的 RTL mapping artifact。
-- fixed trace schema。
+- `GPU_STATE_IR`
+- `RTL_MAPPING_IR`
+- kernel or instruction stream
+- required trace schema
 
-拒绝 direct prose specs、unlocked `SPEC_IR` 或 missing transform-engine mappings。
-
-## Output Contract
+## Output IR
 
 输出：
 
 ```text
 hardware_trace = {
-  cycle,
-  warp_id,
-  pc,
-  active_mask,
-  scheduler_event,
-  pipeline_stage_events,
-  scoreboard_events,
-  execution_unit_events,
-  memory_interface_events,
+  fetch_events,
+  decode_events,
+  issue_events,
+  execute_events,
   writeback_events,
-  fault_events
+  scoreboard_events,
+  memory_interface_events,
+  csr_fault_events
 }
 ```
 
-cycle-level summary counters 只能作为 trace-derived data 输出。
+同时输出：
 
-## Execution Rules
+```text
+rtl_implementability_report = {
+  unsupported_state_fields,
+  unmapped_fsm_rules,
+  pipeline_hazards,
+  scoreboard_conflicts,
+  memory_interface_conflicts,
+  verdict
+}
+```
 
-| Hardware area | Rule |
-|---|---|
-| scheduler | 执行 `GPU_STATE.scheduler_state` 的 fixed scheduler mapping |
-| pipeline | 遵循 mapped fetch/decode/issue/execute/writeback FSM |
-| scoreboard | 应用 `GPU_STATE.register_state` 的 dependency rules |
-| execution units | 使用 transform artifact 中 fixed latency/port mapping |
-| memory interface | emit memory events，不选择 memory behavior |
-| CSR/fault | report state-defined control/status behavior |
+## Allowed Transformations
 
-## Forbidden Behavior
+- 执行 fetch、decode、issue、execute、writeback pipeline rules。
+- 应用已从 `GPU_STATE_IR` 映射的 scheduler FSM 和 scoreboard rules。
+- 报告 hazards，但不改变 state definitions。
+- 通过 `RTL_MAPPING_IR` 绑定 memory interface behavior。
 
-- Reinterpreting architecture。
-- Modifying `GPU_STATE`。
-- Selecting alternate implementations。
-- 从 common RTL practice 补 missing state。
-- 把 waveform convenience 当 semantic truth。
+## Forbidden Actions
 
-## Verification Gate
+- 不 reinterpret architecture。
+- 不修改 `GPU_STATE_IR`。
+- 不添加 execution units。
+- 不因为 RTL convenience 改 scheduler。
+- 不 silently drop unsupported state fields。
 
-- 每个 hardware trace event 映射到 `GPU_STATE` field 和 transform table entry。
-- 同一 input 的 cycle evolution deterministic。
-- scheduler 和 memory behavior 是 consumed，不是 invented。
-- hardware trace 可被 `gpgpu-causal-trace-analyzer` 消费。
+## Required Invariants
+
+- 每个 hardware trace event 引用 state hash 和 mapping version。
+- unsupported fields 列入 implementability report。
+- scoreboard conflicts 显式。
+- pipeline hazards trace-visible。
+- memory interface conflicts 不隐藏。
 
 ## Failure Modes
 
-- 因 RTL 更容易实现而改变 state。
-- 添加 untracked stall causes。
-- 输出 transform-engine 未声明的 trace fields。
-- 把 cycle-level events 折叠成 final output only。
-- 用 prose explanation 替代 hardware trace debug。
+以下情况 reject 或标记不可实现：
+
+- state field 缺 RTL mapping。
+- FSM rule unmapped。
+- scoreboard conflict 无法解决。
+- memory interface width 与 mapped request width 冲突。
+- trace schema 无法覆盖 required events。
+
+## Report Schema
+
+`rtl_implementability_report.verdict = IMPLEMENTABLE | NOT_IMPLEMENTABLE | INSUFFICIENT_MAPPING`。
+
+## Downstream Contract
+
+closure 使用 `rtl_implementability_report` 作为 artifact mapping、trace smoke 和 prototype credibility gates 的 evidence。

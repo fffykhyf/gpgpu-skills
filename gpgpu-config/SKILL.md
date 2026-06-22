@@ -1,73 +1,84 @@
 ---
 name: gpgpu-config
-description: Use when checking whether GPGPU config_defaults, ABI-visible constants, generated headers, memory maps, launch limits, or capability values are explicitly locked in SPEC_IR and consistently reflected in GPU_STATE.
+description: Use when GPGPU config defaults, hardware-private fields, simulator-private fields, ABI-visible constants, test-only fields, or debug-only fields must be validated against SPEC_IR and GPU_STATE_IR.
 ---
 
-# GPGPU Config Lock Validator
+# GPGPU Config Binding Validator
 
-## Objective
+## Skill Role
 
-Validate config fields already locked by `gpgpu-spec-lock`.
-
-This skill is no longer a schema compiler. It must not derive new config, generate downstream artifacts, choose defaults, or reinterpret architecture.
+This skill is the config ownership and binding validation pass.
 
 ```text
-input:  SPEC_IR.config_defaults + GPU_STATE
-output: config_lock_report
+SPEC_IR.config_defaults + GPU_STATE_IR + CONFIG_BINDING_IR -> config_report
 ```
 
-## Input Contract
+It validates config. It does not generate architecture defaults.
 
-Input must include:
+## Input IR
 
-- `SPEC_IR.config_defaults`.
-- `GPU_STATE` snapshot.
-- any generated config artifacts emitted by `gpgpu-deterministic-transform-engine`.
+Required inputs:
 
-Reject raw parameter lists, prose defaults, or values not present in `SPEC_IR`.
+- `SPEC_IR.config_defaults`
+- `GPU_STATE_IR`
+- `CONFIG_BINDING_IR`
+- runtime contract when ABI fields are present
 
-## Output Contract
+## Output IR
 
 Emit:
 
 ```text
-config_lock_report = {
-  locked_fields,
-  gpu_state_bindings,
-  generated_artifact_bindings,
-  missing_or_drifted_fields,
+config_report = {
+  config_hash,
+  hardware_private,
+  simulator_private,
+  hw_sw_abi,
+  test_only,
+  debug_only,
+  binding_results,
+  ownership_violations,
   verdict
 }
 ```
 
-## Validation Rules
+## Allowed Transformations
 
-| Check | Rule |
-|---|---|
-| default source | every default comes from `SPEC_IR.config_defaults` |
-| enum source | every enum is already resolved by `gpgpu-spec-lock` |
-| state binding | every config field maps to exactly one `GPU_STATE` field or explicit unused marker |
-| artifact binding | generated headers/configs cite transform table version and state hash |
-| ABI binding | ABI-visible constants match runtime-visible `GPU_STATE.launch_state` or `csr_state` |
+- Classify config fields into ownership classes.
+- Check each config field binds to one `SPEC_IR` or `GPU_STATE_IR` field.
+- Check generated artifacts cite state hash and transform table version.
+- Check ABI-visible constants appear in runtime contract.
 
-## Forbidden Behavior
+## Forbidden Actions
 
-- Creating config defaults.
-- Deriving hidden values.
-- Generating `config.json`, `config.sv`, or `config.h` directly.
-- Updating architecture based on config convenience.
-- Treating test-only values as canonical state.
+- Do not generate missing defaults.
+- Do not treat generated config as source of truth.
+- Do not let runtime modify `hardware_private` fields.
+- Do not let `simulator_private` fields affect RTL trace.
+- Do not let `test_only` or `debug_only` fields affect canonical execution semantics.
 
-## Verification Gate
+## Required Invariants
 
-- No config field exists only in generated artifacts.
-- No downstream artifact changes a locked value.
-- Missing values route back to `gpgpu-spec-lock`.
-- Mapping gaps route to `gpgpu-deterministic-transform-engine`.
+- `hw_sw_abi` fields are present in runtime contract.
+- `hardware_private` fields are not runtime-controlled.
+- `simulator_private` fields do not alter hardware semantics.
+- `test_only` and `debug_only` fields are excluded from `GPU_STATE_IR` execution semantics.
+- Every config enum is resolved by `gpgpu-spec-lock`.
 
 ## Failure Modes
 
-- Filling missing defaults because previous GPUs use them.
-- Letting runtime or RTL define a value not locked in `SPEC_IR`.
-- Treating generated config as source of truth.
-- Hiding drift behind equivalent-looking names.
+Reject when:
+
+- an ABI-visible constant exists only in RTL
+- a config field has multiple owners
+- a debug/test field affects execution state
+- simulator-only config changes RTL trace
+- a default is not traceable to `SPEC_IR`
+
+## Report Schema
+
+`config_report.verdict = CONFIG_LOCKED | CONFIG_REJECTED`.
+
+## Downstream Contract
+
+Runtime, RTL, simulator, and tests must consume only their declared config class. Closure uses `config_report` as evidence for the config lock gate.

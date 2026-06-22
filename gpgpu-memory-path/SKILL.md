@@ -1,88 +1,100 @@
 ---
 name: gpgpu-memory-path
-description: Use when executing or checking GPGPU memory hierarchy behavior, cache behavior, bandwidth model, memory requests, responses, fences, ordering, or memory traces from GPU_STATE.
+description: Use when GPU_STATE_IR memory state and memory model IR must execute cache behavior, coalescing, load/store/atomic/fence semantics, or memory ordering smoke validation.
 ---
 
-# GPGPU Memory Execution Model
+# GPGPU Memory Path Execution Model
 
-## Objective
+## Skill Role
 
-Execute memory behavior from canonical state.
+This skill is the memory execution model pass.
 
 ```text
-input:  GPU_STATE.memory_state + memory_events
-output: memory_trace
+GPU_STATE_IR.memory_state + MEMORY_MODEL_IR + memory_events
+  -> memory_trace + memory_ordering_smoke_report
 ```
 
-This skill is memory execution only. It must not make architectural decisions, speculate about design alternatives, choose cache policy, change memory hierarchy, or optimize scheduling.
+It executes memory semantics already present in state.
 
-## Allowed Scope
+## Input IR
 
-Allowed:
+Required inputs:
 
-- cache behavior already encoded in `GPU_STATE.memory_state`.
-- memory hierarchy execution.
-- bandwidth model.
-- load/store/atomic/fence response behavior.
-- memory trace validation.
+- `GPU_STATE_IR.memory_state`
+- `GPU_STATE_IR.warp_state` lane and mask fields
+- `MEMORY_MODEL_IR`
+- memory events
 
-Forbidden:
-
-- architectural decisions.
-- speculative design.
-- new cache/coalescing policy selection.
-- reinterpretation of memory model enums.
-
-## Input Contract
-
-Input must include:
-
-- memory state snapshot.
-- memory event list from runtime, RTL, or transform-engine simulation.
-- cache policy enum, memory model enum, bandwidth table, outstanding request table.
-- source `GPU_STATE` snapshot hash.
-
-Reject events that require fields missing from `GPU_STATE.memory_state`.
-
-## Output Contract
+## Output IR
 
 Emit:
 
 ```text
 memory_trace = {
-  request_events,
-  cache_events,
-  bandwidth_events,
-  response_events,
-  fence_ordering_events,
-  fault_or_replay_events
+  issue_events,
+  coalesce_events,
+  tag_events,
+  miss_events,
+  fill_events,
+  retire_events,
+  fault_events
 }
 ```
 
-## Execution Rules
+Also emit:
 
-| Event | Required behavior |
-|---|---|
-| load/store | apply address-space, mask, byte-enable, and ordering rules from state |
-| atomic | apply fixed atomic serialization rule from state |
-| cache access | execute fixed `cache_policy` mapping; do not choose policy |
-| miss/fill | update cache/outstanding state by table rules |
-| bandwidth limit | emit throttle event when bandwidth model is saturated |
-| fence/flush | update visibility/order state exactly as encoded |
-| fault/replay | emit fixed cause enum and state snapshot |
+```text
+memory_ordering_smoke_report = {
+  global_load_store,
+  shared_memory_access,
+  lane_mask,
+  byte_enable,
+  fence,
+  atomic,
+  outstanding_request_tag,
+  verdict
+}
+```
 
-## Verification Gate
+## Allowed Transformations
 
-- Every memory trace event cites a state field and rule ID.
-- Cache behavior matches the fixed policy encoded in `GPU_STATE`.
-- Bandwidth events are derived from explicit bandwidth tables.
-- Outstanding request tags are unique until retired.
-- No memory optimization is proposed by this skill.
+- Execute load, store, atomic, and fence semantics.
+- Apply warp coalescing rules from `MEMORY_MODEL_IR`.
+- Model cache hit/miss/fill behavior from mapped tables.
+- Record outstanding request tags and owners.
+- Report bank conflicts, ordering violations, and faults.
+
+## Forbidden Actions
+
+- Do not choose cache policy.
+- Do not modify memory hierarchy.
+- Do not invent bandwidth model.
+- Do not reinterpret lane masks.
+- Do not change architecture to avoid hazards.
+
+## Required Invariants
+
+- Every request tag is unique until retired.
+- Lane mask width matches warp width.
+- Byte enable fields match access size and lane mask.
+- Fence and atomic semantics follow locked memory model.
+- Ordering violations are trace events, not hidden logs.
 
 ## Failure Modes
 
-- Choosing a new cache behavior from workload symptoms.
-- Treating memory trace gaps as permission to infer events.
-- Dropping lane mask, byte enable, tag, or destination mapping.
-- Explaining performance instead of emitting memory execution evidence.
-- Modifying `GPU_STATE.memory_state` schema.
+Reject when:
+
+- memory event references unknown address space
+- coalescing policy has no table entry
+- request tag collides
+- fence semantics are absent
+- atomic owner is undefined
+- lane mask is inconsistent with warp state
+
+## Report Schema
+
+`memory_ordering_smoke_report.verdict = PASS | FAIL`.
+
+## Downstream Contract
+
+Closure may use memory trace and smoke report for trace smoke and memory consistency gates. RTL and golden sim must align to the same memory trace schema.

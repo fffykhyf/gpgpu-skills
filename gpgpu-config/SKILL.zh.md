@@ -1,73 +1,84 @@
 ---
 name: gpgpu-config
-description: 用于检查 GPGPU config_defaults、ABI-visible constants、generated headers、memory maps、launch limits 或 capability values 是否已在 SPEC_IR 中显式锁定，并一致反映到 GPU_STATE。
+description: 用于验证 GPGPU config defaults、hardware-private fields、simulator-private fields、ABI-visible constants、test-only fields 或 debug-only fields 是否绑定到 SPEC_IR 和 GPU_STATE_IR。
 ---
 
-# GPGPU Config Lock Validator
+# GPGPU Config Binding Validator
 
-## Objective
+## Skill Role
 
-验证 `gpgpu-spec-lock` 已锁定的 config fields。
-
-本 skill 不再是 schema compiler。禁止 derive new config、generate downstream artifacts、choose defaults 或 reinterpret architecture。
+本 skill 是 config ownership 和 binding validation pass。
 
 ```text
-input:  SPEC_IR.config_defaults + GPU_STATE
-output: config_lock_report
+SPEC_IR.config_defaults + GPU_STATE_IR + CONFIG_BINDING_IR -> config_report
 ```
 
-## Input Contract
+它验证 config，不生成架构默认值。
 
-输入必须包含：
+## Input IR
 
-- `SPEC_IR.config_defaults`。
-- `GPU_STATE` snapshot。
-- `gpgpu-deterministic-transform-engine` 生成的 config artifacts。
+必须输入：
 
-拒绝 raw parameter lists、prose defaults 或不在 `SPEC_IR` 中的 values。
+- `SPEC_IR.config_defaults`
+- `GPU_STATE_IR`
+- `CONFIG_BINDING_IR`
+- ABI fields 存在时的 runtime contract
 
-## Output Contract
+## Output IR
 
 输出：
 
 ```text
-config_lock_report = {
-  locked_fields,
-  gpu_state_bindings,
-  generated_artifact_bindings,
-  missing_or_drifted_fields,
+config_report = {
+  config_hash,
+  hardware_private,
+  simulator_private,
+  hw_sw_abi,
+  test_only,
+  debug_only,
+  binding_results,
+  ownership_violations,
   verdict
 }
 ```
 
-## Validation Rules
+## Allowed Transformations
 
-| Check | Rule |
-|---|---|
-| default source | 每个 default 来自 `SPEC_IR.config_defaults` |
-| enum source | 每个 enum 已由 `gpgpu-spec-lock` resolve |
-| state binding | 每个 config field 映射到唯一 `GPU_STATE` field 或 explicit unused marker |
-| artifact binding | generated headers/configs 引用 transform table version 和 state hash |
-| ABI binding | ABI-visible constants 匹配 runtime-visible `GPU_STATE.launch_state` 或 `csr_state` |
+- 把 config fields 分类到 ownership classes。
+- 检查每个 config field 绑定到唯一 `SPEC_IR` 或 `GPU_STATE_IR` 字段。
+- 检查 generated artifacts 引用 state hash 和 transform table version。
+- 检查 ABI-visible constants 出现在 runtime contract。
 
-## Forbidden Behavior
+## Forbidden Actions
 
-- 创建 config defaults。
-- derive hidden values。
-- 直接生成 `config.json`、`config.sv` 或 `config.h`。
-- 为 config convenience 修改 architecture。
-- 把 test-only values 当作 canonical state。
+- 不生成 missing defaults。
+- 不把 generated config 当 source of truth。
+- 不允许 runtime 修改 `hardware_private` fields。
+- 不允许 `simulator_private` fields 影响 RTL trace。
+- 不允许 `test_only` 或 `debug_only` fields 影响 canonical execution semantics。
 
-## Verification Gate
+## Required Invariants
 
-- 没有只存在于 generated artifacts 的 config field。
-- downstream artifact 不改变 locked value。
-- missing values 路由回 `gpgpu-spec-lock`。
-- mapping gaps 路由到 `gpgpu-deterministic-transform-engine`。
+- `hw_sw_abi` fields 出现在 runtime contract。
+- `hardware_private` fields 不受 runtime 控制。
+- `simulator_private` fields 不改变 hardware semantics。
+- `test_only` 和 `debug_only` fields 排除在 `GPU_STATE_IR` execution semantics 外。
+- 每个 config enum 已由 `gpgpu-spec-lock` resolve。
 
 ## Failure Modes
 
-- 因为 previous GPUs 常用而补 missing defaults。
-- 让 runtime 或 RTL 定义未锁定在 `SPEC_IR` 中的 value。
-- 把 generated config 当 source of truth。
-- 用相似名字掩盖 drift。
+以下情况 reject：
+
+- ABI-visible constant 只存在 RTL。
+- config field 有多个 owner。
+- debug/test field 影响 execution state。
+- simulator-only config 改变 RTL trace。
+- default 无法追溯到 `SPEC_IR`。
+
+## Report Schema
+
+`config_report.verdict = CONFIG_LOCKED | CONFIG_REJECTED`。
+
+## Downstream Contract
+
+runtime、RTL、simulator 和 tests 只能消费自己声明的 config class。closure 使用 `config_report` 作为 config lock gate 的 evidence。

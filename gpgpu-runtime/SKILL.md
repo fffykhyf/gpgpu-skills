@@ -1,50 +1,33 @@
 ---
 name: gpgpu-runtime
-description: Use when interpreting GPGPU kernel launch, ABI layout, warp execution semantics, command submission, events, fences, or completion behavior from GPU_STATE into an execution trace.
+description: Use when GPU_STATE_IR and runtime contract IR must interpret kernel launch, ABI layout, command queue, fences, completion, or runtime launch smoke behavior.
 ---
 
 # GPGPU Runtime Execution Semantics
 
-## Objective
+## Skill Role
 
-Interpret runtime and launch semantics from canonical state.
+This skill is the runtime execution semantics pass.
 
 ```text
-input:  GPU_STATE + kernel_launch
-output: execution_trace
+GPU_STATE_IR + RUNTIME_CONTRACT_IR + kernel_launch
+  -> execution_trace + runtime_launch_smoke_report
 ```
 
-This skill is not a system designer. It must not add architecture assumptions, infer scheduling policy, optimize memory, change config defaults, or reinterpret `GPU_STATE`.
+It interprets launch behavior. It does not design architecture.
 
-## Allowed Scope
+## Input IR
 
-Keep only:
+Required inputs:
 
-- kernel launch semantics.
-- warp execution semantics visible to the ABI.
-- ABI definition and argument layout interpretation.
-- command queue, event, fence, fault, and completion semantics.
+- `GPU_STATE_IR.launch_state`
+- `GPU_STATE_IR.warp_state`
+- `GPU_STATE_IR.memory_state` visibility and fence fields
+- `GPU_STATE_IR.csr_state`
+- `RUNTIME_CONTRACT_IR`
+- kernel launch request
 
-Delete or reject:
-
-- architecture assumptions.
-- scheduling inference.
-- memory optimization.
-- backend-specific design choices.
-
-## Input Contract
-
-Input must include:
-
-- `GPU_STATE.launch_state`.
-- `GPU_STATE.warp_state`.
-- `GPU_STATE.memory_state` visibility/fence fields.
-- `GPU_STATE.csr_state` runtime-visible status fields.
-- kernel image ID, entry PC, arguments, grid/block shape, and command queue event.
-
-Reject launch requests whose ABI fields are absent from `GPU_STATE`.
-
-## Output Contract
+## Output IR
 
 Emit:
 
@@ -59,32 +42,58 @@ execution_trace = {
 }
 ```
 
-Every trace event must cite the consumed `GPU_STATE` snapshot hash and transition rule provenance.
+Also emit:
 
-## Execution Rules
+```text
+runtime_launch_smoke_report = {
+  module_load,
+  argument_layout,
+  queue_submit,
+  launch_admit,
+  warp_start,
+  completion_or_fault,
+  verdict
+}
+```
 
-| Runtime operation | Deterministic interpretation |
-|---|---|
-| module load | bind kernel image ID and entry PC already present in launch state |
-| argument pack | emit byte layout exactly as encoded in ABI state |
-| queue submit | append command event; preserve queue ordering |
-| launch admit | check resource fields already resolved in `GPU_STATE.launch_state` |
-| warp start | emit warp start events from existing warp allocation |
-| fence/event wait | interpret visibility and completion state; do not optimize memory |
-| completion | emit success/fault/timeout from state transition result |
+## Allowed Transformations
 
-## Verification Gate
+- Interpret module load using existing kernel image and entry PC.
+- Pack arguments according to ABI layout.
+- Submit commands while preserving queue order.
+- Admit launch only when resources already exist in `GPU_STATE_IR.launch_state`.
+- Emit warp start and completion/fault events.
 
-- Launch trace uses no fields outside `GPU_STATE`.
-- ABI byte layout is deterministic for the same launch.
-- Queue ordering is preserved in trace.
-- Faults and completion are visible as trace events.
-- Runtime never chooses scheduling, cache, memory, or execution-unit policy.
+## Forbidden Actions
+
+- Do not infer scheduler policy.
+- Do not allocate warps absent from `GPU_STATE_IR`.
+- Do not optimize memory visibility.
+- Do not modify config defaults.
+- Do not treat backend transport as ABI.
+
+## Required Invariants
+
+- Launch trace consumes no fields outside `GPU_STATE_IR` and `RUNTIME_CONTRACT_IR`.
+- ABI byte layout is deterministic.
+- Queue ordering is preserved.
+- Completion and fault are visible in trace.
+- Runtime does not choose cache, scheduler, memory, or execution-unit policy.
 
 ## Failure Modes
 
-- Using runtime code to fill missing launch defaults.
-- Deriving warp allocation not present in `GPU_STATE`.
-- Treating a backend transport detail as ABI.
-- Hiding fault state in logs instead of trace.
-- Optimizing memory visibility in the runtime layer.
+Reject when:
+
+- ABI fields are absent from runtime contract
+- kernel image or entry PC is missing from launch state
+- launch resources exceed locked state
+- command queue ordering cannot be represented
+- completion/fault cannot be emitted as a trace event
+
+## Report Schema
+
+`runtime_launch_smoke_report.verdict = PASS | FAIL`.
+
+## Downstream Contract
+
+Closure may use `runtime_launch_smoke_report` for the trace smoke gate. Runtime traces must cite `GPU_STATE_IR` hash and transition rule provenance.

@@ -1,99 +1,102 @@
 ---
 name: gpgpu-causal-trace-analyzer
-description: Use when explaining GPGPU performance deltas, warp stalls, memory bottlenecks, scheduling inefficiency, or execution-trace changes by mapping observed effects back to GPU_STATE transition causes.
+description: Use when failed GPGPU validation reports, traces, performance deltas, stalls, bottlenecks, or divergence evidence must be converted into a structured refinement request.
 ---
 
 # GPGPU Causal Trace Analyzer
 
-## Objective
+## Skill Role
 
-Convert trace deltas into state-transition causes.
-
-This skill is not a metrics reporter. It must not invent design changes, tune architecture, or summarize counters without causality.
+This skill is the causal evidence pass.
 
 ```text
-performance_delta -> state_transition_cause
+failed report | trace delta | performance delta -> REFINEMENT_REQUEST_IR
 ```
 
-## Input Contract
+It explains failure or performance change. It does not repair architecture directly.
 
-Input must include:
+## Input IR
 
-- baseline `GPU_STATE` snapshot.
-- variant `GPU_STATE` snapshot or same state with different event trace.
-- runtime trace, memory trace, RTL hardware trace, or transform-engine PPA estimate.
-- metric delta to explain.
-- event ordering and config/spec IDs.
+Allowed inputs:
 
-Reject inputs without a baseline, variant, trace identity, or state snapshots.
+- failed `VALIDATION_REPORT_IR`
+- runtime, memory, RTL, or golden trace
+- `SYNTHESIS_ACCEPTANCE_REPORT_IR`
+- performance delta report
+- `GPU_STATE_IR` hash and transition rule IDs
 
-## Output Contract
+## Output IR
 
-Emit a causal report:
+Emit:
 
 ```text
-CAUSAL_TRACE = {
-  observed_delta,
-  affected_state,
-  transition_chain,
+REFINEMENT_REQUEST_IR = {
   root_cause,
-  confidence,
-  required_followup_trace
+  affected_state_field,
+  failed_gate,
+  proposed_repair_type,
+  evidence_trace
 }
 ```
 
-## Cause Mapping Rules
+## Allowed Transformations
 
-Every explanation must follow:
+- Map metric delta to trace event delta.
+- Map trace event delta to `GPU_STATE_IR` field.
+- Map affected field to transition rule ID.
+- Attribute warp stalls, memory bottlenecks, scheduler inefficiency, execution-unit pressure, or launch overhead.
+- Propose repair type without editing architecture.
 
-```text
-metric delta
-  -> trace event delta
-  -> GPU_STATE field delta
-  -> transition(rule_id)
-  -> root cause
-```
+## Forbidden Actions
 
-If the chain breaks, report insufficient evidence.
+- Do not modify `ARCH_CANDIDATE_IR`.
+- Do not modify `SPEC_IR`.
+- Do not modify `GPU_STATE_IR`.
+- Do not directly repair synthesizer output.
+- Do not report metrics without a state or trace causal chain.
 
-## Required Analyses
+## Required Invariants
 
-| Analysis | Required mapping |
-|---|---|
-| warp stall cause tracing | stall cycles -> scheduler_state.blocked_set -> dependency/memory/barrier rule |
-| memory bottleneck attribution | latency/bandwidth delta -> memory_state queue/cache/outstanding/fence transition |
-| scheduling inefficiency root cause | issue-rate delta -> scheduler policy transition and ready/blocked set |
-| execution-unit pressure | utilization delta -> execution_units occupancy and completion events |
-| launch overhead | runtime delay -> launch_state queue/admission/completion transitions |
-
-## Classification Enums
-
-Use fixed cause enums:
-
-- `SCHED_SCOREBOARD_WAIT`
-- `SCHED_NO_READY_WARP`
-- `SCHED_POLICY_LOSS`
-- `MEM_CACHE_MISS`
-- `MEM_BANK_CONFLICT`
-- `MEM_BANDWIDTH_LIMIT`
-- `MEM_ORDERING_FENCE`
-- `EXEC_UNIT_BUSY`
-- `LAUNCH_QUEUE_DELAY`
-- `TRACE_INSUFFICIENT`
-
-Do not create new cause names without updating the enum table.
-
-## Verification Gate
-
-- Baseline and variant traces use the same `SPEC_IR` identity unless the delta explicitly studies spec changes.
-- Every reported cause cites a trace event and `rule_id`.
-- Root cause is one of the fixed enums.
-- Missing evidence is reported as `TRACE_INSUFFICIENT`, not guessed.
+- Every root cause cites evidence trace.
+- Every affected state field exists in `GPU_STATE_IR` or is marked `UNKNOWN_FIELD`.
+- Every failed gate is named.
+- Proposed repair type is advisory only.
+- Same trace evidence produces stable attribution.
 
 ## Failure Modes
 
-- Reporting speedup or slowdown without a transition chain.
-- Treating a counter name as a root cause.
-- Blaming memory when scheduler state shows no ready warp.
-- Blaming scheduler when memory outstanding table is saturated.
-- Producing recommendations instead of causal attribution.
+Reject or mark insufficient when:
+
+- no evidence trace exists
+- metric delta cannot be tied to trace events
+- trace event cannot be tied to state field or rule ID
+- multiple root causes cannot be ranked deterministically
+
+## Report Schema
+
+```text
+CAUSAL_TRACE_REPORT = {
+  input_hash,
+  root_cause,
+  affected_state_field,
+  failed_gate,
+  evidence_trace,
+  confidence,
+  refinement_request,
+  verdict
+}
+```
+
+`verdict = ATTRIBUTED | INSUFFICIENT_EVIDENCE`.
+
+## Downstream Contract
+
+Repair routing is:
+
+```text
+gpgpu-causal-trace-analyzer
+ -> gpgpu-synthesis-closure-engine
+ -> gpgpu-architecture-synthesizer
+```
+
+The causal analyzer must never bypass closure.

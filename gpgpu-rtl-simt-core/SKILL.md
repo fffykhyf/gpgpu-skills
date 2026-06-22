@@ -1,84 +1,97 @@
 ---
 name: gpgpu-rtl-simt-core
-description: Use when executing a pure GPGPU SIMT hardware model from GPU_STATE and a kernel to produce cycle-level simulation, hardware trace, pipeline events, stalls, or writeback traces.
+description: Use when GPU_STATE_IR and RTL mapping IR must be executed or checked as a SIMT hardware model with pipeline, scheduler, scoreboard, memory interface, and implementability reports.
 ---
 
-# GPGPU RTL SIMT Pure Hardware Execution Model
+# GPGPU RTL SIMT Core
 
-## Objective
+## Skill Role
 
-Execute the hardware model implied by `GPU_STATE`.
+This skill is the pure hardware execution model pass.
 
 ```text
-input:  GPU_STATE + kernel
-output: cycle_level_simulation + hardware_trace
+GPU_STATE_IR + RTL_MAPPING_IR + kernel
+  -> cycle_level_simulation + hardware_trace + rtl_implementability_report
 ```
 
-This skill is a pure implementation layer. It must not reinterpret architecture, modify canonical state, choose scheduling policy, alter memory hierarchy, or invent RTL structures not emitted by `gpgpu-deterministic-transform-engine`.
+It implements mapped state. It does not reinterpret architecture.
 
-## Input Contract
+## Input IR
 
-Input must include:
+Required inputs:
 
-- `GPU_STATE` snapshot and hash.
-- kernel image and launch identity.
-- RTL mapping artifact from `gpgpu-deterministic-transform-engine`.
-- fixed trace schema.
+- `GPU_STATE_IR`
+- `RTL_MAPPING_IR`
+- kernel or instruction stream
+- required trace schema
 
-Reject direct prose specs, unlocked `SPEC_IR`, or missing transform-engine mappings.
-
-## Output Contract
+## Output IR
 
 Emit:
 
 ```text
 hardware_trace = {
-  cycle,
-  warp_id,
-  pc,
-  active_mask,
-  scheduler_event,
-  pipeline_stage_events,
-  scoreboard_events,
-  execution_unit_events,
-  memory_interface_events,
+  fetch_events,
+  decode_events,
+  issue_events,
+  execute_events,
   writeback_events,
-  fault_events
+  scoreboard_events,
+  memory_interface_events,
+  csr_fault_events
 }
 ```
 
-Also emit cycle-level summary counters only as trace-derived data.
+Also emit:
 
-## Execution Rules
+```text
+rtl_implementability_report = {
+  unsupported_state_fields,
+  unmapped_fsm_rules,
+  pipeline_hazards,
+  scoreboard_conflicts,
+  memory_interface_conflicts,
+  verdict
+}
+```
 
-| Hardware area | Rule |
-|---|---|
-| scheduler | execute fixed scheduler mapping from `GPU_STATE.scheduler_state` |
-| pipeline | follow mapped fetch/decode/issue/execute/writeback FSM |
-| scoreboard | apply dependency rules from `GPU_STATE.register_state` |
-| execution units | use fixed latency/port mapping from transform artifact |
-| memory interface | emit memory events; do not choose memory behavior |
-| CSR/fault | report state-defined control/status behavior |
+## Allowed Transformations
 
-## Forbidden Behavior
+- Execute fetch, decode, issue, execute, and writeback pipeline rules.
+- Apply scheduler FSM and scoreboard rules already mapped from `GPU_STATE_IR`.
+- Report hazards without changing state definitions.
+- Bind memory interface behavior through `RTL_MAPPING_IR`.
 
-- Reinterpreting architecture.
-- Modifying `GPU_STATE`.
-- Selecting alternate implementations.
-- Filling missing state from common RTL practice.
-- Treating waveform convenience as semantic truth.
+## Forbidden Actions
 
-## Verification Gate
+- Do not reinterpret architecture.
+- Do not modify `GPU_STATE_IR`.
+- Do not add execution units.
+- Do not change scheduler because of RTL convenience.
+- Do not silently drop unsupported state fields.
 
-- Every hardware trace event maps to a `GPU_STATE` field and transform table entry.
-- Cycle evolution is deterministic for the same input.
-- Scheduler and memory behavior are consumed, not invented.
-- Hardware trace can be consumed by `gpgpu-causal-trace-analyzer`.
+## Required Invariants
+
+- Every hardware trace event cites state hash and mapping version.
+- Unsupported fields are listed in implementability report.
+- Scoreboard conflicts are explicit.
+- Pipeline hazards are trace-visible.
+- Memory interface conflicts are not hidden.
 
 ## Failure Modes
 
-- Changing state because an RTL implementation would be easier.
-- Adding untracked stall causes.
-- Producing trace fields not declared by transform-engine.
-- Collapsing cycle-level events into final output only.
-- Debugging by prose explanation instead of hardware trace.
+Reject or mark not implementable when:
+
+- state field lacks RTL mapping
+- FSM rule is unmapped
+- scoreboard conflict cannot be resolved
+- memory interface width conflicts with mapped request width
+- trace schema cannot cover required events
+
+## Report Schema
+
+`rtl_implementability_report.verdict = IMPLEMENTABLE | NOT_IMPLEMENTABLE | INSUFFICIENT_MAPPING`.
+
+## Downstream Contract
+
+Closure uses `rtl_implementability_report` for artifact mapping, trace smoke, and prototype credibility gates.

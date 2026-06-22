@@ -1,80 +1,94 @@
 ---
 name: gpgpu-deterministic-transform-engine
-description: 用于通过 fixed table-driven transforms 把 canonical GPU_STATE 映射成 downstream RTL、simulator behavior、runtime、memory 或 PPA artifacts，禁止 heuristic design inference。
+description: 用于把 GPU_STATE_IR 通过固定表映射成 RTL、simulator、runtime、memory、config、PPA 或 validation artifact IR，不做启发式设计推断。
 ---
 
 # GPGPU Deterministic Transform Engine
 
-## Objective
+## Skill Role
 
-通过 fixed tables 把 `GPU_STATE` 转换成 downstream artifacts。
+本 skill 是 table-driven artifact mapping pass。
 
 ```text
-GPU_STATE -> RTL_MAPPING | SIM_BEHAVIOR | RUNTIME_CONTRACT | MEMORY_MODEL | PPA_MODEL
+GPU_STATE_IR -> ARTIFACT_IR | STATE_TO_VALIDATION_IR
 ```
 
-禁止 LLM inference-based design、heuristic mapping 或 opportunistic architecture choice。
+它把 canonical state 转成下游 plan 和 mapping report。
 
-## Input Contract
+## Input IR
 
 输入必须包含：
 
-- 来自 `gpgpu-canonical-state-engine` 的 `GPU_STATE`。
-- transform target。
-- mapping table version。
-- mode selection provenance。
+- `GPU_STATE_IR`
+- transform target
+- mapping table version
+- enum table version
 
-拒绝 prose specs 和 partially locked state。
+## Output IR
 
-## Output Contract
-
-只输出 target artifacts：
+允许 target：
 
 | Target | Output |
 |---|---|
-| `STATE_TO_RTL` | RTL module map、signal map、fixed FSM mapping、hardware trace schema |
-| `STATE_TO_SIM` | simulator state model、event interpreter、semantic trace schema |
-| `STATE_TO_RUNTIME` | ABI-visible launch/execution contract |
-| `STATE_TO_MEMORY` | memory execution model tables |
-| `STATE_TO_PPA` | counter map、bottleneck buckets、estimation inputs |
+| `STATE_TO_RTL` | `RTL_MAPPING_IR` |
+| `STATE_TO_SIM` | `SIM_BEHAVIOR_IR` |
+| `STATE_TO_RUNTIME` | `RUNTIME_CONTRACT_IR` |
+| `STATE_TO_MEMORY` | `MEMORY_MODEL_IR` |
+| `STATE_TO_CONFIG` | `CONFIG_BINDING_IR` |
+| `STATE_TO_PPA` | counter map and estimation inputs |
+| `STATE_TO_VALIDATION` | validation trace schema, required smoke tests, counter binding table, artifact coverage report |
 
-## Table-Driven Mapping
+## Allowed Transformations
 
-每个 mapping 必须由 fixed enum tables 驱动：
+- 对每个 consumed enum 查固定 mapping tables。
+- 输出 artifact IR，并携带 `GPU_STATE_IR` hash 和 mapping table version。
+- 显式标记 unused state fields。
+- 从 consumed fields 和 trace schemas 生成 validation plans。
 
-| GPU_STATE enum | Mapping requirement |
-|---|---|
-| `warp_sched_type` | 映射到唯一 fixed scheduler implementation |
-| `cache_policy` | 映射到唯一 fixed cache behavior table |
-| `memory_model` | 映射到唯一 fixed ordering and bandwidth model |
-| `issue_policy` | 映射到唯一 fixed issue/scoreboard mapping |
-| `exec_unit_type` | 映射到唯一 fixed latency/port/trace mapping |
-| `launch_abi_version` | 映射到唯一 fixed runtime layout |
+## Forbidden Actions
 
-mapping table 缺值时 fail closed，不能合成 implementation。
+- 不从 prose 推断 RTL structure。
+- 不因为看起来更好就选择 cache、scheduler、memory model 或 issue policy。
+- 不把一个 enum 映射到多个实现。
+- 不直接从 `SPEC_IR` 生成 artifacts。
+- 不隐藏 unmapped state fields。
 
-## Transform API
+## Required Invariants
 
-| API | Behavior |
-|---|---|
-| `select_target(target)` | 选择一个 downstream artifact target |
-| `lookup(enum_value)` | 通过 fixed mapping table resolve enum |
-| `emit_artifact()` | 产生 deterministic artifact payload |
-| `emit_trace_schema()` | 产生 downstream execution 所需 trace fields |
-| `validate_mapping()` | 验证每个 consumed state field 有且只有一个 mapping |
-
-## Verification Gate
-
-- 每个 consumed `GPU_STATE` field 被 mapped 或 explicit unused。
+- 每个 consumed state field 都 mapped 或 explicit unused。
 - 每个 mapped enum 只有一个 table entry。
-- Outputs 包含 mapping table version 和 `GPU_STATE` snapshot hash。
-- repeated runs 产生 byte-stable artifacts。
-- prose rationale 不能作为 mapping rule。
+- 每个 artifact 带 state hash 和 mapping table version。
+- `STATE_TO_VALIDATION` 包含 required smoke tests 和 artifact coverage。
+- 同一输入 repeated runs byte-stable。
 
 ## Failure Modes
 
-- 从 natural language 推断 RTL structure。
-- 因为“更好”选择 cache 或 scheduler。
-- 一个 enum 映射到多个 implementations。
-- 直接从 `SPEC_IR` 生成 artifacts，而不是从 `GPU_STATE`。
-- 隐藏 unmapped state fields。
+以下情况 fail closed：
+
+- mapping table 缺 enum entry。
+- 一个 enum 映射到多个实现。
+- output 缺 required state hash。
+- artifact 消费了 `GPU_STATE_IR` 中不存在的字段。
+- validation target 无法从 mapped fields 派生。
+
+## Report Schema
+
+```text
+TRANSFORM_MAPPING_REPORT = {
+  gpu_state_hash,
+  target,
+  mapping_table_version,
+  consumed_fields,
+  unused_fields,
+  missing_mappings,
+  emitted_artifacts,
+  required_smoke_tests,
+  verdict
+}
+```
+
+`verdict = MAPPED | FAIL_CLOSED`。
+
+## Downstream Contract
+
+只有当 `TRANSFORM_MAPPING_REPORT.verdict = MAPPED` 时，runtime、memory、RTL、golden sim、config 和 closure passes 才能依赖 artifact IR。

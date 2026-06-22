@@ -1,74 +1,91 @@
 ---
 name: gpgpu-golden-sim
-description: 用于检查从 GPU_STATE 生成的 simulator traces 或 semantic behavior artifacts，特别是验证 simulation 是否遵循 deterministic transform-engine mappings。
+description: 用于从 GPU_STATE_IR simulator behavior 和 traces 做 deterministic replay、coverage 检查或 first divergence 对比，且不重新定义 ISA semantics。
 ---
 
-# GPGPU Simulator Artifact Validator
+# GPGPU Golden Sim Validator
 
-## Objective
+## Skill Role
 
-验证 `gpgpu-deterministic-transform-engine` 输出的 simulator behavior。
-
-本 skill 不再是 independent semantic oracle。禁止定义 ISA semantics、发明 timing behavior 或修改 `GPU_STATE`。
+本 skill 是 simulator trace validation pass。
 
 ```text
-input:  GPU_STATE + SIM_BEHAVIOR + simulator_trace
-output: sim_validation_report
+GPU_STATE_IR + SIM_BEHAVIOR_IR + simulator_trace
+  -> golden_trace_report + property_test_report
 ```
 
-## Input Contract
+它验证 simulator artifact，不是第二语义源。
 
-输入必须包含：
+## Input IR
 
-- `GPU_STATE` snapshot and hash。
-- 来自 `gpgpu-deterministic-transform-engine` 的 `STATE_TO_SIM` artifact。
-- 待验证 simulator trace。
-- optional RTL/runtime/memory traces。
+必须输入：
 
-无法绑定 state hash 和 transform table version 的 trace 必须拒绝。
+- `GPU_STATE_IR`
+- `SIM_BEHAVIOR_IR`
+- simulator trace
+- mandatory semantic field list
 
-## Output Contract
+## Output IR
 
 输出：
 
 ```text
-sim_validation_report = {
-  matched_events,
-  divergent_events,
-  missing_trace_fields,
-  transform_rule_violations,
+golden_trace_report = {
+  replay_result,
+  first_divergence,
+  divergent_state_field,
+  divergent_rule_id,
+  trace_coverage,
   verdict
 }
 ```
 
-## Validation Rules
+同时输出：
 
-| Check | Rule |
-|---|---|
-| state identity | trace 引用与 sim artifact 相同的 `GPU_STATE` snapshot hash |
-| rule identity | 每个 semantic event 引用 transform rule ID |
-| field coverage | PC、active mask、register、memory、launch、fault fields 匹配 declared trace schema |
-| event order | event order 遵循 state-machine transition sequence |
-| divergence report | first mismatch 报告 expected 和 observed state |
+```text
+property_test_report = {
+  deterministic_replay,
+  first_divergence_location,
+  mandatory_semantic_field_coverage,
+  verdict
+}
+```
 
-## Forbidden Behavior
+## Allowed Transformations
 
-- 在 `GPU_STATE` 外定义 ISA semantics。
-- 把 final output 当 oracle。
-- 为匹配 RTL 修改 simulator behavior。
-- 添加 transform engine 未声明的 trace fields。
-- 解决 ambiguous specs。
+- 根据 `GPU_STATE_IR` transitions replay simulator trace。
+- 把 trace events 和声明 trace schema 对比。
+- 按 state field 和 rule ID 定位 first divergence。
+- 检查 mandatory semantic field coverage。
 
-## Verification Gate
+## Forbidden Actions
 
-- 所有 simulator events 映射到 `GPU_STATE` fields 和 transform rules。
-- summary metrics 前先报告 first divergence。
-- missing trace fields 路由到 `gpgpu-deterministic-transform-engine`。
-- missing semantics 路由到 `gpgpu-spec-lock` 或 `gpgpu-canonical-state-engine`。
+- 不重新定义 ISA。
+- 不创建 alternate warp model。
+- 不修改 simulator semantics 去匹配 RTL。
+- 不修改 `GPU_STATE_IR`。
+- 不接受缺 mandatory fields 的 traces。
+
+## Required Invariants
+
+- 同一 input trace replay deterministic。
+- trace events 引用 state hash 和 mapping version。
+- first divergence 可定位到字段。
+- mandatory semantic fields 被覆盖。
 
 ## Failure Modes
 
-- 充当第二个 source of truth。
-- 比较 raw logs 而不是 canonical trace records。
-- 允许 simulator convenience behavior 覆盖 state。
-- 用 aggregate pass/fail 隐藏 divergent events。
+以下情况 reject：
+
+- replay nondeterministic。
+- trace 缺 mandatory semantic field。
+- first divergence 无法定位。
+- simulator event 违反 `GPU_STATE_IR` transition sequence。
+
+## Report Schema
+
+`property_test_report.verdict = PASS | FAIL`。
+
+## Downstream Contract
+
+closure 可用 golden reports 作为 trace smoke 和 divergence gates 的 evidence。golden sim evidence 不能覆盖 `SPEC_IR` 或 `GPU_STATE_IR`。

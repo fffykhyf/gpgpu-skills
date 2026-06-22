@@ -1,0 +1,5 @@
+interface:
+  display_name: "GPGPU Design Intent Lock"
+  short_description: "Lock from-zero GPGPU design goals into DESIGN_INTENT_IR."
+  default_prompt: "Use $gpgpu-design-intent-lock when a GPGPU request is a design intent rather than a complete architecture spec."
+

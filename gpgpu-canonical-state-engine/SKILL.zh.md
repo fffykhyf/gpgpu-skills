@@ -1,123 +1,114 @@
 ---
 name: gpgpu-canonical-state-engine
-description: 用于把 locked GPGPU SPEC_IR 转成 deterministic GPU_STATE、验证 GPU FSM invariants，或 snapshot canonical warp、scheduler、memory、register、execution-unit、launch、CSR state。
+description: 用于把 locked SPEC_IR 转成 deterministic GPU_STATE_IR，或检查 canonical GPU state invariants、transitions、snapshots 和 FSM API。
 ---
 
 # GPGPU Canonical State Engine
 
-## Objective
+## Skill Role
 
-把 `SPEC_IR` 转换成唯一 deterministic GPU finite-state machine。
-
-本 skill 不是 architecture planner。禁止 pipeline orchestration、heuristic design、evaluation logic、mapping inference 或 tradeoff synthesis。唯一职责是：
+本 skill 是 canonical state construction pass。
 
 ```text
-SPEC_IR -> GPU_STATE
+SPEC_IR -> GPU_STATE_IR
 ```
 
-## Input Contract
+它创建 runtime、memory、RTL、golden sim、config 和 transform passes 消费的唯一执行状态真相。
 
-输入必须由 `gpgpu-spec-lock` 锁定：
+## Input IR
 
-```text
-SPEC_IR = {
-  ISA: canonical,
-  warp_model: explicit,
-  memory_hierarchy: explicit,
-  scheduling_policy: explicit,
-  config_defaults: resolved
-}
-```
+输入必须是 `gpgpu-spec-lock` 锁定后的 `SPEC_IR`。
 
-若存在 implicit defaults、unresolved enums、ambiguous natural language、missing state dimensions 或 mode-dependent behavior，必须拒绝。
+拒绝：
 
-## Output Contract
+- free-form prose
+- `ARCH_CANDIDATE_IR`
+- synthesized draft text
+- partially locked spec
+- missing provenance
 
-只输出一个 canonical state object：
+## Output IR
+
+输出：
 
 ```text
-GPU_STATE = {
+GPU_STATE_IR = {
+  schema_version,
+  design_identity,
+  source_spec_hash,
+  synthesis_candidate_id,
   warp_state,
   scheduler_state,
   memory_state,
   register_state,
+  scoreboard_state,
   execution_units,
+  execution_pipeline_state,
   launch_state,
   csr_state
 }
 ```
 
-下游 skill 只能消费 `GPU_STATE`，不能重新解释或修改 schema。
+`synthesis_candidate_id` 只能用于追溯，不能影响执行语义。
 
-## FSM API
+## Allowed Transformations
 
-所有推理都必须通过 API：
+只能使用 FSM API：
 
-| API | 行为 |
+| API | Behavior |
 |---|---|
-| `init(spec_ir)` | 创建初始 `GPU_STATE`，所有字段显式填充 |
-| `apply(event)` | 通过 rule table 应用一个 external/internal event |
-| `transition(rule_id)` | 执行一个 named transition rule，并记录 provenance |
-| `validate_invariants()` | 每次 transition 前后拒绝非法 state |
-| `snapshot()` | 返回 deterministic、serializable、diffable state snapshot |
+| `init(spec_ir)` | 创建初始 canonical state |
+| `apply(event)` | 通过 rule table 应用一个 event |
+| `transition(rule_id)` | 执行一个 named transition |
+| `validate_invariants()` | transition 前后检查 invariants |
+| `snapshot()` | 输出 deterministic、serializable、diffable state |
 
-禁止在 `GPU_STATE` 外维护 hidden state。
+## Forbidden Actions
 
-## State Schema
+- 不做 architecture planning。
+- 不做 quality evaluation。
+- 不选择 templates。
+- 不吸收 candidate-only quality estimates。
+- 不创建 `SPEC_IR` 中不存在的 state fields。
+- 不因为 RTL 或 runtime 更容易实现而修改 state。
 
-| State | Required fields |
-|---|---|
-| `warp_state` | warp IDs、PC、active mask、predicate mask、reconvergence stack、lifecycle |
-| `scheduler_state` | ready set、blocked set、selected warp、stall reason、policy enum |
-| `memory_state` | address spaces、cache lines、outstanding requests、ordering/fence state、bandwidth counters |
-| `register_state` | scalar/vector/predicate register files、scoreboard dependencies、writeback ownership |
-| `execution_units` | unit type、latency、occupancy、accepted ops、completion events |
-| `launch_state` | kernel image ID、entry PC、grid/block shape、arguments、resource allocation |
-| `csr_state` | control/status fields、trap/fault state、execution-visible counters |
+## Required Invariants
 
-## Transition Rules
-
-每条 rule 必须 table-driven：
-
-```text
-rule_id,
-precondition,
-input_event,
-state_reads,
-state_writes,
-postcondition,
-invariants_checked
-```
-
-允许的 event class：launch、fetch/decode/issue/execute/writeback、warp divergence/reconvergence、scheduler select/stall/release、memory request/response/fence/fault、CSR read/write/fault。
-
-没有 rule 的 transition 必须 fail closed，不能推断新 rule。
-
-## Invariants
-
-至少验证：
-
-- 每个 valid warp 只有一个 PC 和 active mask。
-- active mask 匹配 `warp_model.width`。
-- scheduler state 只引用 valid resident warps。
+- 每个 valid warp 只有一个 PC 和一个 active mask。
+- active mask width 等于 `SPEC_IR.warp_model.width`。
+- scheduler 只引用 valid resident warps。
 - scoreboard dependencies 引用存在的 registers 和 owning events。
-- 每个 outstanding memory request 有唯一 tag/source 和 response owner。
-- launch resources 不超过 resolved config defaults。
-- 同一 event sequence 下 CSR/fault state deterministic。
-
-## Verification Gate
-
-同一 `SPEC_IR` 和同一 ordered event list 必须满足：
-
-- `init(spec_ir)` 产生相同 snapshot。
-- 每次 `apply(event)` 选择相同 `rule_id`。
-- `snapshot()` canonical serialization 后 byte-stable。
-- `validate_invariants()` 产生相同 pass/fail 和 failure path。
+- outstanding memory request tags 唯一。
+- launch resources 不超过 locked config defaults。
+- 同一 event sequence 下 CSR 和 fault state deterministic。
+- `GPU_STATE_IR` 不包含 candidate-only quality data。
 
 ## Failure Modes
 
-- 用 framework evidence 或 papers 发明 state。
-- 在 state engine 内补 implicit defaults。
-- 允许 RTL/runtime/memory skill 重新解释 state。
-- 把多个 transition rules 合成一个 informal step。
-- 输出 prose 而不是 serializable `GPU_STATE`。
+以下情况 reject：
+
+- `SPEC_IR` 不完整。
+- state schema 无法完整填充。
+- transition rule 缺失。
+- invariant 失败。
+- downstream pass 要求重新解释 state。
+
+## Report Schema
+
+```text
+STATE_ENGINE_REPORT = {
+  source_spec_hash,
+  gpu_state_hash,
+  initialized_fields,
+  rejected_fields,
+  invariant_results,
+  transition_rule_table_version,
+  verdict
+}
+```
+
+`verdict = STATE_EMITTED | REJECTED`。
+
+## Downstream Contract
+
+所有下游 pass 必须消费 `GPU_STATE_IR`，不能从 `SPEC_IR`、`ARCH_CANDIDATE_IR` 或 prose 中恢复架构事实。

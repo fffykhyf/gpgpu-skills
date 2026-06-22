@@ -1,80 +1,115 @@
 ---
 name: gpgpu-spec-lock
-description: Use when converting GPGPU spec.md, prose requirements, ISA notes, warp model notes, memory hierarchy notes, scheduling policy text, or config defaults into ambiguity-free SPEC_IR.
+description: Use when a human GPGPU spec or synthesized spec draft must become complete, unambiguous, provenance-bearing SPEC_IR with no implicit defaults.
 ---
 
 # GPGPU Spec Lock
 
-## Objective
+## Skill Role
 
-Convert `spec.md` into structured, ambiguity-free `SPEC_IR`.
+This skill is the spec locking pass.
 
 ```text
-spec.md -> SPEC_IR
+spec.md | synthesized_spec_draft -> SPEC_IR
 ```
 
-This skill stabilizes input. It does not design architecture, choose heuristics, infer missing defaults, or generate downstream artifacts.
+It stabilizes architecture facts. It does not design missing facts.
 
-## Input Contract
+## Input IR
 
-Input is human-written spec text plus optional tables. Accept prose only as source material; never pass prose downstream.
+Input source kind:
 
-## Output Contract
+```text
+source_kind = HUMAN_SPEC | SYNTHESIZED_SPEC_DRAFT
+```
+
+Allowed input:
+
+- human-written `spec.md`
+- synthesized spec draft from `gpgpu-architecture-synthesizer`
+- enum tables
+- field provenance table when source is synthesized
+
+## Output IR
 
 Emit:
 
 ```text
 SPEC_IR = {
-  ISA: canonical,
-  warp_model: explicit,
-  memory_hierarchy: explicit,
-  scheduling_policy: explicit,
-  config_defaults: resolved
+  schema_version,
+  source_kind,
+  design_identity,
+  ISA,
+  warp_model,
+  memory_hierarchy,
+  scheduling_policy,
+  config_defaults,
+  ABI_launch_contract,
+  provenance
 }
 ```
 
-Every enum must be resolved. Every default must be explicit. Every ambiguous sentence must either be rewritten into a field or rejected.
+## Allowed Transformations
 
-## Locking Rules
+- Parse prose into candidate fields.
+- Resolve fields only against declared enum tables.
+- Convert explicit defaults into locked scalar, enum, or table values.
+- Attach `FIELD_PROVENANCE` to each field.
+- Reject conflicts instead of choosing between them.
 
-- No implicit defaults.
-- No natural language ambiguity.
-- No unresolved enums.
-- No "implementation-defined" behavior unless encoded as an enum value with allowed consumers.
-- No architecture inference from examples.
-- No mode-dependent fields unless `gpgpu-mode-controller` selected the mode first.
+When `source_kind = SYNTHESIZED_SPEC_DRAFT`, every generated value must cite:
 
-## Required Fields
+```text
+USER_CONSTRAINT
+DESIGN_PRESET
+SOLVER_DERIVED
+REPAIR_DERIVED
+```
 
-| Section | Required fields |
-|---|---|
-| `ISA` | opcode set, operand types, mask behavior, memory ops, barriers, CSR access, illegal behavior |
-| `warp_model` | warp width, lane IDs, active mask semantics, divergence model, reconvergence rule |
-| `memory_hierarchy` | address spaces, cache policy enum, ordering model, bandwidth limits, atomic/fence semantics |
-| `scheduling_policy` | scheduler enum, arbitration rule, stall causes, fairness guarantee |
-| `config_defaults` | resolved scalar defaults, enum defaults, limits, derived-value owner |
+## Forbidden Actions
 
-## Lock API
+- Do not infer missing warp size, scheduler, memory hierarchy, ISA, or cache policy.
+- Do not accept `UNKNOWN`, `COMMON_GPU_DEFAULT`, `MODEL_GUESS`, or `IMPLICIT_DEFAULT` provenance.
+- Do not pass free-form prose to `gpgpu-canonical-state-engine`.
+- Do not emit `GPU_STATE_IR`.
+- Do not relax requirements because the draft came from a synthesizer.
 
-| API | Behavior |
-|---|---|
-| `parse(spec_md)` | extract candidate fields without resolving ambiguity |
-| `resolve(field)` | convert exactly one candidate into canonical enum/scalar/table value |
-| `reject(reason)` | fail closed when the spec lacks information |
-| `emit_spec_ir()` | output canonical `SPEC_IR` only after every required field is locked |
-| `diff_lock(old_ir, new_ir)` | report deterministic field-level changes |
+## Required Invariants
 
-## Verification Gate
-
-- All required fields exist.
-- All enums are in declared enum tables.
-- No free-form prose remains in `SPEC_IR`.
-- Defaults are explicit and traceable to spec text.
-- `diff_lock` is stable for repeated runs.
+- All required fields are present.
+- All enums are resolved.
+- All defaults are explicit.
+- Every field has provenance.
+- `SPEC_IR` contains no ambiguous natural language.
+- Repeated locking of the same input is byte-stable.
 
 ## Failure Modes
 
-- Filling a missing value because it is common in GPUs.
-- Leaving "TBD", "default", "typical", "maybe", or "implementation-defined" in IR.
-- Passing spec prose to the canonical state engine.
-- Resolving conflicting requirements without rejection.
+Reject when:
+
+- a required field is missing
+- enum value is unresolved
+- provenance is absent or forbidden
+- two fields conflict
+- synthesized draft needs inference to become complete
+
+## Report Schema
+
+```text
+SPEC_LOCK_REPORT = {
+  source_kind,
+  input_hash,
+  spec_ir_hash,
+  locked_fields,
+  rejected_fields,
+  missing_fields,
+  provenance_failures,
+  verdict
+}
+```
+
+`verdict = LOCKED | REJECTED`.
+
+## Downstream Contract
+
+`gpgpu-canonical-state-engine` may consume only `SPEC_IR`, not original prose or synthesized draft text.

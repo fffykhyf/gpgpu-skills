@@ -1,88 +1,100 @@
 ---
 name: gpgpu-memory-path
-description: 用于从 GPU_STATE 执行或检查 GPGPU memory hierarchy behavior、cache behavior、bandwidth model、memory requests、responses、fences、ordering 或 memory traces。
+description: 用于从 GPU_STATE_IR memory state 和 memory model IR 执行 cache behavior、coalescing、load/store/atomic/fence semantics 或 memory ordering smoke validation。
 ---
 
-# GPGPU Memory Execution Model
+# GPGPU Memory Path Execution Model
 
-## Objective
+## Skill Role
 
-从 canonical state 执行 memory behavior。
+本 skill 是 memory execution model pass。
 
 ```text
-input:  GPU_STATE.memory_state + memory_events
-output: memory_trace
+GPU_STATE_IR.memory_state + MEMORY_MODEL_IR + memory_events
+  -> memory_trace + memory_ordering_smoke_report
 ```
 
-本 skill 只做 memory execution。禁止做 architectural decisions、speculative design、选择 cache policy、改变 memory hierarchy 或优化 scheduling。
+它执行 state 中已有的 memory semantics。
 
-## Allowed Scope
+## Input IR
 
-允许：
+必须输入：
 
-- `GPU_STATE.memory_state` 已编码的 cache behavior。
-- memory hierarchy execution。
-- bandwidth model。
-- load/store/atomic/fence response behavior。
-- memory trace validation。
+- `GPU_STATE_IR.memory_state`
+- `GPU_STATE_IR.warp_state` lane and mask fields
+- `MEMORY_MODEL_IR`
+- memory events
 
-禁止：
-
-- architectural decisions。
-- speculative design。
-- 新 cache/coalescing policy selection。
-- reinterpretation of memory model enums。
-
-## Input Contract
-
-输入必须包含：
-
-- memory state snapshot。
-- 来自 runtime、RTL 或 transform-engine simulation 的 memory event list。
-- cache policy enum、memory model enum、bandwidth table、outstanding request table。
-- source `GPU_STATE` snapshot hash。
-
-event 需要 `GPU_STATE.memory_state` 中缺失字段时必须拒绝。
-
-## Output Contract
+## Output IR
 
 输出：
 
 ```text
 memory_trace = {
-  request_events,
-  cache_events,
-  bandwidth_events,
-  response_events,
-  fence_ordering_events,
-  fault_or_replay_events
+  issue_events,
+  coalesce_events,
+  tag_events,
+  miss_events,
+  fill_events,
+  retire_events,
+  fault_events
 }
 ```
 
-## Execution Rules
+同时输出：
 
-| Event | Required behavior |
-|---|---|
-| load/store | 使用 state 中的 address-space、mask、byte-enable、ordering rules |
-| atomic | 使用 state 中的 fixed atomic serialization rule |
-| cache access | 执行 fixed `cache_policy` mapping，不选择 policy |
-| miss/fill | 按 table rules 更新 cache/outstanding state |
-| bandwidth limit | bandwidth model saturated 时 emit throttle event |
-| fence/flush | 按 encoded rule 更新 visibility/order state |
-| fault/replay | emit fixed cause enum 和 state snapshot |
+```text
+memory_ordering_smoke_report = {
+  global_load_store,
+  shared_memory_access,
+  lane_mask,
+  byte_enable,
+  fence,
+  atomic,
+  outstanding_request_tag,
+  verdict
+}
+```
 
-## Verification Gate
+## Allowed Transformations
 
-- 每个 memory trace event 引用 state field 和 rule ID。
-- cache behavior 匹配 `GPU_STATE` 中的 fixed policy。
-- bandwidth events 来自 explicit bandwidth tables。
-- outstanding request tags 在 retire 前唯一。
-- 本 skill 不提出 memory optimization。
+- 执行 load、store、atomic、fence semantics。
+- 根据 `MEMORY_MODEL_IR` 应用 warp coalescing rules。
+- 从 mapped tables 建模 cache hit/miss/fill behavior。
+- 记录 outstanding request tags 和 owners。
+- 报告 bank conflicts、ordering violations 和 faults。
+
+## Forbidden Actions
+
+- 不选择 cache policy。
+- 不修改 memory hierarchy。
+- 不 invent bandwidth model。
+- 不重新解释 lane masks。
+- 不为规避 hazard 改架构。
+
+## Required Invariants
+
+- 每个 request tag 在 retire 前唯一。
+- lane mask width 匹配 warp width。
+- byte enable fields 匹配 access size 和 lane mask。
+- fence 和 atomic semantics 遵循 locked memory model。
+- ordering violations 是 trace events，不是 hidden logs。
 
 ## Failure Modes
 
-- 根据 workload symptoms 选择新 cache behavior。
-- 把 memory trace gaps 当成推断 events 的许可。
-- 丢失 lane mask、byte enable、tag 或 destination mapping。
-- 解释 performance 而不是输出 memory execution evidence。
-- 修改 `GPU_STATE.memory_state` schema。
+以下情况 reject：
+
+- memory event 引用 unknown address space。
+- coalescing policy 没有 table entry。
+- request tag collision。
+- fence semantics 缺失。
+- atomic owner undefined。
+- lane mask 与 warp state 不一致。
+
+## Report Schema
+
+`memory_ordering_smoke_report.verdict = PASS | FAIL`。
+
+## Downstream Contract
+
+closure 可用 memory trace 和 smoke report 作为 trace smoke 和 memory consistency gates 的 evidence。RTL 和 golden sim 必须对齐相同 memory trace schema。

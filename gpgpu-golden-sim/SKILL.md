@@ -1,74 +1,91 @@
 ---
 name: gpgpu-golden-sim
-description: Use when checking simulator traces or semantic behavior artifacts generated from GPU_STATE, especially when validating that simulation follows deterministic transform-engine mappings.
+description: Use when GPU_STATE_IR simulator behavior and traces must be replayed, checked for deterministic coverage, or compared for first divergence without redefining ISA semantics.
 ---
 
-# GPGPU Simulator Artifact Validator
+# GPGPU Golden Sim Validator
 
-## Objective
+## Skill Role
 
-Validate simulator behavior emitted by `gpgpu-deterministic-transform-engine`.
-
-This skill is no longer an independent semantic oracle. It must not define ISA semantics, invent timing behavior, or modify `GPU_STATE`.
+This skill is the simulator trace validation pass.
 
 ```text
-input:  GPU_STATE + SIM_BEHAVIOR + simulator_trace
-output: sim_validation_report
+GPU_STATE_IR + SIM_BEHAVIOR_IR + simulator_trace
+  -> golden_trace_report + property_test_report
 ```
 
-## Input Contract
+It validates simulator artifacts. It is not a second semantics source.
 
-Input must include:
+## Input IR
 
-- `GPU_STATE` snapshot and hash.
-- `STATE_TO_SIM` artifact from `gpgpu-deterministic-transform-engine`.
-- simulator trace to validate.
-- optional RTL/runtime/memory traces for comparison.
+Required inputs:
 
-Reject traces that cannot be tied to a state hash and transform table version.
+- `GPU_STATE_IR`
+- `SIM_BEHAVIOR_IR`
+- simulator trace
+- mandatory semantic field list
 
-## Output Contract
+## Output IR
 
 Emit:
 
 ```text
-sim_validation_report = {
-  matched_events,
-  divergent_events,
-  missing_trace_fields,
-  transform_rule_violations,
+golden_trace_report = {
+  replay_result,
+  first_divergence,
+  divergent_state_field,
+  divergent_rule_id,
+  trace_coverage,
   verdict
 }
 ```
 
-## Validation Rules
+Also emit:
 
-| Check | Rule |
-|---|---|
-| state identity | trace cites the same `GPU_STATE` snapshot hash as the sim artifact |
-| rule identity | every semantic event cites a transform rule ID |
-| field coverage | PC, active mask, register, memory, launch, and fault fields match declared trace schema |
-| event order | event order follows the state-machine transition sequence |
-| divergence report | first mismatch is reported with expected and observed state |
+```text
+property_test_report = {
+  deterministic_replay,
+  first_divergence_location,
+  mandatory_semantic_field_coverage,
+  verdict
+}
+```
 
-## Forbidden Behavior
+## Allowed Transformations
 
-- Defining ISA semantics outside `GPU_STATE`.
-- Treating final output as the oracle.
-- Editing simulator behavior to match RTL.
-- Adding trace fields not declared by the transform engine.
-- Resolving ambiguous specs.
+- Replay simulator trace against `GPU_STATE_IR` transitions.
+- Compare trace events to declared trace schema.
+- Locate first divergence by state field and rule ID.
+- Check mandatory semantic field coverage.
 
-## Verification Gate
+## Forbidden Actions
 
-- All simulator events map to `GPU_STATE` fields and transform rules.
-- First divergence is reported before summary metrics.
-- Missing trace fields route to `gpgpu-deterministic-transform-engine`.
-- Missing semantics route to `gpgpu-spec-lock` or `gpgpu-canonical-state-engine`.
+- Do not redefine ISA.
+- Do not create an alternate warp model.
+- Do not modify simulator semantics to match RTL.
+- Do not modify `GPU_STATE_IR`.
+- Do not accept traces lacking mandatory fields.
+
+## Required Invariants
+
+- Same input trace replays deterministically.
+- Trace events cite state hash and mapping version.
+- First divergence is field-addressable.
+- Mandatory semantic fields are covered.
 
 ## Failure Modes
 
-- Acting as a second source of truth.
-- Comparing raw logs instead of canonical trace records.
-- Allowing simulator convenience behavior to override state.
-- Hiding divergent events behind aggregate pass/fail.
+Reject when:
+
+- replay is nondeterministic
+- trace omits mandatory semantic field
+- first divergence cannot be located
+- simulator event violates `GPU_STATE_IR` transition sequence
+
+## Report Schema
+
+`property_test_report.verdict = PASS | FAIL`.
+
+## Downstream Contract
+
+Closure may use golden reports for trace smoke and divergence gates. Golden sim evidence must not override `SPEC_IR` or `GPU_STATE_IR`.

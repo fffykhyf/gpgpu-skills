@@ -1,80 +1,94 @@
 ---
 name: gpgpu-deterministic-transform-engine
-description: Use when mapping canonical GPU_STATE into downstream RTL, simulator behavior, runtime, memory, or PPA artifacts through fixed table-driven transforms without heuristic design inference.
+description: Use when GPU_STATE_IR must be mapped through fixed tables into RTL, simulator, runtime, memory, config, PPA, or validation artifact IR without heuristic design inference.
 ---
 
 # GPGPU Deterministic Transform Engine
 
-## Objective
+## Skill Role
 
-Transform `GPU_STATE` into all downstream artifacts through fixed tables.
+This skill is the table-driven artifact mapping pass.
 
 ```text
-GPU_STATE -> RTL_MAPPING | SIM_BEHAVIOR | RUNTIME_CONTRACT | MEMORY_MODEL | PPA_MODEL
+GPU_STATE_IR -> ARTIFACT_IR | STATE_TO_VALIDATION_IR
 ```
 
-No LLM inference-based design, heuristic mapping, or opportunistic architecture choice is allowed.
+It turns canonical state into downstream plans and mapping reports.
 
-## Input Contract
+## Input IR
 
 Input must include:
 
-- `GPU_STATE` from `gpgpu-canonical-state-engine`.
-- transform target.
-- mapping table version.
-- mode selection provenance.
+- `GPU_STATE_IR`
+- transform target
+- mapping table version
+- enum table version
 
-Reject prose specs and partially locked state.
+## Output IR
 
-## Output Contract
-
-Emit only target artifacts:
+Allowed targets:
 
 | Target | Output |
 |---|---|
-| `STATE_TO_RTL` | RTL module map, signal map, fixed FSM mapping, hardware trace schema |
-| `STATE_TO_SIM` | simulator state model, event interpreter, semantic trace schema |
-| `STATE_TO_RUNTIME` | ABI-visible launch/execution contract |
-| `STATE_TO_MEMORY` | memory execution model tables |
-| `STATE_TO_PPA` | counter map, bottleneck buckets, estimation inputs |
+| `STATE_TO_RTL` | `RTL_MAPPING_IR` |
+| `STATE_TO_SIM` | `SIM_BEHAVIOR_IR` |
+| `STATE_TO_RUNTIME` | `RUNTIME_CONTRACT_IR` |
+| `STATE_TO_MEMORY` | `MEMORY_MODEL_IR` |
+| `STATE_TO_CONFIG` | `CONFIG_BINDING_IR` |
+| `STATE_TO_PPA` | counter map and estimation inputs |
+| `STATE_TO_VALIDATION` | validation trace schema, required smoke tests, counter binding table, artifact coverage report |
 
-## Table-Driven Mapping
+## Allowed Transformations
 
-Every mapping must be keyed by fixed enum tables:
+- Lookup each consumed enum in fixed mapping tables.
+- Emit artifact IR containing `GPU_STATE_IR` hash and mapping table version.
+- Mark unused state fields explicitly.
+- Generate validation plans from consumed fields and trace schemas.
 
-| GPU_STATE enum | Mapping requirement |
-|---|---|
-| `warp_sched_type` | maps to one fixed scheduler implementation |
-| `cache_policy` | maps to one fixed cache behavior table |
-| `memory_model` | maps to one fixed ordering and bandwidth model |
-| `issue_policy` | maps to one fixed issue/scoreboard mapping |
-| `exec_unit_type` | maps to one fixed latency/port/trace mapping |
-| `launch_abi_version` | maps to one fixed runtime layout |
+## Forbidden Actions
 
-If a value is missing from a mapping table, fail closed. Do not synthesize an implementation.
+- Do not infer RTL structure from prose.
+- Do not choose cache, scheduler, memory model, or issue policy because it seems better.
+- Do not map one enum to multiple implementations.
+- Do not generate artifacts from `SPEC_IR` directly.
+- Do not hide unmapped state fields.
 
-## Transform API
+## Required Invariants
 
-| API | Behavior |
-|---|---|
-| `select_target(target)` | choose one downstream artifact target |
-| `lookup(enum_value)` | resolve one enum through the fixed mapping table |
-| `emit_artifact()` | produce deterministic artifact payload |
-| `emit_trace_schema()` | produce trace fields required by downstream execution |
-| `validate_mapping()` | verify every consumed state field has exactly one mapping |
-
-## Verification Gate
-
-- Every consumed `GPU_STATE` field is mapped or explicitly unused.
+- Every consumed state field is mapped or explicitly unused.
 - Every mapped enum has exactly one table entry.
-- Outputs contain mapping table version and `GPU_STATE` snapshot hash.
-- Repeated runs produce byte-stable artifacts.
-- No prose rationale is used as a mapping rule.
+- Every artifact carries state hash and mapping table version.
+- `STATE_TO_VALIDATION` includes required smoke tests and artifact coverage.
+- Repeated runs with same input are byte-stable.
 
 ## Failure Modes
 
-- Inferring RTL structure from natural language.
-- Choosing a cache or scheduler because it seems better.
-- Mapping one enum to multiple implementations.
-- Generating artifacts from `SPEC_IR` directly instead of `GPU_STATE`.
-- Hiding unmapped state fields.
+Fail closed when:
+
+- mapping table lacks an enum entry
+- one enum maps to multiple implementations
+- output omits required state hash
+- artifact consumes a field not present in `GPU_STATE_IR`
+- validation target cannot be derived from mapped fields
+
+## Report Schema
+
+```text
+TRANSFORM_MAPPING_REPORT = {
+  gpu_state_hash,
+  target,
+  mapping_table_version,
+  consumed_fields,
+  unused_fields,
+  missing_mappings,
+  emitted_artifacts,
+  required_smoke_tests,
+  verdict
+}
+```
+
+`verdict = MAPPED | FAIL_CLOSED`.
+
+## Downstream Contract
+
+Runtime, memory, RTL, golden sim, config, and closure passes may rely on artifact IR only when `TRANSFORM_MAPPING_REPORT.verdict = MAPPED`.

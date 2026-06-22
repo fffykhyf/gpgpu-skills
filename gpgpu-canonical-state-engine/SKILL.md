@@ -1,130 +1,114 @@
 ---
 name: gpgpu-canonical-state-engine
-description: Use when converting locked GPGPU SPEC_IR into deterministic GPU_STATE, validating GPU finite-state-machine invariants, or snapshotting canonical warp, scheduler, memory, register, execution-unit, launch, or CSR state.
+description: Use when locked SPEC_IR must become deterministic GPU_STATE_IR or when canonical GPU state invariants, transitions, snapshots, and FSM APIs must be checked.
 ---
 
 # GPGPU Canonical State Engine
 
-## Objective
+## Skill Role
 
-Transform `SPEC_IR` into one deterministic GPU finite-state machine.
-
-This skill is not an architecture planner. It must not perform pipeline orchestration, heuristic design, evaluation logic, mapping inference, or tradeoff synthesis. Its only job is:
+This skill is the canonical state construction pass.
 
 ```text
-SPEC_IR -> GPU_STATE
+SPEC_IR -> GPU_STATE_IR
 ```
 
-## Input Contract
+It creates the only execution state truth consumed by runtime, memory, RTL, golden sim, config, and transform passes.
 
-Input must be locked by `gpgpu-spec-lock`:
+## Input IR
 
-```text
-SPEC_IR = {
-  ISA: canonical,
-  warp_model: explicit,
-  memory_hierarchy: explicit,
-  scheduling_policy: explicit,
-  config_defaults: resolved
-}
-```
+Input must be locked `SPEC_IR` from `gpgpu-spec-lock`.
 
-Reject input if it contains implicit defaults, unresolved enums, ambiguous natural language, missing state dimensions, or mode-dependent behavior.
+Reject:
 
-## Output Contract
+- free-form prose
+- `ARCH_CANDIDATE_IR`
+- synthesized draft text
+- partially locked spec
+- missing provenance
 
-Emit exactly one canonical state object:
+## Output IR
+
+Emit:
 
 ```text
-GPU_STATE = {
+GPU_STATE_IR = {
+  schema_version,
+  design_identity,
+  source_spec_hash,
+  synthesis_candidate_id,
   warp_state,
   scheduler_state,
   memory_state,
   register_state,
+  scoreboard_state,
   execution_units,
+  execution_pipeline_state,
   launch_state,
   csr_state
 }
 ```
 
-Downstream skills may consume `GPU_STATE`; they must not reinterpret or mutate its schema.
+`synthesis_candidate_id` is trace metadata only and must not affect execution semantics.
 
-## FSM API
+## Allowed Transformations
 
-Implement all reasoning through this API:
+Use only FSM API:
 
-| API | Required behavior |
+| API | Behavior |
 |---|---|
-| `init(spec_ir)` | create the initial `GPU_STATE` with every field explicitly populated |
-| `apply(event)` | apply one external or internal event through the rule table |
-| `transition(rule_id)` | execute exactly one named transition rule and record rule provenance |
-| `validate_invariants()` | reject illegal state before and after every transition |
-| `snapshot()` | return a deterministic, serializable, diffable state snapshot |
+| `init(spec_ir)` | Create the initial canonical state. |
+| `apply(event)` | Apply one event through a rule table. |
+| `transition(rule_id)` | Execute one named transition. |
+| `validate_invariants()` | Check state invariants before and after transitions. |
+| `snapshot()` | Emit deterministic, serializable, diffable state. |
 
-No hidden state is allowed outside `GPU_STATE`.
+## Forbidden Actions
 
-## State Schema
+- Do not plan architecture.
+- Do not evaluate quality.
+- Do not select templates.
+- Do not absorb candidate-only quality estimates.
+- Do not create state fields absent from `SPEC_IR`.
+- Do not modify state because RTL or runtime would be easier.
 
-| State | Required fields |
-|---|---|
-| `warp_state` | warp IDs, PC, active mask, predicate mask, reconvergence stack, lifecycle |
-| `scheduler_state` | ready set, blocked set, selected warp, stall reason, policy enum |
-| `memory_state` | address spaces, cache lines, outstanding requests, ordering/fence state, bandwidth counters |
-| `register_state` | scalar/vector/predicate register files, scoreboard dependencies, writeback ownership |
-| `execution_units` | unit type, latency, occupancy, accepted ops, completion events |
-| `launch_state` | kernel image ID, entry PC, grid/block shape, arguments, resource allocation |
-| `csr_state` | control/status fields, trap/fault state, counters visible to execution semantics |
+## Required Invariants
 
-## Transition Rules
-
-Each transition rule must be table-driven:
-
-```text
-rule_id,
-precondition,
-input_event,
-state_reads,
-state_writes,
-postcondition,
-invariants_checked
-```
-
-Allowed event classes:
-
-- launch events.
-- fetch/decode/issue/execute/writeback events.
-- warp divergence and reconvergence events.
-- scheduler select/stall/release events.
-- memory request/response/fence/fault events.
-- CSR read/write/fault events.
-
-If a requested transition has no rule, fail closed. Do not infer a new rule.
-
-## Invariants
-
-Validate at minimum:
-
-- every valid warp has exactly one PC and one active mask.
-- active masks match `warp_model.width`.
-- scheduler state references only valid resident warps.
-- scoreboard dependencies reference existing registers and owning events.
-- every outstanding memory request has a unique tag/source and response owner.
-- launch resources do not exceed resolved config defaults.
-- CSR/fault state is deterministic for the same event sequence.
-
-## Verification Gate
-
-For the same `SPEC_IR` and same ordered event list:
-
-- `init(spec_ir)` must produce identical snapshots.
-- each `apply(event)` must select the same `rule_id`.
-- `snapshot()` must be byte-stable after canonical serialization.
-- `validate_invariants()` must produce the same pass/fail result and failure path.
+- Each valid warp has one PC and one active mask.
+- Active mask width equals `SPEC_IR.warp_model.width`.
+- Scheduler references only valid resident warps.
+- Scoreboard dependencies reference existing registers and owning events.
+- Outstanding memory request tags are unique.
+- Launch resources do not exceed locked config defaults.
+- CSR and fault state are deterministic for the same event sequence.
+- `GPU_STATE_IR` contains no candidate-only quality data.
 
 ## Failure Modes
 
-- Using framework evidence or papers to invent state.
-- Filling missing defaults inside the state engine.
-- Letting downstream RTL/runtime/memory skills reinterpret state.
-- Applying multiple transition rules as one informal step.
-- Emitting prose instead of serializable `GPU_STATE`.
+Reject when:
+
+- `SPEC_IR` is incomplete
+- state schema cannot be fully populated
+- transition rule is missing
+- invariant fails
+- downstream pass asks to reinterpret state
+
+## Report Schema
+
+```text
+STATE_ENGINE_REPORT = {
+  source_spec_hash,
+  gpu_state_hash,
+  initialized_fields,
+  rejected_fields,
+  invariant_results,
+  transition_rule_table_version,
+  verdict
+}
+```
+
+`verdict = STATE_EMITTED | REJECTED`.
+
+## Downstream Contract
+
+All downstream passes must consume `GPU_STATE_IR` and may not recover architecture facts from `SPEC_IR`, `ARCH_CANDIDATE_IR`, or prose.
