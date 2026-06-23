@@ -1,5 +1,5 @@
 ---
-name: gpgpu-simulation-performance-attribution-engine
+name: gpgpu-simppa
 description: Use when RTL simulation, golden execution, runtime, memory, module, waveform, or toolchain traces must be normalized into correctness evidence, performance metrics, causal attribution, pass evidence, regression fingerprints, and rewrite routing reports.
 ---
 
@@ -21,12 +21,12 @@ metrics, and a regression fingerprint.
 ## Position in Flow
 
 Upstream:
-- `gpgpu-system-contract-golden-engine`
-- `gpgpu-toolchain-runtime-artifact-engine`
-- `gpgpu-incremental-rtl-binding-engine`
+- `gpgpu-golden`
+- `gpgpu-runtime`
+- `gpgpu-rtl`
 
 Downstream:
-- `gpgpu-architecture-rewrite-loop-controller`
+- `gpgpu-loop`
 
 Flow:
 

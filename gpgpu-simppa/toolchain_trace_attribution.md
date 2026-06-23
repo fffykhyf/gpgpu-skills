@@ -1,7 +1,7 @@
 # Toolchain Trace Attribution
 
 This component aligns attribution with
-`gpgpu-toolchain-runtime-artifact-engine`. It checks the chain from assembly to
+`gpgpu-runtime`. It checks the chain from assembly to
 RTL fetch/decode before blaming RTL decode or execution.
 
 ## Checked Chain

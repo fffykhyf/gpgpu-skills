@@ -2,8 +2,8 @@ lessons:
   - lesson_id: MIAOW_SIMT_CORE_001
     source_project: MIAOW
     applies_to:
-      - gpgpu-system-contract-golden-engine
-      - gpgpu-simulation-performance-attribution-engine
+      - gpgpu-golden
+      - gpgpu-simppa
     topic: simt_core
     principle: "SIMT lane mask and register behavior must be visible in validation traces."
     do:

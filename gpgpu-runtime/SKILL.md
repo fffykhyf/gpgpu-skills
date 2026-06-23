@@ -1,5 +1,5 @@
 ---
-name: gpgpu-toolchain-runtime-artifact-engine
+name: gpgpu-runtime
 description: Use when SYSTEM_CONTRACT_IR and GOLDEN_CONTRACT_MODEL must derive assembler, disassembler, ISA tables, assembly IR, program image, runtime launch, loader contract, and toolchain smoke reports without defining independent ISA or ABI truth.
 ---
 
@@ -12,12 +12,12 @@ This skill derives toolchain and runtime artifacts from `SYSTEM_CONTRACT_IR`. It
 ## Position in Flow
 
 Upstream:
-- `gpgpu-system-contract-golden-engine`
+- `gpgpu-golden`
 
 Downstream:
-- `gpgpu-incremental-rtl-binding-engine`
-- `gpgpu-simulation-performance-attribution-engine`
-- `gpgpu-architecture-rewrite-loop-controller`
+- `gpgpu-rtl`
+- `gpgpu-simppa`
+- `gpgpu-loop`
 
 ## Input IR
 

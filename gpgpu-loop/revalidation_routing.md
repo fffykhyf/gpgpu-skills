@@ -21,7 +21,6 @@ Every patch plan must declare the modules and gates that must rerun.
 - assembler smoke
 - disassembler roundtrip
 - program image smoke
-- runtime launch smoke
 - loader contract smoke
 - golden image execution
 - RTL image-load smoke

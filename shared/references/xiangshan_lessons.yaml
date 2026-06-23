@@ -2,8 +2,8 @@ lessons:
   - lesson_id: XIANGSHAN_VALIDATION_001
     source_project: XiangShan
     applies_to:
-      - gpgpu-system-contract-golden-engine
-      - gpgpu-simulation-performance-attribution-engine
+      - gpgpu-golden
+      - gpgpu-simppa
     topic: validation_closure
     principle: "Pipeline and trace validation should route failures to fields, rules, and owners."
     do:

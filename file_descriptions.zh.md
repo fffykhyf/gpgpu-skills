@@ -8,7 +8,7 @@
 
 内容说明：这是 `skill/` 仓库的入口说明，概括 self-correcting GPGPU design system 的目标、六个顶层 skill、核心输出、legacy 迁移原则和 shared 资产边界。它告诉读者当前仓库已经不是旧 9-stage pipeline，而是以可执行合同、toolchain artifact、增量 RTL、因果归因和 rewrite loop 为核心的 v5 skill 系统。
 
-具体例子：新维护者打开仓库时，可以先读这里确认当前只应调用 `gpgpu-architecture-generator`、`gpgpu-system-contract-golden-engine`、`gpgpu-toolchain-runtime-artifact-engine`、`gpgpu-incremental-rtl-binding-engine`、`gpgpu-simulation-performance-attribution-engine`、`gpgpu-architecture-rewrite-loop-controller` 六个 GPGPU skill。
+具体例子：新维护者打开仓库时，可以先读这里确认当前只应调用 `gpgpu-arch`、`gpgpu-golden`、`gpgpu-runtime`、`gpgpu-rtl`、`gpgpu-simppa`、`gpgpu-loop` 六个 GPGPU skill。
 
 ### `file_descriptions.zh.md`
 
@@ -16,175 +16,175 @@
 
 具体例子：如果有人想删除 `shared/tables/rewrite_trigger_table.yaml`，可以先查本文件对应条目，确认它定义 root cause 到 patch type 的触发关系，删除会影响 rewrite controller 的决策依据。
 
-### `gpgpu-architecture-generator/SKILL.md`
+### `gpgpu-arch/SKILL.md`
 
 内容说明：这是 Architecture Generator 的主 skill 文件，定义它如何把用户请求、可选 spec、trace 或 patch request 转成 `MODE_SELECTION_IR`、`DESIGN_INTENT_IR`、候选 `ARCH_IR` 和 `MICRO_CONSTRAINT_ESTIMATE_IR`。文件还规定它不能冻结系统语义、不能生成 RTL、不能产生 rewrite plan。
 
 具体例子：用户说“从零设计一个教学用 SIMT GPGPU”，该 skill 负责锁定目标、选择 preset、估计面积和 memory pressure，并输出候选架构图，而不是直接定义 ISA ordering 或 RTL pipeline。
 
-### `gpgpu-architecture-generator/legacy_request_and_candidate_constraints.md`
+### `gpgpu-arch/legacy_request_and_candidate_constraints.md`
 
 内容说明：该文件迁移旧 front-end、architecture synthesizer、mode controller 和 design-intent-lock 中仍有价值的请求分类、intent lock 和 candidate graph 约束。它明确旧逻辑只作为新 Architecture Generator 的约束来源，不再作为独立 skill 存在。
 
 具体例子：当用户只说“做个高性能 GPU”但没有 workload、platform 和 validation target 时，这个文件要求输出 `INSUFFICIENT_REQUEST` 或显式 non-goal，而不能偷偷推断 warp size 或 cache policy。
 
-### `gpgpu-architecture-rewrite-loop-controller/SKILL.md`
+### `gpgpu-loop/SKILL.md`
 
 内容说明：这是 Architecture Rewrite Loop Controller 的主 skill 文件，定义它如何消费 `PERF_ATTRIBUTION_GRAPH`、`ROOT_CAUSE_REPORT`、`PASS_EVIDENCE_REPORT`、`ARCH_IR`、`SYSTEM_CONTRACT_IR`、toolchain artifacts 和 `INCREMENTAL_RTL_MAP`，并生成 `ARCH_REWRITE_PLAN`、`REWRITE_DECISION_REPORT` 与 `REGRESSION_TRACKING_REPORT`。它强调 controller 只能提出 patch plan，不能直接修改 IR。
 
 具体例子：如果 perf graph 显示 shared memory bank conflict 导致大量 warp stall，该 skill 可以输出 RTL Patch 或 Architecture Patch；如果 pass evidence 缺少 coverage 或 fingerprint，则输出 Pass Evidence Patch 而不是误判设计错误。
 
-### `gpgpu-architecture-rewrite-loop-controller/legacy_closure_repair_constraints.md`
+### `gpgpu-loop/legacy_closure_repair_constraints.md`
 
 内容说明：该文件迁移旧 closure refinement 和 synthesis closure 的 gate、repair routing、failure attribution 规则。它把旧的 `ACCEPT`、`REJECT`、`REFINE_REQUIRED`、`INSUFFICIENT_EVIDENCE` 映射到 v5 rewrite decision 语义。
 
 具体例子：旧系统中的 `MEMORY_DUMP_CONTRACT_MISMATCH` 现在会成为 rewrite controller 的故障标签，并被映射到 RTL Patch 或 Test Evidence Patch，而不是重新启用旧 closure skill。
 
-### `gpgpu-architecture-rewrite-loop-controller/patch_taxonomy.md`
+### `gpgpu-loop/patch_taxonomy.md`
 
 内容说明：该文件定义 rewrite plan 可使用的 patch 类型，包括 Architecture Patch、Contract Patch、Golden Model Patch、Toolchain Patch、Runtime Patch、RTL Patch、Pass Evidence Patch 和 Test Evidence Patch。它让 controller 对“该改架构、合同、golden、工具链、runtime、RTL 还是证据”有稳定分类。
 
 具体例子：如果 root cause 是 `RUNTIME_LAUNCH_ROOT_CAUSE/ARG_BUFFER_ENCODING_MISMATCH`，应归类为 Runtime Patch；如果是 `TEST_EVIDENCE_ROOT_CAUSE/INSUFFICIENT_COVERAGE`，应归类为 Pass Evidence Patch 或 Test Evidence Patch。
 
-### `gpgpu-architecture-rewrite-loop-controller/regression_tracking.md`
+### `gpgpu-loop/regression_tracking.md`
 
 内容说明：该文件说明 rewrite loop 必须如何记录 regression risk、历史失败、已应用 patch 和后续验证结果。它避免系统只修当前失败，却忘记历史通过的行为。
 
 具体例子：一次把 warp size 从 8 改到 16 的 Architecture Patch，必须记录可能影响 active mask、register pressure 和 occupancy 的 regression risk。
 
-### `gpgpu-architecture-rewrite-loop-controller/revalidation_routing.md`
+### `gpgpu-loop/revalidation_routing.md`
 
 内容说明：该文件定义不同 patch 类型需要重新路由到哪些模块和 gate。它把 rewrite plan 和后续验证连接起来，避免 patch 只停留在建议文本。
 
 具体例子：Runtime Patch 应重跑 runtime arg encoding、CSR launch sequence、completion/fault observation 和 RTL/golden trace diff；Pass Evidence Patch 应重跑 pass evidence report、coverage check、performance metric 和 regression fingerprint。
 
-### `gpgpu-architecture-rewrite-loop-controller/rewrite_trigger.md`
+### `gpgpu-loop/rewrite_trigger.md`
 
 内容说明：该文件描述 root cause 如何触发 rewrite。它使用新的两级 root cause taxonomy，把 toolchain、runtime launch、RTL functional/interface、memory、scheduler、performance architecture 和 test evidence root cause 映射到对应 patch type，并规定证据足够、owner 明确、revalidation route 存在时才能产生 rewrite plan。
 
 具体例子：`PERFORMANCE_ARCH_ROOT_CAUSE` 可以触发 Architecture Patch；`PASS_EVIDENCE_REPORT` 显示 coverage 或 fingerprint 证据不足时，只能触发 Pass Evidence Patch 或 Test Evidence Patch。
 
-### `gpgpu-incremental-rtl-binding-engine/SKILL.md`
+### `gpgpu-rtl/SKILL.md`
 
 内容说明：这是 Incremental RTL Binding Engine 的主 skill 文件，定义它如何把 `SYSTEM_CONTRACT_IR` 和 `GOLDEN_CONTRACT_MODEL` 逐模块绑定成 `INCREMENTAL_RTL_MAP`。它强调 module-by-module assembly、interface contract checking 和 RTL partial simulation。
 
 具体例子：在实现 load/store queue 时，该 skill 要求声明 consumed contract paths、provided signals、latency contract、local trace schema，并用 golden slice 做局部仿真对比。
 
-### `gpgpu-incremental-rtl-binding-engine/interface_binding_and_checker.md`
+### `gpgpu-rtl/interface_binding_and_checker.md`
 
 内容说明：该文件定义结构化 `INTERFACE_BINDING_IR`，并说明接口合同检查器要检查 payload 字段、握手协议、tag ordering、latency、reset、trace tap、adapter 和 no combinational ready loop。它是防止模块拼接后才暴露接口错误的约束文档。
 
 具体例子：如果 LSQ 到 coalescer 的 `REQ_RSP_TAGGED` interface 在 response 前复用 tag，checker 必须报告 `TAG_REUSE_BEFORE_RESPONSE`；如果 ready 形成组合环，必须报告 `COMBINATIONAL_READY_LOOP`。
 
-### `gpgpu-incremental-rtl-binding-engine/module_binding_rules.md`
+### `gpgpu-rtl/module_binding_rules.md`
 
 内容说明：该文件定义 deterministic module binding、`MODULE_BINDING_TEMPLATE` 要求、memory path structural rules、timing/synthesis feedback hook 和 fail-closed 规则。它把旧 artifact-contract、memory-subsystem、runtime interface 和 RTL SIMT core 中有价值的绑定规则归并到当前增量 RTL 绑定层。
 
 具体例子：`load_store_queue` module 必须引用 `lsq_template`，声明 consumed contract paths、required local state、input/output interfaces、partial sim cases、timing feedback，并证明没有 combinational ready loop。
 
-### `gpgpu-incremental-rtl-binding-engine/partial_simulation_gates.md`
+### `gpgpu-rtl/partial_simulation_gates.md`
 
 内容说明：该文件定义每个 RTL module 进入 full-system simulation 前必须通过的 partial simulation gate，包括 required inputs、required outputs、模块级具体用例和失败证据格式。
 
 具体例子：scoreboard partial sim 必须覆盖 RAW dependency stall、writeback wakeup 和 multiple warp independence；LSQ partial sim 必须覆盖 ready-low payload stability、tag unique、response wakeup 和 fault propagation。
 
-### `gpgpu-incremental-rtl-binding-engine/rtl_module_catalog.md`
+### `gpgpu-rtl/rtl_module_catalog.md`
 
 内容说明：该文件列出 v5 RTL binding 需要考虑的模块目录和 memory path 分解，例如 SM core、warp scheduler、execute pipeline、register file、scoreboard、SIMT stack、LSQ、coalescer、shared memory bank unit、L1/global adapter、memory response router、fault/completion unit 和 CSR runtime interface。
 
 具体例子：memory path 不应只建一个 cache/global interface，而应拆出 `coalescer`、`l1_cache_or_global_adapter`、`memory_response_router` 和 `fault_completion_unit`，除非模板显式允许融合并保留检查证据。
 
-### `gpgpu-simulation-performance-attribution-engine/SKILL.md`
+### `gpgpu-simppa/SKILL.md`
 
 内容说明：这是 Simulation Evidence and Performance Attribution Engine 的主 skill 文件，定义如何归一化 runtime、memory、RTL、waveform、module partial sim、golden 和 toolchain trace，先生成 `CORRECTNESS_GATE_REPORT`，再进入 failure attribution 或 pass evidence mode。它要求通过时也生成 `PASS_EVIDENCE_REPORT`、coverage、performance metrics 和 regression fingerprint。
 
 具体例子：当 RTL final memory 与 golden 一致时，该 skill 不能直接跳过，而要输出 pass evidence、trace coverage、IPC/stall 指标和 `REGRESSION_FINGERPRINT`；当不一致时才进入 first divergence 和 root cause 定位。
 
-### `gpgpu-simulation-performance-attribution-engine/bottleneck_graph_builder.md`
+### `gpgpu-simppa/bottleneck_graph_builder.md`
 
 内容说明：该文件说明如何把 normalized event 和 performance metric 构造成 bottleneck graph。它从 memory-centric 链路扩展为 template-driven graph，覆盖 memory latency、shared bank conflict、scheduler underutilization、barrier、branch divergence、pipeline imbalance、interface backpressure、toolchain mismatch 和 runtime launch mismatch。
 
 具体例子：scheduler underutilization graph 可以把 low eligible warp count 连接到 scoreboard/barrier/divergence，再映射到 warp scheduler module 和 scheduler contract path。
 
-### `gpgpu-simulation-performance-attribution-engine/correctness_gate_and_mode_selection.md`
+### `gpgpu-simppa/correctness_gate_and_mode_selection.md`
 
 内容说明：该文件定义 correctness gate 的输入、输出和模式选择规则，用 final memory、architectural state、completion/fault status、trace-level divergence 和 evidence completeness 决定进入 `FAILURE_ATTRIBUTION_MODE` 还是 `PASS_EVIDENCE_MODE`。
 
 具体例子：如果 final memory 一致但 instruction trace 出现 active mask divergence，该 gate 要选择 failure attribution mode 并要求 first divergence report；如果结果一致但缺少 RTL trace，则输出 `PASS_WITH_INSUFFICIENT_EVIDENCE`。
 
-### `gpgpu-simulation-performance-attribution-engine/differential_correctness_engine.md`
+### `gpgpu-simppa/differential_correctness_engine.md`
 
 内容说明：该文件定义 failure mode 下的 RTL/golden 差分比较规则，包括 PC、next PC、decode、active mask、predicate、register writeback、memory request/response、CSR、barrier、fault 和 completion。它要求选择第一个 deterministic architectural divergence。
 
 具体例子：final memory mismatch 只能作为 symptom；如果更早的证据显示 entry PC 错，`FIRST_DIVERGENCE_REPORT` 应指向 PC mismatch，而不是把 memory dump mismatch 当根因。
 
-### `gpgpu-simulation-performance-attribution-engine/legacy_validation_and_trace_constraints.md`
+### `gpgpu-simppa/legacy_validation_and_trace_constraints.md`
 
 内容说明：该文件迁移旧 runtime validator、memory validation、implementation validator、golden sim 和 causal trace analyzer 中仍有价值的验证规则，并把旧的 “RTL == golden 即结束” 降级为兼容行为。v5 中 pass 也必须生成 pass evidence、coverage、performance metrics 和 fingerprint。
 
 具体例子：旧 `APP_COMPILE_FAIL` 不再由 runtime-validator 独立处理，而是作为 Test Evidence 或 root cause 输入；通过用例也必须留下 `PASS_EVIDENCE_REPORT`，否则只能算 `PASS_WITH_INSUFFICIENT_EVIDENCE`。
 
-### `gpgpu-simulation-performance-attribution-engine/minimal_trace_window_rules.md`
+### `gpgpu-simppa/minimal_trace_window_rules.md`
 
 内容说明：该文件定义 minimal trace window 的选择规则，区分 correctness window 和 performance window。Correctness window 围绕 first divergence 包含 last matching event、first mismatching event 和 dependency closure；performance window 选择 stall contribution 最大且证据最完整的连续窗口。
 
 具体例子：寄存器写回第 42 cycle 首次不一致时，窗口默认包含前后各 8 个相关事件、依赖事件、contract path、RTL module path 和可能的 toolchain artifact path。
 
-### `gpgpu-simulation-performance-attribution-engine/pass_evidence_engine.md`
+### `gpgpu-simppa/pass_evidence_engine.md`
 
 内容说明：该文件定义 pass mode 的证据报告规则，要求输出 `PASS_EVIDENCE_REPORT`、`TRACE_COVERAGE_REPORT` 和 `REGRESSION_FINGERPRINT`。它检查 evidence completeness、architectural state comparison、coverage、performance metric ref 和 warning。
 
 具体例子：vector add 通过时，报告需要记录 system contract hash、golden model hash、RTL hash、program image hash、input/final memory hash、coverage hash 和 performance metric hash。
 
-### `gpgpu-simulation-performance-attribution-engine/performance_metric_extractor.md`
+### `gpgpu-simppa/performance_metric_extractor.md`
 
 内容说明：该文件定义 `PERFORMANCE_METRIC_IR` 的指标层级和字段，包括 total cycles、IPC、issue utilization、pipeline utilization、stall breakdown、memory metrics、scheduler metrics 和 warning flags。
 
 具体例子：如果 correctness pass 但 memory_wait 占比过高，该 extractor 会输出 `HIGH_MEMORY_STALL`，performance gate 可以进一步要求构建 bottleneck graph。
 
-### `gpgpu-simulation-performance-attribution-engine/report_generation_rules.md`
+### `gpgpu-simppa/report_generation_rules.md`
 
 内容说明：该文件定义统一 `SIM_PERF_ATTRIBUTION_REPORT` 的组装规则，把 correctness gate、first divergence 或 pass evidence、performance metrics、toolchain attribution、coverage、root cause、top bottleneck 和 rewrite handoff 串成最终报告。
 
 具体例子：failure mode 报告必须引用 `FIRST_DIVERGENCE_REPORT` 和 `ROOT_CAUSE_REPORT`；pass mode 报告必须引用 `PASS_EVIDENCE_REPORT`、coverage、metric 和 fingerprint。
 
-### `gpgpu-simulation-performance-attribution-engine/root_cause_engine.md`
+### `gpgpu-simppa/root_cause_engine.md`
 
 内容说明：该文件定义两级 root cause taxonomy 和 rewrite handoff 字段，覆盖 contract、golden、toolchain、runtime launch、RTL functional、RTL interface、memory system、scheduler、performance architecture、test evidence、insufficient trace 和 ambiguous cause。
 
-具体例子：assembler 编码错应输出 `TOOLCHAIN_ROOT_CAUSE/ASM_ENCODE_MISMATCH` 并路由到 `gpgpu-toolchain-runtime-artifact-engine`；active mask 错应输出 `RTL_FUNCTIONAL_ROOT_CAUSE/ACTIVE_MASK_MISMATCH` 并路由 RTL revalidation。
+具体例子：assembler 编码错应输出 `TOOLCHAIN_ROOT_CAUSE/ASM_ENCODE_MISMATCH` 并路由到 `gpgpu-runtime`；active mask 错应输出 `RTL_FUNCTIONAL_ROOT_CAUSE/ACTIVE_MASK_MISMATCH` 并路由 RTL revalidation。
 
-### `gpgpu-simulation-performance-attribution-engine/toolchain_trace_attribution.md`
+### `gpgpu-simppa/toolchain_trace_attribution.md`
 
 内容说明：该文件定义 assembly、encoded bytes、disassembly、program image、loader、runtime launch 到 RTL fetch/decode 的归因链。它用于区分 assembler 编码错、disassembler roundtrip 错、program image layout 错、entry PC 错、loader/runtime 错、RTL fetch/decode 错和 golden decode 错。
 
 具体例子：如果 RTL fetch 到的 instruction 与 golden 不一致，必须先比较 assembler output hash、program image hash、loader contract hash 和 runtime launch hash，再决定是 toolchain root cause 还是 RTL fetch/decode root cause。
 
-### `gpgpu-simulation-performance-attribution-engine/trace_ingestion_and_normalization.md`
+### `gpgpu-simppa/trace_ingestion_and_normalization.md`
 
 内容说明：该文件替代旧 trace normalizer，定义多来源 trace ingestion、字段归一化、时间基准统一、event dictionary、contract path/RTL module/toolchain artifact 映射、trace hash 和 missing field 检查。
 
 具体例子：RTL 里的 `pc_q`、golden trace 里的 `warp.pc`、waveform dump 里的 `u_fetch.pc` 和 toolchain first-fetch evidence 都要归一化到统一的 `pc` / `instruction_id` / `event_source` 字段。
 
-### `gpgpu-system-contract-golden-engine/SKILL.md`
+### `gpgpu-golden/SKILL.md`
 
 内容说明：这是 System Contract + Golden Semantics Engine 的主 skill 文件，定义它如何把 `ARCH_IR` 冻结为唯一 truth source `SYSTEM_CONTRACT_IR`，并派生可执行 reference semantics `GOLDEN_CONTRACT_MODEL`。它是 v5 系统唯一的语义冻结层。
 
 具体例子：当 `ARCH_IR` 选择 `ROUND_ROBIN` scheduler 时，该 skill 要把调度规则写进 `SYSTEM_CONTRACT_IR`，再生成可执行的 scheduler reference function。
 
-### `gpgpu-system-contract-golden-engine/contract_truth_and_state_model.md`
+### `gpgpu-golden/contract_truth_and_state_model.md`
 
 内容说明：该文件定义 `SYSTEM_CONTRACT_IR` 的唯一 truth ownership、contract freeze algorithm、结构化 canonical state model、source-of-truth map、config class semantics、artifact truth hygiene 和系统级 interface semantics model。
 
 具体例子：`state_model` 必须显式包含 `pc_table`、`exec_mask_table`、`scoreboard_state`、`pipeline_visible_state`、`memory_stall_state` 等字段；`interface_semantics_model` 必须定义 accepted request 是否 eventually response、payload 是否 stable、tag 是否 unique until response。
 
-### `gpgpu-system-contract-golden-engine/executable_semantics_rules.md`
+### `gpgpu-golden/executable_semantics_rules.md`
 
 内容说明：该文件合并 execution、memory、launch、config 和 interface semantics 规则，统一描述 semantics function record format、feature-gated required functions 和 fail-closed rules。
 
 具体例子：当 `memory_model.atomic.enabled = false` 时，golden model 应实现 `reject_atomic_or_trap` 并记录 unsupported reason；只有 atomic feature 开启时才要求 `atomic_apply`。
 
-### `gpgpu-system-contract-golden-engine/golden_model_coverage_and_report.md`
+### `gpgpu-golden/golden_model_coverage_and_report.md`
 
 内容说明：该文件定义 `GOLDEN_CONTRACT_MODEL` 的边界、禁止 independent truth 的检查、contract path coverage、feature-gated coverage、报告字段和失败模式。
 
@@ -422,7 +422,7 @@
 
 内容说明：该 schema 定义 root cause report，记录故障类别、证据路径、affected contract path、RTL module path 和 ambiguity。它是 rewrite controller 的主要输入。
 
-具体例子：`MEMORY_IMBALANCE` root cause 应包含 memory request evidence 和对应的 cache module path。
+具体例子：`MEMORY_SYSTEM_ROOT_CAUSE/MEMORY_REPLAY_OVERHEAD` root cause 应包含 memory request evidence 和对应的 LSQ 或 cache module path。
 
 ### `shared/schemas/rtl_partial_sim_report_ir.schema.yaml`
 
@@ -598,49 +598,49 @@
 
 具体例子：case 可以构造 golden model 自行定义 ISA opcode 的情况，并期望 `FORBIDDEN_GOLDEN_TRUTH`。
 
-### `shared/tests/validate_v4_assets.py`
+### `shared/tests/validate_v5_assets.py`
 
-内容说明：这是当前 v5 资产校验脚本，虽然文件名保留 v4 字样，但内容已经验证 v5 self-correcting design-system contract。它检查旧 skill 不回流、shared 只保留 v5 资产、每个文件都有中文说明条目。
+内容说明：这是当前 v5 资产校验脚本，用于验证 v5 self-correcting design-system contract。它检查旧 skill 不回流、shared 只保留 v5 资产、每个文件都有中文说明条目。
 
 具体例子：如果新增 `shared/tables/new_table.yaml` 但没有更新允许列表和 `file_descriptions.zh.md`，脚本会报告 unexpected file 或 missing file description entry。
 
-### `gpgpu-toolchain-runtime-artifact-engine/SKILL.md`
+### `gpgpu-runtime/SKILL.md`
 
 内容说明：这是 Toolchain Runtime Artifact Engine 的主 skill 文件，定义它如何从 `SYSTEM_CONTRACT_IR` 和 `GOLDEN_CONTRACT_MODEL` 派生 ISA table、assembler、disassembler、assembly IR、program image、runtime launch artifact、loader contract 和 smoke report。它强调这些工具产物不能重新定义 opcode、ABI、program image 或 loader truth。
 
 具体例子：当 `SYSTEM_CONTRACT_IR.isa_model` 给出 opcode 和 instruction encoding 时，该 skill 负责生成 `TOOLCHAIN_ARTIFACT_IR` 并验证 assembler/disassembler/RTL defines 的 hash 一致，而不是手写第二套 opcode 表。
 
-### `gpgpu-toolchain-runtime-artifact-engine/assembly_ir_rules.md`
+### `gpgpu-runtime/assembly_ir_rules.md`
 
 内容说明：该文件定义 `ASSEMBLY_IR` 的字段、来源和 fail-closed 规则，明确第一阶段支持 hand-written assembly 或 lowered pseudo assembly，而不是完整 CUDA frontend。它让 assembly 到 program image 的闭环可先跑通。
 
 具体例子：`input_kernel.asm` 中的 `lw r4, 0(r1)` 会被解析成带 `pc`、`mnemonic`、`operands`、`source_line` 和 `contract_path` 的 instruction record。
 
-### `gpgpu-toolchain-runtime-artifact-engine/assembler_disassembler_roundtrip.md`
+### `gpgpu-runtime/assembler_disassembler_roundtrip.md`
 
 内容说明：该文件定义 assembler encode、disassembler decode 和 ASM -> bytes -> DISASM -> bytes roundtrip 三个 gate。它要求 unsupported instruction 行为、operand width、branch offset 和 field layout 都来自 `SYSTEM_CONTRACT_IR`。
 
 具体例子：如果 `branch_equal` 的 offset 没按合同要求对齐，encode gate 应输出 `ASM_ENCODE_FAIL`；如果 disasm 后重新编码的 bytes 不一致，应输出 `DISASM_ROUNDTRIP_FAIL`。
 
-### `gpgpu-toolchain-runtime-artifact-engine/isa_table_derivation.md`
+### `gpgpu-runtime/isa_table_derivation.md`
 
 内容说明：该文件说明如何从 `SYSTEM_CONTRACT_IR.isa_model` 派生 `tools/isa.py`、`tools/encoding_table.py`、assembler/disassembler table、RTL defines 和 ISA 文档。它定义 hash 等价检查，防止工具、RTL 和文档各自维护 opcode 真值。
 
 具体例子：`isa_model_hash`、`assembler_table_hash`、`disassembler_table_hash` 和 `rtl_defines_hash` 不一致时，必须输出 `ISA_ENCODING_DRIFT` 或 `SOURCE_OF_TRUTH_DRIFT`。
 
-### `gpgpu-toolchain-runtime-artifact-engine/program_image_and_loader_contract.md`
+### `gpgpu-runtime/program_image_and_loader_contract.md`
 
 内容说明：该文件定义 `PROGRAM_IMAGE_IR` 和 `LOADER_CONTRACT_IR`，说明 text/data segment、symbol table、relocation、entry PC、imem/dmem 初始化和 RTL loader interface 如何绑定。它解决 RTL 从哪里取第一条指令、program image 如何进入 memory 的问题。
 
 具体例子：vector-add 例子的 `vecadd` symbol 被解析为 `entry_pc: 0`，loader contract 要把 text segment 加载到 instruction memory，并在 reset 后让 entry PC 可见。
 
-### `gpgpu-toolchain-runtime-artifact-engine/runtime_launch_artifact_rules.md`
+### `gpgpu-runtime/runtime_launch_artifact_rules.md`
 
 内容说明：该文件定义 `RUNTIME_LAUNCH_IR`，包括 launch ABI、grid/block dim、warp size、arg buffer layout、CSR write sequence 和 completion observation。它把 runtime launch 从模糊概念变成可验证 artifact。
 
 具体例子：vector-add launch artifact 会写入 `kernel_entry`、`arg_base`、`grid_dim`、`block_dim` 和 `start` CSR，并把 A/B/C 指针编码进 arg buffer。
 
-### `gpgpu-toolchain-runtime-artifact-engine/toolchain_smoke_gates.md`
+### `gpgpu-runtime/toolchain_smoke_gates.md`
 
 内容说明：该文件列出 toolchain smoke 的十个 gate，从 ISA table derivation 到 golden program image execution。它要求 golden model 执行从 `PROGRAM_IMAGE_IR` fetch/decode 出来的 instruction stream，而不是只跑抽象 instruction list。
 

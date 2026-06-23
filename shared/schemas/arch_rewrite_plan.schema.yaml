@@ -4,18 +4,22 @@ type: object
 required:
   - rewrite_id
   - trigger_root_cause
+  - trigger_root_cause_subclass
   - patch_type
   - patch_targets
   - owner_module
   - expected_impact
   - required_revalidation_gates
   - regression_risks
+  - rejected_alternatives
 properties:
   rewrite_id: string
   trigger_root_cause: string
+  trigger_root_cause_subclass: string
   patch_type: enum
   patch_targets: list
   owner_module: string
   expected_impact: map
   required_revalidation_gates: list
   regression_risks: list
+  rejected_alternatives: list

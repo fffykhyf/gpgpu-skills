@@ -1,7 +1,7 @@
 # Contract Truth and State Model
 
 This reference defines the mandatory truth ownership and canonical state rules
-for `gpgpu-system-contract-golden-engine`. It carries forward the still-active
+for `gpgpu-golden`. It carries forward the still-active
 constraints migrated from `gpgpu-spec-lock`, `gpgpu-canonical-state-engine`,
 truth-bearing artifact checks, launch truth, memory truth, config truth, and
 golden replay truth.

@@ -1,26 +1,26 @@
 version: v5
 patch_classes:
   ARCHITECTURE_PATCH:
-    target_owner: gpgpu-architecture-generator
+    target_owner: gpgpu-arch
     examples: [warp_size_change, sm_partition_change, issue_width_change, memory_hierarchy_change]
   CONTRACT_PATCH:
-    target_owner: gpgpu-system-contract-golden-engine
+    target_owner: gpgpu-golden
     examples: [scheduling_rule_change, memory_ordering_change, launch_abi_change, scoreboard_semantic_change]
   GOLDEN_MODEL_PATCH:
-    target_owner: gpgpu-system-contract-golden-engine
+    target_owner: gpgpu-golden
     examples: [golden_decode_fix, executable_semantics_fix, coverage_gap_fix]
   TOOLCHAIN_PATCH:
-    target_owner: gpgpu-toolchain-runtime-artifact-engine
-    examples: [assembler_encoding_fix, disassembler_roundtrip_fix, program_image_layout_fix, runtime_arg_encoding_fix, loader_contract_fix]
+    target_owner: gpgpu-runtime
+    examples: [assembler_encoding_fix, disassembler_roundtrip_fix, instruction_encoding_fix, program_image_layout_fix, loader_contract_binding_fix]
   RUNTIME_PATCH:
-    target_owner: gpgpu-toolchain-runtime-artifact-engine
-    examples: [runtime_arg_buffer_fix, csr_launch_sequence_fix, completion_fault_observation_fix]
+    target_owner: gpgpu-runtime
+    examples: [runtime_arg_buffer_fix, kernel_launch_sequence_fix, csr_launch_sequence_fix, completion_fault_observation_fix]
   RTL_PATCH:
-    target_owner: gpgpu-incremental-rtl-binding-engine
+    target_owner: gpgpu-rtl
     examples: [pipeline_relayout, scoreboard_redesign, lsq_replay_policy_change, interface_latency_adjustment]
   TEST_EVIDENCE_PATCH:
-    target_owner: gpgpu-simulation-performance-attribution-engine
+    target_owner: gpgpu-simppa
     examples: [trace_tap_addition, missing_evidence_collection, attribution_rerun]
   PASS_EVIDENCE_PATCH:
-    target_owner: gpgpu-simulation-performance-attribution-engine
+    target_owner: gpgpu-simppa
     examples: [coverage_collection_fix, regression_fingerprint_stabilization, pass_trace_completeness_fix]

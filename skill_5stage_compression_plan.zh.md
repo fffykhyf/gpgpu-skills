@@ -1,6 +1,6 @@
 # GPGPU Skill Self-Correcting Design System Implementation Plan
 
-> 2026-06-23 更新：本文件最初记录 5-stage 压缩方案。当前流程已升级为 6-stage，在 `System Contract + Golden Semantics Engine` 和 `Incremental RTL Binding Engine` 之间新增 `gpgpu-toolchain-runtime-artifact-engine`，负责从 `SYSTEM_CONTRACT_IR` 派生 assembler、disassembler、program image、runtime launch artifact 和 loader contract。后续实施以 `README.md` 和 `shared/flow/gpgpu_design_flow.md` 中的 6-stage flow 为准。
+> 2026-06-23 更新：本文件最初记录 5-stage 压缩方案。当前流程已升级为 6-stage，在 `System Contract + Golden Semantics Engine` 和 `Incremental RTL Binding Engine` 之间新增 `gpgpu-runtime`，负责从 `SYSTEM_CONTRACT_IR` 派生 assembler、disassembler、program image、runtime launch artifact 和 loader contract。后续实施以 `README.md` 和 `shared/flow/gpgpu_design_flow.md` 中的 6-stage flow 为准。
 
 > **For agentic workers:** REQUIRED SUB-SKILL: Use `superpowers:subagent-driven-development` (recommended) or `superpowers:executing-plans` to implement this plan task-by-task. Steps use checkbox (`- [ ]`) syntax for tracking.
 
@@ -109,11 +109,11 @@ Closure report 只能告诉用户发生了什么。self-correcting design system
 
 | 新模块 | 原 skill 来源 | 新增关键能力 | 主要输出 |
 |---|---|---|---|
-| `gpgpu-architecture-generator` | `gpgpu-front-end` + `gpgpu-architecture-synthesizer` | Micro-constraint estimator | `DESIGN_INTENT_IR`, `ARCH_IR`, `MICRO_CONSTRAINT_ESTIMATE_IR` |
-| `gpgpu-system-contract-golden-engine` | `gpgpu-spec-lock` + `gpgpu-canonical-state-engine` + truth part of `gpgpu-artifact-contract-engine` | Contract executable semantics engine | `SYSTEM_CONTRACT_IR`, `GOLDEN_CONTRACT_MODEL` |
-| `gpgpu-incremental-rtl-binding-engine` | binding part of `gpgpu-artifact-contract-engine` + structural part of `gpgpu-memory-subsystem` | Module-by-module RTL builder, interface checker, partial simulator | `INCREMENTAL_RTL_MAP`, `MODULE_INTERFACE_REPORT` |
-| `gpgpu-simulation-performance-attribution-engine` | `gpgpu-runtime-validator` + `gpgpu-memory-subsystem` validation + `gpgpu-implementation-validator` | Trace normalizer, bottleneck graph builder, root cause engine | `NORMALIZED_TRACE_IR`, `PERF_ATTRIBUTION_GRAPH`, `ROOT_CAUSE_REPORT` |
-| `gpgpu-architecture-rewrite-loop-controller` | `gpgpu-closure-refinement-engine` + causal trace analyzer behavior | Architecture / contract / RTL rewrite trigger | `ARCH_REWRITE_PLAN`, `REGRESSION_TRACKING_REPORT` |
+| `gpgpu-arch` | `gpgpu-front-end` + `gpgpu-architecture-synthesizer` | Micro-constraint estimator | `DESIGN_INTENT_IR`, `ARCH_IR`, `MICRO_CONSTRAINT_ESTIMATE_IR` |
+| `gpgpu-golden` | `gpgpu-spec-lock` + `gpgpu-canonical-state-engine` + truth part of `gpgpu-artifact-contract-engine` | Contract executable semantics engine | `SYSTEM_CONTRACT_IR`, `GOLDEN_CONTRACT_MODEL` |
+| `gpgpu-rtl` | binding part of `gpgpu-artifact-contract-engine` + structural part of `gpgpu-memory-subsystem` | Module-by-module RTL builder, interface checker, partial simulator | `INCREMENTAL_RTL_MAP`, `MODULE_INTERFACE_REPORT` |
+| `gpgpu-simppa` | `gpgpu-runtime-validator` + `gpgpu-memory-subsystem` validation + `gpgpu-implementation-validator` | Trace normalizer, bottleneck graph builder, root cause engine | `NORMALIZED_TRACE_IR`, `PERF_ATTRIBUTION_GRAPH`, `ROOT_CAUSE_REPORT` |
+| `gpgpu-loop` | `gpgpu-closure-refinement-engine` + causal trace analyzer behavior | Architecture / contract / RTL rewrite trigger | `ARCH_REWRITE_PLAN`, `REGRESSION_TRACKING_REPORT` |
 
 `reader` 保持为只读证据支持 skill，不进入生成闭环。`legacy/` 中的旧 skill 不再保留；它们的有用约束被迁移到新 owner skill 的 `legacy_*_constraints.md` 引用文件中，避免旧 skill 继续成为可调用的第二套流程。
 
@@ -170,7 +170,7 @@ ARCH_GENERATION_REPORT
 
 ### 需要创建的 skill
 
-`skill/gpgpu-architecture-generator/SKILL.md`
+`skill/gpgpu-arch/SKILL.md`
 
 必须包含：
 
@@ -251,13 +251,13 @@ CONTRACT_SEMANTICS_REPORT
 
 ### 需要创建的 skill
 
-`skill/gpgpu-system-contract-golden-engine/SKILL.md`
+`skill/gpgpu-golden/SKILL.md`
 
 ### 需要新增 references
 
-- `skill/gpgpu-system-contract-golden-engine/contract_truth_and_state_model.md`
-- `skill/gpgpu-system-contract-golden-engine/executable_semantics_rules.md`
-- `skill/gpgpu-system-contract-golden-engine/golden_model_coverage_and_report.md`
+- `skill/gpgpu-golden/contract_truth_and_state_model.md`
+- `skill/gpgpu-golden/executable_semantics_rules.md`
+- `skill/gpgpu-golden/golden_model_coverage_and_report.md`
 
 ## Module 3: Incremental RTL Binding Engine
 
@@ -341,14 +341,14 @@ RTL_PARTIAL_SIM_REPORT
 
 ### 需要创建的 skill
 
-`skill/gpgpu-incremental-rtl-binding-engine/SKILL.md`
+`skill/gpgpu-rtl/SKILL.md`
 
 ### 需要新增 references
 
-- `skill/gpgpu-incremental-rtl-binding-engine/module_binding_rules.md`
-- `skill/gpgpu-incremental-rtl-binding-engine/interface_binding_and_checker.md`
-- `skill/gpgpu-incremental-rtl-binding-engine/partial_simulation_gates.md`
-- `skill/gpgpu-incremental-rtl-binding-engine/rtl_module_catalog.md`
+- `skill/gpgpu-rtl/module_binding_rules.md`
+- `skill/gpgpu-rtl/interface_binding_and_checker.md`
+- `skill/gpgpu-rtl/partial_simulation_gates.md`
+- `skill/gpgpu-rtl/rtl_module_catalog.md`
 
 ## Module 4: Simulation + Performance Attribution Engine
 
@@ -447,16 +447,16 @@ SIM_PERF_ATTRIBUTION_REPORT
 
 ### 需要创建的 skill
 
-`skill/gpgpu-simulation-performance-attribution-engine/SKILL.md`
+`skill/gpgpu-simppa/SKILL.md`
 
 ### 需要新增 references
 
-- `skill/gpgpu-simulation-performance-attribution-engine/trace_ingestion_and_normalization.md`
-- `skill/gpgpu-simulation-performance-attribution-engine/correctness_gate_and_mode_selection.md`
-- `skill/gpgpu-simulation-performance-attribution-engine/pass_evidence_engine.md`
-- `skill/gpgpu-simulation-performance-attribution-engine/performance_metric_extractor.md`
-- `skill/gpgpu-simulation-performance-attribution-engine/bottleneck_graph_builder.md`
-- `skill/gpgpu-simulation-performance-attribution-engine/root_cause_engine.md`
+- `skill/gpgpu-simppa/trace_ingestion_and_normalization.md`
+- `skill/gpgpu-simppa/correctness_gate_and_mode_selection.md`
+- `skill/gpgpu-simppa/pass_evidence_engine.md`
+- `skill/gpgpu-simppa/performance_metric_extractor.md`
+- `skill/gpgpu-simppa/bottleneck_graph_builder.md`
+- `skill/gpgpu-simppa/root_cause_engine.md`
 
 ## Module 5: Architecture Rewrite Loop Controller
 
@@ -528,28 +528,28 @@ REGRESSION_TRACKING_REPORT
 
 ### 需要创建的 skill
 
-`skill/gpgpu-architecture-rewrite-loop-controller/SKILL.md`
+`skill/gpgpu-loop/SKILL.md`
 
 ### 需要新增 references
 
-- `skill/gpgpu-architecture-rewrite-loop-controller/rewrite_trigger.md`
-- `skill/gpgpu-architecture-rewrite-loop-controller/patch_taxonomy.md`
-- `skill/gpgpu-architecture-rewrite-loop-controller/regression_tracking.md`
-- `skill/gpgpu-architecture-rewrite-loop-controller/revalidation_routing.md`
+- `skill/gpgpu-loop/rewrite_trigger.md`
+- `skill/gpgpu-loop/patch_taxonomy.md`
+- `skill/gpgpu-loop/regression_tracking.md`
+- `skill/gpgpu-loop/revalidation_routing.md`
 
 ## 现有 skill 迁移策略
 
 | 当前 skill | 新 owner | 迁移方式 |
 |---|---|---|
-| `gpgpu-front-end` | `gpgpu-architecture-generator` | 迁移 intent intake 约束后删除旧 skill |
-| `gpgpu-architecture-synthesizer` | `gpgpu-architecture-generator` | 迁移 candidate generation 约束后删除旧 skill |
-| `gpgpu-spec-lock` | `gpgpu-system-contract-golden-engine` | 迁移 truth freeze 到 system contract |
-| `gpgpu-canonical-state-engine` | `gpgpu-system-contract-golden-engine` | 迁移 state semantics 到 executable golden semantics |
-| `gpgpu-artifact-contract-engine` | `gpgpu-system-contract-golden-engine` + `gpgpu-incremental-rtl-binding-engine` | truth part 进 Module 2，binding part 进 Module 3 |
-| `gpgpu-runtime-validator` | `gpgpu-system-contract-golden-engine` + `gpgpu-simulation-performance-attribution-engine` | launch semantics 进 Module 2，runtime trace validation 进 Module 4 |
+| `gpgpu-front-end` | `gpgpu-arch` | 迁移 intent intake 约束后删除旧 skill |
+| `gpgpu-architecture-synthesizer` | `gpgpu-arch` | 迁移 candidate generation 约束后删除旧 skill |
+| `gpgpu-spec-lock` | `gpgpu-golden` | 迁移 truth freeze 到 system contract |
+| `gpgpu-canonical-state-engine` | `gpgpu-golden` | 迁移 state semantics 到 executable golden semantics |
+| `gpgpu-artifact-contract-engine` | `gpgpu-golden` + `gpgpu-rtl` | truth part 进 Module 2，binding part 进 Module 3 |
+| `gpgpu-runtime-validator` | `gpgpu-golden` + `gpgpu-simppa` | launch semantics 进 Module 2，runtime trace validation 进 Module 4 |
 | `gpgpu-memory-subsystem` | Module 2 + Module 3 + Module 4 | memory truth、memory binding、memory correctness 分拆 |
-| `gpgpu-implementation-validator` | `gpgpu-incremental-rtl-binding-engine` + `gpgpu-simulation-performance-attribution-engine` | module gates 进 Module 3，全系统 diff 进 Module 4 |
-| `gpgpu-closure-refinement-engine` | `gpgpu-architecture-rewrite-loop-controller` | 从 closure report 改为 rewrite loop controller |
+| `gpgpu-implementation-validator` | `gpgpu-rtl` + `gpgpu-simppa` | module gates 进 Module 3，全系统 diff 进 Module 4 |
+| `gpgpu-closure-refinement-engine` | `gpgpu-loop` | 从 closure report 改为 rewrite loop controller |
 
 旧 top-level skills 和 `legacy/` 旧 skill 不保留为 active wrapper。迁移完成后必须删除旧目录，并由校验脚本禁止旧 skill 回流。
 
@@ -755,13 +755,13 @@ forbidden_outputs:
 
 **Files:**
 
-- Create: `skill/gpgpu-architecture-generator/SKILL.md`
-- Create: `skill/gpgpu-system-contract-golden-engine/SKILL.md`
-- Create: `skill/gpgpu-incremental-rtl-binding-engine/SKILL.md`
-- Create: `skill/gpgpu-simulation-performance-attribution-engine/SKILL.md`
-- Create: `skill/gpgpu-architecture-rewrite-loop-controller/SKILL.md`
+- Create: `skill/gpgpu-arch/SKILL.md`
+- Create: `skill/gpgpu-golden/SKILL.md`
+- Create: `skill/gpgpu-rtl/SKILL.md`
+- Create: `skill/gpgpu-simppa/SKILL.md`
+- Create: `skill/gpgpu-loop/SKILL.md`
 
-- [ ] **Step 1: Create `gpgpu-architecture-generator`**
+- [ ] **Step 1: Create `gpgpu-arch`**
 
   Required invariant:
 
@@ -769,7 +769,7 @@ forbidden_outputs:
   ARCH_IR is a candidate graph. MICRO_CONSTRAINT_ESTIMATE_IR is a feasibility estimate. This skill must not emit system contract truth, golden semantics, RTL bindings, performance attribution, or rewrite patches.
   ```
 
-- [ ] **Step 2: Create `gpgpu-system-contract-golden-engine`**
+- [ ] **Step 2: Create `gpgpu-golden`**
 
   Required invariant:
 
@@ -777,7 +777,7 @@ forbidden_outputs:
   SYSTEM_CONTRACT_IR is the only semantic truth source. GOLDEN_CONTRACT_MODEL is executable reference semantics derived from SYSTEM_CONTRACT_IR and must not define independent ISA, memory, launch, scheduler, or config truth.
   ```
 
-- [ ] **Step 3: Create `gpgpu-incremental-rtl-binding-engine`**
+- [ ] **Step 3: Create `gpgpu-rtl`**
 
   Required invariant:
 
@@ -785,7 +785,7 @@ forbidden_outputs:
   INCREMENTAL_RTL_MAP binds modules one by one. Every module must declare consumed contract paths, provided signals, required signals, latency contract, local trace schema, and partial simulation evidence.
   ```
 
-- [ ] **Step 4: Create `gpgpu-simulation-performance-attribution-engine`**
+- [ ] **Step 4: Create `gpgpu-simppa`**
 
   Required invariant:
 
@@ -793,7 +793,7 @@ forbidden_outputs:
   PERF_ATTRIBUTION_GRAPH must connect cycle, warp, memory, contract path, and RTL module evidence. A performance conclusion without this causal chain must be INSUFFICIENT_TRACE_EVIDENCE.
   ```
 
-- [ ] **Step 5: Create `gpgpu-architecture-rewrite-loop-controller`**
+- [ ] **Step 5: Create `gpgpu-loop`**
 
   Required invariant:
 
@@ -805,9 +805,9 @@ forbidden_outputs:
 
 **Files:**
 
-- Create: `skill/gpgpu-system-contract-golden-engine/contract_truth_and_state_model.md`
-- Create: `skill/gpgpu-system-contract-golden-engine/executable_semantics_rules.md`
-- Create: `skill/gpgpu-system-contract-golden-engine/golden_model_coverage_and_report.md`
+- Create: `skill/gpgpu-golden/contract_truth_and_state_model.md`
+- Create: `skill/gpgpu-golden/executable_semantics_rules.md`
+- Create: `skill/gpgpu-golden/golden_model_coverage_and_report.md`
 - Create: `skill/shared/schemas/golden_contract_model.schema.yaml`
 - Create: `skill/shared/tables/contract_semantics_binding_table.yaml`
 - Create: `skill/shared/tables/golden_model_coverage_table.yaml`
@@ -853,10 +853,10 @@ forbidden_outputs:
 
 **Files:**
 
-- Create: `skill/gpgpu-incremental-rtl-binding-engine/module_binding_rules.md`
-- Create: `skill/gpgpu-incremental-rtl-binding-engine/interface_binding_and_checker.md`
-- Create: `skill/gpgpu-incremental-rtl-binding-engine/partial_simulation_gates.md`
-- Create: `skill/gpgpu-incremental-rtl-binding-engine/rtl_module_catalog.md`
+- Create: `skill/gpgpu-rtl/module_binding_rules.md`
+- Create: `skill/gpgpu-rtl/interface_binding_and_checker.md`
+- Create: `skill/gpgpu-rtl/partial_simulation_gates.md`
+- Create: `skill/gpgpu-rtl/rtl_module_catalog.md`
 - Create: `skill/shared/schemas/incremental_rtl_map.schema.yaml`
 - Create: `skill/shared/tables/rtl_module_catalog.yaml`
 - Create: `skill/shared/tables/module_interface_contract_table.yaml`
@@ -913,12 +913,12 @@ forbidden_outputs:
 
 **Files:**
 
-- Create: `skill/gpgpu-simulation-performance-attribution-engine/trace_ingestion_and_normalization.md`
-- Create: `skill/gpgpu-simulation-performance-attribution-engine/correctness_gate_and_mode_selection.md`
-- Create: `skill/gpgpu-simulation-performance-attribution-engine/pass_evidence_engine.md`
-- Create: `skill/gpgpu-simulation-performance-attribution-engine/performance_metric_extractor.md`
-- Create: `skill/gpgpu-simulation-performance-attribution-engine/bottleneck_graph_builder.md`
-- Create: `skill/gpgpu-simulation-performance-attribution-engine/root_cause_engine.md`
+- Create: `skill/gpgpu-simppa/trace_ingestion_and_normalization.md`
+- Create: `skill/gpgpu-simppa/correctness_gate_and_mode_selection.md`
+- Create: `skill/gpgpu-simppa/pass_evidence_engine.md`
+- Create: `skill/gpgpu-simppa/performance_metric_extractor.md`
+- Create: `skill/gpgpu-simppa/bottleneck_graph_builder.md`
+- Create: `skill/gpgpu-simppa/root_cause_engine.md`
 - Create: `skill/shared/schemas/perf_attribution_graph.schema.yaml`
 - Create: `skill/shared/tables/trace_normalization_table.yaml`
 - Create: `skill/shared/tables/perf_attribution_taxonomy.yaml`
@@ -975,10 +975,10 @@ forbidden_outputs:
 
 **Files:**
 
-- Create: `skill/gpgpu-architecture-rewrite-loop-controller/rewrite_trigger.md`
-- Create: `skill/gpgpu-architecture-rewrite-loop-controller/patch_taxonomy.md`
-- Create: `skill/gpgpu-architecture-rewrite-loop-controller/regression_tracking.md`
-- Create: `skill/gpgpu-architecture-rewrite-loop-controller/revalidation_routing.md`
+- Create: `skill/gpgpu-loop/rewrite_trigger.md`
+- Create: `skill/gpgpu-loop/patch_taxonomy.md`
+- Create: `skill/gpgpu-loop/regression_tracking.md`
+- Create: `skill/gpgpu-loop/revalidation_routing.md`
 - Create: `skill/shared/schemas/arch_rewrite_plan.schema.yaml`
 - Create: `skill/shared/tables/rewrite_trigger_table.yaml`
 - Create: `skill/shared/tables/patch_taxonomy_table.yaml`
@@ -1023,11 +1023,11 @@ forbidden_outputs:
 
 **Files:**
 
-- Create or update: `skill/gpgpu-architecture-generator/legacy_request_and_candidate_constraints.md`
-- Create or update: `skill/gpgpu-system-contract-golden-engine/contract_truth_and_state_model.md`
-- Create or update: `skill/gpgpu-incremental-rtl-binding-engine/module_binding_rules.md`
-- Create or update: `skill/gpgpu-simulation-performance-attribution-engine/legacy_validation_and_trace_constraints.md`
-- Create or update: `skill/gpgpu-architecture-rewrite-loop-controller/legacy_closure_repair_constraints.md`
+- Create or update: `skill/gpgpu-arch/legacy_request_and_candidate_constraints.md`
+- Create or update: `skill/gpgpu-golden/contract_truth_and_state_model.md`
+- Create or update: `skill/gpgpu-rtl/module_binding_rules.md`
+- Create or update: `skill/gpgpu-simppa/legacy_validation_and_trace_constraints.md`
+- Create or update: `skill/gpgpu-loop/legacy_closure_repair_constraints.md`
 - Delete: old top-level `skill/gpgpu-*` directories that are not one of the six current v5 skills.
 - Delete: `skill/legacy/` old skill archive after useful constraints are migrated.
 
@@ -1063,11 +1063,11 @@ forbidden_outputs:
 
   ```python
   TOP_LEVEL_SKILLS = [
-      "gpgpu-architecture-generator",
-      "gpgpu-system-contract-golden-engine",
-      "gpgpu-incremental-rtl-binding-engine",
-      "gpgpu-simulation-performance-attribution-engine",
-      "gpgpu-architecture-rewrite-loop-controller",
+      "gpgpu-arch",
+      "gpgpu-golden",
+      "gpgpu-rtl",
+      "gpgpu-simppa",
+      "gpgpu-loop",
   ]
   ```
 
@@ -1077,23 +1077,23 @@ forbidden_outputs:
 
   ```python
   V5_REQUIRED_TEXT = {
-      "gpgpu-system-contract-golden-engine/SKILL.md": [
+      "gpgpu-golden/SKILL.md": [
           "GOLDEN_CONTRACT_MODEL",
           "executable reference semantics",
           "must not define independent ISA",
       ],
-      "gpgpu-incremental-rtl-binding-engine/SKILL.md": [
+      "gpgpu-rtl/SKILL.md": [
           "module by module",
           "Interface Contract Checker",
           "RTL Partial Simulator",
       ],
-      "gpgpu-simulation-performance-attribution-engine/SKILL.md": [
+      "gpgpu-simppa/SKILL.md": [
           "PERF_ATTRIBUTION_GRAPH",
           "cycle",
           "contract path",
           "RTL module",
       ],
-      "gpgpu-architecture-rewrite-loop-controller/SKILL.md": [
+      "gpgpu-loop/SKILL.md": [
           "ARCH_REWRITE_PLAN",
           "Architecture Patch",
           "Contract Patch",

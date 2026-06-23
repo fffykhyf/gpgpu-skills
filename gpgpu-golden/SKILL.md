@@ -1,5 +1,5 @@
 ---
-name: gpgpu-system-contract-golden-engine
+name: gpgpu-golden
 description: Use when candidate ARCH_IR or compatible v4 spec/state artifacts must become SYSTEM_CONTRACT_IR and executable GOLDEN_CONTRACT_MODEL reference semantics for execution, memory, launch, and config behavior.
 ---
 
@@ -12,13 +12,13 @@ This skill freezes the system contract and derives executable reference semantic
 ## Position in Flow
 
 Upstream:
-- `gpgpu-architecture-generator`
+- `gpgpu-arch`
 - migrated truth ownership constraints captured in `contract_truth_and_state_model.md`
 
 Downstream:
-- `gpgpu-toolchain-runtime-artifact-engine`
-- `gpgpu-incremental-rtl-binding-engine`
-- `gpgpu-simulation-performance-attribution-engine`
+- `gpgpu-runtime`
+- `gpgpu-rtl`
+- `gpgpu-simppa`
 
 ## Input IR
 

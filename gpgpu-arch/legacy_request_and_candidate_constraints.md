@@ -3,7 +3,7 @@
 This reference migrates the useful constraints from the removed
 `gpgpu-front-end`, `gpgpu-architecture-synthesizer`,
 `gpgpu-mode-controller`, and `gpgpu-design-intent-lock` skills. These rules
-are owned by `gpgpu-architecture-generator`; they must not be reintroduced as
+are owned by `gpgpu-arch`; they must not be reintroduced as
 separate top-level skills.
 
 ## Request Classification

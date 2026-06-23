@@ -6,12 +6,12 @@
 
 | Skill | 责任 | 核心输出 |
 |---|---|---|
-| `gpgpu-architecture-generator` | 读取用户意图、锁定设计目标、生成候选架构，并提前估计不可实现风险 | `MODE_SELECTION_IR`, `DESIGN_INTENT_IR`, `ARCH_IR`, `MICRO_CONSTRAINT_ESTIMATE_IR` |
-| `gpgpu-system-contract-golden-engine` | 冻结唯一系统合同，并从合同派生可执行 golden semantics | `SYSTEM_CONTRACT_IR`, `GOLDEN_CONTRACT_MODEL`, `CONTRACT_SEMANTICS_REPORT` |
-| `gpgpu-toolchain-runtime-artifact-engine` | 从系统合同派生 assembler、disassembler、program image、runtime launch 和 loader artifacts，并执行 toolchain smoke gates | `TOOLCHAIN_ARTIFACT_IR`, `ASSEMBLY_IR`, `PROGRAM_IMAGE_IR`, `RUNTIME_LAUNCH_IR`, `LOADER_CONTRACT_IR`, `TOOLCHAIN_SMOKE_REPORT` |
-| `gpgpu-incremental-rtl-binding-engine` | 把系统合同逐模块绑定到 RTL，并做 interface check 与 partial simulation | `INCREMENTAL_RTL_MAP`, `MODULE_INTERFACE_REPORT`, `RTL_PARTIAL_SIM_REPORT` |
-| `gpgpu-simulation-performance-attribution-engine` | 归一化 runtime/memory/RTL/golden/toolchain trace，先做 correctness gate，再进入 failure attribution 或 pass evidence，并输出性能指标、覆盖率和 regression fingerprint | `NORMALIZED_TRACE_IR`, `CORRECTNESS_GATE_REPORT`, `PASS_EVIDENCE_REPORT`, `PERFORMANCE_METRIC_IR`, `PERF_ATTRIBUTION_GRAPH`, `ROOT_CAUSE_REPORT`, `REGRESSION_FINGERPRINT` |
-| `gpgpu-architecture-rewrite-loop-controller` | 根据 root cause 产生 architecture/contract/RTL/test-evidence patch plan，并路由重验证 | `ARCH_REWRITE_PLAN`, `REWRITE_DECISION_REPORT`, `REGRESSION_TRACKING_REPORT` |
+| `gpgpu-arch` | 读取用户意图、锁定设计目标、生成候选架构，并提前估计不可实现风险 | `MODE_SELECTION_IR`, `DESIGN_INTENT_IR`, `ARCH_IR`, `MICRO_CONSTRAINT_ESTIMATE_IR` |
+| `gpgpu-golden` | 冻结唯一系统合同，并从合同派生可执行 golden semantics | `SYSTEM_CONTRACT_IR`, `GOLDEN_CONTRACT_MODEL`, `CONTRACT_SEMANTICS_REPORT` |
+| `gpgpu-runtime` | 从系统合同派生 assembler、disassembler、program image、runtime launch 和 loader artifacts，并执行 toolchain smoke gates | `TOOLCHAIN_ARTIFACT_IR`, `ASSEMBLY_IR`, `PROGRAM_IMAGE_IR`, `RUNTIME_LAUNCH_IR`, `LOADER_CONTRACT_IR`, `TOOLCHAIN_SMOKE_REPORT` |
+| `gpgpu-rtl` | 把系统合同逐模块绑定到 RTL，并做 interface check 与 partial simulation | `INCREMENTAL_RTL_MAP`, `MODULE_INTERFACE_REPORT`, `RTL_PARTIAL_SIM_REPORT` |
+| `gpgpu-simppa` | 归一化 runtime/memory/RTL/golden/toolchain trace，先做 correctness gate，再进入 failure attribution 或 pass evidence，并输出性能指标、覆盖率和 regression fingerprint | `NORMALIZED_TRACE_IR`, `CORRECTNESS_GATE_REPORT`, `PASS_EVIDENCE_REPORT`, `PERFORMANCE_METRIC_IR`, `PERF_ATTRIBUTION_GRAPH`, `ROOT_CAUSE_REPORT`, `REGRESSION_FINGERPRINT` |
+| `gpgpu-loop` | 根据 root cause 产生 architecture/contract/RTL/test-evidence patch plan，并路由重验证 | `ARCH_REWRITE_PLAN`, `REWRITE_DECISION_REPORT`, `REGRESSION_TRACKING_REPORT` |
 
 ## 当前设计原则
 
@@ -51,12 +51,12 @@
 
 | 旧来源 | 当前承接位置 |
 |---|---|
-| front-end / architecture synthesizer / mode controller / design intent lock | `gpgpu-architecture-generator/legacy_request_and_candidate_constraints.md` |
-| spec lock / canonical state / config truth / golden sim truth | `gpgpu-system-contract-golden-engine/contract_truth_and_state_model.md` |
-| assembler / disassembler / runtime artifact / loader validation | `gpgpu-toolchain-runtime-artifact-engine/` 和 shared toolchain tables |
-| artifact contract / memory path structure / deterministic transform / RTL module gates | `gpgpu-incremental-rtl-binding-engine/module_binding_rules.md` |
-| runtime validator / memory validation / implementation validator / causal trace analyzer | `gpgpu-simulation-performance-attribution-engine/legacy_validation_and_trace_constraints.md` |
-| closure refinement / synthesis closure / repair routing | `gpgpu-architecture-rewrite-loop-controller/legacy_closure_repair_constraints.md` |
+| front-end / architecture synthesizer / mode controller / design intent lock | `gpgpu-arch/legacy_request_and_candidate_constraints.md` |
+| spec lock / canonical state / config truth / golden sim truth | `gpgpu-golden/contract_truth_and_state_model.md` |
+| assembler / disassembler / runtime artifact / loader validation | `gpgpu-runtime/` 和 shared toolchain tables |
+| artifact contract / memory path structure / deterministic transform / RTL module gates | `gpgpu-rtl/module_binding_rules.md` |
+| runtime validator / memory validation / implementation validator / causal trace analyzer | `gpgpu-simppa/legacy_validation_and_trace_constraints.md` |
+| closure refinement / synthesis closure / repair routing | `gpgpu-loop/legacy_closure_repair_constraints.md` |
 
 ## 验证方式
 

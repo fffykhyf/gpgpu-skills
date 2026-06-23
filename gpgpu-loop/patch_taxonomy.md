@@ -28,19 +28,19 @@ The controller must not directly mutate IR. It emits patch plans that route back
 
 `TOOLCHAIN_PATCH` targets assembler/disassembler derivation, program image layout,
 loader contract binding, or toolchain smoke evidence. It routes to
-`gpgpu-toolchain-runtime-artifact-engine` and must not change
+`gpgpu-runtime` and must not change
 `SYSTEM_CONTRACT_IR` unless the root cause is reclassified as a
 `CONTRACT_PATCH`.
 
-`RUNTIME_PATCH` targets launch ABI implementation, argument buffer encoding,
-CSR start sequence, completion observation, and fault observation. It routes to
-`gpgpu-toolchain-runtime-artifact-engine`.
+`RUNTIME_PATCH` targets runtime argument buffer encoding, kernel launch
+sequence, CSR start/done sequencing, completion observation, and fault
+observation. It routes to `gpgpu-runtime`.
 
 `PASS_EVIDENCE_PATCH` targets missing pass evidence, unstable fingerprints,
 trace coverage gaps, or incomplete evidence collection. It routes to
-`gpgpu-simulation-performance-attribution-engine` and does not imply design
+`gpgpu-simppa` and does not imply design
 behavior is wrong.
 
 `GOLDEN_MODEL_PATCH` targets executable semantics or golden coverage derived
 from `SYSTEM_CONTRACT_IR`. It routes to
-`gpgpu-system-contract-golden-engine`.
+`gpgpu-golden`.

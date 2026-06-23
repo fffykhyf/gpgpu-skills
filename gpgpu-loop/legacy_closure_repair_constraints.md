@@ -3,7 +3,7 @@
 This reference migrates the useful constraints from the removed
 `gpgpu-closure-refinement-engine`, legacy `gpgpu-synthesis-closure-engine`, and
 their causal trace analysis behavior. The active owner is
-`gpgpu-architecture-rewrite-loop-controller`.
+`gpgpu-loop`.
 
 The controller emits `ARCH_REWRITE_PLAN`; it does not directly edit the
 architecture, contract, golden model, RTL map, or trace inputs.

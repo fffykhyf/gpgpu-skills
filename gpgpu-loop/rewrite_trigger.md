@@ -9,7 +9,7 @@ Rewrite triggers map root causes to patch classes and revalidation routes.
 | `CONTRACT_ROOT_CAUSE` | Contract Patch |
 | `GOLDEN_MODEL_ROOT_CAUSE` | Golden Model Patch or Contract Patch |
 | `TOOLCHAIN_ROOT_CAUSE` | Toolchain Patch |
-| `RUNTIME_LAUNCH_ROOT_CAUSE` | Runtime Patch or Toolchain Patch |
+| `RUNTIME_LAUNCH_ROOT_CAUSE` | Runtime Patch |
 | `RTL_FUNCTIONAL_ROOT_CAUSE` | RTL Patch |
 | `RTL_INTERFACE_ROOT_CAUSE` | RTL Patch |
 | `MEMORY_SYSTEM_ROOT_CAUSE` | RTL Patch or Architecture Patch |
@@ -22,6 +22,9 @@ Rewrite triggers map root causes to patch classes and revalidation routes.
 ## Gate
 
 Do not trigger a behavior-changing patch without `PERF_ATTRIBUTION_GRAPH`
-evidence and a `ROOT_CAUSE_REPORT`. A `PASS_EVIDENCE_PATCH` may be triggered by
-`PASS_EVIDENCE_REPORT` evidence gaps, trace coverage gaps, or unstable
-`REGRESSION_FINGERPRINT` evidence.
+evidence and a `ROOT_CAUSE_REPORT`. `PERFORMANCE_ARCH_ROOT_CAUSE` requires a
+bottleneck cycle window, counter evidence, contract paths, RTL module paths, and
+explicit rejected alternatives explaining why RTL, contract, runtime, or
+test-evidence patches are insufficient. A `PASS_EVIDENCE_PATCH` may be
+triggered by `PASS_EVIDENCE_REPORT` evidence gaps, trace coverage gaps, or
+unstable `REGRESSION_FINGERPRINT` evidence.

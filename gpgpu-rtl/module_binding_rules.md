@@ -1,7 +1,7 @@
 # Module Binding Rules
 
 This reference defines deterministic module-by-module RTL binding rules for
-`gpgpu-incremental-rtl-binding-engine`. It carries forward the active rules
+`gpgpu-rtl`. It carries forward the active rules
 migrated from `gpgpu-artifact-contract-engine`, structural memory-path pieces of
 `gpgpu-memory-subsystem`, runtime-interface checks, deterministic transform
 checks, config checks, and implementability gates.
@@ -121,7 +121,7 @@ interface field. Structural optimizations must not change contract semantics.
 ## Toolchain Runtime Binding Rules
 
 Program-image and launch artifacts are owned by
-`gpgpu-toolchain-runtime-artifact-engine`; RTL binding consumes them but does not
+`gpgpu-runtime`; RTL binding consumes them but does not
 redefine their format.
 
 RTL bindings must prove:

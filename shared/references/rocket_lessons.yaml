@@ -2,8 +2,8 @@ lessons:
   - lesson_id: ROCKET_CONFIG_001
     source_project: Rocket Chip
     applies_to:
-      - gpgpu-system-contract-golden-engine
-      - gpgpu-incremental-rtl-binding-engine
+      - gpgpu-golden
+      - gpgpu-rtl
     topic: config_binding
     principle: "Generator configuration needs explicit ownership and downstream consumer binding."
     do:

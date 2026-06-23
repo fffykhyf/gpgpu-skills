@@ -1,5 +1,5 @@
 ---
-name: gpgpu-architecture-generator
+name: gpgpu-arch
 description: Use when a GPGPU design request, complete spec request, patch request, or trace-driven redesign must become DESIGN_INTENT_IR, candidate ARCH_IR, and MICRO_CONSTRAINT_ESTIMATE_IR before any system contract, golden semantics, RTL binding, performance attribution, or rewrite patch is produced.
 ---
 
@@ -18,7 +18,7 @@ Upstream:
 - optional reference evidence from `reader`
 
 Downstream:
-- `gpgpu-system-contract-golden-engine`
+- `gpgpu-golden`
 
 ## Input IR
 

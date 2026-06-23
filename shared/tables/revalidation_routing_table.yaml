@@ -2,46 +2,45 @@ version: v5
 routes:
   ARCHITECTURE_PATCH:
     required_modules:
-      - gpgpu-architecture-generator
-      - gpgpu-system-contract-golden-engine
-      - gpgpu-toolchain-runtime-artifact-engine
-      - gpgpu-incremental-rtl-binding-engine
-      - gpgpu-simulation-performance-attribution-engine
+      - gpgpu-arch
+      - gpgpu-golden
+      - gpgpu-runtime
+      - gpgpu-rtl
+      - gpgpu-simppa
   CONTRACT_PATCH:
     required_modules:
-      - gpgpu-system-contract-golden-engine
-      - gpgpu-toolchain-runtime-artifact-engine
-      - gpgpu-incremental-rtl-binding-engine
-      - gpgpu-simulation-performance-attribution-engine
+      - gpgpu-golden
+      - gpgpu-runtime
+      - gpgpu-rtl
+      - gpgpu-simppa
   GOLDEN_MODEL_PATCH:
     required_modules:
-      - gpgpu-system-contract-golden-engine
-      - gpgpu-toolchain-runtime-artifact-engine
-      - gpgpu-simulation-performance-attribution-engine
+      - gpgpu-golden
+      - gpgpu-runtime
+      - gpgpu-simppa
     required_gates:
       - executable_semantics_check
       - golden_image_execution
       - rtl_golden_trace_diff
   TOOLCHAIN_PATCH:
     required_modules:
-      - gpgpu-toolchain-runtime-artifact-engine
-      - gpgpu-incremental-rtl-binding-engine
-      - gpgpu-simulation-performance-attribution-engine
+      - gpgpu-runtime
+      - gpgpu-rtl
+      - gpgpu-simppa
     required_gates:
       - regenerate_TOOLCHAIN_ARTIFACT_IR
       - assembler_smoke
       - disassembler_roundtrip
       - program_image_smoke
-      - runtime_launch_smoke
       - loader_contract_smoke
       - golden_image_execution
       - rtl_image_load_smoke
       - trace_diff
   RUNTIME_PATCH:
     required_modules:
-      - gpgpu-toolchain-runtime-artifact-engine
-      - gpgpu-incremental-rtl-binding-engine
-      - gpgpu-simulation-performance-attribution-engine
+      - gpgpu-runtime
+      - gpgpu-rtl
+      - gpgpu-simppa
     required_gates:
       - runtime_arg_encoding
       - csr_launch_sequence
@@ -49,21 +48,21 @@ routes:
       - rtl_golden_trace_diff
   RTL_PATCH:
     required_modules:
-      - gpgpu-incremental-rtl-binding-engine
-      - gpgpu-simulation-performance-attribution-engine
+      - gpgpu-rtl
+      - gpgpu-simppa
     required_gates:
       - module_partial_sim
       - rtl_golden_trace_diff
       - memory_dump_compare
   TEST_EVIDENCE_PATCH:
     required_modules:
-      - gpgpu-simulation-performance-attribution-engine
+      - gpgpu-simppa
     required_gates:
       - trace_completeness_check
       - coverage_check
   PASS_EVIDENCE_PATCH:
     required_modules:
-      - gpgpu-simulation-performance-attribution-engine
+      - gpgpu-simppa
     required_gates:
       - pass_evidence_report
       - regression_fingerprint
@@ -71,21 +70,21 @@ routes:
 root_cause_to_patch_route:
   TOOLCHAIN_ROOT_CAUSE:
     patch_type: TOOLCHAIN_PATCH
-    target_skill: gpgpu-toolchain-runtime-artifact-engine
-    revalidation: [assembler_smoke, disassembler_roundtrip, program_image_smoke, runtime_launch_smoke, rtl_first_fetch_decode, golden_image_execution, rtl_golden_trace_diff]
+    target_skill: gpgpu-runtime
+    revalidation: [assembler_smoke, disassembler_roundtrip, program_image_smoke, loader_contract_smoke, rtl_first_fetch_decode, golden_image_execution, rtl_golden_trace_diff]
   RUNTIME_LAUNCH_ROOT_CAUSE:
     patch_type: RUNTIME_PATCH
-    target_skill: gpgpu-toolchain-runtime-artifact-engine
+    target_skill: gpgpu-runtime
     revalidation: [runtime_arg_encoding, csr_launch_sequence, completion_fault_observation, rtl_golden_trace_diff]
   RTL_FUNCTIONAL_ROOT_CAUSE:
     patch_type: RTL_PATCH
-    target_skill: gpgpu-incremental-rtl-binding-engine
+    target_skill: gpgpu-rtl
     revalidation: [module_partial_sim, rtl_golden_trace_diff, memory_dump_compare]
   PERFORMANCE_ARCH_ROOT_CAUSE:
     patch_type: ARCHITECTURE_PATCH
-    target_skill: gpgpu-architecture-generator
-    revalidation: [arch_constraint_check, performance_metric_extract, perf_attribution_graph, ppa_estimate_if_available]
+    target_skill: gpgpu-arch
+    revalidation: [arch_constraint_check, performance_metric_extract, perf_attribution_graph, alternative_patch_rejection, ppa_estimate_if_available]
   TEST_EVIDENCE_ROOT_CAUSE:
     patch_type: TEST_EVIDENCE_PATCH
-    target_skill: gpgpu-simulation-performance-attribution-engine
+    target_skill: gpgpu-simppa
     revalidation: [trace_completeness_check, coverage_check]

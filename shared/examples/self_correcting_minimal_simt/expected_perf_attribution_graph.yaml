@@ -1,4 +1,5 @@
-graph_id: perf_graph_memory_imbalance_lsq
+graph_id: perf_graph_memory_replay_lsq
+graph_mode: PERFORMANCE_BOTTLENECK_GRAPH
 trace_window:
   start_cycle: 40
   end_cycle: 96
@@ -32,9 +33,17 @@ contract_path_index:
   contract_request_lifecycle: memory_model.request_lifecycle
 rtl_module_path_index:
   lsq_stage: load_store_queue
+toolchain_artifact_path_index: {}
 bottleneck_summary:
-  root_cause_class: MEMORY_IMBALANCE
+  root_cause_class: MEMORY_SYSTEM_ROOT_CAUSE
+  root_cause_subclass: MEMORY_REPLAY_OVERHEAD
   description: LSQ backpressure stalls warp scoreboard wakeup.
+  bottleneck_cycle_window:
+    start_cycle: 40
+    end_cycle: 96
+  counter_evidence:
+    replay_count: 7
+    scoreboard_wait_cycles: 42
 evidence_hashes:
   - hash_lsq_partial_trace
   - hash_normalized_trace

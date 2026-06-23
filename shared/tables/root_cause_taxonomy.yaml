@@ -83,7 +83,7 @@ root_causes:
       - MEMORY_BANDWIDTH_SATURATION
       - ISSUE_WIDTH_UNDERUTILIZATION
       - EXCESSIVE_DIVERGENCE_OVERHEAD
-    requires: [performance_metric_ref, perf_attribution_graph_ref]
+    requires: [performance_metric_ref, perf_attribution_graph_ref, contract_paths, rtl_module_paths, bottleneck_cycle_window, counter_evidence, alternative_patch_rejection]
     rewrite_candidate: ARCHITECTURE_PATCH
   TEST_EVIDENCE_ROOT_CAUSE:
     subclasses:

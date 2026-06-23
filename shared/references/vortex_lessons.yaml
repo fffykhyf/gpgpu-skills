@@ -2,8 +2,8 @@ lessons:
   - lesson_id: VORTEX_WARP_SCHED_001
     source_project: Vortex
     applies_to:
-      - gpgpu-system-contract-golden-engine
-      - gpgpu-simulation-performance-attribution-engine
+      - gpgpu-golden
+      - gpgpu-simppa
     topic: warp_scheduler
     principle: "Warp scheduling policy must be represented as architectural state or explicit implementation policy."
     do:

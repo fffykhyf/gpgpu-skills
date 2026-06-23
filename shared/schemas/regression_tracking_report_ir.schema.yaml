@@ -8,6 +8,12 @@ required:
   - reappeared_in_run
   - blocked_module
   - next_required_evidence
+  - same_patch_attempt_count
+  - last_patch_type
+  - last_owner_module
+  - worsened_gates
+  - rollback_required
+  - escalation_policy
 properties:
   failure_signature: string
   previous_verdict: string
@@ -15,3 +21,9 @@ properties:
   reappeared_in_run: boolean
   blocked_module: string
   next_required_evidence: list
+  same_patch_attempt_count: integer
+  last_patch_type: string
+  last_owner_module: string
+  worsened_gates: list
+  rollback_required: boolean
+  escalation_policy: map

@@ -13,12 +13,12 @@ This repository now defines a self-correcting GPGPU design system.
 
 ## Current Top-Level Skills
 
-1. `gpgpu-architecture-generator`
-2. `gpgpu-system-contract-golden-engine`
-3. `gpgpu-toolchain-runtime-artifact-engine`
-4. `gpgpu-incremental-rtl-binding-engine`
-5. `gpgpu-simulation-performance-attribution-engine`
-6. `gpgpu-architecture-rewrite-loop-controller`
+1. `gpgpu-arch`
+2. `gpgpu-golden`
+3. `gpgpu-runtime`
+4. `gpgpu-rtl`
+5. `gpgpu-simppa`
+6. `gpgpu-loop`
 
 ## Flow
 

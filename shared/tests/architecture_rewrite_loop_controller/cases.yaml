@@ -1,5 +1,5 @@
 cases:
-  - case_id: rewrite_loop_routes_memory_imbalance_to_patch
+  - case_id: rewrite_loop_routes_memory_system_replay_to_patch
     input_artifacts:
       - shared/examples/self_correcting_minimal_simt/expected_arch_ir.yaml
       - shared/examples/self_correcting_minimal_simt/expected_perf_attribution_graph.yaml
@@ -9,8 +9,10 @@ cases:
       - REGRESSION_TRACKING_REPORT
     expected_failure_mode: null
     required_evidence:
-      - MEMORY_IMBALANCE
+      - MEMORY_SYSTEM_ROOT_CAUSE
+      - MEMORY_REPLAY_OVERHEAD
       - patch_type
       - required_revalidation_gates
+      - rejected_alternatives
     forbidden_outputs:
       - direct_ir_mutation

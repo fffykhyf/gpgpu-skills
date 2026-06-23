@@ -7,7 +7,7 @@ triggers:
   TOOLCHAIN_ROOT_CAUSE:
     patch_options: [TOOLCHAIN_PATCH]
   RUNTIME_LAUNCH_ROOT_CAUSE:
-    patch_options: [RUNTIME_PATCH, TOOLCHAIN_PATCH]
+    patch_options: [RUNTIME_PATCH]
   RTL_FUNCTIONAL_ROOT_CAUSE:
     patch_options: [RTL_PATCH]
   RTL_INTERFACE_ROOT_CAUSE:
@@ -40,3 +40,5 @@ rewrite_blockers:
   - missing_owner_skill
   - missing_revalidation_route
   - ambiguous_root_cause_without_evidence_patch
+  - architecture_patch_without_alternative_rejection
+  - performance_arch_root_cause_without_counter_evidence

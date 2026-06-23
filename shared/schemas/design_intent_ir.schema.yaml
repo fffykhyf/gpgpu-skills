@@ -5,19 +5,34 @@ required: [schema_version, intent_id, objective, non_goals, workload_profile, ta
 forbidden_fields: [warp_size, sm_count, cache_policy, scheduler_policy, isa_encoding, memory_hierarchy, register_file_size, rtl_pipeline]
 properties:
   objective: {type: string, min_length: 1}
-  non_goals: {type: list[string]}
+  non_goals:
+    type: list
+    item_type: string
   workload_profile: {type: object}
   target_platform: {type: enum, values: [TEACHING, FPGA_SMALL, ASIC_PROTOTYPE, SIMULATION_ONLY]}
-  hard_constraints: {type: list[constraint]}
-  soft_constraints: {type: list[constraint]}
-  required_features: {type: list[string]}
-  optional_features: {type: list[string]}
-  validation_target: {type: list[string]}
+  hard_constraints:
+    type: list
+    item_type: constraint
+  soft_constraints:
+    type: list
+    item_type: constraint
+  required_features:
+    type: list
+    item_type: string
+  optional_features:
+    type: list
+    item_type: string
+  validation_target:
+    type: list
+    item_type: string
   prototype_kind: {type: enum, values: [DOCUMENT_ONLY, VERTICAL_SLICE_PROTOTYPE]}
   prototype_credibility_target:
-    type: list[string]
+    type: list
+    item_type: string
     values: [compile_kernel_to_program_image, rtl_sim_smoke_test, memory_dump_golden_check, trace_diff_debug]
-  provenance: {type: list[FIELD_PROVENANCE]}
+  provenance:
+    type: list
+    item_type: FIELD_PROVENANCE
 failure_rules:
   forbidden_architecture_field: FORBIDDEN_ARCHITECTURE_FIELD
   missing_required_field: INSUFFICIENT_REQUEST

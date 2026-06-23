@@ -4,18 +4,20 @@
 from pathlib import Path
 from typing import Dict, List
 
+import yaml
+
 
 ROOT = Path(__file__).resolve().parents[2]
 
 DESCRIPTION_CATALOG = "file_descriptions.zh.md"
 
 TOP_LEVEL_SKILLS = [
-    "gpgpu-architecture-generator",
-    "gpgpu-system-contract-golden-engine",
-    "gpgpu-toolchain-runtime-artifact-engine",
-    "gpgpu-incremental-rtl-binding-engine",
-    "gpgpu-simulation-performance-attribution-engine",
-    "gpgpu-architecture-rewrite-loop-controller",
+    "gpgpu-arch",
+    "gpgpu-golden",
+    "gpgpu-runtime",
+    "gpgpu-rtl",
+    "gpgpu-simppa",
+    "gpgpu-loop",
 ]
 
 REMOVED_TOP_LEVEL_SKILLS = [
@@ -206,31 +208,31 @@ REFERENCE_LESSONS = [
 ]
 
 TOP_LEVEL_REQUIRED_TEXT: Dict[str, List[str]] = {
-    "gpgpu-architecture-generator/SKILL.md": [
+    "gpgpu-arch/SKILL.md": [
         "MICRO_CONSTRAINT_ESTIMATE_IR",
         "ARCH_IR is a candidate graph",
         "must not emit system contract truth",
     ],
-    "gpgpu-system-contract-golden-engine/SKILL.md": [
+    "gpgpu-golden/SKILL.md": [
         "GOLDEN_CONTRACT_MODEL",
         "executable reference semantics",
         "must not define independent ISA",
         "instruction encoding truth for assembler/disassembler derivation",
     ],
-    "gpgpu-toolchain-runtime-artifact-engine/SKILL.md": [
+    "gpgpu-runtime/SKILL.md": [
         "TOOLCHAIN_ARTIFACT_IR",
         "PROGRAM_IMAGE_IR",
         "must not define independent ISA",
         "SOURCE_OF_TRUTH_DRIFT",
     ],
-    "gpgpu-incremental-rtl-binding-engine/SKILL.md": [
+    "gpgpu-rtl/SKILL.md": [
         "INCREMENTAL_RTL_MAP",
         "TOOLCHAIN_ARTIFACT_IR",
         "module by module",
         "Interface Contract Checker",
         "RTL Partial Simulator",
     ],
-    "gpgpu-simulation-performance-attribution-engine/SKILL.md": [
+    "gpgpu-simppa/SKILL.md": [
         "PERF_ATTRIBUTION_GRAPH",
         "PASS_EVIDENCE_REPORT",
         "CORRECTNESS_GATE_REPORT",
@@ -240,7 +242,7 @@ TOP_LEVEL_REQUIRED_TEXT: Dict[str, List[str]] = {
         "contract path",
         "RTL module",
     ],
-    "gpgpu-architecture-rewrite-loop-controller/SKILL.md": [
+    "gpgpu-loop/SKILL.md": [
         "ARCH_REWRITE_PLAN",
         "Architecture Patch",
         "Contract Patch",
@@ -250,28 +252,28 @@ TOP_LEVEL_REQUIRED_TEXT: Dict[str, List[str]] = {
 }
 
 MIGRATED_REQUIRED_TEXT: Dict[str, List[str]] = {
-    "gpgpu-architecture-generator/legacy_request_and_candidate_constraints.md": [
+    "gpgpu-arch/legacy_request_and_candidate_constraints.md": [
         "gpgpu-front-end",
         "gpgpu-architecture-synthesizer",
         "DESIGN_INTENT_IR",
         "ARCH_IR",
         "MICRO_CONSTRAINT_ESTIMATE_IR",
     ],
-    "gpgpu-system-contract-golden-engine/contract_truth_and_state_model.md": [
+    "gpgpu-golden/contract_truth_and_state_model.md": [
         "gpgpu-spec-lock",
         "gpgpu-canonical-state-engine",
         "SYSTEM_CONTRACT_IR",
         "GOLDEN_CONTRACT_MODEL",
         "pc_table",
     ],
-    "gpgpu-incremental-rtl-binding-engine/module_binding_rules.md": [
+    "gpgpu-rtl/module_binding_rules.md": [
         "gpgpu-artifact-contract-engine",
         "gpgpu-memory-subsystem",
         "INCREMENTAL_RTL_MAP",
         "load/store queue",
         "Interface Contract Checker",
     ],
-    "gpgpu-simulation-performance-attribution-engine/legacy_validation_and_trace_constraints.md": [
+    "gpgpu-simppa/legacy_validation_and_trace_constraints.md": [
         "gpgpu-runtime-validator",
         "gpgpu-implementation-validator",
         "NORMALIZED_TRACE_IR",
@@ -279,7 +281,7 @@ MIGRATED_REQUIRED_TEXT: Dict[str, List[str]] = {
         "pass evidence",
         "first divergence",
     ],
-    "gpgpu-architecture-rewrite-loop-controller/legacy_closure_repair_constraints.md": [
+    "gpgpu-loop/legacy_closure_repair_constraints.md": [
         "gpgpu-closure-refinement-engine",
         "ARCH_REWRITE_PLAN",
         "Architecture Patch",
@@ -289,36 +291,36 @@ MIGRATED_REQUIRED_TEXT: Dict[str, List[str]] = {
 }
 
 REFERENCE_FILES = [
-    "gpgpu-architecture-generator/legacy_request_and_candidate_constraints.md",
-    "gpgpu-system-contract-golden-engine/contract_truth_and_state_model.md",
-    "gpgpu-system-contract-golden-engine/executable_semantics_rules.md",
-    "gpgpu-system-contract-golden-engine/golden_model_coverage_and_report.md",
-    "gpgpu-toolchain-runtime-artifact-engine/isa_table_derivation.md",
-    "gpgpu-toolchain-runtime-artifact-engine/assembly_ir_rules.md",
-    "gpgpu-toolchain-runtime-artifact-engine/assembler_disassembler_roundtrip.md",
-    "gpgpu-toolchain-runtime-artifact-engine/program_image_and_loader_contract.md",
-    "gpgpu-toolchain-runtime-artifact-engine/runtime_launch_artifact_rules.md",
-    "gpgpu-toolchain-runtime-artifact-engine/toolchain_smoke_gates.md",
-    "gpgpu-incremental-rtl-binding-engine/module_binding_rules.md",
-    "gpgpu-incremental-rtl-binding-engine/interface_binding_and_checker.md",
-    "gpgpu-incremental-rtl-binding-engine/partial_simulation_gates.md",
-    "gpgpu-incremental-rtl-binding-engine/rtl_module_catalog.md",
-    "gpgpu-simulation-performance-attribution-engine/trace_ingestion_and_normalization.md",
-    "gpgpu-simulation-performance-attribution-engine/correctness_gate_and_mode_selection.md",
-    "gpgpu-simulation-performance-attribution-engine/differential_correctness_engine.md",
-    "gpgpu-simulation-performance-attribution-engine/pass_evidence_engine.md",
-    "gpgpu-simulation-performance-attribution-engine/performance_metric_extractor.md",
-    "gpgpu-simulation-performance-attribution-engine/bottleneck_graph_builder.md",
-    "gpgpu-simulation-performance-attribution-engine/root_cause_engine.md",
-    "gpgpu-simulation-performance-attribution-engine/minimal_trace_window_rules.md",
-    "gpgpu-simulation-performance-attribution-engine/toolchain_trace_attribution.md",
-    "gpgpu-simulation-performance-attribution-engine/report_generation_rules.md",
-    "gpgpu-simulation-performance-attribution-engine/legacy_validation_and_trace_constraints.md",
-    "gpgpu-architecture-rewrite-loop-controller/rewrite_trigger.md",
-    "gpgpu-architecture-rewrite-loop-controller/patch_taxonomy.md",
-    "gpgpu-architecture-rewrite-loop-controller/regression_tracking.md",
-    "gpgpu-architecture-rewrite-loop-controller/revalidation_routing.md",
-    "gpgpu-architecture-rewrite-loop-controller/legacy_closure_repair_constraints.md",
+    "gpgpu-arch/legacy_request_and_candidate_constraints.md",
+    "gpgpu-golden/contract_truth_and_state_model.md",
+    "gpgpu-golden/executable_semantics_rules.md",
+    "gpgpu-golden/golden_model_coverage_and_report.md",
+    "gpgpu-runtime/isa_table_derivation.md",
+    "gpgpu-runtime/assembly_ir_rules.md",
+    "gpgpu-runtime/assembler_disassembler_roundtrip.md",
+    "gpgpu-runtime/program_image_and_loader_contract.md",
+    "gpgpu-runtime/runtime_launch_artifact_rules.md",
+    "gpgpu-runtime/toolchain_smoke_gates.md",
+    "gpgpu-rtl/module_binding_rules.md",
+    "gpgpu-rtl/interface_binding_and_checker.md",
+    "gpgpu-rtl/partial_simulation_gates.md",
+    "gpgpu-rtl/rtl_module_catalog.md",
+    "gpgpu-simppa/trace_ingestion_and_normalization.md",
+    "gpgpu-simppa/correctness_gate_and_mode_selection.md",
+    "gpgpu-simppa/differential_correctness_engine.md",
+    "gpgpu-simppa/pass_evidence_engine.md",
+    "gpgpu-simppa/performance_metric_extractor.md",
+    "gpgpu-simppa/bottleneck_graph_builder.md",
+    "gpgpu-simppa/root_cause_engine.md",
+    "gpgpu-simppa/minimal_trace_window_rules.md",
+    "gpgpu-simppa/toolchain_trace_attribution.md",
+    "gpgpu-simppa/report_generation_rules.md",
+    "gpgpu-simppa/legacy_validation_and_trace_constraints.md",
+    "gpgpu-loop/rewrite_trigger.md",
+    "gpgpu-loop/patch_taxonomy.md",
+    "gpgpu-loop/regression_tracking.md",
+    "gpgpu-loop/revalidation_routing.md",
+    "gpgpu-loop/legacy_closure_repair_constraints.md",
 ]
 
 
@@ -404,6 +406,272 @@ def require_file_description_catalog(failures: List[str]) -> None:
             failures.append(f"missing concrete example in file description: {rel_path}")
 
 
+def load_yaml(rel_path: str, failures: List[str]):
+    path = ROOT / rel_path
+    require(path, failures)
+    if not path.exists():
+        return {}
+    try:
+        return yaml.safe_load(path.read_text(encoding="utf-8")) or {}
+    except yaml.YAMLError as exc:
+        failures.append(f"invalid yaml in {rel_path}: {exc}")
+        return {}
+
+
+def require_shared_yaml_parse(failures: List[str]) -> None:
+    for path in sorted((ROOT / "shared").rglob("*.yaml")):
+        try:
+            yaml.safe_load(path.read_text(encoding="utf-8"))
+        except yaml.YAMLError as exc:
+            failures.append(f"invalid yaml in {path.relative_to(ROOT)}: {exc}")
+
+
+def require_all_present(required_fields: List[str], data: dict, rel_path: str, failures: List[str]) -> None:
+    for field in required_fields:
+        if field not in data:
+            failures.append(f"{rel_path} missing schema required field {field!r}")
+
+
+def require_asset_semantics(failures: List[str]) -> None:
+    root_cause_taxonomy = load_yaml("shared/tables/root_cause_taxonomy.yaml", failures)
+    root_causes = set((root_cause_taxonomy.get("root_causes") or {}).keys())
+
+    rewrite_trigger_table = load_yaml("shared/tables/rewrite_trigger_table.yaml", failures)
+    rewrite_triggers = set((rewrite_trigger_table.get("triggers") or {}).keys())
+
+    patch_taxonomy = load_yaml("shared/tables/patch_taxonomy_table.yaml", failures)
+    patch_classes = patch_taxonomy.get("patch_classes") or {}
+    patch_types = set(patch_classes.keys())
+
+    root_cause_schema = load_yaml("shared/schemas/root_cause_report_ir.schema.yaml", failures)
+    schema_root_causes = set(root_cause_schema.get("classes") or [])
+    if schema_root_causes and schema_root_causes != root_causes:
+        failures.append(
+            "root_cause_report_ir.schema.yaml classes must match root_cause_taxonomy.yaml"
+        )
+
+    for root_cause in sorted(rewrite_triggers - root_causes):
+        failures.append(f"rewrite trigger has unknown root cause {root_cause!r}")
+
+    for root_cause, rule in (rewrite_trigger_table.get("triggers") or {}).items():
+        for patch_type in rule.get("patch_options") or []:
+            if patch_type not in patch_types:
+                failures.append(
+                    f"rewrite trigger {root_cause!r} references unknown patch type {patch_type!r}"
+                )
+
+    for root_cause, rule in (root_cause_taxonomy.get("root_causes") or {}).items():
+        patch_type = rule.get("rewrite_candidate")
+        if patch_type and patch_type not in patch_types:
+            failures.append(
+                f"root cause {root_cause!r} references unknown rewrite_candidate {patch_type!r}"
+            )
+
+    perf_graph = load_yaml(
+        "shared/examples/self_correcting_minimal_simt/expected_perf_attribution_graph.yaml",
+        failures,
+    )
+    perf_graph_schema = load_yaml("shared/schemas/perf_attribution_graph.schema.yaml", failures)
+    require_all_present(
+        perf_graph_schema.get("required") or [],
+        perf_graph,
+        "shared/examples/self_correcting_minimal_simt/expected_perf_attribution_graph.yaml",
+        failures,
+    )
+    graph_root_cause = (
+        (perf_graph.get("bottleneck_summary") or {}).get("root_cause_class")
+    )
+    graph_root_subclass = (
+        (perf_graph.get("bottleneck_summary") or {}).get("root_cause_subclass")
+    )
+    if graph_root_cause and graph_root_cause not in root_causes:
+        failures.append(
+            "expected_perf_attribution_graph.yaml uses unknown root_cause_class "
+            f"{graph_root_cause!r}"
+        )
+    if graph_root_cause and graph_root_subclass:
+        subclasses = (
+            (root_cause_taxonomy.get("root_causes") or {})
+            .get(graph_root_cause, {})
+            .get("subclasses")
+            or []
+        )
+        if graph_root_subclass not in subclasses:
+            failures.append(
+                "expected_perf_attribution_graph.yaml uses unknown root_cause_subclass "
+                f"{graph_root_cause}/{graph_root_subclass}"
+            )
+
+    rewrite_plan = load_yaml(
+        "shared/examples/self_correcting_minimal_simt/expected_arch_rewrite_plan.yaml",
+        failures,
+    )
+    arch_rewrite_schema = load_yaml("shared/schemas/arch_rewrite_plan.schema.yaml", failures)
+    require_all_present(
+        arch_rewrite_schema.get("required") or [],
+        rewrite_plan,
+        "shared/examples/self_correcting_minimal_simt/expected_arch_rewrite_plan.yaml",
+        failures,
+    )
+    trigger_root_cause = rewrite_plan.get("trigger_root_cause")
+    trigger_root_subclass = rewrite_plan.get("trigger_root_cause_subclass")
+    if trigger_root_cause and trigger_root_cause not in root_causes:
+        failures.append(
+            "expected_arch_rewrite_plan.yaml uses unknown trigger_root_cause "
+            f"{trigger_root_cause!r}"
+        )
+    if trigger_root_cause and trigger_root_cause not in rewrite_triggers:
+        failures.append(
+            "expected_arch_rewrite_plan.yaml trigger_root_cause has no rewrite trigger "
+            f"{trigger_root_cause!r}"
+        )
+    if trigger_root_cause and trigger_root_subclass:
+        subclasses = (
+            (root_cause_taxonomy.get("root_causes") or {})
+            .get(trigger_root_cause, {})
+            .get("subclasses")
+            or []
+        )
+        if trigger_root_subclass not in subclasses:
+            failures.append(
+                "expected_arch_rewrite_plan.yaml uses unknown trigger_root_cause_subclass "
+                f"{trigger_root_cause}/{trigger_root_subclass}"
+            )
+    plan_patch_type = rewrite_plan.get("patch_type")
+    if plan_patch_type and plan_patch_type not in patch_types:
+        failures.append(
+            f"expected_arch_rewrite_plan.yaml uses unknown patch_type {plan_patch_type!r}"
+        )
+
+    stale_root_cause = "MEMORY_IMBALANCE"
+    stale_scan_paths = [
+        "shared/examples/self_correcting_minimal_simt/expected_perf_attribution_graph.yaml",
+        "shared/examples/self_correcting_minimal_simt/expected_arch_rewrite_plan.yaml",
+        "shared/tests/architecture_rewrite_loop_controller/cases.yaml",
+        "file_descriptions.zh.md",
+    ]
+    for rel_path in stale_scan_paths:
+        path = ROOT / rel_path
+        if path.exists() and stale_root_cause in path.read_text(encoding="utf-8"):
+            failures.append(f"stale root cause {stale_root_cause!r} in {rel_path}")
+
+    toolchain_examples = set((patch_classes.get("TOOLCHAIN_PATCH") or {}).get("examples") or [])
+    runtime_forbidden = {
+        "runtime_arg_encoding_fix",
+        "runtime_arg_buffer_fix",
+        "csr_launch_sequence_fix",
+        "completion_fault_observation_fix",
+    }
+    for example in sorted(toolchain_examples & runtime_forbidden):
+        failures.append(
+            "TOOLCHAIN_PATCH example crosses runtime boundary: "
+            f"{example}"
+        )
+
+    runtime_patch = patch_classes.get("RUNTIME_PATCH") or {}
+    runtime_examples = set(runtime_patch.get("examples") or [])
+    for required_example in [
+        "runtime_arg_buffer_fix",
+        "csr_launch_sequence_fix",
+        "completion_fault_observation_fix",
+    ]:
+        if required_example not in runtime_examples:
+            failures.append(f"RUNTIME_PATCH missing example {required_example!r}")
+
+    runtime_trigger = (rewrite_trigger_table.get("triggers") or {}).get(
+        "RUNTIME_LAUNCH_ROOT_CAUSE"
+    ) or {}
+    if runtime_trigger.get("patch_options") != ["RUNTIME_PATCH"]:
+        failures.append(
+            "RUNTIME_LAUNCH_ROOT_CAUSE must route only to RUNTIME_PATCH"
+        )
+
+    revalidation_routing = load_yaml("shared/tables/revalidation_routing_table.yaml", failures)
+    toolchain_route = (
+        (revalidation_routing.get("routes") or {}).get("TOOLCHAIN_PATCH") or {}
+    )
+    if "runtime_launch_smoke" in (toolchain_route.get("required_gates") or []):
+        failures.append("TOOLCHAIN_PATCH route must not require runtime_launch_smoke")
+    toolchain_root_route = (
+        (revalidation_routing.get("root_cause_to_patch_route") or {})
+        .get("TOOLCHAIN_ROOT_CAUSE")
+        or {}
+    )
+    if "runtime_launch_smoke" in (toolchain_root_route.get("revalidation") or []):
+        failures.append(
+            "TOOLCHAIN_ROOT_CAUSE route must not require runtime_launch_smoke"
+        )
+    if plan_patch_type:
+        patch_route = (revalidation_routing.get("routes") or {}).get(plan_patch_type) or {}
+        route_gates = set(patch_route.get("required_gates") or [])
+        for gate in rewrite_plan.get("required_revalidation_gates") or []:
+            if gate not in route_gates:
+                failures.append(
+                    "expected_arch_rewrite_plan.yaml required_revalidation_gates "
+                    f"contains gate not in {plan_patch_type} route: {gate!r}"
+                )
+
+    for root_cause, route in (revalidation_routing.get("root_cause_to_patch_route") or {}).items():
+        if root_cause not in root_causes:
+            failures.append(
+                f"revalidation route has unknown root cause {root_cause!r}"
+            )
+        patch_type = route.get("patch_type")
+        if patch_type and patch_type not in patch_types:
+            failures.append(
+                f"revalidation route {root_cause!r} references unknown patch type {patch_type!r}"
+            )
+
+    perf_arch_requires = (
+        (root_cause_taxonomy.get("root_causes") or {})
+        .get("PERFORMANCE_ARCH_ROOT_CAUSE", {})
+        .get("requires")
+        or []
+    )
+    for required_evidence in [
+        "performance_metric_ref",
+        "perf_attribution_graph_ref",
+        "contract_paths",
+        "rtl_module_paths",
+        "bottleneck_cycle_window",
+        "counter_evidence",
+        "alternative_patch_rejection",
+    ]:
+        if required_evidence not in perf_arch_requires:
+            failures.append(
+                "PERFORMANCE_ARCH_ROOT_CAUSE missing required evidence "
+                f"{required_evidence!r}"
+            )
+
+    arch_required = set(arch_rewrite_schema.get("required") or [])
+    if "rejected_alternatives" not in arch_required:
+        failures.append("arch_rewrite_plan.schema.yaml must require rejected_alternatives")
+    if "rejected_alternatives" not in rewrite_plan:
+        failures.append("expected_arch_rewrite_plan.yaml missing rejected_alternatives")
+
+    regression_schema = load_yaml(
+        "shared/schemas/regression_tracking_report_ir.schema.yaml",
+        failures,
+    )
+    regression_required = set(regression_schema.get("required") or [])
+    for field in [
+        "same_patch_attempt_count",
+        "last_patch_type",
+        "last_owner_module",
+        "worsened_gates",
+        "rollback_required",
+        "escalation_policy",
+    ]:
+        if field not in regression_required:
+            failures.append(
+                "regression_tracking_report_ir.schema.yaml missing required field "
+                f"{field!r}"
+            )
+
+    if "PASS_EVIDENCE_PATCH" not in patch_classes:
+        failures.append("PASS_EVIDENCE_PATCH must remain in patch taxonomy")
+
+
 def main() -> int:
     failures: List[str] = []
 
@@ -470,6 +738,8 @@ def main() -> int:
     for lesson in REFERENCE_LESSONS:
         require(ROOT / "shared" / "references" / lesson, failures)
 
+    require_shared_yaml_parse(failures)
+
     require_text(
         ROOT / "README.md",
         [
@@ -514,7 +784,7 @@ def main() -> int:
         [
             "# GPGPU Skill v5 总结",
             "六个核心 skill",
-            "gpgpu-toolchain-runtime-artifact-engine",
+            "gpgpu-runtime",
             "file_descriptions.zh.md",
             "self-correcting GPGPU design system",
         ],
@@ -526,6 +796,8 @@ def main() -> int:
 
     for rel_path, needles in MIGRATED_REQUIRED_TEXT.items():
         require_text(ROOT / rel_path, needles, failures)
+
+    require_asset_semantics(failures)
 
     if failures:
         print("GPGPU skill v5 self-correcting asset contract failed:")

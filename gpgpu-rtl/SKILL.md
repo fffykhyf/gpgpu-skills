@@ -1,5 +1,5 @@
 ---
-name: gpgpu-incremental-rtl-binding-engine
+name: gpgpu-rtl
 description: Use when SYSTEM_CONTRACT_IR, GOLDEN_CONTRACT_MODEL, and toolchain runtime artifacts must be bound module by module into INCREMENTAL_RTL_MAP with interface contract checking, loader binding, and RTL partial simulation evidence.
 ---
 
@@ -12,12 +12,12 @@ This skill lowers the system contract into modular RTL bindings. It replaces glo
 ## Position in Flow
 
 Upstream:
-- `gpgpu-system-contract-golden-engine`
-- `gpgpu-toolchain-runtime-artifact-engine`
+- `gpgpu-golden`
+- `gpgpu-runtime`
 
 Downstream:
-- `gpgpu-simulation-performance-attribution-engine`
-- `gpgpu-architecture-rewrite-loop-controller`
+- `gpgpu-simppa`
+- `gpgpu-loop`
 
 ## Input IR
 
