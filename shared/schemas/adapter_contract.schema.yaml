@@ -1,0 +1,49 @@
+schema: adapter_contract
+version: v5
+type: object
+required:
+  - adapter_id
+  - adapter_type
+  - input_edge_ref
+  - output_edge_ref
+  - translated_fields
+  - preconditions
+  - state
+  - monitors
+  - failure_modes
+properties:
+  adapter_id: string
+  adapter_type:
+    type: enum
+    values: [width, fragment, source_id, atomic, protocol_bridge, buffer]
+  input_edge_ref: string
+  output_edge_ref: string
+  translated_fields:
+    type: list
+    item_schema: TRANSLATED_FIELD
+  preconditions: list
+  state: map
+  monitors: list
+  failure_modes: list
+definitions:
+  TRANSLATED_FIELD:
+    type: object
+    required: [field, input_semantics, output_semantics, lossless]
+    properties:
+      field: string
+      input_semantics: string
+      output_semantics: string
+      lossless: bool
+rules:
+  - Width mismatch requires a width adapter with response-shape bookkeeping.
+  - Burst or transfer-size mismatch requires a fragment adapter with reassembly evidence.
+  - Source-id compression requires explicit remap state and inflight guards.
+  - Atomic exposure requires native support or an atomic adapter with read-modify-write preconditions.
+  - Protocol bridge adapters must document ID, error, burst, and ordering translation.
+failure_modes:
+  - ADAPTER_CONTRACT_MISSING
+  - WIDTH_ADAPTER_MISSING
+  - FRAGMENT_ADAPTER_MISSING
+  - SOURCE_ID_ADAPTER_MISSING
+  - ATOMIC_ADAPTER_UNSAFE
+  - PROTOCOL_BRIDGE_UNSAFE

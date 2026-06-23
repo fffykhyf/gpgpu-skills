@@ -1,14 +1,206 @@
 lessons:
-  - lesson_id: ROCKET_CONFIG_001
+  - lesson_id: ROCKET_CONFIG_FRAGMENT_STACK
     source_project: Rocket Chip
     applies_to:
-      - gpgpu-golden
-      - gpgpu-rtl
-    topic: config_binding
-    principle: "Generator configuration needs explicit ownership and downstream consumer binding."
+      - gpgpu-arch
+      - gpgpu-loop
+    topic: config_stack
+    principle: "Generator variants should be built from an ordered config stack with explicit override order and field ownership."
     do:
-      - "Bind behavior through SYSTEM_CONTRACT_IR, GOLDEN_CONTRACT_MODEL, and explicit contract tables."
+      - "Emit CONFIG_STACK_IR with named config, fragment order, root defaults, owner policy, and shadowing rules."
+      - "Record highest-priority overrides first and base defaults last."
+      - "Require fragments that touch structured records to transform prior values instead of replacing unrelated fields."
     do_not:
-      - "Let a downstream implementation invent behavior not visible to validation."
+      - "Do not let hidden side files override generator truth."
+      - "Do not let multiple fragments silently own the same leaf field."
+      - "Do not copy Rocket scalar pipeline parameters as GPGPU execution parameters."
     evidence_anchor:
-      - "ref/skillref/rocket chip.md"
+      - "shared/references/rocket/config_fragment_lessons.md"
+      - "shared/references/rocket/raw/rocket_config_fragment_lessons.md"
+
+  - lesson_id: ROCKET_RESOLVED_CONFIG_COLLATERAL
+    source_project: Rocket Chip
+    applies_to:
+      - gpgpu-arch
+      - gpgpu-runtime
+      - gpgpu-rtl
+      - gpgpu-simppa
+    topic: resolved_config
+    principle: "Resolved configuration is a generator artifact consumed by architecture, runtime, RTL, tests, traces, and collateral."
+    do:
+      - "Emit RESOLVED_CONFIG_IR with every raw key, derived field, owner, source fragment, consumer, invariant, and collateral effect."
+      - "Make runtime-visible IO, address maps, trace schema, and test selection system-visible when a config field affects them."
+      - "Derive global widths, IDs, line sizes, beat bytes, bank counts, and queue depths once."
+    do_not:
+      - "Do not recompute global geometry independently in local modules."
+      - "Do not maintain separate verification spreadsheets or MMIO maps that shadow the config graph."
+      - "Do not treat late simulation failure as a substitute for generator-time invariant checks."
+    evidence_anchor:
+      - "shared/references/rocket/config_fragment_lessons.md"
+      - "shared/references/rocket/raw/rocket_config_fragment_lessons.md"
+
+  - lesson_id: ROCKET_SYSTEM_COMPOSITION_ROOT
+    source_project: Rocket Chip
+    applies_to:
+      - gpgpu-arch
+      - gpgpu-interconnect
+      - gpgpu-runtime
+      - gpgpu-rtl
+    topic: system_composition
+    principle: "A subsystem composition root should own planes, attachment surfaces, stable instance IDs, and generated collateral."
+    do:
+      - "Emit SYSTEM_COMPOSITION_IR after RESOLVED_CONFIG_IR and before ARCH_IR."
+      - "Separate compute, memory/data, control/MMIO, debug/trace, host-frontdoor, and interrupt/event planes."
+      - "Instantiate SMs or clusters from attach records with stable IDs, crossing policy, trace policy, and harness effects."
+    do_not:
+      - "Do not compose buses or periphery from multiple unrelated tops with duplicated address metadata."
+      - "Do not bury clock/reset/interrupt crossings inside schedulers, LSUs, or scalar pipeline analogues."
+      - "Do not copy Rocket CPU tile internals into the GPGPU pipeline."
+    evidence_anchor:
+      - "shared/references/rocket/soc_composition.md"
+      - "shared/references/rocket/raw/rocket_soc_composition_to_gpgpu_system.md"
+
+  - lesson_id: ROCKET_NEGOTIATED_INTERFACE_EDGE
+    source_project: Rocket Chip
+    applies_to:
+      - gpgpu-interconnect
+      - gpgpu-rtl
+      - gpgpu-memory
+      - gpgpu-atomic-sync
+    topic: negotiated_interface
+    principle: "Concrete wires are legal only after both sides of an interface have negotiated capabilities into an edge."
+    do:
+      - "Emit NEGOTIATED_INTERFACE_IR for SM/L1/NoC/L2/DRAM/host/runtime/debug boundaries before RTL binding."
+      - "Derive address width, data width, source ID width, sink ID width, transfer size, masks, beat counts, ordering scope, error policy, and response shape from the negotiated edge."
+      - "Reject raw wire binding unless it references a negotiated edge."
+    do_not:
+      - "Do not infer legality from one endpoint alone."
+      - "Do not direct-wire ready/valid channels and retrofit protocol metadata later."
+      - "Do not make TileLink mandatory; use the negotiated-edge abstraction with any selected protocol family."
+    evidence_anchor:
+      - "shared/references/rocket/diplomacy_interface_contract.md"
+      - "shared/references/rocket/raw/rocket_diplomacy_to_gpgpu_interface_contract.md"
+
+  - lesson_id: ROCKET_INTERFACE_ADAPTER_CONTRACT
+    source_project: Rocket Chip
+    applies_to:
+      - gpgpu-interconnect
+      - gpgpu-rtl
+      - gpgpu-memory
+      - gpgpu-atomic-sync
+    topic: adapter_contract
+    principle: "Width, fragmentation, source-id, atomic, buffering, and protocol conversion mismatches require explicit adapter contracts."
+    do:
+      - "Emit ADAPTER_CONTRACT with adapter type, input edge, output edge, translated fields, preconditions, state, monitors, and failure modes."
+      - "Require width adapters for beat-width mismatch and fragment adapters for burst or transfer-size mismatch."
+      - "Require source-id remap state, atomic adapter preconditions, and protocol bridge ID/error/order translation when those cases apply."
+    do_not:
+      - "Do not silently truncate, duplicate, repack, or reorder transactions in local RTL."
+      - "Do not expose atomics because loads and stores exist unless native support or an atomic adapter proves the contract."
+      - "Do not treat protocol bridges as signal-renaming wrappers."
+    evidence_anchor:
+      - "shared/references/rocket/diplomacy_interface_contract.md"
+      - "shared/references/rocket/raw/rocket_diplomacy_to_gpgpu_interface_contract.md"
+
+  - lesson_id: ROCKET_PROTOCOL_MONITOR_CONTRACT
+    source_project: Rocket Chip
+    applies_to:
+      - gpgpu-interconnect
+      - gpgpu-rtl
+      - gpgpu-simppa
+    topic: protocol_monitor
+    principle: "Protocol monitors should be generated from negotiated interface facts and used as executable evidence."
+    do:
+      - "Emit PROTOCOL_MONITOR_CONTRACT per negotiated edge."
+      - "Check opcode or request class legality, width and mask legality, multibeat stability, source/sink uniqueness, response matching, and timeout where applicable."
+      - "Pass monitor violations into gpgpu-simppa as evidence tied to edge and module paths."
+    do_not:
+      - "Do not replace negotiated monitors with hand-written spot assertions."
+      - "Do not treat interface negotiation as documentation-only."
+      - "Do not let monitor constants drift from NEGOTIATED_INTERFACE_IR."
+    evidence_anchor:
+      - "shared/references/rocket/diplomacy_interface_contract.md"
+      - "shared/references/rocket/generator_verification.md"
+      - "shared/references/rocket/raw/rocket_generator_verification_to_gpgpu.md"
+
+  - lesson_id: ROCKET_MMIO_REGISTER_MAP
+    source_project: Rocket Chip
+    applies_to:
+      - gpgpu-runtime
+      - gpgpu-rtl
+      - gpgpu-simppa
+    topic: mmio_register_map
+    principle: "Runtime-visible registers are generator-owned field maps with explicit access and side-effect semantics."
+    do:
+      - "Emit MMIO_REGISTER_MAP_IR with discovery, launch, status, interrupt, fault, trace, debug, and counter blocks."
+      - "Record field access, reset, volatility, write-one-clear or pulse behavior, enumerations, generated regmap, memmap, and discovery collateral."
+      - "Enforce the START/BUSY/DONE/FAULTED/ACK smoke gate."
+    do_not:
+      - "Do not copy CLINT, PLIC, debug-module, or CPU privilege register layouts as GPGPU ABI."
+      - "Do not collapse control, status, fault, trace, debug, and counter state into one undocumented CSR blob."
+      - "Do not rely on driver comments to define MMIO field semantics."
+    evidence_anchor:
+      - "shared/references/rocket/mmio_runtime_debug.md"
+      - "shared/references/rocket/raw/rocket_mmio_runtime_debug_to_gpgpu.md"
+
+  - lesson_id: ROCKET_DEBUG_COUNTER_CONTRACT
+    source_project: Rocket Chip
+    applies_to:
+      - gpgpu-runtime
+      - gpgpu-rtl
+      - gpgpu-simppa
+    topic: debug_counter_contract
+    principle: "Debug, trace, and counters are generated optional blocks with discoverable presence and producer-backed evidence."
+    do:
+      - "Emit DEBUG_COUNTER_CONTRACT with debug control/status/fault, trace control/sink, counter control/status/data, and producer bindings."
+      - "Keep counter control separate from read-only volatile counter data."
+      - "Require stable counters to name producer module, producer event, unit, sample window, and consumer skill."
+    do_not:
+      - "Do not attach debug through simulation-only wires with no runtime contract."
+      - "Do not use parser-only or defined-only counters as sole root-cause evidence."
+      - "Do not hide trace sink selection outside resolved config and MMIO discovery."
+    evidence_anchor:
+      - "shared/references/rocket/mmio_runtime_debug.md"
+      - "shared/references/rocket/generator_verification.md"
+      - "shared/references/rocket/raw/rocket_mmio_runtime_debug_to_gpgpu.md"
+
+  - lesson_id: ROCKET_HARNESS_CLOSURE_GATE
+    source_project: Rocket Chip
+    applies_to:
+      - gpgpu-rtl
+      - gpgpu-simppa
+      - gpgpu-loop
+    topic: harness_closure
+    principle: "Generated systems must prove every external port is connected to a simulation model or tied off before sign-off."
+    do:
+      - "Require harness closure evidence for DRAM, host, MMIO, debug, trace, interrupt, clock, and reset ports."
+      - "Require unit-test start/finished/timeout contracts for unit-testable blocks."
+      - "Route dangling harness ports to gpgpu-loop as test-evidence or RTL-binding patches."
+    do_not:
+      - "Do not leave floating optional ports for manual testbench patching."
+      - "Do not decide pass/fail through unstructured logs only."
+      - "Do not let harness settings drift from resolved config."
+    evidence_anchor:
+      - "shared/references/rocket/generator_verification.md"
+      - "shared/references/rocket/soc_composition.md"
+      - "shared/references/rocket/raw/rocket_generator_verification_to_gpgpu.md"
+
+  - lesson_id: ROCKET_COMPILE_ONLY_DRIFT_GATE
+    source_project: Rocket Chip
+    applies_to:
+      - gpgpu-simppa
+      - gpgpu-loop
+      - gpgpu-arch
+    topic: compile_only_drift
+    principle: "Named configs that are too expensive or unsuitable to run still need compile-only evidence to prevent configuration rot."
+    do:
+      - "Classify every named config as executed, compile-only, unsupported, or retired with owner and evidence."
+      - "Require compile-only drift evidence when a feature changes config, interface, MMIO, debug, or harness collateral."
+      - "Trigger loop rewrites for compile-only config rot."
+    do_not:
+      - "Do not treat unrun configs as invisible."
+      - "Do not accept compile-only coverage without a named config fragment and generated harness artifact."
+      - "Do not allow compile-only drift to be hidden by simulator-private defaults."
+    evidence_anchor:
+      - "shared/references/rocket/generator_verification.md"
+      - "shared/references/rocket/raw/rocket_generator_verification_to_gpgpu.md"

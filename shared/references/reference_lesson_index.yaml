@@ -6,3 +6,19 @@ lesson_files:
   - rocket_lessons.yaml
   - xiangshan_lessons.yaml
   - vibe_gpu_lessons.yaml
+reference_groups:
+  - group_id: rocket_generator_reference
+    lesson_file: rocket_lessons.yaml
+    summary_root: rocket
+    raw_report_root: rocket/raw
+    applies_as:
+      - generator_config_reference
+      - system_composition_reference
+      - negotiated_interface_reference
+      - mmio_runtime_debug_reference
+      - verification_harness_reference
+    not_applied_as:
+      - gpu_pipeline_reference
+      - mandatory_tilelink_protocol
+      - cpu_privilege_semantics
+      - clint_plic_register_layout

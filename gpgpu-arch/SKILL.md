@@ -9,6 +9,10 @@ description: Use when a GPGPU design request, complete spec request, patch reque
 
 This skill is the entry generator for the self-correcting GPGPU design system. It classifies the request, locks design intent, constructs candidate architecture graphs, and estimates micro-constraints before any semantic truth or RTL binding is frozen.
 
+Rocket lessons are used only as generator/config/interface/MMIO/verification
+references. This skill must not use Rocket scalar pipeline structure as a GPU
+pipeline reference.
+
 ## Position in Flow
 
 Upstream:
@@ -23,6 +27,13 @@ Downstream:
 - `gpgpu-atomic-sync` for atomic, fence, barrier, and WSYNC fragments when synchronization is enabled
 - `gpgpu-golden`
 
+Ordering:
+- Generate `CONFIG_STACK_IR`.
+- Generate `RESOLVED_CONFIG_IR`.
+- Generate `SYSTEM_COMPOSITION_IR`.
+- Generate `ARCH_IR` only after the resolved config and system composition are
+  available. `ARCH_IR is generated only after RESOLVED_CONFIG_IR and SYSTEM_COMPOSITION_IR`.
+
 ## Input IR
 
 Consumes:
@@ -35,12 +46,19 @@ Consumes:
 - quality_target_table
 - requirement_owner_table
 - reference_lesson_index
+- `shared/references/rocket_lessons.yaml`
+- optional `CONFIG_STACK_IR`
+- optional `RESOLVED_CONFIG_IR`
+- optional `SYSTEM_COMPOSITION_IR`
 
 ## Output IR
 
 Produces:
 - `MODE_SELECTION_IR`
 - `DESIGN_INTENT_IR`
+- `CONFIG_STACK_IR`
+- `RESOLVED_CONFIG_IR`
+- `SYSTEM_COMPOSITION_IR`
 - `ARCH_IR`
 - `CAPABILITY_PROFILE_IR`
 - `MICRO_CONSTRAINT_ESTIMATE_IR`
@@ -56,6 +74,9 @@ Human-facing reports:
 
 AI-facing artifacts:
 - English `DESIGN_INTENT_IR.yaml`
+- English `CONFIG_STACK_IR.yaml`
+- English `RESOLVED_CONFIG_IR.yaml`
+- English `SYSTEM_COMPOSITION_IR.yaml`
 - English `ARCH_IR.yaml`
 - English `MICRO_CONSTRAINT_ESTIMATE_IR.yaml`
 - English `ARCH_GENERATION_REPORT.yaml`
@@ -90,6 +111,16 @@ This skill owns:
 - scheduler-visible warp, SIMT, scoreboard, and pipe state contract
 - simulator-only architecture artifact rejection
 - architecture-level performance attribution order
+- Rocket-style config owner assignment
+- config owner, override order, derived field, invariant, consumer, and collateral rules
+- resolved config dependency-edge construction
+- system composition plane construction before architecture graph emission
+
+Required Rocket reference lessons:
+- `ROCKET_CONFIG_FRAGMENT_STACK`
+- `ROCKET_RESOLVED_CONFIG_COLLATERAL`
+- `ROCKET_SYSTEM_COMPOSITION_ROOT`
+- `ROCKET_COMPILE_ONLY_DRIFT_GATE`
 
 ## Preset Selection Rules
 
@@ -132,6 +163,24 @@ reference can influence `ARCH_IR`, classify it with
 in `imported_evidence_classification.md`. Simulator-private, debug-only, and
 parser-only items must not enter hardware contracts.
 
+## Rocket-Style Generator Config Rules
+
+Rocket-derived config lessons apply as generator rules only:
+
+- Every config field has exactly one config owner.
+- The override order is explicit in `CONFIG_STACK_IR`; highest-priority
+  overlays appear before base defaults.
+- A fragment that changes one field of a structured value must transform the
+  prior value and preserve unrelated fields.
+- Every derived field is listed in `RESOLVED_CONFIG_IR` with formula,
+  dependencies, owner, and read-only-after-resolution status.
+- Every invariant names owner, condition, and failure text.
+- Every consumer of a resolved key is listed by skill and artifact.
+- Every collateral effect on RTL, MMIO, traces, harnesses, tests, or generated
+  docs is listed before `ARCH_IR` is emitted.
+- `SYSTEM_COMPOSITION_IR` separates compute, memory/data, control/MMIO,
+  debug/trace, host-frontdoor, and interrupt/event planes.
+
 ## SM Issue / Non-Issue Contract
 
 Every generated SM architecture must emit `SM_ISSUE_GATE_CONTRACT.md` and answer:
@@ -167,6 +216,7 @@ in Chinese, while passing affected `ARCH_IR` paths as English AI artifact refs.
 ## Forbidden Actions
 
 This skill must not:
+- emit `ARCH_IR` before `RESOLVED_CONFIG_IR` and `SYSTEM_COMPOSITION_IR`
 - emit `SYSTEM_CONTRACT_IR`
 - emit `GOLDEN_CONTRACT_MODEL`
 - emit `INCREMENTAL_RTL_MAP`
@@ -203,6 +253,9 @@ This skill must validate:
 - `shared/schemas/human_report_manifest_ir.schema.yaml`
 - `shared/schemas/artifact_visibility_ir.schema.yaml`
 - `shared/schemas/design_intent_ir.schema.yaml`
+- `shared/schemas/config_stack_ir.schema.yaml`
+- `shared/schemas/resolved_config_ir.schema.yaml`
+- `shared/schemas/system_composition_ir.schema.yaml`
 - `shared/schemas/capability_profile_ir.schema.yaml`
 - `shared/schemas/arch_ir.schema.yaml`
 - `shared/schemas/micro_constraint_estimate_ir.schema.yaml`
@@ -217,6 +270,10 @@ This skill must validate:
 
 The output must satisfy:
 - `ARCH_IR is a candidate graph`
+- `ARCH_IR is generated only after RESOLVED_CONFIG_IR and SYSTEM_COMPOSITION_IR`
+- Every generated `CONFIG_STACK_IR` entry records config owner, override order, target keys, and collateral effects.
+- Every generated `RESOLVED_CONFIG_IR` row records final value, config owner, source fragment, derived field dependencies, invariant list, consumer list, and collateral list.
+- Every generated `SYSTEM_COMPOSITION_IR` separates compute, memory/data, control/MMIO, debug/trace, host-frontdoor, and interrupt/event planes.
 - Every `ARCH_IR.graph_nodes` entry is a structured graph node with `node_id`, `node_type`, `owned_state`, `input_ports`, `output_ports`, `required_contract_paths`, and `scaling_parameters`.
 - `MICRO_CONSTRAINT_ESTIMATE_IR is a feasibility estimate`
 - `ARCH_IR` must contain `capability_profile`.
@@ -244,6 +301,9 @@ This skill must emit:
 - `INSUFFICIENT_REQUEST`
 - `UNSUPPORTED_REQUIREMENT`
 - `HARD_CONSTRAINT_FAIL`
+- `CONFIG_OVERRIDE_ORDER_AMBIGUOUS`
+- `RESOLVED_CONFIG_FIELD_OWNER_MISSING`
+- `SYSTEM_COMPOSITION_ROOT_MISSING`
 - `FORBIDDEN_PROVENANCE`
 - `UNREALIZABLE_MICRO_CONSTRAINT`
 - `INSUFFICIENT_SKILL_ASSET`
@@ -256,6 +316,9 @@ The report must include:
 - selected_mode
 - capability_profile
 - design_intent_hash
+- config_stack_hash
+- resolved_config_hash
+- system_composition_hash
 - arch_ir_hash
 - micro_constraint_estimate_hash
 - selected_preset
@@ -281,6 +344,9 @@ This skill is incomplete unless the following exist:
 - `shared/tables/report_language_policy.yaml`
 - `shared/schemas/mode_selection_ir.schema.yaml`
 - `shared/schemas/design_intent_ir.schema.yaml`
+- `shared/schemas/config_stack_ir.schema.yaml`
+- `shared/schemas/resolved_config_ir.schema.yaml`
+- `shared/schemas/system_composition_ir.schema.yaml`
 - `shared/schemas/arch_ir.schema.yaml`
 - `shared/schemas/micro_constraint_estimate_ir.schema.yaml`
 - `shared/schemas/arch_generation_report_ir.schema.yaml`

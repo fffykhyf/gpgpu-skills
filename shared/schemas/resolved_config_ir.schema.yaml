@@ -1,0 +1,79 @@
+schema: resolved_config_ir
+version: v5
+type: object
+required:
+  - config_stack_ref
+  - resolved_fields
+  - derived_fields
+  - invariants
+  - consumers
+  - collateral
+  - canonical_hash
+properties:
+  config_stack_ref: string
+  resolved_fields:
+    type: list
+    item_schema: RESOLVED_FIELD
+  derived_fields:
+    type: list
+    item_schema: DERIVED_FIELD
+  invariants:
+    type: list
+    item_schema: CONFIG_INVARIANT
+  consumers:
+    type: list
+    item_schema: CONFIG_CONSUMER
+  collateral:
+    type: list
+    item_schema: CONFIG_COLLATERAL
+  canonical_hash: string
+definitions:
+  RESOLVED_FIELD:
+    type: object
+    required: [field, value, owner_skill, source_fragment, consumers, derived_from, invariants, collateral]
+    properties:
+      field: string
+      value: any
+      owner_skill: string
+      source_fragment: string
+      consumers: list
+      derived_from: list
+      invariants: list
+      collateral: list
+  DERIVED_FIELD:
+    type: object
+    required: [field, owner_skill, derived_from, formula, read_only_after_resolution]
+    properties:
+      field: string
+      owner_skill: string
+      derived_from: list
+      formula: string
+      read_only_after_resolution: bool
+  CONFIG_INVARIANT:
+    type: object
+    required: [invariant_id, owner_skill, condition, failure_text]
+    properties:
+      invariant_id: string
+      owner_skill: string
+      condition: string
+      failure_text: string
+  CONFIG_CONSUMER:
+    type: object
+    required: [field, consumer_skill, consumer_artifact]
+    properties:
+      field: string
+      consumer_skill: string
+      consumer_artifact: string
+  CONFIG_COLLATERAL:
+    type: object
+    required: [field, artifact, producer_skill, visibility]
+    properties:
+      field: string
+      artifact: string
+      producer_skill: string
+      visibility: enum
+failure_modes:
+  - RESOLVED_CONFIG_FIELD_OWNER_MISSING
+  - DERIVED_FIELD_LOCAL_RECOMPUTE
+  - CONFIG_INVARIANT_MISSING
+  - CONFIG_COLLATERAL_UNDECLARED

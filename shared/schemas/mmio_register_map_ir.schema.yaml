@@ -1,0 +1,64 @@
+schema: mmio_register_map_ir
+version: v5
+type: object
+required:
+  - device
+  - base
+  - size
+  - beat_bytes
+  - generated_outputs
+  - blocks
+  - field_semantics
+  - interrupt_semantics
+  - canonical_hash
+properties:
+  device:
+    type: object
+    required: [name, compatible, owner_skill]
+    properties:
+      name: string
+      compatible: list
+      owner_skill: string
+  base: string
+  size: integer
+  beat_bytes: integer
+  generated_outputs: list
+  blocks:
+    type: object
+    required: [discovery, launch, status, interrupt, fault, trace, debug, counters]
+    properties:
+      discovery: map
+      launch: map
+      status: map
+      interrupt: map
+      fault: map
+      trace: map
+      debug: map
+      counters: map
+  field_semantics:
+    type: list
+    item_schema: MMIO_FIELD_SEMANTICS
+  interrupt_semantics: map
+  canonical_hash: string
+definitions:
+  MMIO_FIELD_SEMANTICS:
+    type: object
+    required: [block, field, access, volatile, reset, side_effect, description]
+    properties:
+      block: string
+      field: string
+      access: enum
+      volatile: bool
+      reset: any
+      side_effect: string
+      description: string
+rules:
+  - START must be separated from BUSY, DONE, FAULTED, and ACK semantics.
+  - Volatile status, fault, debug, trace, and counter fields must be marked explicitly.
+  - Generated regmap, memmap, and runtime discovery collateral must share this map as source of truth.
+failure_modes:
+  - MMIO_REGISTER_MAP_MISSING
+  - MMIO_FIELD_SEMANTICS_MISSING
+  - START_DONE_ACK_AMBIGUOUS
+  - FAULT_CLEAR_POLICY_MISSING
+  - RUNTIME_ADDRESS_MAP_DRIFT

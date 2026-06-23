@@ -1,0 +1,65 @@
+schema: negotiated_interface_ir
+version: v5
+type: object
+required:
+  - edge_id
+  - client
+  - manager
+  - negotiated_capabilities
+  - derived_fields
+  - legality
+  - required_adapters
+  - monitor_contract_ref
+  - canonical_hash
+properties:
+  edge_id: string
+  client:
+    type: object
+    required: [node_id, owner_skill, emits, accepts, source_id_range, visibility]
+    properties:
+      node_id: string
+      owner_skill: string
+      emits: map
+      accepts: map
+      source_id_range: map
+      visibility: list
+  manager:
+    type: object
+    required: [node_id, owner_skill, supports, emits, address_sets, beat_bytes]
+    properties:
+      node_id: string
+      owner_skill: string
+      supports: map
+      emits: map
+      address_sets: list
+      beat_bytes: integer
+  negotiated_capabilities: map
+  derived_fields:
+    type: object
+    required: [address_bits, data_bits, source_bits, sink_bits, size_bits, beat_bytes, max_transfer_bytes]
+    properties:
+      address_bits: integer
+      data_bits: integer
+      source_bits: integer
+      sink_bits: integer
+      size_bits: integer
+      beat_bytes: integer
+      max_transfer_bytes: integer
+  legality:
+    type: object
+    required: [request_classes, response_classes, ordering_scope, denial_policy, error_policy]
+    properties:
+      request_classes: list
+      response_classes: list
+      ordering_scope: string
+      denial_policy: string
+      error_policy: string
+  required_adapters: list
+  monitor_contract_ref: string
+  canonical_hash: string
+failure_modes:
+  - NEGOTIATED_EDGE_MISSING
+  - RAW_WIRE_BINDING_FORBIDDEN
+  - SOURCE_ID_RANGE_OVERLAP
+  - ADDRESS_SET_OVERLAP
+  - INTERFACE_CAPABILITY_MISMATCH

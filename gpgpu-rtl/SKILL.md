@@ -9,6 +9,10 @@ description: Use when SYSTEM_CONTRACT_IR, GOLDEN_CONTRACT_MODEL, and toolchain r
 
 This skill lowers the system contract into modular RTL bindings. It replaces global RTL-map generation with module-by-module assembly, interface checking, and partial simulation gates.
 
+Rocket lessons are used only for interface negotiation, generated harness
+closure, unit-test, monitor, fuzzer, trace sink, and compile-only drift patterns.
+Do not copy Rocket scalar pipeline structure or CPU privilege semantics.
+
 ## Position in Flow
 
 Upstream:
@@ -28,6 +32,11 @@ Consumes:
 - `PROGRAM_IMAGE_IR`
 - `RUNTIME_LAUNCH_IR`
 - `LOADER_CONTRACT_IR`
+- `RESOLVED_CONFIG_IR`
+- `SYSTEM_COMPOSITION_IR`
+- `NEGOTIATED_INTERFACE_IR`
+- `ADAPTER_CONTRACT`
+- `PROTOCOL_MONITOR_CONTRACT`
 - module catalog
 - module interface contract table
 - RTL partial simulation gate table
@@ -41,11 +50,18 @@ Consumes:
 Produces:
 - `INCREMENTAL_RTL_MAP`
 - `INTERFACE_BINDING_IR`
+- `PROTOCOL_MONITOR_CONTRACT`
 - `MODULE_INTERFACE_REPORT`
 - `RTL_PARTIAL_SIM_REPORT`
 - `RTL_MODULE_CONTRACT`
 - `RTL_TRACE_CONTRACT`
 - `COUNTER_TAP_POINT_PLAN`
+- `HARNESS_CLOSURE_REPORT`
+- `UNIT_TEST_CONTRACT`
+- `SHADOW_MEMORY_CHECKER_PLAN`
+- `ADAPTER_FUZZER_PLAN`
+- `TRACE_SINK_CONTRACT`
+- `COMPILE_ONLY_DRIFT_EVIDENCE`
 - `SIMULATOR_ARTIFACT_REJECTION_REPORT`
 
 Human-facing report:
@@ -55,9 +71,16 @@ AI-facing artifacts:
 - English `INCREMENTAL_RTL_MAP.yaml`
 - English `MODULE_INTERFACE_REPORT.yaml`
 - English `RTL_PARTIAL_SIM_REPORT.yaml`
+- English `PROTOCOL_MONITOR_CONTRACT.yaml`
 - English `RTL_MODULE_CONTRACT.md`
 - English `RTL_TRACE_CONTRACT.md`
 - English `COUNTER_TAP_POINT_PLAN.md`
+- English `HARNESS_CLOSURE_REPORT.md`
+- English `UNIT_TEST_CONTRACT.md`
+- English `SHADOW_MEMORY_CHECKER_PLAN.md`
+- English `ADAPTER_FUZZER_PLAN.md`
+- English `TRACE_SINK_CONTRACT.md`
+- English `COMPILE_ONLY_DRIFT_EVIDENCE.md`
 - English `SIMULATOR_ARTIFACT_REJECTION_REPORT.md`
 
 ## Owned Decisions
@@ -89,6 +112,15 @@ This skill owns:
 - counter tap point planning
 - hardware-rewritten mechanism checklist
 - simulator artifact rejection
+- negotiated edge consumption before interface binding
+- adapter contract binding for width, fragment, source-id, atomic, and protocol bridge adapters
+- protocol monitor instantiation from `PROTOCOL_MONITOR_CONTRACT`
+- harness closure for every external port
+- unit-test start/finished/timeout contract generation
+- shadow memory checker plan binding
+- adapter fuzzer plan binding
+- trace sink contract binding
+- compile-only drift evidence collection for named configs
 
 Required reference lessons:
 - `VORTEX_LSU_LANE_FORMAT`
@@ -98,6 +130,11 @@ Required reference lessons:
 - `VORTEX_LOCAL_MEMORY_BANK`
 - `VORTEX_BARRIER_WSYNC_DRAIN`
 - `VORTEX_SIMX_RTL_TWIN`
+- `ROCKET_NEGOTIATED_INTERFACE_EDGE`
+- `ROCKET_INTERFACE_ADAPTER_CONTRACT`
+- `ROCKET_PROTOCOL_MONITOR_CONTRACT`
+- `ROCKET_HARNESS_CLOSURE_GATE`
+- `ROCKET_COMPILE_ONLY_DRIFT_GATE`
 
 ## Human and AI Output Policy
 
@@ -120,6 +157,36 @@ gate, memory request interface, coalescer output interface, packet interface,
 cache status output, and counter tap points may become RTL contracts. C++ queues,
 `std::set` scoreboard, BookSim configs, AccelWattch objects, CUDA stream stack,
 fixed simulator latencies, SM86 queue depths, and PTX opcode latencies may not.
+
+## Negotiated Interface Binding Rules
+
+RTL module ports may be bound only from `NEGOTIATED_INTERFACE_IR`,
+`ADAPTER_CONTRACT`, and `PROTOCOL_MONITOR_CONTRACT` records. raw wire binding is
+forbidden unless it comes from a negotiated edge.
+
+Required binding checks:
+
+- Endpoint widths, source IDs, sink IDs, masks, transfer sizes, and response
+  shape come from the negotiated edge.
+- Width, fragment, source-id, atomic, and protocol bridge adapters must bind
+  the exact `ADAPTER_CONTRACT` state and translated fields.
+- Protocol monitors must be instantiated or waived with owner-approved evidence
+  before partial simulation can pass.
+- Interface checker failures block full-system simulation.
+
+## Generated Verification Closure
+
+Every generated RTL top or unit must provide:
+
+- harness closure for each external DRAM, host, MMIO, debug, trace, interrupt,
+  clock, and reset port
+- unit-test start/finished/timeout where a block is unit-testable
+- protocol monitor evidence for negotiated interfaces
+- shadow memory checker evidence for memory or atomic paths
+- adapter fuzzer evidence for width, fragment, source-id, atomic, or protocol
+  bridge adapters
+- trace sink evidence for runtime-visible traces
+- compile-only drift evidence for named configs that are not executed
 
 ## Observable Trace Contract
 
@@ -156,6 +223,8 @@ This skill must not:
 - produce architecture rewrite patches
 - silently join incompatible module interfaces
 - allow global RTL binding without module evidence
+- allow raw wire binding without a negotiated edge
+- leave a generated harness port dangling
 
 ## Required Tables
 
@@ -184,6 +253,10 @@ This skill must validate:
 - `shared/schemas/program_image_ir.schema.yaml`
 - `shared/schemas/runtime_launch_ir.schema.yaml`
 - `shared/schemas/loader_contract_ir.schema.yaml`
+- `shared/schemas/system_composition_ir.schema.yaml`
+- `shared/schemas/negotiated_interface_ir.schema.yaml`
+- `shared/schemas/adapter_contract.schema.yaml`
+- `shared/schemas/protocol_monitor_contract.schema.yaml`
 - `shared/schemas/incremental_rtl_map.schema.yaml`
 - `shared/schemas/module_interface_report_ir.schema.yaml`
 - `shared/schemas/rtl_partial_sim_report_ir.schema.yaml`
@@ -201,6 +274,16 @@ The output must satisfy:
 - `INCREMENTAL_RTL_MAP` binds modules one by one.
 - Program image loading must consume `PROGRAM_IMAGE_IR` and `LOADER_CONTRACT_IR`.
 - Runtime CSR binding must consume `RUNTIME_LAUNCH_IR`.
+- Interface binding must consume `NEGOTIATED_INTERFACE_IR` or fail.
+- Adapter RTL must consume `ADAPTER_CONTRACT` or fail.
+- Protocol monitors must consume `PROTOCOL_MONITOR_CONTRACT` or fail.
+- raw wire binding is forbidden unless it comes from a negotiated edge.
+- Every generated top proves harness closure for all external ports.
+- Every unit-testable block exposes unit-test start/finished/timeout.
+- Memory/atomic verification includes a shadow memory checker when memory-visible data can change.
+- Every adapter path has an adapter fuzzer plan or an explicit unsupported waiver.
+- Runtime-visible trace paths include a trace sink contract.
+- Named configs not executed in regression include compile-only drift evidence.
 - Entry PC fetch must match `PROGRAM_IMAGE_IR.entry_pc`.
 - Argument buffer visibility must match `RUNTIME_LAUNCH_IR.arg_buffer_bytes`.
 - Every module must reference a `MODULE_BINDING_TEMPLATE`.
@@ -229,6 +312,15 @@ This skill must emit:
 - `PARTIAL_SIM_FAIL`
 - `CONTRACT_PATH_UNBOUND`
 - `MODULE_TEMPLATE_MISSING`
+- `NEGOTIATED_EDGE_MISSING`
+- `ADAPTER_CONTRACT_MISSING`
+- `PROTOCOL_MONITOR_MISSING`
+- `HARNESS_CLOSURE_FAIL`
+- `UNIT_TEST_TIMEOUT_CONTRACT_MISSING`
+- `SHADOW_MEMORY_CHECKER_MISSING`
+- `ADAPTER_FUZZER_MISSING`
+- `TRACE_SINK_UNDECLARED`
+- `COMPILE_ONLY_DRIFT_EVIDENCE_MISSING`
 - `PROGRAM_IMAGE_LOAD_FAIL`
 - `ENTRY_PC_FETCH_FAIL`
 - `ARG_BUFFER_VISIBILITY_FAIL`
@@ -249,11 +341,18 @@ The report must include:
 - program_image_ir_hash
 - runtime_launch_ir_hash
 - loader_contract_ir_hash
+- negotiated_interface_ir_hash
+- adapter_contract_hash
+- protocol_monitor_contract_hash
 - incremental_rtl_map_hash
 - module_results
 - interface_results
 - partial_sim_results
 - timing_feedback_results
+- harness_closure_results
+- unit_test_contract_results
+- adapter_fuzzer_results
+- compile_only_drift_results
 - unresolved_binding_risks
 - downstream_contract
 
@@ -275,6 +374,9 @@ This skill is incomplete unless the following exist:
 - `shared/schemas/program_image_ir.schema.yaml`
 - `shared/schemas/runtime_launch_ir.schema.yaml`
 - `shared/schemas/loader_contract_ir.schema.yaml`
+- `shared/schemas/negotiated_interface_ir.schema.yaml`
+- `shared/schemas/adapter_contract.schema.yaml`
+- `shared/schemas/protocol_monitor_contract.schema.yaml`
 - `shared/schemas/incremental_rtl_map.schema.yaml`
 - `shared/schemas/module_interface_report_ir.schema.yaml`
 - `shared/schemas/rtl_partial_sim_report_ir.schema.yaml`

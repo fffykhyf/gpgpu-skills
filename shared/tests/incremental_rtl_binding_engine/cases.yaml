@@ -1,4 +1,28 @@
 cases:
+  - case_id: harness_closure_and_compile_only_config
+    input_artifacts:
+      - shared/examples/self_correcting_minimal_simt/expected_system_contract_ir.yaml
+      - shared/examples/self_correcting_minimal_simt/expected_incremental_rtl_map.yaml
+      - shared/references/rocket/generator_verification.md
+    expected_outputs:
+      - INCREMENTAL_RTL_MAP
+      - MODULE_INTERFACE_REPORT
+      - RTL_PARTIAL_SIM_REPORT
+      - PROTOCOL_MONITOR_CONTRACT
+    expected_failure_mode: null
+    required_evidence:
+      - harness closure
+      - unit-test start/finished/timeout
+      - protocol monitor
+      - shadow memory checker
+      - adapter fuzzer
+      - trace sink
+      - compile-only drift evidence
+      - dangling harness port rejected
+    forbidden_outputs:
+      - PERF_ATTRIBUTION_GRAPH
+      - ARCH_REWRITE_PLAN
+
   - case_id: incremental_rtl_detects_lsq_backpressure
     input_artifacts:
       - shared/examples/self_correcting_minimal_simt/expected_system_contract_ir.yaml

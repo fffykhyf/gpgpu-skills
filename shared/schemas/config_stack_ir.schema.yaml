@@ -1,0 +1,56 @@
+schema: config_stack_ir
+version: v5
+type: object
+required:
+  - stack_id
+  - named_config
+  - root_config
+  - fragments
+  - override_order
+  - owner_policy
+  - shadowing_rules
+  - provenance
+properties:
+  stack_id: string
+  named_config: string
+  root_config: string
+  fragments:
+    type: list
+    item_schema: CONFIG_FRAGMENT
+  override_order:
+    type: list
+    rule: Highest-priority override appears first; base defaults appear last.
+  owner_policy:
+    type: object
+    required: [single_leaf_owner, transform_prior_required, side_channel_configs_forbidden]
+    properties:
+      single_leaf_owner: bool
+      transform_prior_required: bool
+      side_channel_configs_forbidden: bool
+  shadowing_rules: list
+  provenance: map
+definitions:
+  CONFIG_FRAGMENT:
+    type: object
+    required:
+      - fragment_id
+      - owner_skill
+      - operation
+      - target_keys
+      - precedence
+      - prior_value_policy
+      - collateral_effects
+    properties:
+      fragment_id: string
+      owner_skill: string
+      operation: enum
+      target_keys: list
+      precedence: integer
+      prior_value_policy: enum
+      collateral_effects: list
+    rule: Fragments that touch an existing structured field must transform the prior value instead of replacing unrelated fields.
+failure_modes:
+  - CONFIG_FRAGMENT_OWNER_MISSING
+  - CONFIG_OVERRIDE_ORDER_AMBIGUOUS
+  - CONFIG_FIELD_SHADOWED
+  - SIDE_CHANNEL_CONFIG_DRIFT

@@ -81,6 +81,14 @@ SKILL_SECTIONS = [
 ]
 
 NEW_SCHEMAS = [
+    "config_stack_ir.schema.yaml",
+    "resolved_config_ir.schema.yaml",
+    "system_composition_ir.schema.yaml",
+    "negotiated_interface_ir.schema.yaml",
+    "adapter_contract.schema.yaml",
+    "protocol_monitor_contract.schema.yaml",
+    "mmio_register_map_ir.schema.yaml",
+    "debug_counter_contract.schema.yaml",
     "capability_profile_ir.schema.yaml",
     "contract_fragment_ir.schema.yaml",
     "lsu_lane_format_contract.schema.yaml",
@@ -365,8 +373,54 @@ REFERENCE_LESSONS = [
     "reference_lesson_index.yaml",
 ]
 
+ROCKET_REFERENCE_SUMMARIES = [
+    "README.md",
+    "repo_map.md",
+    "config_fragment_lessons.md",
+    "diplomacy_interface_contract.md",
+    "generator_verification.md",
+    "mmio_runtime_debug.md",
+    "soc_composition.md",
+]
+
+ROCKET_RAW_REPORTS = [
+    "rocket_config_fragment_lessons.md",
+    "rocket_diplomacy_to_gpgpu_interface_contract.md",
+    "rocket_generator_verification_to_gpgpu.md",
+    "rocket_mmio_runtime_debug_to_gpgpu.md",
+    "rocket_repo_map_for_gpgpu.md",
+    "rocket_soc_composition_to_gpgpu_system.md",
+]
+
+ROCKET_GENERATOR_SCHEMA_OWNERS = [
+    "CONFIG_STACK_IR",
+    "RESOLVED_CONFIG_IR",
+    "SYSTEM_COMPOSITION_IR",
+    "NEGOTIATED_INTERFACE_IR",
+    "ADAPTER_CONTRACT",
+    "PROTOCOL_MONITOR_CONTRACT",
+    "MMIO_REGISTER_MAP_IR",
+    "DEBUG_COUNTER_CONTRACT",
+]
+
+ROCKET_REQUIRED_REGRESSION_CASES = [
+    "rocket_style_config_resolution",
+    "negotiated_interface_width_adapter",
+    "mmio_start_done_fault_smoke",
+    "harness_closure_and_compile_only_config",
+]
+
 TOP_LEVEL_REQUIRED_TEXT: Dict[str, List[str]] = {
     "gpgpu-arch/SKILL.md": [
+        "CONFIG_STACK_IR",
+        "RESOLVED_CONFIG_IR",
+        "SYSTEM_COMPOSITION_IR",
+        "ARCH_IR is generated only after RESOLVED_CONFIG_IR and SYSTEM_COMPOSITION_IR",
+        "config owner",
+        "override order",
+        "derived field",
+        "consumer",
+        "collateral",
         "MICRO_CONSTRAINT_ESTIMATE_IR",
         "ARCH_IR is a candidate graph",
         "must not emit system contract truth",
@@ -383,6 +437,12 @@ TOP_LEVEL_REQUIRED_TEXT: Dict[str, List[str]] = {
         "ARTIFACT_MANIFEST_IR",
     ],
     "gpgpu-runtime/SKILL.md": [
+        "MMIO_REGISTER_MAP_IR",
+        "DEBUG_COUNTER_CONTRACT",
+        "START/BUSY/DONE/FAULTED/ACK",
+        "discovery",
+        "interrupt",
+        "fault",
         "TOOLCHAIN_ARTIFACT_IR",
         "PROGRAM_IMAGE_IR",
         "must not define independent ISA",
@@ -392,6 +452,17 @@ TOP_LEVEL_REQUIRED_TEXT: Dict[str, List[str]] = {
         "ARTIFACT_MANIFEST_IR",
     ],
     "gpgpu-rtl/SKILL.md": [
+        "NEGOTIATED_INTERFACE_IR",
+        "ADAPTER_CONTRACT",
+        "PROTOCOL_MONITOR_CONTRACT",
+        "raw wire binding is forbidden unless it comes from a negotiated edge",
+        "harness closure",
+        "unit-test start/finished/timeout",
+        "protocol monitor",
+        "shadow memory checker",
+        "adapter fuzzer",
+        "trace sink",
+        "compile-only drift evidence",
         "INCREMENTAL_RTL_MAP",
         "TOOLCHAIN_ARTIFACT_IR",
         "module by module",
@@ -401,6 +472,14 @@ TOP_LEVEL_REQUIRED_TEXT: Dict[str, List[str]] = {
         "ARTIFACT_MANIFEST_IR",
     ],
     "gpgpu-simppa/SKILL.md": [
+        "PROTOCOL_MONITOR_CONTRACT",
+        "harness closure",
+        "unit-test start/finished/timeout",
+        "protocol monitor",
+        "shadow memory checker",
+        "adapter fuzzer",
+        "trace sink",
+        "compile-only drift evidence",
         "PERF_ATTRIBUTION_GRAPH",
         "PASS_EVIDENCE_REPORT",
         "CORRECTNESS_GATE_REPORT",
@@ -414,6 +493,12 @@ TOP_LEVEL_REQUIRED_TEXT: Dict[str, List[str]] = {
         "ARTIFACT_MANIFEST_IR",
     ],
     "gpgpu-loop/SKILL.md": [
+        "config drift",
+        "missing negotiated edge",
+        "missing adapter",
+        "missing MMIO semantics",
+        "dangling harness port",
+        "compile-only config rot",
         "ARCH_REWRITE_PLAN",
         "Architecture Patch",
         "Contract Patch",
@@ -424,6 +509,15 @@ TOP_LEVEL_REQUIRED_TEXT: Dict[str, List[str]] = {
         "ARTIFACT_MANIFEST_IR",
     ],
     "gpgpu-interconnect/SKILL.md": [
+        "NEGOTIATED_INTERFACE_IR",
+        "ADAPTER_CONTRACT",
+        "PROTOCOL_MONITOR_CONTRACT",
+        "raw wire binding is forbidden unless it comes from a negotiated edge",
+        "width adapter",
+        "fragment adapter",
+        "source-id adapter",
+        "atomic adapter",
+        "protocol bridge adapter",
         "SM_TO_MEMORY_FABRIC_IR",
         "NOC_ROUTING_CONTRACT",
         "SM to L2 routing table",
@@ -843,6 +937,82 @@ def require_shared_yaml_parse(failures: List[str]) -> None:
             yaml.safe_load(path.read_text(encoding="utf-8"))
         except yaml.YAMLError as exc:
             failures.append(f"invalid yaml in {path.relative_to(ROOT)}: {exc}")
+
+
+def require_rocket_reference_assets(failures: List[str]) -> None:
+    rocket_root = ROOT / "shared" / "references" / "rocket"
+    raw_root = rocket_root / "raw"
+    for filename in ROCKET_REFERENCE_SUMMARIES:
+        require_nonempty(rocket_root / filename, failures)
+    for filename in ROCKET_RAW_REPORTS:
+        require_nonempty(raw_root / filename, failures)
+
+
+def require_rocket_lessons(failures: List[str]) -> None:
+    lessons_yaml = load_yaml("shared/references/rocket_lessons.yaml", failures)
+    lesson_entries = lessons_yaml.get("lessons") or []
+    if not lesson_entries:
+        failures.append("rocket_lessons.yaml must define at least one lesson")
+        return
+
+    required_fields = ["applies_to", "do", "do_not", "evidence_anchor"]
+    lesson_ids = set()
+    for entry in lesson_entries:
+        lesson_id = entry.get("lesson_id")
+        if not lesson_id:
+            failures.append("rocket_lessons.yaml lesson missing lesson_id")
+            continue
+        if lesson_id in lesson_ids:
+            failures.append(f"rocket_lessons.yaml duplicate lesson_id {lesson_id!r}")
+        lesson_ids.add(lesson_id)
+        for field in required_fields:
+            value = entry.get(field)
+            if not value:
+                failures.append(
+                    f"rocket lesson {lesson_id!r} missing required field {field!r}"
+                )
+
+    for lesson_id in [
+        "ROCKET_CONFIG_FRAGMENT_STACK",
+        "ROCKET_RESOLVED_CONFIG_COLLATERAL",
+        "ROCKET_SYSTEM_COMPOSITION_ROOT",
+        "ROCKET_NEGOTIATED_INTERFACE_EDGE",
+        "ROCKET_INTERFACE_ADAPTER_CONTRACT",
+        "ROCKET_PROTOCOL_MONITOR_CONTRACT",
+        "ROCKET_MMIO_REGISTER_MAP",
+        "ROCKET_DEBUG_COUNTER_CONTRACT",
+        "ROCKET_HARNESS_CLOSURE_GATE",
+        "ROCKET_COMPILE_ONLY_DRIFT_GATE",
+    ]:
+        if lesson_id not in lesson_ids:
+            failures.append(f"rocket_lessons.yaml missing lesson_id {lesson_id!r}")
+
+
+def require_rocket_regression_cases(failures: List[str]) -> None:
+    discovered = set()
+    for cases_path in sorted((ROOT / "shared" / "tests").glob("*/cases.yaml")):
+        cases_yaml = load_yaml(str(cases_path.relative_to(ROOT)), failures)
+        for case in cases_yaml.get("cases") or []:
+            case_id = case.get("case_id")
+            if case_id:
+                discovered.add(case_id)
+
+    for case_id in ROCKET_REQUIRED_REGRESSION_CASES:
+        if case_id not in discovered:
+            failures.append(f"missing Rocket regression case {case_id!r}")
+
+
+def require_rocket_schema_owner_references(failures: List[str]) -> None:
+    skill_text = "\n".join(
+        (ROOT / skill / "SKILL.md").read_text(encoding="utf-8")
+        for skill in TOP_LEVEL_SKILLS
+        if (ROOT / skill / "SKILL.md").exists()
+    )
+    for schema_owner in ROCKET_GENERATOR_SCHEMA_OWNERS:
+        if schema_owner not in skill_text:
+            failures.append(
+                f"new Rocket-derived schema {schema_owner!r} is not referenced by an owner skill"
+            )
 
 
 def require_all_present(required_fields: List[str], data: dict, rel_path: str, failures: List[str]) -> None:
@@ -1515,6 +1685,10 @@ def main() -> int:
         require(ROOT / "shared" / "references" / lesson, failures)
 
     require_shared_yaml_parse(failures)
+    require_rocket_reference_assets(failures)
+    require_rocket_lessons(failures)
+    require_rocket_regression_cases(failures)
+    require_rocket_schema_owner_references(failures)
 
     require_text(
         ROOT / "README.md",

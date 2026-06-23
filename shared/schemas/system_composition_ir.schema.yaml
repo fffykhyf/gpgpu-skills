@@ -1,0 +1,68 @@
+schema: system_composition_ir
+version: v5
+type: object
+required:
+  - composition_id
+  - resolved_config_ref
+  - compute_plane
+  - memory_plane
+  - control_plane
+  - debug_trace_plane
+  - interrupt_event_plane
+  - attach_points
+  - external_ports
+  - harness_closure
+  - generated_collateral
+  - canonical_hash
+properties:
+  composition_id: string
+  resolved_config_ref: string
+  compute_plane: map
+  memory_plane: map
+  control_plane: map
+  debug_trace_plane: map
+  interrupt_event_plane: map
+  attach_points:
+    type: list
+    item_schema: ATTACH_POINT
+  external_ports:
+    type: list
+    item_schema: EXTERNAL_PORT
+  harness_closure:
+    type: list
+    item_schema: HARNESS_PORT_CLOSURE
+  generated_collateral: list
+  canonical_hash: string
+definitions:
+  ATTACH_POINT:
+    type: object
+    required: [attach_id, owner_skill, plane, stable_instance_id, crossing_policy]
+    properties:
+      attach_id: string
+      owner_skill: string
+      plane: enum
+      stable_instance_id: string
+      crossing_policy: map
+  EXTERNAL_PORT:
+    type: object
+    required: [port_id, owner_skill, protocol_family, width_bits, address_range, harness_policy]
+    properties:
+      port_id: string
+      owner_skill: string
+      protocol_family: string
+      width_bits: integer
+      address_range: map
+      harness_policy: enum
+  HARNESS_PORT_CLOSURE:
+    type: object
+    required: [port_id, closure_kind, evidence_artifact]
+    properties:
+      port_id: string
+      closure_kind: enum
+      evidence_artifact: string
+failure_modes:
+  - SYSTEM_COMPOSITION_ROOT_MISSING
+  - COMPUTE_ATTACH_ID_UNSTABLE
+  - TRAFFIC_PLANE_COLLAPSED
+  - EXTERNAL_PORT_HARNESS_POLICY_MISSING
+  - COMPOSITION_COLLATERAL_DRIFT

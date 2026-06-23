@@ -18,6 +18,10 @@ only disables failure localization unless trace-level architectural divergence
 exists. The skill still produces pass evidence, coverage summary, performance
 metrics, and a regression fingerprint.
 
+Rocket lessons are used only for generated verification evidence: harness
+closure, unit-test contracts, protocol monitors, shadow checkers, adapter
+fuzzers, trace sinks, and compile-only drift coverage.
+
 ## Position in Flow
 
 Upstream:
@@ -52,6 +56,13 @@ Consumes:
 - `PROGRAM_IMAGE_IR`
 - `RUNTIME_LAUNCH_IR`
 - `LOADER_CONTRACT_IR`
+- `PROTOCOL_MONITOR_CONTRACT`
+- `HARNESS_CLOSURE_REPORT`
+- `UNIT_TEST_CONTRACT`
+- `SHADOW_MEMORY_CHECKER_PLAN`
+- `ADAPTER_FUZZER_PLAN`
+- `TRACE_SINK_CONTRACT`
+- `COMPILE_ONLY_DRIFT_EVIDENCE`
 - `rtl_trace`
 - `waveform_trace`
 - `golden_contract_trace`
@@ -90,6 +101,9 @@ Produces:
 - `MEMORY_STALL_MATRIX`
 - `PERFORMANCE_ATTRIBUTION_GRAPH`
 - `POWER_PROVENANCE_REPORT`
+- `HARNESS_CLOSURE_EVIDENCE_REPORT`
+- `ADAPTER_FUZZER_EVIDENCE_REPORT`
+- `COMPILE_ONLY_DRIFT_REPORT`
 
 Human-facing reports:
 - `VALIDATION_DASHBOARD.zh.md`
@@ -109,6 +123,9 @@ Additional AI-facing artifacts:
 - English `PERFORMANCE_ATTRIBUTION_GRAPH.md`
 - English `POWER_PROVENANCE_REPORT.md`
 - English `ROOT_CAUSE_REPORT.md`
+- English `HARNESS_CLOSURE_EVIDENCE_REPORT.md`
+- English `ADAPTER_FUZZER_EVIDENCE_REPORT.md`
+- English `COMPILE_ONLY_DRIFT_REPORT.md`
 
 ## Owned Decisions
 
@@ -140,6 +157,13 @@ This skill owns:
 - queue boundary attribution
 - power and energy provenance reporting
 - root cause evidence rule enforcement
+- harness closure evidence ingestion
+- unit-test start/finished/timeout evidence ingestion
+- protocol monitor violation attribution
+- shadow memory checker evidence ingestion
+- adapter fuzzer pass/fail evidence ingestion
+- trace sink availability and schema evidence ingestion
+- compile-only drift evidence reporting
 
 Required reference lessons:
 - `VORTEX_LSU_LANE_FORMAT`
@@ -149,6 +173,9 @@ Required reference lessons:
 - `VORTEX_MSHR_DEADLOCK_GUARD`
 - `VORTEX_BARRIER_WSYNC_DRAIN`
 - `VORTEX_SIMX_RTL_TWIN`
+- `ROCKET_PROTOCOL_MONITOR_CONTRACT`
+- `ROCKET_HARNESS_CLOSURE_GATE`
+- `ROCKET_COMPILE_ONLY_DRIFT_GATE`
 
 ## Human and AI Output Policy
 
@@ -173,6 +200,28 @@ ambiguous, a regression reappears, or a downstream owner needs exact fields.
 Every counter used for a stable conclusion must record name, producer module,
 producer event, meaning, unit, sample window, status, users, and stable/debug
 classification. Status is `producer-backed`, `defined-only`, or `parser-only`.
+
+## Generator Verification Evidence Rules
+
+This skill must ingest generator-created verification artifacts as first-class
+evidence:
+
+- harness closure proves every external port is connected to a model or tied off
+- unit-test start/finished/timeout proves local block tests have deterministic
+  start, finish, and timeout semantics
+- protocol monitor evidence comes from `PROTOCOL_MONITOR_CONTRACT`, not
+  hand-written local constants
+- shadow memory checker evidence is required for memory-visible or atomic data
+  changes
+- adapter fuzzer evidence is required when an adapter contract is introduced or
+  changed
+- trace sink evidence proves runtime-visible traces have schema and consumer
+  paths
+- compile-only drift evidence proves named configs that do not execute still
+  elaborate and retain harness collateral
+
+Missing evidence does not become a functional root cause by itself; it routes to
+test-evidence, RTL-binding, or loop rewrite triggers.
 
 ## Producer Audit
 
@@ -229,6 +278,8 @@ This skill must not:
 - blame RTL decode before checking assembler, program image, loader, runtime
   launch, and first-fetch evidence when toolchain traces exist
 - produce rewrite patches directly
+- ignore missing harness closure, protocol monitor, shadow checker, adapter
+  fuzzer, trace sink, or compile-only drift evidence
 
 ## Required Tables
 
@@ -265,6 +316,7 @@ This skill must validate:
 - `shared/schemas/artifact_manifest_ir.schema.yaml`
 - `shared/schemas/human_report_manifest_ir.schema.yaml`
 - `shared/schemas/artifact_visibility_ir.schema.yaml`
+- `shared/schemas/protocol_monitor_contract.schema.yaml`
 - `shared/schemas/normalized_trace_ir.schema.yaml`
 - `shared/schemas/correctness_gate_report_ir.schema.yaml`
 - `shared/schemas/first_divergence_report_ir.schema.yaml`
@@ -293,6 +345,15 @@ This skill must validate:
 
 The output must satisfy:
 - `CORRECTNESS_GATE_REPORT` selects exactly one mode for each run.
+- `PROTOCOL_MONITOR_CONTRACT` violations must be attributed to negotiated edge,
+  adapter, module, or evidence gap before blaming memory or DRAM behavior.
+- harness closure evidence is required before a full-system pass can be marked evidence-complete.
+- unit-test start/finished/timeout evidence is required for unit-test pass evidence.
+- protocol monitor evidence is required for negotiated interface pass evidence.
+- shadow memory checker evidence is required for memory-visible data correctness.
+- adapter fuzzer evidence is required for adapter pass evidence.
+- trace sink evidence is required for runtime-visible trace coverage.
+- compile-only drift evidence is required for named configs that are not executed.
 - RTL/golden match enters Pass Evidence Mode, not skill skip.
 - RTL/golden mismatch, completion/fault mismatch, final memory mismatch, or
   trace-level architectural divergence enters Failure Attribution Mode.
@@ -335,6 +396,13 @@ This skill must emit:
 - `TRACE_DIVERGENCE_AFTER_FINAL_MATCH`
 - `FIRST_DIVERGENCE_INSUFFICIENT_TRACE`
 - `PASS_EVIDENCE_INCOMPLETE`
+- `HARNESS_CLOSURE_EVIDENCE_MISSING`
+- `UNIT_TEST_TIMEOUT_EVIDENCE_MISSING`
+- `PROTOCOL_MONITOR_EVIDENCE_MISSING`
+- `SHADOW_MEMORY_CHECKER_EVIDENCE_MISSING`
+- `ADAPTER_FUZZER_EVIDENCE_MISSING`
+- `TRACE_SINK_EVIDENCE_MISSING`
+- `COMPILE_ONLY_DRIFT_EVIDENCE_MISSING`
 - `PERFORMANCE_METRIC_UNAVAILABLE`
 - `PERF_CAUSAL_CHAIN_MISSING`
 - `TOOLCHAIN_ATTRIBUTION_AMBIGUOUS`
@@ -360,6 +428,9 @@ The report must include:
 - `toolchain_attribution_report_ref`
 - `trace_coverage_report_ref`
 - `regression_fingerprint_ref`
+- `harness_closure_evidence_ref`
+- `adapter_fuzzer_evidence_ref`
+- `compile_only_drift_report_ref`
 - `top_bottlenecks`
 - `contract_path_index`
 - `toolchain_artifact_path_index`
@@ -439,6 +510,7 @@ This skill is incomplete unless the following exist:
 - `queue_boundary_attribution.md`
 - `power_energy_provenance.md`
 - `root_cause_evidence_rule.md`
+- `shared/schemas/protocol_monitor_contract.schema.yaml`
 - `shared/schemas/normalized_trace_ir.schema.yaml`
 - `shared/schemas/correctness_gate_report_ir.schema.yaml`
 - `shared/schemas/first_divergence_report_ir.schema.yaml`

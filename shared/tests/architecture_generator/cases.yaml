@@ -1,4 +1,27 @@
 cases:
+  - case_id: rocket_style_config_resolution
+    input_artifacts:
+      - shared/references/rocket/config_fragment_lessons.md
+      - shared/references/rocket/soc_composition.md
+    expected_outputs:
+      - CONFIG_STACK_IR
+      - RESOLVED_CONFIG_IR
+      - SYSTEM_COMPOSITION_IR
+      - ARCH_IR
+    expected_failure_mode: null
+    required_evidence:
+      - config owner
+      - override order
+      - derived field
+      - invariant
+      - consumer
+      - collateral
+      - ARCH_IR generated after RESOLVED_CONFIG_IR
+      - ARCH_IR generated after SYSTEM_COMPOSITION_IR
+    forbidden_outputs:
+      - GOLDEN_CONTRACT_MODEL
+      - INCREMENTAL_RTL_MAP
+
   - case_id: architecture_generator_memory_pressure_prefilter
     input_artifacts:
       - shared/examples/self_correcting_minimal_simt/input_request.md

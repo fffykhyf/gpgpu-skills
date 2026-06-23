@@ -1,4 +1,27 @@
 cases:
+  - case_id: mmio_start_done_fault_smoke
+    input_artifacts:
+      - shared/examples/self_correcting_minimal_simt/expected_system_contract_ir.yaml
+      - shared/examples/self_correcting_minimal_simt/expected_runtime_launch_ir.yaml
+      - shared/references/rocket/mmio_runtime_debug.md
+    expected_outputs:
+      - MMIO_REGISTER_MAP_IR
+      - DEBUG_COUNTER_CONTRACT
+      - RUNTIME_LAUNCH_IR
+      - TOOLCHAIN_SMOKE_REPORT
+    expected_failure_mode: null
+    required_evidence:
+      - discovery block
+      - launch block
+      - status block
+      - interrupt block
+      - fault block
+      - trace block
+      - debug block
+      - counter block
+      - START/BUSY/DONE/FAULTED/ACK
+      - second START while BUSY checked
+
   - case_id: derives_toolchain_runtime_artifacts_from_contract
     input_artifacts:
       - shared/examples/self_correcting_minimal_simt/expected_system_contract_ir.yaml

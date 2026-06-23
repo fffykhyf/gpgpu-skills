@@ -9,6 +9,11 @@ description: Use when SYSTEM_CONTRACT_IR and GOLDEN_CONTRACT_MODEL must derive a
 
 This skill derives toolchain and runtime artifacts from `SYSTEM_CONTRACT_IR`. It must not define independent ISA, ABI, program image, loader, or runtime truth.
 
+Rocket lessons are used only for generator-owned MMIO, debug, trace, counter,
+and verification-collateral patterns. Do not copy CLINT/PLIC register layout,
+Rocket debug-module layout, TileLink as mandatory protocol, or CPU privilege
+semantics.
+
 ## Position in Flow
 
 Upstream:
@@ -43,6 +48,8 @@ Produces:
 - `PROGRAM_IMAGE_IR`
 - `RUNTIME_LAUNCH_IR`
 - `LOADER_CONTRACT_IR`
+- `MMIO_REGISTER_MAP_IR`
+- `DEBUG_COUNTER_CONTRACT`
 - `ASSEMBLER_BINDING_REPORT`
 - `TOOLCHAIN_SMOKE_REPORT`
 - `LAUNCH_DESCRIPTOR`
@@ -61,6 +68,8 @@ AI-facing artifacts:
 - English `PROGRAM_IMAGE_IR.yaml`
 - English `RUNTIME_LAUNCH_IR.yaml`
 - English `LOADER_CONTRACT_IR.yaml`
+- English `MMIO_REGISTER_MAP_IR.yaml`
+- English `DEBUG_COUNTER_CONTRACT.yaml`
 - English `TOOLCHAIN_SMOKE_REPORT.yaml`
 - English `LAUNCH_DESCRIPTOR.schema.yaml`
 - English `PROGRAM_IMAGE.schema.yaml`
@@ -91,12 +100,18 @@ This skill owns:
 - program image layout validation
 - runtime argument encoding validation
 - loader contract validation
+- discovery, launch, status, interrupt, fault, trace, debug, and counter block generation
+- MMIO register field access, volatility, reset, side-effect, and enumeration metadata
+- START/BUSY/DONE/FAULTED/ACK runtime smoke gate generation
+- debug/counter producer binding handoff to `gpgpu-rtl` and `gpgpu-simppa`
 - golden program-image execution smoke validation
 - source-of-truth hash and semantic equivalence checks
 
 Required reference lessons:
 - `VORTEX_LSU_LANE_FORMAT`
 - `VORTEX_COALESCER_RESPONSE_RESTORE`
+- `ROCKET_MMIO_REGISTER_MAP`
+- `ROCKET_DEBUG_COUNTER_CONTRACT`
 
 ## Human and AI Output Policy
 
@@ -150,6 +165,36 @@ CUDA stream stack, kernel launch latency, compute capability, OpenCL object
 model, PTX capability, and frontend-specific memory quirks may only appear in an
 optional compatibility profile. They must not enter the base ABI.
 
+## Rocket-Style MMIO Runtime Rules
+
+Runtime-visible state must be generated from `MMIO_REGISTER_MAP_IR` and
+`DEBUG_COUNTER_CONTRACT`, not handwritten register decode fragments. Required
+MMIO blocks are discovery, launch, status, interrupt, fault, trace, debug, and
+counter blocks.
+
+Minimum field rules:
+
+- The discovery block exposes ABI version, SM count, trace presence, debug
+  presence, and counter bank count from resolved config.
+- The launch block owns descriptor address, grid/block dimensions, queue select,
+  abort, and `START` pulse or explicit start control.
+- The status block owns volatile `BUSY`, `DONE`, `FAULTED`, pending transaction,
+  active SM mask, and completion sequence fields.
+- The interrupt block separates enable, volatile pending, and ACK or W1C clear.
+- The fault block separates cause, value, accrued state, and explicit clear
+  semantics.
+- The trace block exposes enable, target, and sink selection when trace is
+  configured.
+- The debug block exposes debug control/status/fault windows only when debug is
+  configured.
+- The counter block separates control fields from read-only volatile counter
+  data and records producer bindings.
+
+The `START/BUSY/DONE/FAULTED/ACK` smoke gate is mandatory: write descriptor,
+write `START`, observe `BUSY`, eventually observe exactly one of `DONE` or
+`FAULTED`, require terminal status to persist until `ACK`, and require a second
+`START` while `BUSY` to be rejected or reported as a defined pending/error case.
+
 ## Forbidden Actions
 
 This skill must not:
@@ -194,6 +239,8 @@ This skill must validate:
 - `shared/schemas/program_image_ir.schema.yaml`
 - `shared/schemas/runtime_launch_ir.schema.yaml`
 - `shared/schemas/loader_contract_ir.schema.yaml`
+- `shared/schemas/mmio_register_map_ir.schema.yaml`
+- `shared/schemas/debug_counter_contract.schema.yaml`
 - `shared/schemas/assembler_binding_report_ir.schema.yaml`
 - `shared/schemas/toolchain_smoke_report_ir.schema.yaml`
 - `shared/schemas/warp_memory_transaction.schema.yaml`
@@ -209,6 +256,9 @@ The output must satisfy:
 - `PROGRAM_IMAGE_IR.metadata.isa_model_hash` matches the derived ISA table hash.
 - `RUNTIME_LAUNCH_IR.launch_abi` derives from `SYSTEM_CONTRACT_IR.launch_model.abi`.
 - `LOADER_CONTRACT_IR` derives from `SYSTEM_CONTRACT_IR.launch_model.loader_contract`.
+- `MMIO_REGISTER_MAP_IR` must generate discovery, launch, status, interrupt, fault, trace, debug, and counter blocks.
+- `DEBUG_COUNTER_CONTRACT` must separate counter control from read-only volatile counter data and must name producer bindings for stable counters.
+- `START/BUSY/DONE/FAULTED/ACK` smoke evidence must be present for runtime launch sign-off.
 - Golden execution must consume `PROGRAM_IMAGE_IR`, decode instruction bytes, and emit expected trace or memory dump.
 - Memory instructions must emit `MEMORY_BUNDLE` before LSU issue.
 - `MEMORY_BUNDLE` must contain address vector, lane mask, access type, memory space, byte enables, ordering scope, and coalescing policy reference.
@@ -231,6 +281,10 @@ This skill must emit:
 - `PROGRAM_IMAGE_LAYOUT_FAIL`
 - `ENTRY_SYMBOL_RESOLVE_FAIL`
 - `RUNTIME_ARG_ENCODING_FAIL`
+- `MMIO_REGISTER_MAP_MISSING`
+- `MMIO_FIELD_SEMANTICS_MISSING`
+- `START_DONE_ACK_AMBIGUOUS`
+- `DEBUG_COUNTER_CONTRACT_MISSING`
 - `LOADER_CONTRACT_FAIL`
 - `GOLDEN_IMAGE_EXECUTION_FAIL`
 - `SOURCE_OF_TRUTH_DRIFT`
@@ -247,6 +301,8 @@ The report must include:
 - program_image_ir_hash
 - runtime_launch_ir_hash
 - loader_contract_ir_hash
+- mmio_register_map_ir_hash
+- debug_counter_contract_hash
 - source_of_truth_checks
 - assembler_binding_results
 - disassembler_roundtrip_results
@@ -276,6 +332,8 @@ This skill is incomplete unless the following exist:
 - `shared/schemas/program_image_ir.schema.yaml`
 - `shared/schemas/runtime_launch_ir.schema.yaml`
 - `shared/schemas/loader_contract_ir.schema.yaml`
+- `shared/schemas/mmio_register_map_ir.schema.yaml`
+- `shared/schemas/debug_counter_contract.schema.yaml`
 - `shared/schemas/assembler_binding_report_ir.schema.yaml`
 - `shared/schemas/toolchain_smoke_report_ir.schema.yaml`
 - `shared/schemas/warp_memory_transaction.schema.yaml`

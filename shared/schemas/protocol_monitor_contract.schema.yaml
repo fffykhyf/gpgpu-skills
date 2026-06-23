@@ -1,0 +1,46 @@
+schema: protocol_monitor_contract
+version: v5
+type: object
+required:
+  - monitor_id
+  - negotiated_edge_ref
+  - checked_capabilities
+  - assertions
+  - timeout_policy
+  - response_tracking
+  - coverage
+  - failure_modes
+properties:
+  monitor_id: string
+  negotiated_edge_ref: string
+  checked_capabilities: list
+  assertions:
+    type: list
+    item_schema: MONITOR_ASSERTION
+  timeout_policy:
+    type: object
+    required: [enabled, max_cycles, owner_skill]
+    properties:
+      enabled: bool
+      max_cycles: integer
+      owner_skill: string
+  response_tracking: map
+  coverage: list
+  failure_modes: list
+definitions:
+  MONITOR_ASSERTION:
+    type: object
+    required: [assertion_id, derived_from, condition, failure_text]
+    properties:
+      assertion_id: string
+      derived_from: string
+      condition: string
+      failure_text: string
+rules:
+  - Monitor checks must be derived from NEGOTIATED_INTERFACE_IR, not local constants.
+  - Multibeat payload stability, source/sink uniqueness, response matching, and timeout checks are mandatory when the edge supports multibeat or outstanding traffic.
+failure_modes:
+  - PROTOCOL_MONITOR_MISSING
+  - MONITOR_NOT_DERIVED_FROM_EDGE
+  - RESPONSE_TRACKING_MISSING
+  - INTERFACE_TIMEOUT_UNCHECKED

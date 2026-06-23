@@ -11,6 +11,10 @@ This skill defines the `full_memory_sync_system` interconnect contract between S
 front-ends and the shared memory hierarchy. It owns NoC routing, SM-to-L2
 mapping, request queues, fabric arbitration, and congestion evidence.
 
+Rocket lessons are used here only for negotiated interface, adapter, and
+protocol-monitor structure. TileLink is not mandatory; the required abstraction
+is a negotiated edge with explicit adapter and monitor contracts.
+
 ## Position in Flow
 
 Upstream:
@@ -31,6 +35,9 @@ Consumes:
 - `ARCH_IR`
 - `CAPABILITY_PROFILE_IR`
 - `INCREMENTAL_RTL_MAP`
+- `RESOLVED_CONFIG_IR`
+- `SYSTEM_COMPOSITION_IR`
+- optional `NEGOTIATED_INTERFACE_IR`
 - `MEMORY_BUNDLE`
 - per-SM trace partitions
 - memory hierarchy constraints
@@ -39,6 +46,9 @@ Consumes:
 ## Output IR
 
 Produces:
+- `NEGOTIATED_INTERFACE_IR`
+- `ADAPTER_CONTRACT`
+- `PROTOCOL_MONITOR_CONTRACT`
 - `CONTRACT_FRAGMENT_IR`
 - `NOC_ROUTING_CONTRACT`
 - `SM_TO_MEMORY_FABRIC_IR`
@@ -55,6 +65,9 @@ Human-facing report:
 - interconnect section in `VALIDATION_DASHBOARD.zh.md`
 
 AI-facing artifacts:
+- English `NEGOTIATED_INTERFACE_IR.yaml`
+- English `ADAPTER_CONTRACT.yaml`
+- English `PROTOCOL_MONITOR_CONTRACT.yaml`
 - English `NOC_ROUTING_CONTRACT.yaml`
 - English `SM_TO_MEMORY_FABRIC_IR.yaml`
 - English `FABRIC_CONTENTION_REPORT.yaml`
@@ -84,10 +97,17 @@ This skill owns:
 - DRAM-facing queue boundary handoff
 - address mapping evidence contract
 - return path contract
+- negotiated edge ownership for SM/L1/NoC/L2/DRAM/host-facing memory paths
+- width adapter, fragment adapter, source-id adapter, atomic adapter, and protocol bridge adapter selection
+- protocol monitor generation from negotiated edge facts
+- raw wire binding rejection before RTL binding
 
 Required reference lessons:
 - `VORTEX_CACHE_MSHR_RESPONSE_ROUTE`
 - `VORTEX_SIMX_RTL_TWIN`
+- `ROCKET_NEGOTIATED_INTERFACE_EDGE`
+- `ROCKET_INTERFACE_ADAPTER_CONTRACT`
+- `ROCKET_PROTOCOL_MONITOR_CONTRACT`
 
 ## Human and AI Output Policy
 
@@ -103,6 +123,31 @@ All full routing tables and queue traces must be registered in
 Every fabric packet must expose packet class, source, destination, request or
 response direction, byte size, flit count, `has_buffer` result, queue enter
 cycle, and queue exit cycle.
+
+## Negotiated Interface and Adapter Rules
+
+Every interconnect boundary must emit `NEGOTIATED_INTERFACE_IR` before packet or
+wire binding. The negotiated edge derives address width, data width, source ID
+width, sink ID width, size width, beat bytes, max transfer bytes, legal request
+classes, legal response classes, ordering scope, denial policy, error policy,
+and response shape.
+
+raw wire binding is forbidden unless it comes from a negotiated edge.
+
+Adapter rules:
+
+- A width adapter is mandatory when endpoint data width or beat bytes differ.
+- A fragment adapter is mandatory when transfer-size or burst-shape lattices
+  differ and reassembly is required.
+- A source-id adapter is mandatory when outstanding request capacity must be
+  remapped or compressed.
+- An atomic adapter is mandatory when an atomic operation is exposed over a path
+  that does not natively support the required operation.
+- A protocol bridge adapter is mandatory when crossing protocol families; it
+  must document ID mapping, burst translation, response/error mapping, and
+  ordering guarantees.
+- Every adapter emits `ADAPTER_CONTRACT` and every external or multibeat edge
+  emits `PROTOCOL_MONITOR_CONTRACT`.
 
 ## ICNT Buffer / Backpressure Contract
 
@@ -143,6 +188,8 @@ This skill must not:
 - define barrier or fence semantics
 - mutate `SYSTEM_CONTRACT_IR`
 - hide source SM IDs in global memory traces
+- allow raw wire binding without `NEGOTIATED_INTERFACE_IR`
+- treat TileLink as the mandatory GPGPU fabric protocol
 
 ## Required Tables
 
@@ -163,6 +210,9 @@ This skill must validate:
 - `shared/schemas/human_report_manifest_ir.schema.yaml`
 - `shared/schemas/artifact_visibility_ir.schema.yaml`
 - `shared/schemas/system_contract_ir.schema.yaml`
+- `shared/schemas/negotiated_interface_ir.schema.yaml`
+- `shared/schemas/adapter_contract.schema.yaml`
+- `shared/schemas/protocol_monitor_contract.schema.yaml`
 - `shared/schemas/incremental_rtl_map.schema.yaml`
 - `shared/schemas/normalized_trace_ir.schema.yaml`
 - `shared/schemas/noc_packet.schema.yaml`
@@ -172,6 +222,14 @@ This skill must validate:
 ## Required Invariants
 
 The output must satisfy:
+- every interconnect boundary has a `NEGOTIATED_INTERFACE_IR` edge before RTL or packet binding
+- raw wire binding is forbidden unless it comes from a negotiated edge
+- every width mismatch has a width adapter or a hard failure
+- every transfer-size or burst-shape mismatch has a fragment adapter or a hard failure
+- every source-ID compression has a source-id adapter with remap state and inflight guards
+- every exposed atomic path has native support or an atomic adapter with checked preconditions
+- every protocol-family crossing has a protocol bridge adapter with ID, burst, error, and ordering translation
+- every negotiated edge with outstanding, multibeat, or external traffic has a `PROTOCOL_MONITOR_CONTRACT`
 - every memory request entering the fabric has a `sm_id`
 - every route names source SM, destination L2 slice or memory target, arbitration class, and ordering scope
 - request merging across SM is explicit and never changes memory visibility
@@ -187,6 +245,10 @@ This skill must emit:
 - `NOC_ROUTE_MISSING`
 - `SM_ID_ROUTE_MISSING`
 - `FABRIC_ARBITRATION_AMBIGUOUS`
+- `NEGOTIATED_EDGE_MISSING`
+- `RAW_WIRE_BINDING_FORBIDDEN`
+- `ADAPTER_CONTRACT_MISSING`
+- `PROTOCOL_MONITOR_MISSING`
 - `REQUEST_QUEUE_OVERFLOW`
 - `CROSS_SM_MERGE_UNSAFE`
 - `CONGESTION_MODEL_MISSING`
@@ -199,6 +261,9 @@ The report must include:
 - system_contract_ir_hash
 - incremental_rtl_map_hash
 - routing_contract_hash
+- negotiated_interface_ir_hash
+- adapter_contract_hash
+- protocol_monitor_contract_hash
 - sm_to_memory_fabric_hash
 - route_results
 - queue_results
@@ -218,6 +283,9 @@ This skill is incomplete unless the following exist:
 - `address_mapping_evidence_contract.md`
 - `return_path_contract.md`
 - `shared/schemas/noc_packet.schema.yaml`
+- `shared/schemas/negotiated_interface_ir.schema.yaml`
+- `shared/schemas/adapter_contract.schema.yaml`
+- `shared/schemas/protocol_monitor_contract.schema.yaml`
 - `shared/schemas/memory_queue_boundary.schema.yaml`
 - `shared/templates/memory_queue_boundary_report.md`
 
