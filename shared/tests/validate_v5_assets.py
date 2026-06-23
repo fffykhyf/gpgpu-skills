@@ -46,6 +46,9 @@ REMOVED_LEGACY_SKILLS = [
 ]
 
 REMOVED_FILES = [
+    "file_descriptions.zh.md",
+    "skill_5stage_compression_plan.zh.md",
+    "skill_summary.md",
     "shared/tools/generate_v4_assets.py",
 ]
 
@@ -548,7 +551,6 @@ def require_asset_semantics(failures: List[str]) -> None:
         "shared/examples/self_correcting_minimal_simt/expected_perf_attribution_graph.yaml",
         "shared/examples/self_correcting_minimal_simt/expected_arch_rewrite_plan.yaml",
         "shared/tests/architecture_rewrite_loop_controller/cases.yaml",
-        "file_descriptions.zh.md",
     ]
     for rel_path in stale_scan_paths:
         path = ROOT / rel_path
@@ -733,8 +735,6 @@ def main() -> int:
     for rel_path in REFERENCE_FILES:
         require_nonempty(ROOT / rel_path, failures)
 
-    require_file_description_catalog(failures)
-
     for lesson in REFERENCE_LESSONS:
         require(ROOT / "shared" / "references" / lesson, failures)
 
@@ -764,29 +764,6 @@ def main() -> int:
             "Simulation + Performance Attribution Engine",
             "Architecture Rewrite Loop Controller",
             "Legacy v4 top-level skills and the old `legacy/` skill archive are not active wrappers",
-        ],
-        failures,
-    )
-
-    require_text(
-        ROOT / "skill_5stage_compression_plan.zh.md",
-        [
-            "Executable Golden Model",
-            "INCREMENTAL_RTL_MAP",
-            "PERF_ATTRIBUTION_GRAPH",
-            "ARCH_REWRITE_PLAN",
-        ],
-        failures,
-    )
-
-    require_text(
-        ROOT / "skill_summary.md",
-        [
-            "# GPGPU Skill v5 总结",
-            "六个核心 skill",
-            "gpgpu-runtime",
-            "file_descriptions.zh.md",
-            "self-correcting GPGPU design system",
         ],
         failures,
     )
