@@ -29,3 +29,8 @@ graph_modes:
   - CORRECTNESS_FAILURE_GRAPH
   - PERFORMANCE_BOTTLENECK_GRAPH
   - TOOLCHAIN_ATTRIBUTION_GRAPH
+xiangshan_extensions:
+  weighted_perf_report_ref: WEIGHTED_PERF_REPORT
+  phase_feature_ref: PHASE_FEATURE
+  checkpoint_package_ref: CHECKPOINT_PACKAGE
+  topdown_attribution_ref: TOPDOWN_GPGPU_ATTRIBUTION

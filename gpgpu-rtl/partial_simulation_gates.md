@@ -62,3 +62,10 @@ Each failed case must report:
 - first failing cycle when available
 - expected golden slice behavior
 - observed local behavior
+
+## XiangShan Probe Gate
+
+Partial simulation cannot sign off a feature that affects memory, scheduling,
+sync, atomic, or performance unless the corresponding basic probe,
+full-transaction debug probe when needed, `STRUCTURED_TRACE_TABLE`, and counter
+tap ownership are present or explicitly waived with owner evidence.

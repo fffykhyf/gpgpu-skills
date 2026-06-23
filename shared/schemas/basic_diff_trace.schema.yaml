@@ -1,0 +1,21 @@
+schema: basic_diff_trace
+version: v5-xiangshan
+owner_skill: gpgpu-simppa
+type: object
+required:
+  - trace_id
+  - always_enabled
+  - warp_commit
+  - lane_writeback
+  - trap_fault
+  - launch_done
+properties:
+  trace_id: string
+  always_enabled: boolean
+  warp_commit: list
+  lane_writeback: list
+  trap_fault: list
+  launch_done: map
+validation_rules:
+  - basic diff must be available in smoke and regression modes.
+

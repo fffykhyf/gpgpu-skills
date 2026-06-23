@@ -73,3 +73,11 @@ Route failures:
 - ambiguous route -> `gpgpu-interconnect`
 - incorrect memory visibility -> `gpgpu-memory`
 - atomic/fence ordering mismatch -> `gpgpu-atomic-sync`
+
+## XiangShan NoC Trace DB Hook
+
+Interconnect routing must emit NoC packet and queue events into
+`NOC_PACKET_LOG` or equivalent `STRUCTURED_TRACE_TABLE` with schema version,
+config hash, source SM, target slice, virtual channel, route id, queue
+occupancy, arbitration wait, and response tag. Every NoC trace feature must
+ship a debug query and a performance attribution query.

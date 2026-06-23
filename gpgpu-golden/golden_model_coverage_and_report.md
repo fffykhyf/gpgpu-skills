@@ -74,3 +74,10 @@ All such fields must be absent or derived from an explicit
 - `GOLDEN_MODEL_COVERAGE_FAIL`
 - `NONDETERMINISTIC_REFERENCE_FUNCTION`
 - `FEATURE_GATE_COVERAGE_FAIL`
+
+## XiangShan Golden Coverage Additions
+
+Coverage must prove that `GOLDEN_REF_API`, `ARCHITECTURE_STATE_BLOB`,
+`GOLDEN_SIDECAR_STATE`, `STORE_COMMIT_EVENT`, and `GOLDEN_STATUS_API` are
+defined when live diff is enabled. The report must state whether the golden
+model is being used in live diff mode or offline analysis mode.

@@ -13,6 +13,12 @@ Rocket lessons are used only as generator/config/interface/MMIO/verification
 references. This skill must not use Rocket scalar pipeline structure as a GPU
 pipeline reference.
 
+XiangShan lessons are used only as development-loop closure references:
+safe runtime DSE, representative phase/counter planning, and top-level
+tool-enable switchboard rules. This skill must not copy XiangShan CPU frontend,
+branch predictor, rename/ROB, RISC-V privilege, CSR, or scalar pipeline
+semantics.
+
 ## Position in Flow
 
 Upstream:
@@ -121,6 +127,10 @@ Required Rocket reference lessons:
 - `ROCKET_RESOLVED_CONFIG_COLLATERAL`
 - `ROCKET_SYSTEM_COMPOSITION_ROOT`
 - `ROCKET_COMPILE_ONLY_DRIFT_GATE`
+
+Required XiangShan reference lessons:
+- `XIANGSHAN_SAFE_RUNTIME_DSE`
+- `XIANGSHAN_WEIGHTED_PERF_SAMPLING`
 
 ## Preset Selection Rules
 
@@ -262,6 +272,9 @@ This skill must validate:
 - `shared/schemas/arch_generation_report_ir.schema.yaml`
 - `shared/schemas/config_parameter_classification.schema.yaml`
 - `shared/schemas/config_parameter_taxonomy.schema.yaml`
+- `shared/schemas/runtime_dse_knob.schema.yaml` (`RUNTIME_DSE_KNOB`)
+- `shared/schemas/knob_classification.schema.yaml` (`KNOB_CLASSIFICATION`)
+- `shared/schemas/phase_feature.schema.yaml` (`PHASE_FEATURE`)
 - `shared/schemas/issue_nonissue_reason.schema.yaml`
 - `shared/schemas/simt_state.schema.yaml`
 - `shared/schemas/scoreboard_state.schema.yaml`

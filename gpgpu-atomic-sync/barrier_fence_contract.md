@@ -92,3 +92,11 @@ Failures include:
 - `BARRIER_RELEASE_WITHOUT_LSU_DRAIN`
 - `BARRIER_PHASE_ADVANCE_MISMATCH`
 - `ASYNC_BARRIER_UNSUPPORTED_BUT_ACCEPTED`
+
+## XiangShan Sync Side-Channel Events
+
+Barrier, fence, atomic, and WSYNC behavior must emit `SYNC_SIDECHANNEL_EVENT`
+records for full transaction diff. These events are side-channel evidence for
+synchronization ownership; they do not replace architectural state diff.
+Required structured tables include `BARRIER_EVENT_LOG`, `FENCE_EVENT_LOG`, and
+`ATOMIC_EVENT_LOG` when those features are enabled.

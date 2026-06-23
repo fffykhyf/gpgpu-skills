@@ -41,3 +41,21 @@ warning_thresholds:
   POWER_CLAIM_WITHOUT_SAIF: missing_switching_activity_evidence
   FPGA_CLAIM_WITHOUT_BACKEND_RUN: missing_fpga_or_hw_run_log
   PERF_COUNTER_UNBOUND_TO_CONTRACT: counter_missing_contract_path
+xiangshan_weighted_sampling:
+  required_artifacts:
+    - PHASE_FEATURE
+    - CHECKPOINT_PACKAGE
+    - WEIGHTED_PERF_REPORT
+    - TOPDOWN_GPGPU_ATTRIBUTION
+  gate_order:
+    - correctness_diff
+    - representative_checkpoint_replay
+    - weighted_attribution
+  topdown_buckets:
+    - frontend_fetch_decode_idle
+    - warp_scheduling_stall
+    - scoreboard_dependency_stall
+    - memory_pipeline_stall
+    - synchronization_stall
+    - tensor_alu_busy
+    - structural_conflict

@@ -135,6 +135,9 @@ Required reference lessons:
 - `ROCKET_PROTOCOL_MONITOR_CONTRACT`
 - `ROCKET_HARNESS_CLOSURE_GATE`
 - `ROCKET_COMPILE_ONLY_DRIFT_GATE`
+- `XIANGSHAN_BASIC_AND_FULL_DIFF`
+- `XIANGSHAN_REPLAYABLE_FAILURE_CAPTURE`
+- `XIANGSHAN_STRUCTURED_TRACE_DB`
 
 ## Human and AI Output Policy
 
@@ -258,6 +261,11 @@ This skill must validate:
 - `shared/schemas/adapter_contract.schema.yaml`
 - `shared/schemas/protocol_monitor_contract.schema.yaml`
 - `shared/schemas/incremental_rtl_map.schema.yaml`
+- `shared/schemas/basic_diff_trace.schema.yaml` (`BASIC_DIFF_TRACE`)
+- `shared/schemas/full_transaction_diff_trace.schema.yaml` (`FULL_TRANSACTION_DIFF_TRACE`)
+- `shared/schemas/warp_instr_commit.schema.yaml` (`WARP_INSTR_COMMIT`)
+- `shared/schemas/lane_reg_writeback.schema.yaml` (`LANE_REG_WRITEBACK`)
+- `shared/schemas/structured_trace_table.schema.yaml` (`STRUCTURED_TRACE_TABLE`)
 - `shared/schemas/module_interface_report_ir.schema.yaml`
 - `shared/schemas/rtl_partial_sim_report_ir.schema.yaml`
 - `shared/schemas/issue_nonissue_reason.schema.yaml`

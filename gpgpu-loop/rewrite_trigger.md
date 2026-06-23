@@ -28,3 +28,14 @@ explicit rejected alternatives explaining why RTL, contract, runtime, or
 test-evidence patches are insufficient. A `PASS_EVIDENCE_PATCH` may be
 triggered by `PASS_EVIDENCE_REPORT` evidence gaps, trace coverage gaps, or
 unstable `REGRESSION_FINGERPRINT` evidence.
+
+## XiangShan Replay-Driven Triggers
+
+`MISMATCH_PACKAGE` and `FAILURE_CAPTURE_PACKAGE` are first-class rewrite inputs.
+The loop must route:
+
+- first bad event owner to the matching owner skill
+- absent capture artifact without valid reason to `TEST_EVIDENCE_PATCH`
+- runtime structural knob mutation to `CONTRACT_PATCH` or `RUNTIME_PATCH`
+- representative checkpoint performance regression to `ARCHITECTURE_PATCH`
+  only after correctness diff passes and `WEIGHTED_PERF_REPORT` is complete

@@ -176,6 +176,12 @@ Required reference lessons:
 - `ROCKET_PROTOCOL_MONITOR_CONTRACT`
 - `ROCKET_HARNESS_CLOSURE_GATE`
 - `ROCKET_COMPILE_ONLY_DRIFT_GATE`
+- `XIANGSHAN_GOLDEN_EXECUTABLE_REF`
+- `XIANGSHAN_BASIC_AND_FULL_DIFF`
+- `XIANGSHAN_REPLAYABLE_FAILURE_CAPTURE`
+- `XIANGSHAN_SAFE_RUNTIME_DSE`
+- `XIANGSHAN_STRUCTURED_TRACE_DB`
+- `XIANGSHAN_WEIGHTED_PERF_SAMPLING`
 
 ## Human and AI Output Policy
 
@@ -340,6 +346,26 @@ This skill must validate:
 - `shared/schemas/noc_packet.schema.yaml`
 - `shared/schemas/memory_request_lifecycle.schema.yaml`
 - `shared/schemas/memory_queue_boundary.schema.yaml`
+- `shared/schemas/basic_diff_trace.schema.yaml` (`BASIC_DIFF_TRACE`)
+- `shared/schemas/full_transaction_diff_trace.schema.yaml` (`FULL_TRANSACTION_DIFF_TRACE`)
+- `shared/schemas/warp_instr_commit.schema.yaml` (`WARP_INSTR_COMMIT`)
+- `shared/schemas/lane_reg_writeback.schema.yaml` (`LANE_REG_WRITEBACK`)
+- `shared/schemas/memory_transaction_event.schema.yaml` (`MEMORY_TRANSACTION_EVENT`)
+- `shared/schemas/sync_sidechannel_event.schema.yaml` (`SYNC_SIDECHANNEL_EVENT`)
+- `shared/schemas/mismatch_package.schema.yaml` (`MISMATCH_PACKAGE`)
+- `shared/schemas/failure_capture_package.schema.yaml` (`FAILURE_CAPTURE_PACKAGE`)
+- `shared/schemas/replay_window.schema.yaml` (`REPLAY_WINDOW`)
+- `shared/schemas/debug_trigger.schema.yaml` (`DEBUG_TRIGGER`)
+- `shared/schemas/interactive_replay_session.schema.yaml` (`INTERACTIVE_REPLAY_SESSION`)
+- `shared/schemas/batch_auto_capture.schema.yaml` (`BATCH_AUTO_CAPTURE`)
+- `shared/schemas/dse_experiment_manifest.schema.yaml` (`DSE_EXPERIMENT_MANIFEST`)
+- `shared/schemas/trace_db_manifest.schema.yaml` (`TRACE_DB_MANIFEST`)
+- `shared/schemas/sql_debug_query.schema.yaml` (`SQL_DEBUG_QUERY`)
+- `shared/schemas/sql_perf_query.schema.yaml` (`SQL_PERF_QUERY`)
+- `shared/schemas/phase_feature.schema.yaml` (`PHASE_FEATURE`)
+- `shared/schemas/checkpoint_package.schema.yaml` (`CHECKPOINT_PACKAGE`)
+- `shared/schemas/weighted_perf_report.schema.yaml` (`WEIGHTED_PERF_REPORT`)
+- `shared/schemas/topdown_gpgpu_attribution.schema.yaml` (`TOPDOWN_GPGPU_ATTRIBUTION`)
 
 ## Required Invariants
 

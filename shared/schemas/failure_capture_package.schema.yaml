@@ -1,0 +1,27 @@
+schema: failure_capture_package
+version: v5-xiangshan
+owner_skill: gpgpu-simppa
+type: object
+required:
+  - package_id
+  - failing_test
+  - git_revision
+  - config_hash
+  - runtime_image_hash
+  - random_seed
+  - first_bad_event
+  - replay_command
+  - artifacts
+  - absent_artifact_reasons
+properties:
+  package_id: string
+  failing_test: string
+  git_revision: string
+  config_hash: string
+  runtime_image_hash: string
+  random_seed: integer
+  first_bad_event: map
+  replay_command: string
+  artifacts: map
+  absent_artifact_reasons: map
+

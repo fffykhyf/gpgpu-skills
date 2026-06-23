@@ -99,3 +99,10 @@ Route:
 - memory bundle mismatch -> `gpgpu-runtime` or `gpgpu-rtl`
 - coalescing mismatch -> `gpgpu-runtime`, `gpgpu-rtl`, or `gpgpu-memory`
 - cross-SM ordering mismatch -> `gpgpu-interconnect`, `gpgpu-memory`, or `gpgpu-atomic-sync`
+
+## XiangShan Diff Event Requirements
+
+Warp trace diff must consume `WARP_INSTR_COMMIT` and `LANE_REG_WRITEBACK` as the
+basic commit channel. If a warp mismatch depends on memory, barrier, fence, or
+atomic side effects, the report must request `FULL_TRANSACTION_DIFF_TRACE`
+instead of guessing from commit-only evidence.

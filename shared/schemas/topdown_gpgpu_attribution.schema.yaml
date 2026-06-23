@@ -1,0 +1,24 @@
+schema: topdown_gpgpu_attribution
+version: v5-xiangshan
+owner_skill: gpgpu-simppa
+type: object
+required:
+  - attribution_id
+  - total_cycles
+  - buckets
+  - weighted_phase_comparison
+  - correctness_gate_ref
+properties:
+  attribution_id: string
+  total_cycles: integer
+  buckets: map
+  weighted_phase_comparison: list
+  correctness_gate_ref: string
+required_buckets:
+  - frontend_fetch_decode_idle
+  - warp_scheduling_stall
+  - scoreboard_dependency_stall
+  - memory_pipeline_stall
+  - synchronization_stall
+  - tensor_alu_busy
+  - structural_conflict

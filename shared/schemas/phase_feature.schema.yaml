@@ -1,0 +1,23 @@
+schema: phase_feature
+version: v5-xiangshan
+owner_skill: gpgpu-simppa
+type: object
+required:
+  - phase_id
+  - kernel_id
+  - interval
+  - instruction_mix
+  - memory_behavior
+  - scheduling_behavior
+  - sync_behavior
+  - weight
+properties:
+  phase_id: string
+  kernel_id: string
+  interval: map
+  instruction_mix: map
+  memory_behavior: map
+  scheduling_behavior: map
+  sync_behavior: map
+  weight: number
+

@@ -29,3 +29,10 @@ Failure modes:
 - `TAG_REUSE_BEFORE_RESPONSE`
 - `SCOREBOARD_WAKEUP_BEFORE_FINAL_RESPONSE`
 - `COALESCER_RESPONSE_SHAPE_MISMATCH`
+
+## XiangShan Memory Transaction Event
+
+Full transaction diff must emit `MEMORY_TRANSACTION_EVENT` for accepted load,
+store, atomic, coalesced request, cache refill, MSHR replay, response restore,
+and final scoreboard release. Each event must preserve request tag, response
+tag, original request tag, SM, warp, lane mask, byte enable, and final EOP.

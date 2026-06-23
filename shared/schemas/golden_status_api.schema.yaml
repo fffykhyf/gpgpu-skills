@@ -1,0 +1,22 @@
+schema: golden_status_api
+version: v5-xiangshan
+owner_skill: gpgpu-golden
+type: object
+required:
+  - status_id
+  - running
+  - done
+  - faulted
+  - aborted
+  - timeout
+  - fault_code
+properties:
+  status_id: string
+  running: boolean
+  done: boolean
+  faulted: boolean
+  aborted: boolean
+  timeout: boolean
+  fault_code: string
+  completion_sequence: integer
+

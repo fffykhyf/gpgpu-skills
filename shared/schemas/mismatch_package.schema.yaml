@@ -1,0 +1,32 @@
+schema: mismatch_package
+version: v5-xiangshan
+owner_skill: gpgpu-simppa
+type: object
+required:
+  - mismatch_id
+  - first_bad_cycle
+  - first_bad_event
+  - event_type
+  - expected
+  - actual
+  - suspected_owner
+  - required_traces
+  - replay_window
+  - related_config
+  - related_runtime_image
+properties:
+  mismatch_id: string
+  first_bad_cycle: integer
+  first_bad_event: map
+  event_type: string
+  sm_id: integer
+  warp_id: integer
+  lane_mask: string
+  expected: map
+  actual: map
+  suspected_owner: string
+  required_traces: list
+  replay_window: map
+  related_config: string
+  related_runtime_image: string
+

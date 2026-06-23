@@ -225,3 +225,27 @@ Legacy v4 top-level skills and the old `legacy/` skill archive are not active wr
 ## Fail Closed Policy
 
 Missing schema, missing table row, hidden default, unsupported enum, forbidden provenance, unmapped contract paths, interface mismatches, missing causal evidence, and unowned rewrite triggers must reject or emit `INSUFFICIENT_SKILL_ASSET`.
+
+## XiangShan-Inspired Development Closure
+
+XiangShan is used as an engineering loop template, not as a CPU pipeline
+template. The integrated GPGPU flow is:
+
+1. `gpgpu-arch` generates architecture design, config classification, runtime
+   knob boundaries, trace/counter initial requirements, and a tool enablement
+   switchboard for basic diff, full diff, trace DB, failure capture, runtime
+   DSE, checkpoints, and performance sampling.
+2. `gpgpu-golden` generates `GOLDEN_REF_API`, `ARCHITECTURE_STATE_BLOB`,
+   `GOLDEN_SIDECAR_STATE`, `STORE_COMMIT_EVENT`, and `GOLDEN_STATUS_API`.
+3. `gpgpu-runtime` generates program image, launch descriptor, runtime knobs,
+   debug knobs, and stable runtime switch inputs.
+4. `gpgpu-rtl` binds modules, basic diff probes, full transaction probes,
+   structured trace tables, counter tap points, and sim harness closure.
+5. `gpgpu-simppa` runs correctness diff, emits `MISMATCH_PACKAGE`, creates
+   replayable `FAILURE_CAPTURE_PACKAGE`, ingests trace DB evidence, replays
+   representative checkpoints, and emits weighted performance attribution.
+6. `gpgpu-loop` routes mismatch packages and weighted attribution to the owner
+   patch class, forces replay after repair, and updates regression fingerprints.
+
+Generated workflows should include reproducible scripts for correctness, diff,
+replay, performance sampling, DSE, and trace DB collection.

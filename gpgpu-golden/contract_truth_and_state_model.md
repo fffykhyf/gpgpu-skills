@@ -145,3 +145,23 @@ Golden traces must replay deterministically from `GOLDEN_CONTRACT_MODEL`, cite
 contract hashes, cover mandatory semantic fields, and locate first divergence by
 field and rule path. They must not redefine ISA, warp model, state transitions,
 or memory behavior.
+
+## XiangShan Executable Reference Model
+
+Use `XIANGSHAN_GOLDEN_EXECUTABLE_REF` as a development-closure pattern only.
+`GOLDEN_REF_API` must define two separated modes:
+
+- live diff mode: `gpgpu_ref_init`, `gpgpu_ref_memcpy`,
+  `gpgpu_ref_statecpy`, `gpgpu_ref_step_event`, `gpgpu_ref_query_event`, and
+  `gpgpu_ref_status`
+- offline analysis mode: standalone run, profiling run, checkpoint generation,
+  checkpoint restore, and host-side performance attribution
+
+`ARCHITECTURE_STATE_BLOB` is the only diff-visible state container. It includes
+per-warp PC, active mask, reconvergence state, architectural registers, lane
+predicates, committed memory-visible store sequence, launch/grid/CTA state, and
+trap/fault state.
+
+`GOLDEN_SIDECAR_STATE` may hold scoreboard, outstanding memory, barrier phase,
+atomic pending, fault injection, and debug query state. Sidecar state is allowed
+to synchronize or localize evidence, but it must not become ISA-visible truth.

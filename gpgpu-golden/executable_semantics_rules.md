@@ -120,3 +120,19 @@ Each rule record must define:
 - Reject ABI fields not present in `SYSTEM_CONTRACT_IR.launch_model`.
 - Reject grid/block dimensions that cannot map to declared execution resources.
 - Reject completion behavior that cannot be observed by runtime-visible state.
+
+## XiangShan Live Reference API Rules
+
+`GOLDEN_REF_API` must expose a live step interface suitable for RTL
+synchronization:
+
+- `gpgpu_ref_init`
+- `gpgpu_ref_memcpy`
+- `gpgpu_ref_statecpy`
+- `gpgpu_ref_step_event`
+- `gpgpu_ref_query_event`
+- `gpgpu_ref_status`
+
+The live synchronization unit must be explicit: instruction, warp event, memory
+transaction, sync event, or CTA event. Offline profiling and checkpoint calls
+must be separate optional entry points so the basic diff path remains light.

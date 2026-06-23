@@ -77,3 +77,12 @@ verdict while still requiring `FIRST_DIVERGENCE_REPORT`.
 - Do not run failure localization for a clean pass.
 - Do not route to rewrite when evidence is incomplete; route to
   `TEST_EVIDENCE_PATCH` through pass evidence or root cause reporting.
+
+## XiangShan Probe Mode Policy
+
+`BASIC_DIFF_TRACE` is required for every correctness gate. It carries warp
+commit, lane writeback, trap/fault, and launch done events. Select
+`FULL_TRANSACTION_DIFF_TRACE` only when debug mode is requested, basic diff
+identifies a memory/sync/control ambiguity, or a prior regression requires
+transaction-level replay. Full diff must not be silently enabled in performance
+ranking runs without marking the run as debug-contaminated.

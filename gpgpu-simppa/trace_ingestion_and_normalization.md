@@ -229,3 +229,16 @@ usable for performance summaries only, not for high-confidence root cause.
 - `timestamp_normalization_report`
 - `trace_summary_hash`
 - per-source hashes for regression fingerprinting
+
+## XiangShan Structured Trace Input
+
+When `XIANGSHAN_STRUCTURED_TRACE_DB` is enabled, ingestion must accept
+`TRACE_DB_MANIFEST`, validate every `STRUCTURED_TRACE_TABLE` schema version, and
+preserve SQL query artifacts as evidence:
+
+- `SQL_DEBUG_QUERY` for first-divergence/root-cause investigation
+- `SQL_PERF_QUERY` for performance attribution
+
+Default table families include warp issue/commit, scoreboard, memory
+transaction, coalescer, cache access, MSHR event, NoC packet, barrier, fence,
+atomic, runtime launch, fault, and counter snapshot logs.

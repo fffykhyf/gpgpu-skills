@@ -124,3 +124,12 @@ Warnings:
 - Preserve `performance_metric_hash` for regression fingerprinting.
 - Reject PPA claims when `backend_perf_evidence` lacks the required backend
   matrix artifacts.
+
+## XiangShan Phase Sampling Metrics
+
+Performance gates that claim optimization must include `PHASE_FEATURE` records
+unless the run is explicitly a smoke-only correctness run. A phase feature must
+cover instruction mix, memory behavior, scheduling behavior, sync behavior,
+cycle interval, and weight. `CHECKPOINT_PACKAGE` replay must bind golden replay,
+RTL replay, counter schema, trace schema, runtime descriptor, pending
+transactions, barrier state, and atomic state.

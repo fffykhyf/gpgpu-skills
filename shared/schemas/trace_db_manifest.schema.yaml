@@ -1,0 +1,21 @@
+schema: trace_db_manifest
+version: v5-xiangshan
+owner_skill: gpgpu-simppa
+type: object
+required:
+  - manifest_id
+  - tables
+  - schema_versions
+  - config_hash
+  - workload
+  - producer_build
+  - storage_path
+properties:
+  manifest_id: string
+  tables: list
+  schema_versions: map
+  config_hash: string
+  workload: string
+  producer_build: string
+  storage_path: string
+

@@ -1,0 +1,19 @@
+schema: sql_debug_query
+version: v5-xiangshan
+owner_skill: gpgpu-simppa
+type: object
+required:
+  - query_id
+  - feature
+  - table_refs
+  - parameters
+  - sql
+  - expected_debug_answer
+properties:
+  query_id: string
+  feature: string
+  table_refs: list
+  parameters: list
+  sql: string
+  expected_debug_answer: string
+

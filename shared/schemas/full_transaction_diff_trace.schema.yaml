@@ -1,0 +1,21 @@
+schema: full_transaction_diff_trace
+version: v5-xiangshan
+owner_skill: gpgpu-simppa
+type: object
+required:
+  - trace_id
+  - debug_only
+  - memory_transactions
+  - sync_transactions
+  - control_transactions
+  - enable_gate
+properties:
+  trace_id: string
+  debug_only: boolean
+  memory_transactions: list
+  sync_transactions: list
+  control_transactions: list
+  enable_gate: string
+validation_rules:
+  - full transaction diff is enabled for debug localization, not default smoke evidence.
+

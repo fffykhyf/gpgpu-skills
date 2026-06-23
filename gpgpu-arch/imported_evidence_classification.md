@@ -15,3 +15,10 @@ replacement contract:
 - BookSim and AccelWattch configuration;
 - parser-only visualization variables.
 
+## XiangShan DSE Import Rule
+
+XiangShan Constantin evidence may define runtime-DSE mechanics, but not GPU
+structure. Accept policy selects, thresholds, already-elaborated feature gates,
+trace gates, and counter selection. Reject evidence that would change module
+existence, wire width, queue depth, bank count, warp size, ISA/ABI, or MMIO
+layout at runtime.

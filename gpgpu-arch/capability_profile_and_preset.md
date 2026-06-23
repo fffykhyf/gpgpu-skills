@@ -99,3 +99,19 @@ A generated `ARCH_IR` is accepted only if:
 - graph nodes name the owner skill for every fragment-producing subsystem;
 - unsupported subsystems are explicit non-goals;
 - the selected preset is recorded with provenance and rejected alternatives.
+
+## XiangShan Runtime DSE Boundary
+
+`XIANGSHAN_SAFE_RUNTIME_DSE` adds a required parameter classification before
+DSE. Every parameter must produce `KNOB_CLASSIFICATION`:
+
+- `structural_compile_time`: module count, wire width, queue depth, bank count,
+  data width, warp size, register-file geometry
+- `abi_visible`: ISA encoding, launch descriptor layout, MMIO register map,
+  memory consistency scope
+- `runtime_behavior_knob`: scheduler policy select, coalescer policy select,
+  prefetch enable, replay threshold, throttle threshold
+- `debug_trace_knob`: memory trace, scoreboard trace, barrier trace, full
+  transaction diff, counter selection
+
+Only runtime behavior and debug trace knobs may become `RUNTIME_DSE_KNOB`.

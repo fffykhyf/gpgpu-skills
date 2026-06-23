@@ -1,0 +1,23 @@
+schema: dse_experiment_manifest
+version: v5-xiangshan
+owner_skill: gpgpu-simppa
+type: object
+required:
+  - experiment_id
+  - base_config_hash
+  - knob_set
+  - workload
+  - correctness_gate
+  - performance_gate
+  - selected_result
+  - reject_reason
+properties:
+  experiment_id: string
+  base_config_hash: string
+  knob_set: list
+  workload: string
+  correctness_gate: map
+  performance_gate: map
+  selected_result: map
+  reject_reason: string
+

@@ -108,6 +108,7 @@ Required reference lessons:
 - `ROCKET_NEGOTIATED_INTERFACE_EDGE`
 - `ROCKET_INTERFACE_ADAPTER_CONTRACT`
 - `ROCKET_PROTOCOL_MONITOR_CONTRACT`
+- `XIANGSHAN_STRUCTURED_TRACE_DB`
 
 ## Human and AI Output Policy
 
@@ -216,6 +217,7 @@ This skill must validate:
 - `shared/schemas/incremental_rtl_map.schema.yaml`
 - `shared/schemas/normalized_trace_ir.schema.yaml`
 - `shared/schemas/noc_packet.schema.yaml`
+- `shared/schemas/structured_trace_table.schema.yaml` (`STRUCTURED_TRACE_TABLE`)
 - `shared/schemas/memory_queue_boundary.schema.yaml`
 - `shared/schemas/memory_request_lifecycle.schema.yaml`
 

@@ -1,14 +1,180 @@
 lessons:
-  - lesson_id: XIANGSHAN_VALIDATION_001
+  - lesson_id: XIANGSHAN_GOLDEN_EXECUTABLE_REF
     source_project: XiangShan
+    source_report: xiangshan_nemu_to_gpgpu_golden_model.en.md
     applies_to:
       - gpgpu-golden
       - gpgpu-simppa
-    topic: validation_closure
-    principle: "Pipeline and trace validation should route failures to fields, rules, and owners."
+      - gpgpu-rtl
+    topic: executable_golden_reference
+    principle: "Golden correctness should be driven by a live executable reference API with explicit state blobs, sidecar state, store commit events, and status queries."
     do:
-      - "Bind behavior through SYSTEM_CONTRACT_IR, PERF_ATTRIBUTION_GRAPH, and explicit contract tables."
+      - "Define GOLDEN_REF_API with init, memory copy, state copy, event step, event query, and status calls."
+      - "Separate ARCHITECTURE_STATE_BLOB diff-visible state from GOLDEN_SIDECAR_STATE synchronization and debug state."
+      - "Expose STORE_COMMIT_EVENT so store mismatches can be localized without whole-memory diff."
+      - "Separate live diff mode from offline profiling and checkpoint analysis mode."
     do_not:
-      - "Let a downstream implementation invent behavior not visible to validation."
+      - "Do not treat the golden model as only a final memory checker."
+      - "Do not mix non-architectural sidecar state into ISA-visible semantics."
+      - "Do not make offline profiling machinery mandatory for light live diff."
+    required_artifacts:
+      - GOLDEN_REF_API
+      - ARCHITECTURE_STATE_BLOB
+      - GOLDEN_SIDECAR_STATE
+      - STORE_COMMIT_EVENT
+      - GOLDEN_STATUS_API
+    acceptance_tests:
+      - executable_golden_ref_step_api
     evidence_anchor:
-      - "ref/skillref/xiangshan.md"
+      - shared/references/xiangshan/golden_model_lessons.md
+    raw_report_path: shared/references/xiangshan/raw/xiangshan_nemu_to_gpgpu_golden_model.en.md
+
+  - lesson_id: XIANGSHAN_BASIC_AND_FULL_DIFF
+    source_project: XiangShan
+    source_report: xiangshan_difftest_to_gpgpu_trace_diff.en.md
+    applies_to:
+      - gpgpu-simppa
+      - gpgpu-rtl
+      - gpgpu-memory
+      - gpgpu-atomic-sync
+    topic: layered_trace_diff
+    principle: "Correctness diff should use always-on lightweight commit probes and debug-only full transaction probes to find the first bad event."
+    do:
+      - "Define BASIC_DIFF_TRACE for warp commit, lane writeback, trap/fault, and launch done events."
+      - "Define FULL_TRANSACTION_DIFF_TRACE for memory, coalescer, cache/MSHR, sync, atomic, fence, control, and debug events."
+      - "Emit MISMATCH_PACKAGE with first bad cycle, first bad event, expected/actual, owner, required traces, and replay window."
+    do_not:
+      - "Do not rely on final output equality or whole-memory diff for correctness localization."
+      - "Do not enable heavy transaction probes by default in every smoke test."
+      - "Do not compare traces that lack stable warp, lane, transaction, or sync identity."
+    required_artifacts:
+      - BASIC_DIFF_TRACE
+      - FULL_TRANSACTION_DIFF_TRACE
+      - WARP_INSTR_COMMIT
+      - LANE_REG_WRITEBACK
+      - MEMORY_TRANSACTION_EVENT
+      - SYNC_SIDECHANNEL_EVENT
+      - MISMATCH_PACKAGE
+    acceptance_tests:
+      - basic_vs_full_diff_trace
+      - mismatch_package_generation
+    evidence_anchor:
+      - shared/references/xiangshan/difftest_trace_diff_lessons.md
+    raw_report_path: shared/references/xiangshan/raw/xiangshan_difftest_to_gpgpu_trace_diff.en.md
+
+  - lesson_id: XIANGSHAN_REPLAYABLE_FAILURE_CAPTURE
+    source_project: XiangShan
+    source_report: xiangshan_lightsss_to_gpgpu_failure_capture.en.md
+    applies_to:
+      - gpgpu-simppa
+      - gpgpu-loop
+      - gpgpu-rtl
+    topic: replayable_failure_capture
+    principle: "Simulation failure evidence should be a bounded, replayable package with trigger context, trace and waveform windows, state snapshots, and absent-artifact reasons."
+    do:
+      - "Define BATCH_AUTO_CAPTURE for CI and regression triggers."
+      - "Define INTERACTIVE_REPLAY_SESSION for human step, break, dump, and compare workflows."
+      - "Emit FAILURE_CAPTURE_PACKAGE with replay command, trace slice, waveform slice or absent reason, config hash, program image hash, golden state, RTL summary, memory store log, and counter snapshot."
+    do_not:
+      - "Do not dump every cycle waveform by default."
+      - "Do not leave failures as unstructured log text."
+      - "Do not silently omit replay artifacts."
+    required_artifacts:
+      - FAILURE_CAPTURE_PACKAGE
+      - REPLAY_WINDOW
+      - DEBUG_TRIGGER
+      - INTERACTIVE_REPLAY_SESSION
+      - BATCH_AUTO_CAPTURE
+    acceptance_tests:
+      - replayable_failure_capture
+    evidence_anchor:
+      - shared/references/xiangshan/failure_capture_lessons.md
+    raw_report_path: shared/references/xiangshan/raw/xiangshan_lightsss_to_gpgpu_failure_capture.en.md
+
+  - lesson_id: XIANGSHAN_SAFE_RUNTIME_DSE
+    source_project: XiangShan
+    source_report: xiangshan_constantin_to_gpgpu_runtime_dse.en.md
+    applies_to:
+      - gpgpu-arch
+      - gpgpu-runtime
+      - gpgpu-simppa
+      - gpgpu-loop
+    topic: safe_runtime_dse
+    principle: "Runtime DSE may explore already-elaborated policies, thresholds, and debug gates, but must not mutate structural or ABI-visible design facts."
+    do:
+      - "Classify every knob as structural compile-time, ABI-visible, runtime behavior, debug trace, test-only, or unsupported."
+      - "Define RUNTIME_DSE_KNOB with default, bounds, metric, trace tables, and contamination risk."
+      - "Emit DSE_EXPERIMENT_MANIFEST tying knobs, workload, correctness gate, performance gate, selected result, and reject reason."
+    do_not:
+      - "Do not allow runtime knobs to change module existence, wire width, queue depth, bank count, warp size, ISA/ABI, or MMIO layout."
+      - "Do not compare pre-elaborated variants unless IO shape remains stable."
+      - "Do not let debug trace knobs pollute performance ranking."
+    required_artifacts:
+      - RUNTIME_DSE_KNOB
+      - RUNTIME_SWITCH_IR
+      - KNOB_CLASSIFICATION
+      - DSE_EXPERIMENT_MANIFEST
+    acceptance_tests:
+      - safe_runtime_dse_knob
+    evidence_anchor:
+      - shared/references/xiangshan/runtime_dse_lessons.md
+    raw_report_path: shared/references/xiangshan/raw/xiangshan_constantin_to_gpgpu_runtime_dse.en.md
+
+  - lesson_id: XIANGSHAN_STRUCTURED_TRACE_DB
+    source_project: XiangShan
+    source_report: xiangshan_chiseldb_to_gpgpu_structured_trace.en.md
+    applies_to:
+      - gpgpu-rtl
+      - gpgpu-simppa
+      - gpgpu-memory
+      - gpgpu-interconnect
+      - gpgpu-atomic-sync
+    topic: structured_trace_db
+    principle: "High-cardinality hardware debug and performance events should be structured into versioned trace tables with debug and performance queries."
+    do:
+      - "Define STRUCTURED_TRACE_TABLE with schema version, common fields, producer, write gate, retention, and consumer."
+      - "Define TRACE_DB_MANIFEST for table list, schema versions, config hash, workload, producer build, and storage path."
+      - "Require every memory, scheduling, sync, atomic, or performance feature to provide SQL_DEBUG_QUERY and SQL_PERF_QUERY."
+    do_not:
+      - "Do not rely only on VCD, printf, or hand-scanned logs for memory, barrier, atomic, NoC, or counter attribution."
+      - "Do not emit unversioned trace tables."
+      - "Do not add trace sources without producer ownership."
+    required_artifacts:
+      - STRUCTURED_TRACE_TABLE
+      - TRACE_DB_MANIFEST
+      - SQL_DEBUG_QUERY
+      - SQL_PERF_QUERY
+    acceptance_tests:
+      - structured_trace_db_feature
+    evidence_anchor:
+      - shared/references/xiangshan/structured_trace_lessons.md
+    raw_report_path: shared/references/xiangshan/raw/xiangshan_chiseldb_to_gpgpu_structured_trace.en.md
+
+  - lesson_id: XIANGSHAN_WEIGHTED_PERF_SAMPLING
+    source_project: XiangShan
+    source_report: xiangshan_simpoint_to_gpgpu_perf_sampling.en.md
+    applies_to:
+      - gpgpu-simppa
+      - gpgpu-loop
+      - gpgpu-arch
+    topic: weighted_performance_sampling
+    principle: "Performance validation should use representative phase features, replayable checkpoints, weights, counters, traces, and TopDown attribution."
+    do:
+      - "Define PHASE_FEATURE with instruction mix, memory behavior, scheduling behavior, sync behavior, interval, and weight."
+      - "Define CHECKPOINT_PACKAGE with golden state, RTL snapshot, memory image, runtime descriptor, pending transactions, barrier/atomic state, schema versions, and replay commands."
+      - "Emit WEIGHTED_PERF_REPORT and TOPDOWN_GPGPU_ATTRIBUTION after correctness diff passes."
+    do_not:
+      - "Do not accept performance claims based only on toy kernels or smoke tests."
+      - "Do not report speedup without weighted phase attribution and regression comparison."
+      - "Do not run performance gates before correctness gates."
+    required_artifacts:
+      - PHASE_FEATURE
+      - CHECKPOINT_PACKAGE
+      - WEIGHTED_PERF_REPORT
+      - TOPDOWN_GPGPU_ATTRIBUTION
+    acceptance_tests:
+      - representative_checkpoint_perf
+      - topdown_attribution_gate
+    evidence_anchor:
+      - shared/references/xiangshan/perf_sampling_lessons.md
+    raw_report_path: shared/references/xiangshan/raw/xiangshan_simpoint_to_gpgpu_perf_sampling.en.md

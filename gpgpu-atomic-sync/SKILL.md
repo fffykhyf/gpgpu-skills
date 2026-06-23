@@ -83,6 +83,8 @@ This skill owns:
 Required reference lessons:
 - `VORTEX_BARRIER_WSYNC_DRAIN`
 - `VORTEX_SIMX_RTL_TWIN`
+- `XIANGSHAN_BASIC_AND_FULL_DIFF`
+- `XIANGSHAN_STRUCTURED_TRACE_DB`
 
 ## Human and AI Output Policy
 
@@ -161,6 +163,7 @@ This skill must validate:
 - `shared/schemas/atomic_operation.schema.yaml`
 - `shared/schemas/fence_visibility.schema.yaml`
 - `shared/schemas/barrier_state.schema.yaml`
+- `shared/schemas/sync_sidechannel_event.schema.yaml` (`SYNC_SIDECHANNEL_EVENT`)
 
 ## Required Invariants
 

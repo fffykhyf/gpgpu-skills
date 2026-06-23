@@ -162,6 +162,35 @@ NEW_SCHEMAS = [
     "arch_rewrite_plan.schema.yaml",
     "rewrite_decision_report_ir.schema.yaml",
     "regression_tracking_report_ir.schema.yaml",
+    "golden_ref_api.schema.yaml",
+    "architecture_state_blob.schema.yaml",
+    "golden_sidecar_state.schema.yaml",
+    "store_commit_event.schema.yaml",
+    "golden_status_api.schema.yaml",
+    "basic_diff_trace.schema.yaml",
+    "full_transaction_diff_trace.schema.yaml",
+    "warp_instr_commit.schema.yaml",
+    "lane_reg_writeback.schema.yaml",
+    "memory_transaction_event.schema.yaml",
+    "sync_sidechannel_event.schema.yaml",
+    "mismatch_package.schema.yaml",
+    "failure_capture_package.schema.yaml",
+    "replay_window.schema.yaml",
+    "debug_trigger.schema.yaml",
+    "interactive_replay_session.schema.yaml",
+    "batch_auto_capture.schema.yaml",
+    "runtime_dse_knob.schema.yaml",
+    "runtime_switch_ir.schema.yaml",
+    "knob_classification.schema.yaml",
+    "dse_experiment_manifest.schema.yaml",
+    "structured_trace_table.schema.yaml",
+    "trace_db_manifest.schema.yaml",
+    "sql_debug_query.schema.yaml",
+    "sql_perf_query.schema.yaml",
+    "phase_feature.schema.yaml",
+    "checkpoint_package.schema.yaml",
+    "weighted_perf_report.schema.yaml",
+    "topdown_gpgpu_attribution.schema.yaml",
 ]
 
 NEW_TABLES = [
@@ -227,6 +256,7 @@ TEST_DIRS = [
     "sync_atomic_contract_engine",
     "architecture_rewrite_loop_controller",
     "gpgpusim-inspired",
+    "xiangshan-inspired",
 ]
 
 SHARED_DIRS = [
@@ -408,6 +438,80 @@ ROCKET_REQUIRED_REGRESSION_CASES = [
     "negotiated_interface_width_adapter",
     "mmio_start_done_fault_smoke",
     "harness_closure_and_compile_only_config",
+]
+
+XIANGSHAN_REFERENCE_SUMMARIES = [
+    "README.md",
+    "do_not_copy.md",
+    "repo_map.md",
+    "golden_model_lessons.md",
+    "difftest_trace_diff_lessons.md",
+    "failure_capture_lessons.md",
+    "runtime_dse_lessons.md",
+    "structured_trace_lessons.md",
+    "perf_sampling_lessons.md",
+]
+
+XIANGSHAN_RAW_REPORTS = [
+    "xiangshan_repo_map_for_gpgpu.md",
+    "xiangshan_nemu_to_gpgpu_golden_model.en.md",
+    "xiangshan_difftest_to_gpgpu_trace_diff.en.md",
+    "xiangshan_lightsss_to_gpgpu_failure_capture.en.md",
+    "xiangshan_constantin_to_gpgpu_runtime_dse.en.md",
+    "xiangshan_chiseldb_to_gpgpu_structured_trace.en.md",
+    "xiangshan_simpoint_to_gpgpu_perf_sampling.en.md",
+]
+
+XIANGSHAN_REQUIRED_LESSONS = [
+    "XIANGSHAN_GOLDEN_EXECUTABLE_REF",
+    "XIANGSHAN_BASIC_AND_FULL_DIFF",
+    "XIANGSHAN_REPLAYABLE_FAILURE_CAPTURE",
+    "XIANGSHAN_SAFE_RUNTIME_DSE",
+    "XIANGSHAN_STRUCTURED_TRACE_DB",
+    "XIANGSHAN_WEIGHTED_PERF_SAMPLING",
+]
+
+XIANGSHAN_SCHEMA_OWNERS = [
+    "GOLDEN_REF_API",
+    "ARCHITECTURE_STATE_BLOB",
+    "GOLDEN_SIDECAR_STATE",
+    "STORE_COMMIT_EVENT",
+    "GOLDEN_STATUS_API",
+    "BASIC_DIFF_TRACE",
+    "FULL_TRANSACTION_DIFF_TRACE",
+    "WARP_INSTR_COMMIT",
+    "LANE_REG_WRITEBACK",
+    "MEMORY_TRANSACTION_EVENT",
+    "SYNC_SIDECHANNEL_EVENT",
+    "MISMATCH_PACKAGE",
+    "FAILURE_CAPTURE_PACKAGE",
+    "REPLAY_WINDOW",
+    "DEBUG_TRIGGER",
+    "INTERACTIVE_REPLAY_SESSION",
+    "BATCH_AUTO_CAPTURE",
+    "RUNTIME_DSE_KNOB",
+    "RUNTIME_SWITCH_IR",
+    "KNOB_CLASSIFICATION",
+    "DSE_EXPERIMENT_MANIFEST",
+    "STRUCTURED_TRACE_TABLE",
+    "TRACE_DB_MANIFEST",
+    "SQL_DEBUG_QUERY",
+    "SQL_PERF_QUERY",
+    "PHASE_FEATURE",
+    "CHECKPOINT_PACKAGE",
+    "WEIGHTED_PERF_REPORT",
+    "TOPDOWN_GPGPU_ATTRIBUTION",
+]
+
+XIANGSHAN_REQUIRED_REGRESSION_CASES = [
+    "executable_golden_ref_step_api",
+    "basic_vs_full_diff_trace",
+    "mismatch_package_generation",
+    "replayable_failure_capture",
+    "safe_runtime_dse_knob",
+    "structured_trace_db_feature",
+    "representative_checkpoint_perf",
+    "topdown_attribution_gate",
 ]
 
 TOP_LEVEL_REQUIRED_TEXT: Dict[str, List[str]] = {
@@ -1013,6 +1117,92 @@ def require_rocket_schema_owner_references(failures: List[str]) -> None:
             failures.append(
                 f"new Rocket-derived schema {schema_owner!r} is not referenced by an owner skill"
             )
+
+
+def require_xiangshan_reference_assets(failures: List[str]) -> None:
+    xiangshan_root = ROOT / "shared" / "references" / "xiangshan"
+    raw_root = xiangshan_root / "raw"
+    for filename in XIANGSHAN_REFERENCE_SUMMARIES:
+        require_nonempty(xiangshan_root / filename, failures)
+    for filename in XIANGSHAN_RAW_REPORTS:
+        require_nonempty(raw_root / filename, failures)
+
+
+def require_xiangshan_lessons(failures: List[str]) -> None:
+    lessons_yaml = load_yaml("shared/references/xiangshan_lessons.yaml", failures)
+    lesson_entries = lessons_yaml.get("lessons") or []
+    if not lesson_entries:
+        failures.append("xiangshan_lessons.yaml must define at least one lesson")
+        return
+
+    required_fields = [
+        "applies_to",
+        "do",
+        "do_not",
+        "required_artifacts",
+        "acceptance_tests",
+        "raw_report_path",
+    ]
+    lesson_ids = set()
+    for entry in lesson_entries:
+        lesson_id = entry.get("lesson_id")
+        if not lesson_id:
+            failures.append("xiangshan_lessons.yaml lesson missing lesson_id")
+            continue
+        if lesson_id in lesson_ids:
+            failures.append(f"xiangshan_lessons.yaml duplicate lesson_id {lesson_id!r}")
+        lesson_ids.add(lesson_id)
+        for field in required_fields:
+            value = entry.get(field)
+            if not value:
+                failures.append(
+                    f"xiangshan lesson {lesson_id!r} missing required field {field!r}"
+                )
+
+    for lesson_id in XIANGSHAN_REQUIRED_LESSONS:
+        if lesson_id not in lesson_ids:
+            failures.append(f"xiangshan_lessons.yaml missing lesson_id {lesson_id!r}")
+
+
+def require_xiangshan_regression_cases(failures: List[str]) -> None:
+    discovered = set()
+    for cases_path in sorted((ROOT / "shared" / "tests").glob("*/cases.yaml")):
+        cases_yaml = load_yaml(str(cases_path.relative_to(ROOT)), failures)
+        for case in cases_yaml.get("cases") or []:
+            case_id = case.get("case_id") or case.get("name")
+            if case_id:
+                discovered.add(case_id)
+
+    for case_id in XIANGSHAN_REQUIRED_REGRESSION_CASES:
+        if case_id not in discovered:
+            failures.append(f"missing XiangShan regression case {case_id!r}")
+
+
+def require_xiangshan_schema_owner_references(failures: List[str]) -> None:
+    skill_text = "\n".join(
+        (ROOT / skill / "SKILL.md").read_text(encoding="utf-8")
+        for skill in TOP_LEVEL_SKILLS
+        if (ROOT / skill / "SKILL.md").exists()
+    )
+    for schema_owner in XIANGSHAN_SCHEMA_OWNERS:
+        if schema_owner not in skill_text:
+            failures.append(
+                f"new XiangShan-derived schema {schema_owner!r} is not referenced by an owner skill"
+            )
+
+
+def require_xiangshan_lazy_load_top_level_skills(failures: List[str]) -> None:
+    raw_report_names = set(XIANGSHAN_RAW_REPORTS)
+    for skill in TOP_LEVEL_SKILLS:
+        skill_md = ROOT / skill / "SKILL.md"
+        if not skill_md.exists():
+            continue
+        text = skill_md.read_text(encoding="utf-8")
+        for report_name in raw_report_names:
+            if report_name in text:
+                failures.append(
+                    f"{skill}/SKILL.md embeds XiangShan raw report path {report_name!r}; use lesson IDs instead"
+                )
 
 
 def require_all_present(required_fields: List[str], data: dict, rel_path: str, failures: List[str]) -> None:
@@ -1689,6 +1879,11 @@ def main() -> int:
     require_rocket_lessons(failures)
     require_rocket_regression_cases(failures)
     require_rocket_schema_owner_references(failures)
+    require_xiangshan_reference_assets(failures)
+    require_xiangshan_lessons(failures)
+    require_xiangshan_regression_cases(failures)
+    require_xiangshan_schema_owner_references(failures)
+    require_xiangshan_lazy_load_top_level_skills(failures)
 
     require_text(
         ROOT / "README.md",

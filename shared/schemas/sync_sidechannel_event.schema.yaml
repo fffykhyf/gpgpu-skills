@@ -1,0 +1,30 @@
+schema: sync_sidechannel_event
+version: v5-xiangshan
+owner_skill: gpgpu-atomic-sync
+type: object
+required:
+  - event_id
+  - cycle
+  - event_type
+  - sm_id
+  - warp_id
+  - participant_mask
+  - phase
+  - release_condition
+properties:
+  event_id: string
+  cycle: integer
+  event_type: enum
+  sm_id: integer
+  warp_id: integer
+  barrier_id: string
+  participant_mask: string
+  phase: string
+  release_condition: string
+event_types:
+  - barrier_arrive
+  - barrier_release
+  - fence_issue
+  - fence_complete
+  - atomic_serialize
+

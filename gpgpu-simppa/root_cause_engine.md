@@ -169,3 +169,11 @@ root_cause_report:
   correctness failure is unrelated and the bottleneck graph is complete.
 - If multiple causes cannot be ranked from evidence, emit
   `ROOT_CAUSE_AMBIGUOUS`.
+
+## XiangShan Failure Package Routing
+
+When `FAILURE_CAPTURE_PACKAGE` exists, root-cause ranking must cite its
+`MISMATCH_PACKAGE`, `REPLAY_WINDOW`, config hash, runtime image hash, and
+available artifact list. Missing trace, waveform, state, store-log, or counter
+artifacts route to `TEST_EVIDENCE_PATCH` unless an absent reason proves the
+artifact is intentionally unavailable.

@@ -107,3 +107,11 @@ regression_fingerprint:
 - `PASS_WITH_TRACE_DIVERGENCE_WARNING`: final outputs match but architectural
   traces diverge. This escalates to Failure Attribution Mode for first
   divergence reporting.
+
+## XiangShan Capture Evidence
+
+Passing CI evidence may include `BATCH_AUTO_CAPTURE` disabled by policy, but
+failure evidence must include `FAILURE_CAPTURE_PACKAGE` or an explicit
+test-evidence gap. A failure package must include replay command, trace slice,
+waveform slice or absent reason, config hash, program image hash, golden state,
+RTL state summary, memory store log, counter snapshot, and normalized report.

@@ -96,6 +96,7 @@ This skill owns:
 Required reference lessons:
 - `VORTEX_BARRIER_WSYNC_DRAIN`
 - `VORTEX_SIMX_RTL_TWIN`
+- `XIANGSHAN_GOLDEN_EXECUTABLE_REF`
 
 ## Human and AI Output Policy
 
@@ -191,6 +192,11 @@ This skill must validate:
 - `shared/schemas/system_contract_ir.schema.yaml`
 - `shared/schemas/golden_contract_model.schema.yaml`
 - `shared/schemas/contract_semantics_report_ir.schema.yaml`
+- `shared/schemas/golden_ref_api.schema.yaml` (`GOLDEN_REF_API`)
+- `shared/schemas/architecture_state_blob.schema.yaml` (`ARCHITECTURE_STATE_BLOB`)
+- `shared/schemas/golden_sidecar_state.schema.yaml` (`GOLDEN_SIDECAR_STATE`)
+- `shared/schemas/store_commit_event.schema.yaml` (`STORE_COMMIT_EVENT`)
+- `shared/schemas/golden_status_api.schema.yaml` (`GOLDEN_STATUS_API`)
 - `shared/schemas/simt_state.schema.yaml`
 - `shared/schemas/warp_memory_transaction.schema.yaml`
 - `shared/schemas/atomic_operation.schema.yaml`
@@ -208,6 +214,11 @@ The output must satisfy:
 - `SYSTEM_CONTRACT_IR.state_model` is structured with canonical state tables for trace diff.
 - `SYSTEM_CONTRACT_IR.interface_semantics_model` owns request/response lifecycle semantics.
 - `GOLDEN_CONTRACT_MODEL` is executable reference semantics derived from `SYSTEM_CONTRACT_IR`.
+- `GOLDEN_REF_API` exposes a live reference machine with init, memory copy, state copy, event step, event query, and status calls.
+- `ARCHITECTURE_STATE_BLOB` contains only diff-visible architectural state.
+- `GOLDEN_SIDECAR_STATE` may synchronize and localize debug, but must not define ISA-visible semantics.
+- `STORE_COMMIT_EVENT` is required for store mismatch localization.
+- `GOLDEN_STATUS_API` separates running, done, faulted, aborted, and timeout states.
 - `GOLDEN_CONTRACT_MODEL` steps warp state with explicit EXEC-mask evolution.
 - `GOLDEN_CONTRACT_MODEL` models SM-parallel execution without shared execution state across SMs.
 - `GOLDEN_CONTRACT_MODEL` executes decode-time `MEMORY_BUNDLE` semantics before LSU/coalescer effects.

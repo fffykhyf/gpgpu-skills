@@ -1,0 +1,26 @@
+schema: golden_ref_api
+version: v5-xiangshan
+owner_skill: gpgpu-golden
+type: object
+required:
+  - api_name
+  - live_diff_calls
+  - offline_analysis_calls
+  - synchronization_unit
+  - status_api
+  - state_blob_schema
+properties:
+  api_name: string
+  live_diff_calls: list
+  offline_analysis_calls: list
+  synchronization_unit: enum
+  memory_copy_contract: map
+  state_copy_contract: map
+  event_step_contract: map
+  query_contract: map
+  status_api: string
+  state_blob_schema: string
+validation_rules:
+  - live diff calls must include init, memcpy, statecpy, step_event, query_event, and status.
+  - offline profiling and checkpoint calls must not be required for basic live diff.
+

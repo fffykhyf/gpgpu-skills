@@ -52,3 +52,18 @@ first_divergence_report:
   `INSUFFICIENT_TRACE`.
 - If toolchain evidence exists, compare assembler/program image/loader/runtime
   chain before blaming RTL fetch or decode.
+
+## XiangShan Basic vs Full Diff
+
+Use `XIANGSHAN_BASIC_AND_FULL_DIFF` as the diff layering rule:
+
+- `BASIC_DIFF_TRACE` is always available and covers `WARP_INSTR_COMMIT`,
+  `LANE_REG_WRITEBACK`, trap/fault, and launch completion events.
+- `FULL_TRANSACTION_DIFF_TRACE` is debug-only and covers
+  `MEMORY_TRANSACTION_EVENT`, `SYNC_SIDECHANNEL_EVENT`, coalescer/cache/MSHR,
+  atomic/fence/barrier, control, abort, and debug halt events.
+
+Every failure must emit `MISMATCH_PACKAGE` with first bad cycle, first bad event,
+event type, expected value, actual value, suspected owner, required traces,
+`REPLAY_WINDOW`, related config hash, and runtime image hash. Final output or
+final memory mismatch is a symptom unless it is also the first bad event.

@@ -1,0 +1,18 @@
+schema: batch_auto_capture
+version: v5-xiangshan
+owner_skill: gpgpu-simppa
+type: object
+required:
+  - enabled
+  - triggers
+  - window
+  - artifacts
+properties:
+  enabled: boolean
+  triggers: list
+  window: map
+  artifacts: list
+validation_rules:
+  - batch auto capture is for CI and regression evidence.
+  - missing artifacts must be represented by absent_artifact_reasons in FAILURE_CAPTURE_PACKAGE.
+

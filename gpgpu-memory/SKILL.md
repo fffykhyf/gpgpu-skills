@@ -90,6 +90,8 @@ Required reference lessons:
 - `VORTEX_CACHE_MSHR_RESPONSE_ROUTE`
 - `VORTEX_MSHR_DEADLOCK_GUARD`
 - `VORTEX_LOCAL_MEMORY_BANK`
+- `XIANGSHAN_BASIC_AND_FULL_DIFF`
+- `XIANGSHAN_STRUCTURED_TRACE_DB`
 
 ## Human and AI Output Policy
 
@@ -174,6 +176,7 @@ This skill must validate:
 - `shared/schemas/cache_request_status.schema.yaml`
 - `shared/schemas/memory_request_lifecycle.schema.yaml`
 - `shared/schemas/memory_queue_boundary.schema.yaml`
+- `shared/schemas/memory_transaction_event.schema.yaml` (`MEMORY_TRANSACTION_EVENT`)
 
 ## Required Invariants
 

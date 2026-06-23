@@ -68,3 +68,11 @@ Failure modes:
 - `COMPLETION_FAULT_UNOBSERVABLE`
 - `BACKEND_CAPABILITY_MISMATCH`
 - `RUNTIME_PRIVATE_STATE_LEAKED_AS_ABI`
+
+## XiangShan Runtime Switch Rules
+
+`RUNTIME_SWITCH_IR` may select only pre-elaborated behavior with stable IO
+shape. Runtime launch artifacts may carry runtime behavior knobs and debug
+trace knobs, but any request to change ISA/ABI, launch descriptor layout, MMIO
+map, queue depth, bank count, wire width, module presence, or warp size must be
+rejected before launch.

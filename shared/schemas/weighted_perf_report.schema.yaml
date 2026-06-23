@@ -1,0 +1,23 @@
+schema: weighted_perf_report
+version: v5-xiangshan
+owner_skill: gpgpu-simppa
+type: object
+required:
+  - report_id
+  - correctness_gate
+  - weighted_phase_results
+  - aggregate_delta
+  - counter_evidence
+  - trace_evidence
+  - selected_result
+  - reject_reason
+properties:
+  report_id: string
+  correctness_gate: map
+  weighted_phase_results: list
+  aggregate_delta: map
+  counter_evidence: list
+  trace_evidence: list
+  selected_result: map
+  reject_reason: string
+

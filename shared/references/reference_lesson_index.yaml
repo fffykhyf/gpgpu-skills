@@ -22,3 +22,21 @@ reference_groups:
       - mandatory_tilelink_protocol
       - cpu_privilege_semantics
       - clint_plic_register_layout
+  - group_id: xiangshan_development_loop_reference
+    lesson_file: xiangshan_lessons.yaml
+    summary_root: xiangshan
+    raw_report_root: xiangshan/raw
+    applies_as:
+      - executable_golden_reference
+      - layered_trace_diff_reference
+      - replayable_failure_capture_reference
+      - safe_runtime_dse_reference
+      - structured_trace_db_reference
+      - weighted_perf_sampling_reference
+    not_applied_as:
+      - cpu_frontend_reference
+      - branch_predictor_reference
+      - rename_rob_reference
+      - riscv_privilege_reference
+      - scalar_pipeline_reference
+      - xiangshan_cache_template

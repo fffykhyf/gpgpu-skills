@@ -1,0 +1,103 @@
+cases:
+  - case_id: executable_golden_ref_step_api
+    expected_outputs:
+      schemas:
+        - golden_ref_api
+        - architecture_state_blob
+        - golden_sidecar_state
+        - store_commit_event
+        - golden_status_api
+    required_evidence:
+      - golden_ref_api_exists
+      - state_blob_defined
+      - sidecar_defined
+      - store_commit_channel_exists
+      - live_diff_offline_mode_separated
+
+  - case_id: basic_vs_full_diff_trace
+    expected_outputs:
+      schemas:
+        - basic_diff_trace
+        - full_transaction_diff_trace
+        - warp_instr_commit
+        - lane_reg_writeback
+        - memory_transaction_event
+        - sync_sidechannel_event
+    required_evidence:
+      - basic_diff_always_available
+      - full_diff_debug_only
+      - memory_transaction_probe_exists
+      - sync_sidechannel_probe_exists
+
+  - case_id: mismatch_package_generation
+    expected_outputs:
+      schemas:
+        - mismatch_package
+        - replay_window
+    required_evidence:
+      - first_bad_event_present
+      - expected_actual_present
+      - replay_window_present
+      - suspected_owner_present
+
+  - case_id: replayable_failure_capture
+    expected_outputs:
+      schemas:
+        - failure_capture_package
+        - replay_window
+        - debug_trigger
+        - batch_auto_capture
+        - interactive_replay_session
+    required_evidence:
+      - batch_auto_capture_schema_exists
+      - interactive_replay_schema_exists
+      - replay_command_exists
+      - absent_artifact_reason_required
+
+  - case_id: safe_runtime_dse_knob
+    expected_outputs:
+      schemas:
+        - runtime_dse_knob
+        - runtime_switch_ir
+        - knob_classification
+        - dse_experiment_manifest
+    required_evidence:
+      - structural_knob_rejected
+      - runtime_behavior_knob_accepted
+      - debug_trace_knob_separated
+      - bounds_and_metric_required
+
+  - case_id: structured_trace_db_feature
+    expected_outputs:
+      schemas:
+        - structured_trace_table
+        - trace_db_manifest
+        - sql_debug_query
+        - sql_perf_query
+    required_evidence:
+      - trace_table_schema_exists
+      - debug_query_exists
+      - perf_query_exists
+      - schema_version_required
+
+  - case_id: representative_checkpoint_perf
+    expected_outputs:
+      schemas:
+        - phase_feature
+        - checkpoint_package
+        - weighted_perf_report
+    required_evidence:
+      - phase_feature_schema_exists
+      - checkpoint_weight_required
+      - golden_and_rtl_replay_required
+      - weighted_perf_report_required
+
+  - case_id: topdown_attribution_gate
+    expected_outputs:
+      schemas:
+        - topdown_gpgpu_attribution
+        - weighted_perf_report
+    required_evidence:
+      - stall_bucket_defined
+      - weighted_phase_comparison_defined
+      - correctness_gate_before_perf_gate

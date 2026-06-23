@@ -127,6 +127,10 @@ Required reference lessons:
 - `ROCKET_MMIO_REGISTER_MAP`
 - `ROCKET_HARNESS_CLOSURE_GATE`
 - `ROCKET_COMPILE_ONLY_DRIFT_GATE`
+- `XIANGSHAN_BASIC_AND_FULL_DIFF`
+- `XIANGSHAN_REPLAYABLE_FAILURE_CAPTURE`
+- `XIANGSHAN_SAFE_RUNTIME_DSE`
+- `XIANGSHAN_WEIGHTED_PERF_SAMPLING`
 
 ## Human and AI Output Policy
 
@@ -246,6 +250,12 @@ This skill must validate:
 - `shared/schemas/stall_reason_matrix.schema.yaml`
 - `shared/schemas/performance_attribution_graph.schema.yaml`
 - `shared/schemas/config_parameter_classification.schema.yaml`
+- `shared/schemas/mismatch_package.schema.yaml` (`MISMATCH_PACKAGE`)
+- `shared/schemas/failure_capture_package.schema.yaml` (`FAILURE_CAPTURE_PACKAGE`)
+- `shared/schemas/replay_window.schema.yaml` (`REPLAY_WINDOW`)
+- `shared/schemas/dse_experiment_manifest.schema.yaml` (`DSE_EXPERIMENT_MANIFEST`)
+- `shared/schemas/weighted_perf_report.schema.yaml` (`WEIGHTED_PERF_REPORT`)
+- `shared/schemas/topdown_gpgpu_attribution.schema.yaml` (`TOPDOWN_GPGPU_ATTRIBUTION`)
 
 ## Required Invariants
 

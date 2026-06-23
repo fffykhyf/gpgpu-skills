@@ -66,3 +66,11 @@ performance_window_rule:
 - Do not expand the window to the whole trace unless causal closure requires it.
 - Do not drop direct dependency events to make a window smaller.
 - Mark the window `AMBIGUOUS_TRACE_ORDERING` when event order cannot be ranked.
+
+## XiangShan Replay Window Rules
+
+`REPLAY_WINDOW` is required whenever `MISMATCH_PACKAGE` or
+`FAILURE_CAPTURE_PACKAGE` is emitted. The window must name the trigger, start
+cycle, end cycle, pre-failure cycles, post-failure cycles, and optional
+checkpoint id. Batch capture should keep the window bounded; interactive replay
+may request additional windows only through explicit debug commands.

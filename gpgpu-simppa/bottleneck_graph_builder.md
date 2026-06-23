@@ -137,3 +137,11 @@ assembler_encoding_mismatch_template:
 If the graph cannot connect event evidence, contract path, and RTL module path
 or toolchain artifact path for the selected claim, the verdict is
 `INSUFFICIENT_TRACE_EVIDENCE`.
+
+## XiangShan TopDown GPGPU Attribution
+
+`TOPDOWN_GPGPU_ATTRIBUTION` partitions total cycles into frontend/fetch/decode
+idle, warp scheduling stall, scoreboard dependency stall, memory pipeline
+stall, synchronization stall, tensor/ALU busy, and structural conflict. Memory
+pipeline stall must be further attributable to coalescer, L1, MSHR, NoC, L2,
+DRAM, or return path when those traces exist.

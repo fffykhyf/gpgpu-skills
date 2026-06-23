@@ -10,3 +10,9 @@ Audit every counter before use:
 
 Visualizer names are not stable metrics without producer proof.
 
+## Structured Trace Producer Audit
+
+For each `STRUCTURED_TRACE_TABLE`, audit table producer module, producer event,
+write gate, schema version, sample window, and consumer skill. A table without
+producer proof can support exploratory debug only; it cannot close
+`SQL_PERF_QUERY` attribution or weighted performance gates.

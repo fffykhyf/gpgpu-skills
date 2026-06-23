@@ -11,6 +11,8 @@ required:
   - postcondition_window
   - evidence_hashes
   - confidence
+  - mismatch_package_ref
+  - replay_window_ref
 properties:
   verdict: enum
   first_divergence_type: enum
@@ -27,6 +29,8 @@ properties:
   postcondition_window: list
   evidence_hashes: list
   confidence: enum
+  mismatch_package_ref: string
+  replay_window_ref: string
 verdicts:
   - DIVERGENCE_FOUND
   - NO_DIVERGENCE_FOUND

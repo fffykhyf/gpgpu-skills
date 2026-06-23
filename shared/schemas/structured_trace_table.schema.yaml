@@ -1,0 +1,22 @@
+schema: structured_trace_table
+version: v5-xiangshan
+owner_skill: gpgpu-rtl
+type: object
+required:
+  - table_name
+  - schema_version
+  - common_fields
+  - feature_fields
+  - producer
+  - write_gate
+  - consumer_skill
+properties:
+  table_name: string
+  schema_version: string
+  common_fields: list
+  feature_fields: list
+  producer: string
+  write_gate: string
+  retention_policy: string
+  consumer_skill: string
+

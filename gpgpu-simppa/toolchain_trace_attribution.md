@@ -70,3 +70,11 @@ toolchain_attribution_report:
   observation mismatches, classify `RUNTIME_LAUNCH_ROOT_CAUSE`.
 - If toolchain chain passes and RTL first fetch/decode diverges, continue to
   RTL functional attribution.
+
+## Structured Trace Query Artifacts
+
+Toolchain and runtime traces that feed a trace database must register tables in
+`TRACE_DB_MANIFEST`. Each table-producing feature must provide one
+`SQL_DEBUG_QUERY` for failure investigation and one `SQL_PERF_QUERY` for
+attribution. Query artifacts are AI-facing English evidence and should be
+referenced by human reports only as summarized results.

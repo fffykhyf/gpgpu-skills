@@ -112,6 +112,7 @@ Required reference lessons:
 - `VORTEX_COALESCER_RESPONSE_RESTORE`
 - `ROCKET_MMIO_REGISTER_MAP`
 - `ROCKET_DEBUG_COUNTER_CONTRACT`
+- `XIANGSHAN_SAFE_RUNTIME_DSE`
 
 ## Human and AI Output Policy
 
@@ -241,6 +242,9 @@ This skill must validate:
 - `shared/schemas/loader_contract_ir.schema.yaml`
 - `shared/schemas/mmio_register_map_ir.schema.yaml`
 - `shared/schemas/debug_counter_contract.schema.yaml`
+- `shared/schemas/runtime_switch_ir.schema.yaml` (`RUNTIME_SWITCH_IR`)
+- `shared/schemas/runtime_dse_knob.schema.yaml` (`RUNTIME_DSE_KNOB`)
+- `shared/schemas/dse_experiment_manifest.schema.yaml` (`DSE_EXPERIMENT_MANIFEST`)
 - `shared/schemas/assembler_binding_report_ir.schema.yaml`
 - `shared/schemas/toolchain_smoke_report_ir.schema.yaml`
 - `shared/schemas/warp_memory_transaction.schema.yaml`
@@ -258,6 +262,9 @@ The output must satisfy:
 - `LOADER_CONTRACT_IR` derives from `SYSTEM_CONTRACT_IR.launch_model.loader_contract`.
 - `MMIO_REGISTER_MAP_IR` must generate discovery, launch, status, interrupt, fault, trace, debug, and counter blocks.
 - `DEBUG_COUNTER_CONTRACT` must separate counter control from read-only volatile counter data and must name producer bindings for stable counters.
+- `RUNTIME_SWITCH_IR` may select only pre-elaborated behavior with stable IO shape.
+- Runtime DSE knobs may alter policy selection, thresholds, feature enables, debug trace gates, and counter selection only.
+- Runtime must reject knob values that mutate module existence, wire width, queue depth, bank count, warp size, ISA/ABI, or MMIO layout.
 - `START/BUSY/DONE/FAULTED/ACK` smoke evidence must be present for runtime launch sign-off.
 - Golden execution must consume `PROGRAM_IMAGE_IR`, decode instruction bytes, and emit expected trace or memory dump.
 - Memory instructions must emit `MEMORY_BUNDLE` before LSU issue.

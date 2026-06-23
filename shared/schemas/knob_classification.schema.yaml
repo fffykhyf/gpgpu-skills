@@ -1,0 +1,24 @@
+schema: knob_classification
+version: v5-xiangshan
+owner_skill: gpgpu-arch
+type: object
+required:
+  - parameter_name
+  - class
+  - owner_skill
+  - allowed_runtime_mutation
+  - rejection_rule
+properties:
+  parameter_name: string
+  class: enum
+  owner_skill: string
+  allowed_runtime_mutation: boolean
+  rejection_rule: string
+classes:
+  - structural_compile_time
+  - abi_visible
+  - runtime_behavior_knob
+  - debug_trace_knob
+  - test_only
+  - unsupported
+

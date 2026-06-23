@@ -64,3 +64,15 @@ Pass Evidence Mode:
 - `next_action` must name the owner skill when rewrite or evidence repair is
   required.
 - Never claim a clean pass when evidence is incomplete.
+
+## XiangShan Report Additions
+
+Failure reports must reference `MISMATCH_PACKAGE` and
+`FAILURE_CAPTURE_PACKAGE` when present. Human summaries should state replay
+availability, replay command status, absent artifact reasons, suspected owner,
+and required revalidation route without exposing full raw traces by default.
+
+Performance reports must reference `WEIGHTED_PERF_REPORT` when a change claims
+speedup or regression. The report must state which weighted phases changed,
+which TopDown buckets moved, whether correctness diff passed first, and whether
+any phase regressed enough to reject the change.
