@@ -16,6 +16,7 @@ Upstream:
 - migrated truth ownership constraints captured in `contract_truth_and_state_model.md`
 
 Downstream:
+- `gpgpu-toolchain-runtime-artifact-engine`
 - `gpgpu-incremental-rtl-binding-engine`
 - `gpgpu-simulation-performance-attribution-engine`
 
@@ -41,6 +42,10 @@ Produces:
 
 This skill owns:
 - ISA model definition
+- instruction encoding truth for assembler/disassembler derivation
+- program image semantic contract
+- entry symbol resolution contract
+- launch ABI layout truth
 - architecture semantic freeze
 - execution model definition
 - state model definition
@@ -56,6 +61,10 @@ This skill owns:
 
 This skill must not:
 - create RTL module structure
+- generate assembler.py directly
+- generate disassembler.py directly
+- generate runtime launch files directly
+- generate program image files directly
 - create performance attribution
 - create architecture rewrite patches
 - let `GOLDEN_CONTRACT_MODEL` define independent ISA, memory, launch, scheduler, config, or interface truth
@@ -84,6 +93,9 @@ This skill must validate:
 The output must satisfy:
 - `SYSTEM_CONTRACT_IR` is the only semantic truth source.
 - `SYSTEM_CONTRACT_IR.isa_model` owns ISA opcode and instruction encoding truth.
+- `SYSTEM_CONTRACT_IR.launch_model.program_image_format` owns program image layout truth.
+- `SYSTEM_CONTRACT_IR.launch_model.argument_buffer_layout` owns runtime argument encoding truth.
+- `SYSTEM_CONTRACT_IR.launch_model.loader_contract` owns loader contract truth.
 - `SYSTEM_CONTRACT_IR.state_model` is structured with canonical state tables for trace diff.
 - `SYSTEM_CONTRACT_IR.interface_semantics_model` owns request/response lifecycle semantics.
 - `GOLDEN_CONTRACT_MODEL` is executable reference semantics derived from `SYSTEM_CONTRACT_IR`.

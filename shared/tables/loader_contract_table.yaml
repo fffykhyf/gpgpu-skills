@@ -1,0 +1,16 @@
+table: loader_contract_table
+version: v5
+source: SYSTEM_CONTRACT_IR.launch_model.loader_contract
+rules:
+  imem_load_rule: launch_model.loader_contract.imem_load_rule
+  dmem_load_rule: launch_model.loader_contract.dmem_load_rule
+  entry_pc_rule: launch_model.loader_contract.entry_pc_rule
+  reset_visibility: launch_model.loader_contract.reset_visibility
+  program_image_format: launch_model.program_image_format
+rtl_loader_interfaces:
+  - program_image_loader_interface
+  - instruction_memory_init
+  - runtime_arg_buffer_interface
+failure_modes:
+  loader_contract: LOADER_CONTRACT_FAIL
+  image_layout: PROGRAM_IMAGE_LAYOUT_FAIL

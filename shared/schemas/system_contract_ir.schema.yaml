@@ -26,12 +26,51 @@ properties:
       - instruction_encodings
       - decode_classes
       - operand_fields
+      - assembly_syntax
+      - pseudo_instruction_rules
       - unsupported_instruction_behavior
     properties:
       opcodes: map
-      instruction_encodings: map
+      instruction_encodings:
+        type: object
+        required:
+          - width_bits
+          - endian
+          - field_layouts
+          - immediate_layouts
+          - branch_offset_rule
+          - alignment_rule
+        properties:
+          width_bits: integer
+          endian: string
+          field_layouts: map
+          immediate_layouts: map
+          branch_offset_rule: map
+          alignment_rule: map
       decode_classes: map
       operand_fields: map
+      assembly_syntax:
+        type: object
+        required:
+          - register_naming
+          - immediate_formats
+          - label_syntax
+          - section_syntax
+          - comment_syntax
+        properties:
+          register_naming: map
+          immediate_formats: map
+          label_syntax: map
+          section_syntax: map
+          comment_syntax: string
+      pseudo_instruction_rules:
+        type: object
+        required:
+          - enabled
+          - expansion_rules
+        properties:
+          enabled: bool
+          expansion_rules: map
       unsupported_instruction_behavior: string
   execution_model: map
   state_model:
@@ -80,7 +119,61 @@ properties:
       atomic: map
       request_lifecycle: map
       fault_behavior: map
-  launch_model: map
+  launch_model:
+    type: object
+    required:
+      - abi
+      - grid_block_thread_mapping
+      - kernel_entry
+      - program_image_format
+      - argument_buffer_layout
+      - loader_contract
+      - completion_fault_observation
+    properties:
+      abi: string
+      grid_block_thread_mapping: string
+      kernel_entry: string
+      program_image_format:
+        type: object
+        required:
+          - text_segment_rule
+          - data_segment_rule
+          - symbol_table_rule
+          - relocation_rule
+          - entry_symbol_rule
+          - metadata_hash_rule
+        properties:
+          text_segment_rule: map
+          data_segment_rule: map
+          symbol_table_rule: map
+          relocation_rule: map
+          entry_symbol_rule: map
+          metadata_hash_rule: map
+      argument_buffer_layout:
+        type: object
+        required:
+          - endian
+          - alignment
+          - scalar_arg_rule
+          - pointer_arg_rule
+        properties:
+          endian: string
+          alignment: integer
+          scalar_arg_rule: map
+          pointer_arg_rule: map
+      loader_contract:
+        type: object
+        required:
+          - imem_load_rule
+          - dmem_load_rule
+          - entry_pc_rule
+          - reset_visibility
+        properties:
+          imem_load_rule: map
+          dmem_load_rule: map
+          entry_pc_rule: map
+          reset_visibility: map
+      completion_fault_observation: string
   interface_semantics_model:
     type: object
     required:

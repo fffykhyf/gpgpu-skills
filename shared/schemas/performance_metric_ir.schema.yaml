@@ -1,0 +1,31 @@
+schema: performance_metric_ir
+version: v5
+type: object
+required:
+  - total_cycles
+  - active_cycles
+  - issue_cycles
+  - commit_cycles
+  - ipc
+  - issue_utilization
+  - pipeline_utilization
+  - stall_breakdown
+  - memory_metrics
+  - scheduler_metrics
+  - warning_flags
+  - performance_metric_hash
+properties:
+  total_cycles: integer
+  active_cycles: integer
+  issue_cycles: integer
+  commit_cycles: integer
+  ipc: number
+  warp_eligible_rate: number
+  warp_issue_rate: number
+  issue_utilization: number
+  pipeline_utilization: map
+  stall_breakdown: map
+  memory_metrics: map
+  scheduler_metrics: map
+  warning_flags: list
+  performance_metric_hash: string

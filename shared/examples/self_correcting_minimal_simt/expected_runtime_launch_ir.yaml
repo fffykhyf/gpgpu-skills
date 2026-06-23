@@ -1,0 +1,38 @@
+system_contract_ir_hash: hash_system_contract_minimal_simt
+launch_abi: flat_argument_buffer
+entry_symbol: vecadd
+entry_pc: 0
+grid_dim:
+  x: 1
+  y: 1
+  z: 1
+block_dim:
+  x: 4
+  y: 1
+  z: 1
+warp_size: 4
+arg_buffer_layout:
+  endian: little
+  alignment: 8
+  args:
+    - name: A
+      kind: global_ptr32
+      offset: 0
+    - name: B
+      kind: global_ptr32
+      offset: 4
+    - name: C
+      kind: global_ptr32
+      offset: 8
+arg_buffer_bytes: "001000001010000020100000"
+csr_write_sequence:
+  - {csr: kernel_entry, value: 0}
+  - {csr: arg_base, value: 8192}
+  - {csr: grid_dim, value: [1, 1, 1]}
+  - {csr: block_dim, value: [4, 1, 1]}
+  - {csr: start, value: 1}
+completion_observation:
+  done_bit: csr_status.done
+  fault_bit: csr_status.fault
+  status: csr_status
+canonical_hash: hash_runtime_launch_vecadd

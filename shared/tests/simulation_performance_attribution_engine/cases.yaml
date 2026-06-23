@@ -1,18 +1,354 @@
 cases:
-  - case_id: simulation_perf_builds_memory_imbalance_graph
+  - case_id: case_pass_vector_add_evidence
+    input_artifacts:
+      - shared/examples/self_correcting_minimal_simt/expected_golden_contract_model.yaml
+      - shared/examples/self_correcting_minimal_simt/expected_incremental_rtl_map.yaml
+      - shared/examples/self_correcting_minimal_simt/expected_program_image_ir.yaml
+      - shared/examples/self_correcting_minimal_simt/expected_runtime_launch_ir.yaml
+    expected_outputs:
+      - NORMALIZED_TRACE_IR
+      - CORRECTNESS_GATE_REPORT
+      - PASS_EVIDENCE_REPORT
+      - TRACE_COVERAGE_REPORT
+      - PERFORMANCE_METRIC_IR
+      - REGRESSION_FINGERPRINT
+      - SIM_PERF_ATTRIBUTION_REPORT
+    expected_mode: PASS_EVIDENCE_MODE
+    required_evidence:
+      - final_memory_match
+      - completion_status_match
+      - fault_status_match
+      - contract_hash_match
+      - trace_summary_hash
+    forbidden_outputs:
+      - FIRST_DIVERGENCE_REPORT
+      - ROOT_CAUSE_REPORT
+
+  - case_id: case_pass_with_insufficient_trace
     input_artifacts:
       - shared/examples/self_correcting_minimal_simt/expected_golden_contract_model.yaml
       - shared/examples/self_correcting_minimal_simt/expected_incremental_rtl_map.yaml
     expected_outputs:
       - NORMALIZED_TRACE_IR
+      - CORRECTNESS_GATE_REPORT
+      - PASS_EVIDENCE_REPORT
+      - TRACE_COVERAGE_REPORT
+      - REGRESSION_FINGERPRINT
+      - SIM_PERF_ATTRIBUTION_REPORT
+    expected_mode: PASS_EVIDENCE_MODE
+    expected_verdict: PASS_WITH_INSUFFICIENT_EVIDENCE
+    required_evidence:
+      - final_memory_match
+      - missing_rtl_trace
+      - missing_golden_trace
+      - uncovered_contract_paths
+
+  - case_id: case_pass_with_performance_warning
+    input_artifacts:
+      - shared/examples/self_correcting_minimal_simt/expected_golden_contract_model.yaml
+      - shared/examples/self_correcting_minimal_simt/expected_incremental_rtl_map.yaml
+    expected_outputs:
+      - NORMALIZED_TRACE_IR
+      - CORRECTNESS_GATE_REPORT
+      - PASS_EVIDENCE_REPORT
+      - TRACE_COVERAGE_REPORT
+      - PERFORMANCE_METRIC_IR
+      - REGRESSION_FINGERPRINT
+      - PERF_ATTRIBUTION_GRAPH
+      - SIM_PERF_ATTRIBUTION_REPORT
+    expected_mode: PASS_EVIDENCE_MODE
+    expected_verdict: PASS_WITH_PERFORMANCE_WARNING
+    required_evidence:
+      - LOW_ISSUE_UTILIZATION
+      - top_stall_contribution_window
+      - performance_metric_hash
+
+  - case_id: case_first_divergence_pc_mismatch
+    input_artifacts:
+      - shared/examples/self_correcting_minimal_simt/expected_golden_contract_model.yaml
+      - shared/examples/self_correcting_minimal_simt/expected_incremental_rtl_map.yaml
+      - shared/examples/self_correcting_minimal_simt/expected_program_image_ir.yaml
+    expected_outputs:
+      - NORMALIZED_TRACE_IR
+      - CORRECTNESS_GATE_REPORT
+      - FIRST_DIVERGENCE_REPORT
       - PERF_ATTRIBUTION_GRAPH
       - ROOT_CAUSE_REPORT
-    expected_failure_mode: null
+      - SIM_PERF_ATTRIBUTION_REPORT
+    expected_mode: FAILURE_ATTRIBUTION_MODE
+    expected_root_cause: RTL_FUNCTIONAL_ROOT_CAUSE
     required_evidence:
-      - cycle_window
-      - warp
-      - memory_request
-      - rtl_pipeline_stage
-      - contract_rule
-    forbidden_outputs:
-      - ARCH_REWRITE_PLAN
+      - PC_MISMATCH
+      - last_matching_event
+      - first_mismatching_event
+      - rtl_module_path
+      - contract_path
+
+  - case_id: case_active_mask_mismatch
+    input_artifacts:
+      - shared/examples/self_correcting_minimal_simt/expected_golden_contract_model.yaml
+      - shared/examples/self_correcting_minimal_simt/expected_incremental_rtl_map.yaml
+    expected_outputs:
+      - NORMALIZED_TRACE_IR
+      - CORRECTNESS_GATE_REPORT
+      - FIRST_DIVERGENCE_REPORT
+      - ROOT_CAUSE_REPORT
+    expected_mode: FAILURE_ATTRIBUTION_MODE
+    expected_root_cause: RTL_FUNCTIONAL_ROOT_CAUSE
+    required_evidence:
+      - ACTIVE_MASK_MISMATCH
+      - active_mask
+      - predicate_mask
+      - simt_control_contract_path
+
+  - case_id: case_register_writeback_mismatch
+    input_artifacts:
+      - shared/examples/self_correcting_minimal_simt/expected_golden_contract_model.yaml
+      - shared/examples/self_correcting_minimal_simt/expected_incremental_rtl_map.yaml
+    expected_outputs:
+      - NORMALIZED_TRACE_IR
+      - CORRECTNESS_GATE_REPORT
+      - FIRST_DIVERGENCE_REPORT
+      - ROOT_CAUSE_REPORT
+    expected_mode: FAILURE_ATTRIBUTION_MODE
+    expected_root_cause: RTL_FUNCTIONAL_ROOT_CAUSE
+    required_evidence:
+      - REGISTER_WRITEBACK_MISMATCH
+      - dst_regs
+      - reg_values_after
+      - writeback_module_path
+
+  - case_id: case_memory_byte_enable_mismatch
+    input_artifacts:
+      - shared/examples/self_correcting_minimal_simt/expected_golden_contract_model.yaml
+      - shared/examples/self_correcting_minimal_simt/expected_incremental_rtl_map.yaml
+    expected_outputs:
+      - NORMALIZED_TRACE_IR
+      - CORRECTNESS_GATE_REPORT
+      - FIRST_DIVERGENCE_REPORT
+      - ROOT_CAUSE_REPORT
+    expected_mode: FAILURE_ATTRIBUTION_MODE
+    expected_root_cause: MEMORY_SYSTEM_ROOT_CAUSE
+    required_evidence:
+      - MEMORY_BYTE_ENABLE_MISMATCH
+      - byte_enable
+      - lane_mask
+      - memory_contract_path
+
+  - case_id: case_response_tag_mismatch
+    input_artifacts:
+      - shared/examples/self_correcting_minimal_simt/expected_golden_contract_model.yaml
+      - shared/examples/self_correcting_minimal_simt/expected_incremental_rtl_map.yaml
+    expected_outputs:
+      - NORMALIZED_TRACE_IR
+      - CORRECTNESS_GATE_REPORT
+      - FIRST_DIVERGENCE_REPORT
+      - ROOT_CAUSE_REPORT
+    expected_mode: FAILURE_ATTRIBUTION_MODE
+    expected_root_cause: RTL_INTERFACE_ROOT_CAUSE
+    required_evidence:
+      - RESPONSE_TAG_MISMATCH
+      - request_tag
+      - response_tag
+      - interface_contract_path
+
+  - case_id: case_scoreboard_wakeup_delay
+    input_artifacts:
+      - shared/examples/self_correcting_minimal_simt/expected_golden_contract_model.yaml
+      - shared/examples/self_correcting_minimal_simt/expected_incremental_rtl_map.yaml
+    expected_outputs:
+      - NORMALIZED_TRACE_IR
+      - PERFORMANCE_METRIC_IR
+      - PERF_ATTRIBUTION_GRAPH
+      - ROOT_CAUSE_REPORT
+    expected_mode: FAILURE_ATTRIBUTION_MODE
+    expected_root_cause: SCHEDULER_ROOT_CAUSE
+    required_evidence:
+      - SCOREBOARD_WAKEUP_DELAY
+      - scoreboard_dependency
+      - ready_warp_not_issued_cycles
+      - scheduler_state
+
+  - case_id: case_shared_bank_conflict_bottleneck
+    input_artifacts:
+      - shared/examples/self_correcting_minimal_simt/expected_golden_contract_model.yaml
+      - shared/examples/self_correcting_minimal_simt/expected_incremental_rtl_map.yaml
+    expected_outputs:
+      - NORMALIZED_TRACE_IR
+      - PERFORMANCE_METRIC_IR
+      - PERF_ATTRIBUTION_GRAPH
+      - ROOT_CAUSE_REPORT
+    expected_mode: PASS_EVIDENCE_MODE
+    expected_root_cause: PERFORMANCE_ARCH_ROOT_CAUSE
+    required_evidence:
+      - bank_conflict
+      - shared_bank_conflict_rate
+      - shared_bank_conflict_template
+      - affected_contract_paths
+
+  - case_id: case_scheduler_underutilization
+    input_artifacts:
+      - shared/examples/self_correcting_minimal_simt/expected_golden_contract_model.yaml
+      - shared/examples/self_correcting_minimal_simt/expected_incremental_rtl_map.yaml
+    expected_outputs:
+      - NORMALIZED_TRACE_IR
+      - PERFORMANCE_METRIC_IR
+      - PERF_ATTRIBUTION_GRAPH
+      - ROOT_CAUSE_REPORT
+    expected_mode: PASS_EVIDENCE_MODE
+    expected_root_cause: PERFORMANCE_ARCH_ROOT_CAUSE
+    required_evidence:
+      - scheduler_underutilization_template
+      - low_eligible_warp_count
+      - LOW_OCCUPANCY
+      - issue_utilization
+
+  - case_id: case_barrier_wait_bottleneck
+    input_artifacts:
+      - shared/examples/self_correcting_minimal_simt/expected_golden_contract_model.yaml
+      - shared/examples/self_correcting_minimal_simt/expected_incremental_rtl_map.yaml
+    expected_outputs:
+      - NORMALIZED_TRACE_IR
+      - PERFORMANCE_METRIC_IR
+      - PERF_ATTRIBUTION_GRAPH
+      - ROOT_CAUSE_REPORT
+    expected_mode: PASS_EVIDENCE_MODE
+    expected_root_cause: SCHEDULER_ROOT_CAUSE
+    required_evidence:
+      - barrier_wait
+      - barrier_synchronization_template
+      - EXCESSIVE_BARRIER_WAIT
+
+  - case_id: case_branch_divergence_overhead
+    input_artifacts:
+      - shared/examples/self_correcting_minimal_simt/expected_golden_contract_model.yaml
+      - shared/examples/self_correcting_minimal_simt/expected_incremental_rtl_map.yaml
+    expected_outputs:
+      - NORMALIZED_TRACE_IR
+      - PERFORMANCE_METRIC_IR
+      - PERF_ATTRIBUTION_GRAPH
+      - ROOT_CAUSE_REPORT
+    expected_mode: PASS_EVIDENCE_MODE
+    expected_root_cause: PERFORMANCE_ARCH_ROOT_CAUSE
+    required_evidence:
+      - branch_divergence_template
+      - divergence_reconvergence
+      - EXCESSIVE_DIVERGENCE_OVERHEAD
+
+  - case_id: case_assembler_encoding_mismatch
+    input_artifacts:
+      - shared/examples/self_correcting_minimal_simt/input_kernel.asm
+      - shared/examples/self_correcting_minimal_simt/expected_assembly_ir.yaml
+      - shared/examples/self_correcting_minimal_simt/expected_toolchain_artifact_ir.yaml
+    expected_outputs:
+      - NORMALIZED_TRACE_IR
+      - CORRECTNESS_GATE_REPORT
+      - TOOLCHAIN_ATTRIBUTION_REPORT
+      - FIRST_DIVERGENCE_REPORT
+      - PERF_ATTRIBUTION_GRAPH
+      - ROOT_CAUSE_REPORT
+      - SIM_PERF_ATTRIBUTION_REPORT
+    expected_mode: FAILURE_ATTRIBUTION_MODE
+    expected_root_cause: TOOLCHAIN_ROOT_CAUSE
+    required_evidence:
+      - ASM_ENCODE
+      - ASM_ENCODE_MISMATCH
+      - encoded_instruction
+      - isa_model.instruction_encodings
+
+  - case_id: case_disassembler_roundtrip_mismatch
+    input_artifacts:
+      - shared/examples/self_correcting_minimal_simt/expected_program.hex
+      - shared/examples/self_correcting_minimal_simt/expected_disassembly.asm
+    expected_outputs:
+      - NORMALIZED_TRACE_IR
+      - TOOLCHAIN_ATTRIBUTION_REPORT
+      - ROOT_CAUSE_REPORT
+    expected_mode: FAILURE_ATTRIBUTION_MODE
+    expected_root_cause: TOOLCHAIN_ROOT_CAUSE
+    required_evidence:
+      - DISASM_ROUNDTRIP_MISMATCH
+      - disassembly_hash
+      - assembler_output_hash
+
+  - case_id: case_program_image_entry_pc_mismatch
+    input_artifacts:
+      - shared/examples/self_correcting_minimal_simt/expected_program_image_ir.yaml
+      - shared/examples/self_correcting_minimal_simt/expected_loader_contract_ir.yaml
+    expected_outputs:
+      - NORMALIZED_TRACE_IR
+      - TOOLCHAIN_ATTRIBUTION_REPORT
+      - FIRST_DIVERGENCE_REPORT
+      - ROOT_CAUSE_REPORT
+    expected_mode: FAILURE_ATTRIBUTION_MODE
+    expected_root_cause: TOOLCHAIN_ROOT_CAUSE
+    required_evidence:
+      - ENTRY_SYMBOL_RESOLVE_MISMATCH
+      - entry_pc
+      - program_image_hash
+      - loader_contract_hash
+
+  - case_id: case_runtime_arg_buffer_mismatch
+    input_artifacts:
+      - shared/examples/self_correcting_minimal_simt/expected_runtime_launch_ir.yaml
+      - shared/examples/self_correcting_minimal_simt/expected_loader_contract_ir.yaml
+    expected_outputs:
+      - NORMALIZED_TRACE_IR
+      - TOOLCHAIN_ATTRIBUTION_REPORT
+      - FIRST_DIVERGENCE_REPORT
+      - ROOT_CAUSE_REPORT
+    expected_mode: FAILURE_ATTRIBUTION_MODE
+    expected_root_cause: RUNTIME_LAUNCH_ROOT_CAUSE
+    required_evidence:
+      - ARG_BUFFER_ENCODING_MISMATCH
+      - runtime_launch_hash
+      - arg_buffer
+      - csr_start_sequence
+
+  - case_id: case_loader_contract_mismatch
+    input_artifacts:
+      - shared/examples/self_correcting_minimal_simt/expected_program_image_ir.yaml
+      - shared/examples/self_correcting_minimal_simt/expected_loader_contract_ir.yaml
+    expected_outputs:
+      - NORMALIZED_TRACE_IR
+      - TOOLCHAIN_ATTRIBUTION_REPORT
+      - ROOT_CAUSE_REPORT
+    expected_mode: FAILURE_ATTRIBUTION_MODE
+    expected_root_cause: TOOLCHAIN_ROOT_CAUSE
+    required_evidence:
+      - LOADER_CONTRACT_MISMATCH
+      - loader_init
+      - loader_contract_hash
+
+  - case_id: case_insufficient_trace_evidence
+    input_artifacts:
+      - shared/examples/self_correcting_minimal_simt/expected_golden_contract_model.yaml
+    expected_outputs:
+      - NORMALIZED_TRACE_IR
+      - CORRECTNESS_GATE_REPORT
+      - ROOT_CAUSE_REPORT
+      - SIM_PERF_ATTRIBUTION_REPORT
+    expected_mode: FAILURE_ATTRIBUTION_MODE
+    expected_root_cause: TEST_EVIDENCE_ROOT_CAUSE
+    required_evidence:
+      - MISSING_RTL_TRACE
+      - INSUFFICIENT_TRACE_EVIDENCE
+      - TEST_EVIDENCE_PATCH
+
+  - case_id: case_ambiguous_root_cause
+    input_artifacts:
+      - shared/examples/self_correcting_minimal_simt/expected_golden_contract_model.yaml
+      - shared/examples/self_correcting_minimal_simt/expected_incremental_rtl_map.yaml
+    expected_outputs:
+      - NORMALIZED_TRACE_IR
+      - CORRECTNESS_GATE_REPORT
+      - FIRST_DIVERGENCE_REPORT
+      - PERF_ATTRIBUTION_GRAPH
+      - ROOT_CAUSE_REPORT
+      - SIM_PERF_ATTRIBUTION_REPORT
+    expected_mode: FAILURE_ATTRIBUTION_MODE
+    expected_root_cause: ROOT_CAUSE_AMBIGUOUS
+    required_evidence:
+      - ambiguous_evidence
+      - MULTIPLE_UNRANKED_CAUSES
+      - TEST_EVIDENCE_PATCH

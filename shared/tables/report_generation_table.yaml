@@ -1,0 +1,41 @@
+version: v5
+modes:
+  FAILURE_ATTRIBUTION_MODE:
+    required_refs:
+      - correctness_gate_report_ref
+      - first_divergence_report_ref
+      - performance_metric_ref
+      - perf_attribution_graph_ref
+      - root_cause_report_ref
+    optional_refs:
+      - toolchain_attribution_report_ref
+      - trace_coverage_report_ref
+  PASS_EVIDENCE_MODE:
+    required_refs:
+      - correctness_gate_report_ref
+      - pass_evidence_report_ref
+      - trace_coverage_report_ref
+      - performance_metric_ref
+      - regression_fingerprint_ref
+    optional_refs:
+      - perf_attribution_graph_ref
+      - toolchain_attribution_report_ref
+verdicts:
+  correctness:
+    - CORRECTNESS_PASS
+    - CORRECTNESS_FAIL
+    - PASS_WITH_INSUFFICIENT_EVIDENCE
+    - PASS_WITH_PERFORMANCE_WARNING
+  performance:
+    - PERFORMANCE_PASS
+    - PERFORMANCE_WARNING
+    - PERFORMANCE_FAIL
+    - NOT_EVALUATED
+  evidence:
+    - EVIDENCE_COMPLETE
+    - EVIDENCE_INCOMPLETE
+    - EVIDENCE_AMBIGUOUS
+human_summary_fields:
+  - short_verdict
+  - primary_reason
+  - next_action

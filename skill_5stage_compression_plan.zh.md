@@ -1,10 +1,12 @@
 # GPGPU Skill Self-Correcting Design System Implementation Plan
 
+> 2026-06-23 更新：本文件最初记录 5-stage 压缩方案。当前流程已升级为 6-stage，在 `System Contract + Golden Semantics Engine` 和 `Incremental RTL Binding Engine` 之间新增 `gpgpu-toolchain-runtime-artifact-engine`，负责从 `SYSTEM_CONTRACT_IR` 派生 assembler、disassembler、program image、runtime launch artifact 和 loader contract。后续实施以 `README.md` 和 `shared/flow/gpgpu_design_flow.md` 中的 6-stage flow 为准。
+
 > **For agentic workers:** REQUIRED SUB-SKILL: Use `superpowers:subagent-driven-development` (recommended) or `superpowers:executing-plans` to implement this plan task-by-task. Steps use checkbox (`- [ ]`) syntax for tracking.
 
-**Goal:** 将当前 GPGPU skill flow 从“IR-driven design pipeline”升级为“self-correcting design system”：可以生成架构、冻结合同、执行 golden semantics、增量绑定 RTL、归因性能/正确性问题，并自动产生 architecture / contract / RTL rewrite plan。
+**Goal:** 将当前 GPGPU skill flow 从“IR-driven design pipeline”升级为“self-correcting design system”：可以生成架构、冻结合同、执行 golden semantics、派生 toolchain/runtime artifacts、增量绑定 RTL、归因性能/正确性问题，并自动产生 architecture / contract / toolchain / RTL rewrite plan。
 
-**Architecture:** 新系统由 5 个核心模块组成：Architecture Generator、System Contract + Golden Semantics Engine、Incremental RTL Binding Engine、Simulation + Performance Attribution Engine、Architecture Rewrite Loop Controller。核心变化是补齐 4 个工程缺口：Executable Golden Model、module-by-module incremental RTL、Performance Attribution Graph、Architecture Rewriting Trigger。
+**Architecture:** 当前系统由 6 个核心模块组成：Architecture Generator、System Contract + Golden Semantics Engine、Toolchain + Runtime Artifact Engine、Incremental RTL Binding Engine、Simulation + Performance Attribution Engine、Architecture Rewrite Loop Controller。核心变化是补齐 5 个工程缺口：Executable Golden Model、toolchain/runtime artifact stage、module-by-module incremental RTL、Performance Attribution Graph、Architecture Rewriting Trigger。
 
 **Tech Stack:** Markdown skills, `SKILL.md` / optional `SKILL.zh.md`, YAML schemas, YAML rule tables, executable reference-model specifications, module interface contracts, trace normalization rules, regression cases under `shared/tests/`, example IR under `shared/examples/`, validation script under `shared/tests/validate_v4_assets.py` or later `validate_v5_assets.py`.
 
@@ -30,18 +32,20 @@
 | Performance Attribution | 只有 perf report | `PERF_ATTRIBUTION_GRAPH` |
 | Architecture Rewrite Trigger | closure 只报告 | `ARCH_REWRITE_PLAN` |
 
-因此本计划不再把目标描述为“压缩成 5-stage pipeline”，而是明确升级为：
+因此本计划不再把目标描述为“旧压缩 pipeline”，而是明确升级为：
 
 ```text
 (1) Architecture Generator
         ↓
 (2) System Contract + Golden Semantics Engine
         ↓
-(3) Incremental RTL Binding Engine
+(3) Toolchain + Runtime Artifact Engine
         ↓
-(4) Simulation + Performance Attribution Engine
+(4) Incremental RTL Binding Engine
         ↓
-(5) Architecture Rewrite Loop Controller
+(5) Simulation + Performance Attribution Engine
+        ↓
+(6) Architecture Rewrite Loop Controller
         ↺ back to (1)(2)(3)
 ```
 
@@ -447,7 +451,10 @@ SIM_PERF_ATTRIBUTION_REPORT
 
 ### 需要新增 references
 
-- `skill/gpgpu-simulation-performance-attribution-engine/trace_normalizer.md`
+- `skill/gpgpu-simulation-performance-attribution-engine/trace_ingestion_and_normalization.md`
+- `skill/gpgpu-simulation-performance-attribution-engine/correctness_gate_and_mode_selection.md`
+- `skill/gpgpu-simulation-performance-attribution-engine/pass_evidence_engine.md`
+- `skill/gpgpu-simulation-performance-attribution-engine/performance_metric_extractor.md`
 - `skill/gpgpu-simulation-performance-attribution-engine/bottleneck_graph_builder.md`
 - `skill/gpgpu-simulation-performance-attribution-engine/root_cause_engine.md`
 
@@ -906,7 +913,10 @@ forbidden_outputs:
 
 **Files:**
 
-- Create: `skill/gpgpu-simulation-performance-attribution-engine/trace_normalizer.md`
+- Create: `skill/gpgpu-simulation-performance-attribution-engine/trace_ingestion_and_normalization.md`
+- Create: `skill/gpgpu-simulation-performance-attribution-engine/correctness_gate_and_mode_selection.md`
+- Create: `skill/gpgpu-simulation-performance-attribution-engine/pass_evidence_engine.md`
+- Create: `skill/gpgpu-simulation-performance-attribution-engine/performance_metric_extractor.md`
 - Create: `skill/gpgpu-simulation-performance-attribution-engine/bottleneck_graph_builder.md`
 - Create: `skill/gpgpu-simulation-performance-attribution-engine/root_cause_engine.md`
 - Create: `skill/shared/schemas/perf_attribution_graph.schema.yaml`
@@ -1018,15 +1028,16 @@ forbidden_outputs:
 - Create or update: `skill/gpgpu-incremental-rtl-binding-engine/module_binding_rules.md`
 - Create or update: `skill/gpgpu-simulation-performance-attribution-engine/legacy_validation_and_trace_constraints.md`
 - Create or update: `skill/gpgpu-architecture-rewrite-loop-controller/legacy_closure_repair_constraints.md`
-- Delete: old top-level `skill/gpgpu-*` directories that are not one of the five v5 skills.
+- Delete: old top-level `skill/gpgpu-*` directories that are not one of the six current v5 skills.
 - Delete: `skill/legacy/` old skill archive after useful constraints are migrated.
 
 - [ ] **Step 1: Migrate useful constraints**
 
-  Move useful behavior into the five current owner skill reference files:
+  Move useful behavior into the six current owner skill reference files:
 
 - request classification, mode routing, and design-intent lock -> Architecture Generator
 - spec/state/config truth and golden trace replay -> System Contract + Golden Semantics Engine
+- assembler/disassembler derivation, program image, runtime launch, and loader artifacts -> Toolchain + Runtime Artifact Engine
 - deterministic transform, module binding, memory path structure, and RTL implementability -> Incremental RTL Binding Engine
 - runtime, memory, RTL/golden trace, and causal attribution evidence -> Simulation + Performance Attribution Engine
 - closure gates, repair routing, regression risk, and rewrite decisions -> Architecture Rewrite Loop Controller
@@ -1194,12 +1205,13 @@ forbidden_outputs:
 
 ## Recommended implementation order
 
-1. Create the 5 new top-level skills.
+1. Keep the 6 current top-level skills as the active namespace.
 2. Add executable golden semantics schemas, tables, and references.
-3. Add incremental RTL binding schemas, tables, and references.
-4. Add trace normalization and performance attribution graph schemas, tables, and references.
-5. Add rewrite loop schemas, tables, and references.
-6. Migrate useful old-skill constraints into the five v5 skills, then delete old skill directories.
-7. Update validator and examples.
-8. Update README, summary, and flow docs.
-9. Run validation and only then archive old v4 directories.
+3. Add toolchain/runtime artifact schemas, tables, references, and smoke examples.
+4. Add incremental RTL binding schemas, tables, and references.
+5. Add trace normalization and performance attribution graph schemas, tables, and references.
+6. Add rewrite loop schemas, tables, and references.
+7. Migrate useful old-skill constraints into the six v5 skills, then delete old skill directories.
+8. Update validator and examples.
+9. Update README, summary, and flow docs.
+10. Run validation and only then archive old v4 directories.

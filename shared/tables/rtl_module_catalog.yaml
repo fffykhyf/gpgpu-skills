@@ -55,8 +55,24 @@ modules:
     required_interfaces: [l1_cache_or_global_adapter, csr_runtime_interface]
   csr_runtime_interface:
     template: csr_runtime_template
-    required_contract_paths: [launch_model.abi, launch_model.kernel_entry, launch_model.completion_fault_observation, config_contract.hw_sw_abi]
-    required_interfaces: [sm_core, fault_completion_unit, interconnect]
+    required_contract_paths: [launch_model.abi, launch_model.kernel_entry, launch_model.argument_buffer_layout, launch_model.completion_fault_observation, config_contract.hw_sw_abi]
+    required_artifacts: [RUNTIME_LAUNCH_IR, LOADER_CONTRACT_IR]
+    required_interfaces: [sm_core, fault_completion_unit, interconnect, runtime_arg_buffer_interface]
+  program_image_loader_interface:
+    template: program_image_loader_template
+    required_contract_paths: [launch_model.program_image_format, launch_model.loader_contract, launch_model.kernel_entry]
+    required_artifacts: [PROGRAM_IMAGE_IR, LOADER_CONTRACT_IR]
+    required_interfaces: [instruction_memory_init, runtime_arg_buffer_interface, sm_core]
+  instruction_memory_init:
+    template: instruction_memory_init_template
+    required_contract_paths: [launch_model.program_image_format, isa_model.instruction_encodings]
+    required_artifacts: [PROGRAM_IMAGE_IR, LOADER_CONTRACT_IR]
+    required_interfaces: [program_image_loader_interface, decode_execute_pipeline]
+  runtime_arg_buffer_interface:
+    template: runtime_arg_buffer_template
+    required_contract_paths: [launch_model.argument_buffer_layout, config_contract.hw_sw_abi]
+    required_artifacts: [RUNTIME_LAUNCH_IR, LOADER_CONTRACT_IR]
+    required_interfaces: [csr_runtime_interface, program_image_loader_interface, register_file]
 module_binding_templates:
   warp_scheduler_template:
     required_contract_paths: [execution_model.scheduler, state_model.scheduler_state, state_model.warp_state]
@@ -148,3 +164,30 @@ module_binding_templates:
     required_trace_fields: [cycle, start, done, fault, kernel_entry, arg_base]
     forbidden_hidden_state: [undocumented_csr, untracked_arg_base]
     timing_checks: [no_combinational_ready_loop]
+  program_image_loader_template:
+    required_contract_paths: [launch_model.program_image_format, launch_model.loader_contract, launch_model.kernel_entry]
+    required_local_state: [entry_pc_latch, imem_init_state, dmem_init_state]
+    required_input_interfaces: [host_program_image_load]
+    required_output_interfaces: [program_image_loader_to_instruction_memory_init, program_image_loader_to_sm_core]
+    required_partial_sim_cases: [program_image_load, entry_pc_fetch, first_instruction_decode]
+    required_trace_fields: [cycle, entry_pc, segment_name, image_offset, encoded_instruction]
+    forbidden_hidden_state: [implicit_entry_pc, undocumented_image_layout]
+    timing_checks: [local_timing_risk, no_combinational_ready_loop]
+  instruction_memory_init_template:
+    required_contract_paths: [launch_model.program_image_format, isa_model.instruction_encodings]
+    required_local_state: [instruction_memory_array]
+    required_input_interfaces: [program_image_loader_to_instruction_memory_init]
+    required_output_interfaces: [instruction_memory_to_decode_execute_pipeline]
+    required_partial_sim_cases: [program_image_load, first_instruction_decode]
+    required_trace_fields: [cycle, pc, image_offset, encoded_instruction, decoded_instruction]
+    forbidden_hidden_state: [instruction_patch_without_contract]
+    timing_checks: [estimated_sram_macro_need, no_combinational_ready_loop]
+  runtime_arg_buffer_template:
+    required_contract_paths: [launch_model.argument_buffer_layout, config_contract.hw_sw_abi]
+    required_local_state: [arg_buffer_base, arg_buffer_bytes_visible]
+    required_input_interfaces: [csr_runtime_interface_to_runtime_arg_buffer]
+    required_output_interfaces: [runtime_arg_buffer_to_register_file]
+    required_partial_sim_cases: [arg_buffer_visible]
+    required_trace_fields: [cycle, arg_base, arg_buffer_offset, arg_bytes, decoded_argument]
+    forbidden_hidden_state: [implicit_argument_default]
+    timing_checks: [local_timing_risk, no_combinational_ready_loop]

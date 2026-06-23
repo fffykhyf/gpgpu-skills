@@ -1,0 +1,20 @@
+table: instruction_encoding_derivation_table
+version: v5
+sources:
+  opcodes: SYSTEM_CONTRACT_IR.isa_model.opcodes
+  instruction_encodings: SYSTEM_CONTRACT_IR.isa_model.instruction_encodings
+  operand_fields: SYSTEM_CONTRACT_IR.isa_model.operand_fields
+  decode_classes: SYSTEM_CONTRACT_IR.isa_model.decode_classes
+required_equivalence_hashes:
+  - isa_model_hash
+  - tools_isa_table_hash
+  - assembler_table_hash
+  - disassembler_table_hash
+  - rtl_defines_hash
+gates:
+  opcode_equivalence:
+    failure_mode: ISA_ENCODING_DRIFT
+  field_layout_equivalence:
+    failure_mode: ISA_ENCODING_DRIFT
+  unsupported_behavior_equivalence:
+    failure_mode: UNSUPPORTED_INSTRUCTION_BEHAVIOR_MISMATCH

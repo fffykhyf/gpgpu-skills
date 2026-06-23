@@ -1,0 +1,48 @@
+schema: first_divergence_report_ir
+version: v5
+type: object
+required:
+  - verdict
+  - first_divergence_type
+  - contract_paths
+  - rtl_module_paths
+  - toolchain_artifact_paths
+  - precondition_window
+  - postcondition_window
+  - evidence_hashes
+  - confidence
+properties:
+  verdict: enum
+  first_divergence_type: enum
+  cycle: integer
+  step_id: integer
+  warp_id: integer
+  pc: string
+  golden_event: map
+  rtl_event: map
+  contract_paths: list
+  rtl_module_paths: list
+  toolchain_artifact_paths: list
+  precondition_window: list
+  postcondition_window: list
+  evidence_hashes: list
+  confidence: enum
+verdicts:
+  - DIVERGENCE_FOUND
+  - NO_DIVERGENCE_FOUND
+  - INSUFFICIENT_TRACE
+divergence_types:
+  - PC_MISMATCH
+  - NEXT_PC_MISMATCH
+  - DECODE_MISMATCH
+  - ACTIVE_MASK_MISMATCH
+  - PREDICATE_MASK_MISMATCH
+  - REGISTER_WRITEBACK_MISMATCH
+  - MEMORY_ADDRESS_MISMATCH
+  - MEMORY_VALUE_MISMATCH
+  - MEMORY_BYTE_ENABLE_MISMATCH
+  - RESPONSE_TAG_MISMATCH
+  - CSR_MISMATCH
+  - BARRIER_STATE_MISMATCH
+  - FAULT_STATUS_MISMATCH
+  - COMPLETION_STATUS_MISMATCH

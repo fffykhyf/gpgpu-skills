@@ -1,0 +1,21 @@
+schema: loader_contract_ir
+version: v5
+type: object
+required:
+  - system_contract_ir_hash
+  - program_image_ir_hash
+  - imem_load_rule
+  - dmem_load_rule
+  - entry_pc_rule
+  - reset_rule
+  - rtl_loader_interface
+  - memory_initialization_hash
+properties:
+  system_contract_ir_hash: string
+  program_image_ir_hash: string
+  imem_load_rule: map
+  dmem_load_rule: map
+  entry_pc_rule: map
+  reset_rule: map
+  rtl_loader_interface: map
+  memory_initialization_hash: string

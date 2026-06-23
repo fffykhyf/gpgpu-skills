@@ -1,0 +1,24 @@
+schema: correctness_gate_report_ir
+version: v5
+type: object
+required:
+  - verdict
+  - selected_mode
+  - comparison_level
+  - mismatch_summary
+  - evidence_completeness
+properties:
+  verdict: enum
+  selected_mode: enum
+  comparison_level: list
+  mismatch_summary: map
+  evidence_completeness: map
+  fail_reason: string
+verdicts:
+  - CORRECTNESS_PASS
+  - CORRECTNESS_FAIL
+  - PASS_WITH_INSUFFICIENT_EVIDENCE
+  - PASS_WITH_TRACE_DIVERGENCE_WARNING
+modes:
+  - PASS_EVIDENCE_MODE
+  - FAILURE_ATTRIBUTION_MODE

@@ -2,20 +2,79 @@ version: v5
 event_fields:
   required:
     - event_id
-    - cycle
-    - warp_id
-    - instruction_id
-    - contract_path
-    - rtl_module_path
+    - event_source
     - event_type
+    - timestamp_kind
+    - order_key
+    - contract_path
     - dependencies
-    - evidence_source
+    - evidence_hash
+  optional:
+    - cycle
+    - step_id
+    - block_id
+    - warp_id
+    - lane_id
+    - thread_id
+    - lane_mask
+    - pc
+    - next_pc
+    - instruction_id
+    - opcode
+    - encoded_instruction
+    - decoded_instruction
+    - active_mask
+    - predicate_mask
+    - stall_reason
+    - issue_valid
+    - commit_valid
+    - src_regs
+    - dst_regs
+    - reg_values_before
+    - reg_values_after
+    - memory_space
+    - memory_addr
+    - access_size
+    - byte_enable
+    - request_tag
+    - response_tag
+    - memory_latency
+    - fault_code
+    - csr_addr
+    - csr_value
+    - launch_state
+    - rtl_module_path
+    - toolchain_artifact_path
 sources:
+  assembler_trace:
+    requires_toolchain_artifact_path: true
+    requires_contract_path: isa_model.instruction_encodings
+  disassembler_trace:
+    requires_toolchain_artifact_path: true
+    requires_contract_path: isa_model.instruction_encodings
+  program_image_trace:
+    requires_toolchain_artifact_path: true
+    requires_contract_path: launch_model.program_image_format
+  loader_trace:
+    requires_toolchain_artifact_path: true
+    requires_contract_path: launch_model.loader_contract
+  toolchain_smoke_trace:
+    requires_toolchain_artifact_path: true
+    requires_contract_path: source_of_truth.toolchain_validation
+  runtime_launch_trace:
+    requires_contract_path: launch_model.runtime_launch
   rtl_trace:
     requires_module_path: true
+  waveform_trace:
+    requires_module_path: false
   golden_contract_trace:
     requires_golden_contract_model_hash: true
-  runtime_launch_trace:
-    requires_launch_contract_path: true
+  module_partial_sim_trace:
+    requires_module_path: true
   memory_trace:
     requires_memory_contract_path: true
+missing_field_failures:
+  toolchain_source: TOOLCHAIN_TRACE_FIELD_MISSING
+  rtl_source: TRACE_FIELD_MISSING
+  golden_source: GOLDEN_TRACE_UNTRUSTED
+  order_missing: TRACE_NORMALIZATION_FAIL

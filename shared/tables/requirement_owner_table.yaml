@@ -4,11 +4,18 @@ owners:
   simt_execution: gpgpu-system-contract-golden-engine
   launch_abi: gpgpu-system-contract-golden-engine
   canonical_state: gpgpu-system-contract-golden-engine
+  toolchain_artifacts: gpgpu-toolchain-runtime-artifact-engine
+  assembler: gpgpu-toolchain-runtime-artifact-engine
+  disassembler: gpgpu-toolchain-runtime-artifact-engine
+  program_image: gpgpu-toolchain-runtime-artifact-engine
+  runtime_launch_artifact: gpgpu-toolchain-runtime-artifact-engine
+  loader_contract: gpgpu-toolchain-runtime-artifact-engine
   artifact_mapping: gpgpu-incremental-rtl-binding-engine
-  runtime_launch: gpgpu-system-contract-golden-engine
+  runtime_launch: gpgpu-toolchain-runtime-artifact-engine
   memory_ordering: gpgpu-system-contract-golden-engine
   rtl_trace: gpgpu-simulation-performance-attribution-engine
   closure_verdict: gpgpu-architecture-rewrite-loop-controller
   source_of_truth_generation: gpgpu-system-contract-golden-engine
+  source_of_truth_derivation_check: gpgpu-toolchain-runtime-artifact-engine
   software_stack_contract: gpgpu-simulation-performance-attribution-engine
   vertical_slice_validation: gpgpu-simulation-performance-attribution-engine

@@ -1,6 +1,6 @@
 ---
 name: gpgpu-incremental-rtl-binding-engine
-description: Use when SYSTEM_CONTRACT_IR and GOLDEN_CONTRACT_MODEL must be bound module by module into INCREMENTAL_RTL_MAP with interface contract checking and RTL partial simulation evidence.
+description: Use when SYSTEM_CONTRACT_IR, GOLDEN_CONTRACT_MODEL, and toolchain runtime artifacts must be bound module by module into INCREMENTAL_RTL_MAP with interface contract checking, loader binding, and RTL partial simulation evidence.
 ---
 
 # GPGPU Incremental RTL Binding Engine
@@ -13,6 +13,7 @@ This skill lowers the system contract into modular RTL bindings. It replaces glo
 
 Upstream:
 - `gpgpu-system-contract-golden-engine`
+- `gpgpu-toolchain-runtime-artifact-engine`
 
 Downstream:
 - `gpgpu-simulation-performance-attribution-engine`
@@ -23,6 +24,10 @@ Downstream:
 Consumes:
 - `SYSTEM_CONTRACT_IR`
 - `GOLDEN_CONTRACT_MODEL`
+- `TOOLCHAIN_ARTIFACT_IR`
+- `PROGRAM_IMAGE_IR`
+- `RUNTIME_LAUNCH_IR`
+- `LOADER_CONTRACT_IR`
 - module catalog
 - module interface contract table
 - RTL partial simulation gate table
@@ -40,6 +45,9 @@ Produces:
 
 This skill owns:
 - module-by-module RTL binding
+- program image loader interface binding
+- instruction memory initialization binding
+- runtime argument buffer interface binding
 - module binding template selection
 - Interface Contract Checker
 - RTL Partial Simulator
@@ -77,6 +85,10 @@ This skill must use:
 This skill must validate:
 - `shared/schemas/system_contract_ir.schema.yaml`
 - `shared/schemas/golden_contract_model.schema.yaml`
+- `shared/schemas/toolchain_artifact_ir.schema.yaml`
+- `shared/schemas/program_image_ir.schema.yaml`
+- `shared/schemas/runtime_launch_ir.schema.yaml`
+- `shared/schemas/loader_contract_ir.schema.yaml`
 - `shared/schemas/incremental_rtl_map.schema.yaml`
 - `shared/schemas/module_interface_report_ir.schema.yaml`
 - `shared/schemas/rtl_partial_sim_report_ir.schema.yaml`
@@ -85,6 +97,10 @@ This skill must validate:
 
 The output must satisfy:
 - `INCREMENTAL_RTL_MAP` binds modules one by one.
+- Program image loading must consume `PROGRAM_IMAGE_IR` and `LOADER_CONTRACT_IR`.
+- Runtime CSR binding must consume `RUNTIME_LAUNCH_IR`.
+- Entry PC fetch must match `PROGRAM_IMAGE_IR.entry_pc`.
+- Argument buffer visibility must match `RUNTIME_LAUNCH_IR.arg_buffer_bytes`.
 - Every module must reference a `MODULE_BINDING_TEMPLATE`.
 - Every module must declare consumed contract paths, required local state, input/output interfaces, latency contract, local trace schema, partial simulation evidence, and timing feedback.
 - Every interface must be represented as structured `INTERFACE_BINDING_IR`.
@@ -104,6 +120,10 @@ This skill must emit:
 - `PARTIAL_SIM_FAIL`
 - `CONTRACT_PATH_UNBOUND`
 - `MODULE_TEMPLATE_MISSING`
+- `PROGRAM_IMAGE_LOAD_FAIL`
+- `ENTRY_PC_FETCH_FAIL`
+- `ARG_BUFFER_VISIBILITY_FAIL`
+- `FIRST_INSTRUCTION_DECODE_FAIL`
 - `TAG_REUSE_BEFORE_RESPONSE`
 - `PAYLOAD_STABILITY_FAIL`
 - `COMBINATIONAL_READY_LOOP`
@@ -116,6 +136,10 @@ The report must include:
 - verdict
 - system_contract_ir_hash
 - golden_contract_model_hash
+- toolchain_artifact_ir_hash
+- program_image_ir_hash
+- runtime_launch_ir_hash
+- loader_contract_ir_hash
 - incremental_rtl_map_hash
 - module_results
 - interface_results
@@ -131,6 +155,10 @@ This skill is incomplete unless the following exist:
 - `interface_binding_and_checker.md`
 - `partial_simulation_gates.md`
 - `rtl_module_catalog.md`
+- `shared/schemas/toolchain_artifact_ir.schema.yaml`
+- `shared/schemas/program_image_ir.schema.yaml`
+- `shared/schemas/runtime_launch_ir.schema.yaml`
+- `shared/schemas/loader_contract_ir.schema.yaml`
 - `shared/schemas/incremental_rtl_map.schema.yaml`
 - `shared/schemas/module_interface_report_ir.schema.yaml`
 - `shared/schemas/rtl_partial_sim_report_ir.schema.yaml`

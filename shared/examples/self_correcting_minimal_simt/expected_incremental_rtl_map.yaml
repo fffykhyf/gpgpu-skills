@@ -1,5 +1,9 @@
 system_contract_ir_hash: hash_system_contract_minimal_simt
 golden_contract_model_hash: hash_golden_contract_minimal_simt
+toolchain_artifact_ir_hash: hash_toolchain_artifact_minimal_simt
+program_image_ir_hash: hash_program_image_vecadd
+runtime_launch_ir_hash: hash_runtime_launch_vecadd
+loader_contract_ir_hash: hash_loader_contract_vecadd
 modules:
   - module_id: warp_scheduler
     template_id: warp_scheduler_template

@@ -1,13 +1,28 @@
 version: v5
 node_classes:
   - cycle_window
+  - order_window
+  - block
   - warp
+  - lane
   - instruction
+  - pc_event
+  - decode_event
+  - active_mask_event
+  - register_writeback
   - scoreboard_dependency
+  - scheduler_state
+  - barrier_state
+  - branch_divergence
   - memory_request
+  - memory_response
   - cache_event
   - bank_conflict
+  - coalescing_event
+  - interface_backpressure
   - rtl_pipeline_stage
+  - toolchain_artifact
+  - runtime_launch_event
   - contract_rule
   - bottleneck_category
 edge_classes:
@@ -17,10 +32,18 @@ edge_classes:
   - violates
   - maps_to
   - amplified_by
+  - precedes
+  - depends_on
+  - routes_to
 required_chain:
-  - cycle_window
-  - warp
-  - memory_request
-  - rtl_pipeline_stage
-  - contract_rule
+  performance_claim:
+    - cycle_window
+    - warp
+    - bottleneck_category
+    - rtl_pipeline_stage
+    - contract_rule
+  toolchain_claim:
+    - instruction
+    - toolchain_artifact
+    - contract_rule
 failure_mode: PERF_CAUSAL_CHAIN_MISSING

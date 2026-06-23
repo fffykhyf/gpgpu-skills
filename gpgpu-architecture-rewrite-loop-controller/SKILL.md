@@ -1,6 +1,6 @@
 ---
 name: gpgpu-architecture-rewrite-loop-controller
-description: Use when PERF_ATTRIBUTION_GRAPH, ROOT_CAUSE_REPORT, INCREMENTAL_RTL_MAP, SYSTEM_CONTRACT_IR, GOLDEN_CONTRACT_MODEL, or ARCH_IR evidence must trigger architecture, contract, RTL, or test-evidence rewrite plans and revalidation routing.
+description: Use when PERF_ATTRIBUTION_GRAPH, ROOT_CAUSE_REPORT, PASS_EVIDENCE_REPORT, toolchain artifacts, INCREMENTAL_RTL_MAP, SYSTEM_CONTRACT_IR, GOLDEN_CONTRACT_MODEL, or ARCH_IR evidence must trigger architecture, contract, golden-model, toolchain, runtime, RTL, pass-evidence, or test-evidence rewrite plans and revalidation routing.
 ---
 
 # GPGPU Architecture Rewrite Loop Controller
@@ -14,14 +14,17 @@ This skill is the self-correction controller. It reads attribution evidence and 
 Upstream:
 - `gpgpu-architecture-generator`
 - `gpgpu-system-contract-golden-engine`
+- `gpgpu-toolchain-runtime-artifact-engine`
 - `gpgpu-incremental-rtl-binding-engine`
 - `gpgpu-simulation-performance-attribution-engine`
 
 Downstream:
 - `gpgpu-architecture-generator` for architecture patches
 - `gpgpu-system-contract-golden-engine` for contract patches
+- `gpgpu-system-contract-golden-engine` for golden-model patches
+- `gpgpu-toolchain-runtime-artifact-engine` for toolchain and runtime patches
 - `gpgpu-incremental-rtl-binding-engine` for RTL patches
-- `gpgpu-simulation-performance-attribution-engine` for revalidation
+- `gpgpu-simulation-performance-attribution-engine` for pass-evidence, test-evidence, and revalidation patches
 
 ## Input IR
 
@@ -29,9 +32,15 @@ Consumes:
 - `ARCH_IR`
 - `SYSTEM_CONTRACT_IR`
 - `GOLDEN_CONTRACT_MODEL`
+- `TOOLCHAIN_ARTIFACT_IR`
+- `PROGRAM_IMAGE_IR`
+- `RUNTIME_LAUNCH_IR`
+- `LOADER_CONTRACT_IR`
 - `INCREMENTAL_RTL_MAP`
 - `PERF_ATTRIBUTION_GRAPH`
 - `ROOT_CAUSE_REPORT`
+- `PASS_EVIDENCE_REPORT`
+- `REGRESSION_FINGERPRINT`
 - regression history
 - patch taxonomy
 - rewrite trigger table
@@ -49,7 +58,11 @@ This skill owns:
 - rewrite trigger selection
 - architecture patch planning
 - contract patch planning
+- golden-model patch planning
+- toolchain patch planning
+- runtime patch planning
 - RTL patch planning
+- pass evidence patch planning
 - test evidence patch planning
 - revalidation routing
 - regression tracking
@@ -60,6 +73,10 @@ This skill must not:
 - directly mutate `ARCH_IR`
 - directly mutate `SYSTEM_CONTRACT_IR`
 - directly mutate `GOLDEN_CONTRACT_MODEL`
+- directly mutate `TOOLCHAIN_ARTIFACT_IR`
+- directly mutate `PROGRAM_IMAGE_IR`
+- directly mutate `RUNTIME_LAUNCH_IR`
+- directly mutate `LOADER_CONTRACT_IR`
 - directly mutate `INCREMENTAL_RTL_MAP`
 - directly mutate traces
 - define new truth or module interfaces
@@ -82,9 +99,9 @@ This skill must validate:
 ## Required Invariants
 
 The output must satisfy:
-- `ARCH_REWRITE_PLAN` may propose architecture, contract, or RTL patches, but must not directly mutate `ARCH_IR`, `SYSTEM_CONTRACT_IR`, `GOLDEN_CONTRACT_MODEL`, `INCREMENTAL_RTL_MAP`, or traces.
+- `ARCH_REWRITE_PLAN` may propose architecture, contract, golden-model, toolchain, runtime, RTL, pass-evidence, or test-evidence patches, but must not directly mutate `ARCH_IR`, `SYSTEM_CONTRACT_IR`, `GOLDEN_CONTRACT_MODEL`, `TOOLCHAIN_ARTIFACT_IR`, `PROGRAM_IMAGE_IR`, `RUNTIME_LAUNCH_IR`, `LOADER_CONTRACT_IR`, `INCREMENTAL_RTL_MAP`, or traces.
 - Every patch has owner module, patch target, expected impact, required revalidation gates, and regression risks.
-- Architecture Patch, Contract Patch, and RTL Patch are distinct patch classes.
+- Architecture Patch, Contract Patch, Golden Model Patch, Toolchain Patch, Runtime Patch, RTL Patch, Pass Evidence Patch, and Test Evidence Patch are distinct patch classes.
 - Every accepted rewrite routes to revalidation.
 
 ## Failure Modes
@@ -92,6 +109,9 @@ The output must satisfy:
 This skill must emit:
 - `UNSUPPORTED_REWRITE_TRIGGER`
 - `PATCH_OWNER_MISSING`
+- `TOOLCHAIN_PATCH_OWNER_MISSING`
+- `RUNTIME_PATCH_OWNER_MISSING`
+- `PASS_EVIDENCE_PATCH_OWNER_MISSING`
 - `REVALIDATION_ROUTE_MISSING`
 - `REGRESSION_RISK_UNBOUNDED`
 - `INSUFFICIENT_TRACE_EVIDENCE`

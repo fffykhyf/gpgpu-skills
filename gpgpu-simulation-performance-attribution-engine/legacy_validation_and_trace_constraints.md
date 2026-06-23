@@ -27,8 +27,9 @@ checks include:
 These checks validate behavior against `GOLDEN_CONTRACT_MODEL`; they must not
 define launch or memory truth themselves.
 
-The final cross-run output for this engine is `PERF_ATTRIBUTION_GRAPH`, with
-supporting `ROOT_CAUSE_REPORT` and normalized trace evidence.
+The final cross-run output for this engine is `SIM_PERF_ATTRIBUTION_REPORT`,
+with supporting `CORRECTNESS_GATE_REPORT`, `PASS_EVIDENCE_REPORT`,
+`PERF_ATTRIBUTION_GRAPH`, `ROOT_CAUSE_REPORT`, and normalized trace evidence.
 
 Runtime validation must not infer scheduler policy, allocate warps absent from
 the contract, optimize memory visibility, modify config defaults, or treat the
@@ -73,6 +74,15 @@ Trace comparison must identify both contract path and module path whenever the
 data allows it. A mismatch without enough evidence becomes
 `INSUFFICIENT_TRACE_EVIDENCE`, not a guessed root cause.
 
+## Pass Evidence Compatibility
+
+Legacy validation often treated `RTL == golden` as the end of the flow. In v5,
+that behavior is explicitly downgraded to compatibility behavior. A correctness
+pass must still produce pass evidence, trace coverage, performance metrics, and
+a regression fingerprint. Missing evidence in a passing run becomes
+`PASS_WITH_INSUFFICIENT_EVIDENCE` or `TEST_EVIDENCE_ROOT_CAUSE`, not silent
+success.
+
 ## Causal Attribution Requirement
 
 Performance and correctness reports must become a causal graph, not a flat
@@ -88,8 +98,10 @@ cycle
   -> SYSTEM_CONTRACT_IR path
 ```
 
-Root cause classes include contract violation, RTL structural issue, memory
-imbalance, scheduling inefficiency, missing evidence, and test-evidence drift.
+Root cause classes include contract violation, golden model issue, toolchain
+issue, runtime launch issue, RTL functional issue, RTL interface issue, memory
+system issue, scheduler issue, performance architecture issue, missing
+evidence, and test-evidence drift.
 
 The migrated causal trace analyzer rule is mandatory: metrics are not enough.
 Every root cause must cite trace evidence, a failed gate, and a path to either

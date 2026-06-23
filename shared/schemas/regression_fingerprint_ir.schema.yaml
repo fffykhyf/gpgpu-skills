@@ -1,0 +1,25 @@
+schema: regression_fingerprint_ir
+version: v5
+type: object
+required:
+  - contract_hash
+  - golden_model_hash
+  - rtl_hash
+  - input_memory_hash
+  - final_memory_hash
+  - trace_summary_hash
+  - performance_metric_hash
+  - coverage_hash
+properties:
+  contract_hash: string
+  golden_model_hash: string
+  rtl_hash: string
+  toolchain_artifact_hash: string
+  program_image_hash: string
+  runtime_launch_hash: string
+  loader_contract_hash: string
+  input_memory_hash: string
+  final_memory_hash: string
+  trace_summary_hash: string
+  performance_metric_hash: string
+  coverage_hash: string

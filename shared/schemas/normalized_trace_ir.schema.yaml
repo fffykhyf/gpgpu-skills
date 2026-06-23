@@ -3,15 +3,83 @@ version: v5
 type: object
 required:
   - trace_id
+  - trace_source_manifest_ref
   - events
   - event_dictionary
   - event_to_contract_path_map
+  - event_to_toolchain_artifact_path_map
   - event_to_rtl_module_map
   - timestamp_normalization_report
+  - trace_summary_hash
 properties:
   trace_id: string
+  trace_source_manifest_ref: string
   events: list
   event_dictionary: map
   event_to_contract_path_map: map
+  event_to_toolchain_artifact_path_map: map
   event_to_rtl_module_map: map
   timestamp_normalization_report: map
+  trace_summary_hash: string
+  source_hashes: map
+event_schema:
+  required:
+    - event_id
+    - event_source
+    - event_type
+    - timestamp_kind
+    - order_key
+    - contract_path
+    - dependencies
+    - evidence_hash
+  optional:
+    - cycle
+    - step_id
+    - block_id
+    - warp_id
+    - lane_id
+    - thread_id
+    - lane_mask
+    - pc
+    - next_pc
+    - instruction_id
+    - opcode
+    - encoded_instruction
+    - decoded_instruction
+    - active_mask
+    - predicate_mask
+    - stall_reason
+    - issue_valid
+    - commit_valid
+    - src_regs
+    - dst_regs
+    - reg_values_before
+    - reg_values_after
+    - memory_space
+    - memory_addr
+    - access_size
+    - byte_enable
+    - request_tag
+    - response_tag
+    - memory_latency
+    - fault_code
+    - csr_addr
+    - csr_value
+    - launch_state
+    - rtl_module_path
+    - toolchain_artifact_path
+event_sources:
+  - rtl_trace
+  - golden_trace
+  - waveform_trace
+  - memory_trace
+  - runtime_trace
+  - assembler_trace
+  - disassembler_trace
+  - program_image_trace
+  - loader_trace
+  - toolchain_smoke_trace
+timestamp_kinds:
+  - cycle
+  - step_id
+  - order_key

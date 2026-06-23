@@ -1,0 +1,25 @@
+schema: toolchain_artifact_ir
+version: v5
+type: object
+required:
+  - system_contract_ir_hash
+  - golden_contract_model_hash
+  - isa_artifacts
+  - assembler_artifacts
+  - disassembler_artifacts
+  - program_image_artifacts
+  - runtime_launch_artifacts
+  - loader_artifacts
+  - artifact_hashes
+  - source_of_truth_checks
+properties:
+  system_contract_ir_hash: string
+  golden_contract_model_hash: string
+  isa_artifacts: map
+  assembler_artifacts: map
+  disassembler_artifacts: map
+  program_image_artifacts: map
+  runtime_launch_artifacts: map
+  loader_artifacts: map
+  artifact_hashes: map
+  source_of_truth_checks: map

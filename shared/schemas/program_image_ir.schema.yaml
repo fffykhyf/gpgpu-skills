@@ -1,0 +1,24 @@
+schema: program_image_ir
+version: v5
+type: object
+required:
+  - system_contract_ir_hash
+  - image_format_version
+  - entry_symbol
+  - entry_pc
+  - segments
+  - symbol_table
+  - relocation_table
+  - metadata
+  - canonical_hash
+properties:
+  system_contract_ir_hash: string
+  image_format_version: string
+  entry_symbol: string
+  entry_pc: integer
+  segments: list
+  symbol_table: list
+  relocation_table: list
+  initial_memory_objects: list
+  metadata: map
+  canonical_hash: string

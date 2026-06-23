@@ -1,0 +1,19 @@
+table: assembly_syntax_table
+version: v5
+syntax_sources:
+  register_naming: SYSTEM_CONTRACT_IR.isa_model.assembly_syntax.register_naming
+  immediate_formats: SYSTEM_CONTRACT_IR.isa_model.assembly_syntax.immediate_formats
+  label_syntax: SYSTEM_CONTRACT_IR.isa_model.assembly_syntax.label_syntax
+  section_syntax: SYSTEM_CONTRACT_IR.isa_model.assembly_syntax.section_syntax
+  comment_syntax: SYSTEM_CONTRACT_IR.isa_model.assembly_syntax.comment_syntax
+accepted_source_kinds:
+  - hand_written_asm
+  - lowered_frontend
+required_sections:
+  - .text
+  - .data
+optional_sections:
+  - .rodata
+failure_modes:
+  parse: ASM_PARSE_FAIL
+  unsupported_instruction: UNSUPPORTED_INSTRUCTION_BEHAVIOR_MISMATCH

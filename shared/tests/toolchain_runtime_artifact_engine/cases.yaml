@@ -1,0 +1,27 @@
+cases:
+  - case_id: derives_toolchain_runtime_artifacts_from_contract
+    input_artifacts:
+      - shared/examples/self_correcting_minimal_simt/expected_system_contract_ir.yaml
+      - shared/examples/self_correcting_minimal_simt/expected_golden_contract_model.yaml
+      - shared/examples/self_correcting_minimal_simt/input_kernel.asm
+    expected_outputs:
+      - TOOLCHAIN_ARTIFACT_IR
+      - ASSEMBLY_IR
+      - PROGRAM_IMAGE_IR
+      - RUNTIME_LAUNCH_IR
+      - LOADER_CONTRACT_IR
+      - ASSEMBLER_BINDING_REPORT
+      - TOOLCHAIN_SMOKE_REPORT
+    expected_failure_mode: null
+    required_evidence:
+      - isa_table_hash_equivalence
+      - assembler_encode_smoke
+      - disassembler_roundtrip_smoke
+      - program_image_layout_smoke
+      - entry_symbol_resolve_smoke
+      - runtime_argument_encoding_smoke
+      - loader_contract_smoke
+      - golden_image_execution_smoke
+    forbidden_outputs:
+      - INCREMENTAL_RTL_MAP
+      - ARCH_REWRITE_PLAN

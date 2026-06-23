@@ -1,0 +1,31 @@
+version: v5
+required_pass_checks:
+  evidence_completeness:
+    - system_contract_hash
+    - golden_model_hash
+    - rtl_hash
+    - input_memory_hash
+    - final_memory_hash
+    - completion_status_present
+    - fault_status_present
+  architectural_state_comparison:
+    - final_memory_match
+    - final_pc_match
+    - observable_register_state_match
+    - csr_state_match
+    - fault_status_match
+    - completion_status_match
+  regression_fingerprint:
+    - contract_hash
+    - golden_model_hash
+    - rtl_hash
+    - input_memory_hash
+    - final_memory_hash
+    - trace_summary_hash
+    - performance_metric_hash
+    - coverage_hash
+warning_map:
+  missing_trace_detail: PASS_WITH_INSUFFICIENT_EVIDENCE
+  uncovered_contract_paths: PASS_WITH_INSUFFICIENT_EVIDENCE
+  performance_below_target: PASS_WITH_PERFORMANCE_WARNING
+  trace_divergence_after_final_match: PASS_WITH_TRACE_DIVERGENCE_WARNING

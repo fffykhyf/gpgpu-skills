@@ -1,0 +1,29 @@
+version: v5
+levels:
+  correctness_only_smoke:
+    required_metrics: [total_cycles]
+    graph_required: false
+  standard_validation:
+    required_metrics: [total_cycles, ipc, issue_utilization, stall_breakdown]
+    graph_required: false
+  performance_gate:
+    required_metrics:
+      - total_cycles
+      - active_cycles
+      - issue_cycles
+      - commit_cycles
+      - ipc
+      - warp_eligible_rate
+      - warp_issue_rate
+      - issue_utilization
+      - pipeline_utilization
+      - stall_breakdown
+      - memory_metrics
+      - scheduler_metrics
+    graph_required: true
+warning_thresholds:
+  LOW_ISSUE_UTILIZATION: issue_utilization_below_target
+  HIGH_MEMORY_STALL: memory_wait_dominates_stall_breakdown
+  HIGH_BANK_CONFLICT: shared_bank_conflict_rate_above_target
+  HIGH_INTERFACE_BACKPRESSURE: interface_backpressure_above_target
+  LOW_OCCUPANCY: ready_warp_count_avg_below_target

@@ -16,6 +16,12 @@ launch_semantics_functions:
   - grid_block_thread_map
   - kernel_entry_resolve
   - completion_or_fault_observe
+program_image_semantics_functions:
+  - parse_program_image
+  - resolve_entry_symbol
+  - decode_instruction_bytes
+  - fetch_instruction_from_image
+  - execute_program_image
 config_semantics_functions:
   - classify_config_visibility
   - validate_config_owner

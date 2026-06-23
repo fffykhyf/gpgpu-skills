@@ -1,0 +1,18 @@
+schema: trace_coverage_report_ir
+version: v5
+type: object
+required:
+  - observed_contract_paths
+  - uncovered_contract_paths
+  - observed_rtl_module_paths
+  - observed_toolchain_artifact_paths
+  - source_completeness
+  - coverage_hash
+properties:
+  observed_contract_paths: list
+  uncovered_contract_paths: list
+  observed_rtl_module_paths: list
+  observed_toolchain_artifact_paths: list
+  source_completeness: map
+  coverage_hash: string
+  warnings: list

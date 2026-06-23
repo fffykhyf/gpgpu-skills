@@ -1,0 +1,20 @@
+schema: assembly_ir
+version: v5
+type: object
+required:
+  - system_contract_ir_hash
+  - source_kind
+  - sections
+  - symbols
+  - instructions
+  - relocations
+  - canonical_hash
+properties:
+  system_contract_ir_hash: string
+  source_kind: string
+  sections: list
+  symbols: list
+  instructions: list
+  data_objects: list
+  relocations: list
+  canonical_hash: string

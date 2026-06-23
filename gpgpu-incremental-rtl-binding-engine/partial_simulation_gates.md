@@ -10,6 +10,9 @@ full-system verification.
 - selected `MODULE_BINDING_TEMPLATE`
 - local trace schema
 - `GOLDEN_CONTRACT_MODEL` slice
+- `PROGRAM_IMAGE_IR`
+- `RUNTIME_LAUNCH_IR`
+- `LOADER_CONTRACT_IR`
 - `INTERFACE_BINDING_IR` transactions
 - local stimulus
 
@@ -34,12 +37,19 @@ At minimum it must cover:
 - shared memory bank unit: bank conflict stall, lane-mask byte enable,
   aligned/misaligned behavior
 - CSR runtime: start, done, fault, kernel entry, arg base
+- program image loader interface: program image load, entry PC fetch, first
+  instruction decode
+- runtime argument buffer interface: argument buffer visible
 
 ## Gate Rule
 
 A module with `PARTIAL_SIM_FAIL`, `INTERFACE_PROTOCOL_MISMATCH`,
 `GOLDEN_SLICE_MISMATCH`, or `COMBINATIONAL_READY_LOOP` cannot be used in
 full-system simulation.
+
+Program-image and runtime partial gates also fail closed on
+`PROGRAM_IMAGE_LOAD_FAIL`, `ENTRY_PC_FETCH_FAIL`, `FIRST_INSTRUCTION_DECODE_FAIL`,
+or `ARG_BUFFER_VISIBILITY_FAIL`.
 
 ## Failure Evidence
 

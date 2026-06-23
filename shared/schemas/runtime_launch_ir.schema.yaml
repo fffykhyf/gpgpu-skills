@@ -1,0 +1,27 @@
+schema: runtime_launch_ir
+version: v5
+type: object
+required:
+  - system_contract_ir_hash
+  - launch_abi
+  - entry_pc
+  - grid_dim
+  - block_dim
+  - arg_buffer_layout
+  - arg_buffer_bytes
+  - csr_write_sequence
+  - completion_observation
+  - canonical_hash
+properties:
+  system_contract_ir_hash: string
+  launch_abi: string
+  entry_symbol: string
+  entry_pc: integer
+  grid_dim: map
+  block_dim: map
+  warp_size: integer
+  arg_buffer_layout: map
+  arg_buffer_bytes: string
+  csr_write_sequence: list
+  completion_observation: map
+  canonical_hash: string

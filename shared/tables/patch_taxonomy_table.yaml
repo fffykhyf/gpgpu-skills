@@ -6,9 +6,21 @@ patch_classes:
   CONTRACT_PATCH:
     target_owner: gpgpu-system-contract-golden-engine
     examples: [scheduling_rule_change, memory_ordering_change, launch_abi_change, scoreboard_semantic_change]
+  GOLDEN_MODEL_PATCH:
+    target_owner: gpgpu-system-contract-golden-engine
+    examples: [golden_decode_fix, executable_semantics_fix, coverage_gap_fix]
+  TOOLCHAIN_PATCH:
+    target_owner: gpgpu-toolchain-runtime-artifact-engine
+    examples: [assembler_encoding_fix, disassembler_roundtrip_fix, program_image_layout_fix, runtime_arg_encoding_fix, loader_contract_fix]
+  RUNTIME_PATCH:
+    target_owner: gpgpu-toolchain-runtime-artifact-engine
+    examples: [runtime_arg_buffer_fix, csr_launch_sequence_fix, completion_fault_observation_fix]
   RTL_PATCH:
     target_owner: gpgpu-incremental-rtl-binding-engine
     examples: [pipeline_relayout, scoreboard_redesign, lsq_replay_policy_change, interface_latency_adjustment]
   TEST_EVIDENCE_PATCH:
     target_owner: gpgpu-simulation-performance-attribution-engine
     examples: [trace_tap_addition, missing_evidence_collection, attribution_rerun]
+  PASS_EVIDENCE_PATCH:
+    target_owner: gpgpu-simulation-performance-attribution-engine
+    examples: [coverage_collection_fix, regression_fingerprint_stabilization, pass_trace_completeness_fix]

@@ -1,0 +1,32 @@
+table: toolchain_artifact_generation_table
+version: v5
+generation_rules:
+  isa_model:
+    source: SYSTEM_CONTRACT_IR.isa_model
+    derived_artifacts:
+      - tools/isa.py
+      - tools/encoding_table.py
+      - tools/assembler.py
+      - tools/disassembler.py
+      - rtl/defines.svh
+      - docs/isa.md
+    gate: hash_and_semantic_equivalence_required
+  launch_model:
+    source: SYSTEM_CONTRACT_IR.launch_model
+    derived_artifacts:
+      - tools/runtime_launch.py
+      - docs/launch_abi.md
+    gate: semantic_equivalence_required
+  program_image_model:
+    source: SYSTEM_CONTRACT_IR.launch_model.program_image_format
+    derived_artifacts:
+      - tools/program_image.py
+      - tools/loader.py
+      - docs/program_image_format.md
+    gate: byte_layout_equivalence_required
+  loader_model:
+    source: SYSTEM_CONTRACT_IR.launch_model.loader_contract
+    derived_artifacts:
+      - tools/loader.py
+      - rtl/program_image_loader_interface.sv
+    gate: semantic_equivalence_required

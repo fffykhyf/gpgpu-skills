@@ -6,10 +6,47 @@ generation_rules:
     derived_artifacts:
       - rtl/defines.svh
       - tools/isa.py
+      - tools/encoding_table.py
       - tools/assembler.py opcode table
       - tools/disassembler.py opcode table
       - docs/isa.md
     gate: byte_or_semantic_equivalence_required
+  isa_model.instruction_encodings:
+    source: SYSTEM_CONTRACT_IR.isa_model.instruction_encodings
+    derived_artifacts:
+      - tools/assembler.py encode rules
+      - tools/disassembler.py decode rules
+      - tools/isa.py field layout
+      - rtl/decode.svh
+      - docs/isa_encoding.md
+    gate: encoding_equivalence_required
+  isa_model.assembly_syntax:
+    source: SYSTEM_CONTRACT_IR.isa_model.assembly_syntax
+    derived_artifacts:
+      - tools/assembler.py parser rules
+      - docs/isa.md assembly syntax
+    gate: semantic_equivalence_required
+  launch_model.program_image_format:
+    source: SYSTEM_CONTRACT_IR.launch_model.program_image_format
+    derived_artifacts:
+      - tools/program_image.py
+      - tools/loader.py
+      - docs/program_image_format.md
+    gate: byte_layout_equivalence_required
+  launch_model.argument_buffer_layout:
+    source: SYSTEM_CONTRACT_IR.launch_model.argument_buffer_layout
+    derived_artifacts:
+      - tools/runtime_launch.py
+      - tests/expected_arg_buffer.bin
+      - docs/launch_abi.md
+    gate: semantic_equivalence_required
+  launch_model.loader_contract:
+    source: SYSTEM_CONTRACT_IR.launch_model.loader_contract
+    derived_artifacts:
+      - tools/loader.py
+      - rtl/program_image_loader_interface.sv
+      - docs/program_image_format.md loader section
+    gate: semantic_equivalence_required
   hardware_threads:
     source: SYSTEM_CONTRACT_IR.launch_model.thread_block_grid_model
     derived_artifacts:

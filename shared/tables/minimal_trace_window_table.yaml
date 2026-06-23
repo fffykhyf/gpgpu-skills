@@ -1,0 +1,24 @@
+version: v5
+correctness_window_rule:
+  pre_events: 8
+  post_events: 8
+  include_last_matching_event: true
+  include_first_mismatching_event: true
+  include_dependency_closure: true
+  include_contract_path: true
+  include_rtl_module_path: true
+  include_toolchain_artifact_path: true
+performance_window_rule:
+  candidate_windows:
+    - top_stall_contribution_window
+    - sustained_bottleneck_window
+    - queue_saturation_window
+    - periodic_replay_window
+  tie_breakers:
+    - highest_evidence_completeness
+    - earliest_window
+    - strongest_contract_mapping
+    - strongest_rtl_module_mapping
+ambiguity_failures:
+  - AMBIGUOUS_TRACE_ORDERING
+  - INSUFFICIENT_TRACE_EVIDENCE

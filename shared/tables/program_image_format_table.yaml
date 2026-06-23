@@ -1,0 +1,23 @@
+table: program_image_format_table
+version: v5
+source: SYSTEM_CONTRACT_IR.launch_model.program_image_format
+segments:
+  text:
+    permissions: rx
+    source_rule: text_segment_rule
+  data:
+    permissions: rw
+    source_rule: data_segment_rule
+  rodata:
+    permissions: r
+    source_rule: data_segment_rule
+metadata:
+  required_hashes:
+    - isa_model_hash
+    - launch_model_hash
+    - program_image_hash
+entry_symbol_resolution:
+  source_rule: entry_symbol_rule
+failure_modes:
+  layout: PROGRAM_IMAGE_LAYOUT_FAIL
+  entry: ENTRY_SYMBOL_RESOLVE_FAIL

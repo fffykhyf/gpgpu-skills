@@ -3,17 +3,40 @@ version: v5
 type: object
 required:
   - root_cause_class
+  - root_cause_subclass
+  - confidence
   - minimal_trace_window
   - contract_paths
   - rtl_module_paths
+  - toolchain_artifact_paths
   - evidence_hashes
-  - confidence
   - rewrite_candidate
 properties:
   root_cause_class: enum
+  root_cause_subclass: enum
+  confidence: enum
   minimal_trace_window: map
+  first_divergence_ref: string
+  performance_metric_ref: string
   contract_paths: list
   rtl_module_paths: list
+  toolchain_artifact_paths: list
   evidence_hashes: list
-  confidence: number
   rewrite_candidate: map
+classes:
+  - CONTRACT_ROOT_CAUSE
+  - GOLDEN_MODEL_ROOT_CAUSE
+  - TOOLCHAIN_ROOT_CAUSE
+  - RUNTIME_LAUNCH_ROOT_CAUSE
+  - RTL_FUNCTIONAL_ROOT_CAUSE
+  - RTL_INTERFACE_ROOT_CAUSE
+  - MEMORY_SYSTEM_ROOT_CAUSE
+  - SCHEDULER_ROOT_CAUSE
+  - PERFORMANCE_ARCH_ROOT_CAUSE
+  - TEST_EVIDENCE_ROOT_CAUSE
+  - INSUFFICIENT_TRACE_EVIDENCE
+  - ROOT_CAUSE_AMBIGUOUS
+confidence_values:
+  - HIGH
+  - MEDIUM
+  - LOW
