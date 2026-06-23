@@ -1,0 +1,41 @@
+schema: simt_state
+version: v6-gpgpusim
+owner_skill: gpgpu-arch
+producer_skill:
+  - gpgpu-golden
+  - gpgpu-rtl
+consumer_skill:
+  - gpgpu-simppa
+  - gpgpu-loop
+required:
+  - warp_id
+  - pc
+  - active_mask
+  - reconvergence_pc
+  - call_depth
+  - divergence_event
+  - owner_skill
+  - validation_rule
+properties:
+  warp_id: integer
+  pc: string
+  active_mask: string
+  reconvergence_pc: string
+  call_depth: integer
+  divergence_event: map
+  simt_stack_depth: integer
+validation_rules:
+  - SIMT state owns PC, active mask, reconvergence, call depth, and divergence.
+  - Branch divergence must not be encoded as scoreboard_wait.
+example:
+  warp_id: 1
+  pc: "0x40"
+  active_mask: "0x0000ffff"
+  reconvergence_pc: "0x70"
+  call_depth: 0
+  divergence_event:
+    branch_pc: "0x40"
+    taken_mask: "0x000000ff"
+  owner_skill: gpgpu-golden
+  validation_rule: simt_scoreboard_separation
+

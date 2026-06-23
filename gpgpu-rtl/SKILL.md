@@ -43,6 +43,10 @@ Produces:
 - `INTERFACE_BINDING_IR`
 - `MODULE_INTERFACE_REPORT`
 - `RTL_PARTIAL_SIM_REPORT`
+- `RTL_MODULE_CONTRACT`
+- `RTL_TRACE_CONTRACT`
+- `COUNTER_TAP_POINT_PLAN`
+- `SIMULATOR_ARTIFACT_REJECTION_REPORT`
 
 Human-facing report:
 - `IMPLEMENTATION_DASHBOARD.zh.md`
@@ -51,6 +55,10 @@ AI-facing artifacts:
 - English `INCREMENTAL_RTL_MAP.yaml`
 - English `MODULE_INTERFACE_REPORT.yaml`
 - English `RTL_PARTIAL_SIM_REPORT.yaml`
+- English `RTL_MODULE_CONTRACT.md`
+- English `RTL_TRACE_CONTRACT.md`
+- English `COUNTER_TAP_POINT_PLAN.md`
+- English `SIMULATOR_ARTIFACT_REJECTION_REPORT.md`
 
 ## Owned Decisions
 
@@ -76,6 +84,11 @@ This skill owns:
 - warp execution model binding
 - EXEC-mask driven SIMD gating checks
 - SM_ID routing checks
+- RTL contract extraction from simulator evidence
+- observable trace contract selection
+- counter tap point planning
+- hardware-rewritten mechanism checklist
+- simulator artifact rejection
 
 Required reference lessons:
 - `VORTEX_LSU_LANE_FORMAT`
@@ -99,6 +112,41 @@ interface, and partial-sim artifacts in `ARTIFACT_MANIFEST_IR` and expand them
 only when the user asks, an interface is ambiguous, or a downstream owner needs
 exact fields.
 
+## RTL Contract Extraction From Simulator Evidence
+
+Imported mechanisms must be rewritten into hardware contracts before RTL
+binding. Scoreboard bitsets, SIMT PC/active-mask/reconvergence state, issue
+gate, memory request interface, coalescer output interface, packet interface,
+cache status output, and counter tap points may become RTL contracts. C++ queues,
+`std::set` scoreboard, BookSim configs, AccelWattch objects, CUDA stream stack,
+fixed simulator latencies, SM86 queue depths, and PTX opcode latencies may not.
+
+## Observable Trace Contract
+
+RTL traces must expose cycle, core id, warp id, PC, active mask, issue valid,
+non-issue reason, scoreboard collision, selected pipe, memory transaction count,
+cache status, ICNT status, L2 queue status, DRAM queue status, and writeback
+release when the corresponding subsystem exists.
+
+## Counter Tap Point Contract
+
+Each stable counter must have a producer module, producer event, unit, sample
+window, reset rule, stable/debug status, and consumer skill. Counter tap points
+are hardware observability hooks; power models and root-cause logic remain in
+`gpgpu-simppa`.
+
+## Hardware-Rewritten Mechanism Checklist
+
+Every RTL module derived from simulator evidence must name state owner,
+structured interfaces, protocol checks, timing/pipeline boundary, trace fields,
+and rejection decisions for simulator-only artifacts.
+
+## Simulator Artifact Rejection Checklist
+
+Emit `SIMULATOR_ARTIFACT_REJECTION_REPORT.md` when imported evidence tries to
+introduce CUDA stream stack behavior, fixed latencies, BookSim parameters,
+AccelWattch internals, SM86 queue depths, or parser-only variables.
+
 ## Forbidden Actions
 
 This skill must not:
@@ -120,6 +168,8 @@ This skill must use:
 - `shared/tables/module_interface_contract_table.yaml`
 - `shared/tables/rtl_partial_sim_gate_table.yaml`
 - `shared/tables/contract_semantics_binding_table.yaml`
+- `shared/tables/stall_reason_taxonomy.md`
+- `shared/tables/gpgpusim_config_taxonomy_seed.md`
 
 ## Required Schemas
 
@@ -137,6 +187,13 @@ This skill must validate:
 - `shared/schemas/incremental_rtl_map.schema.yaml`
 - `shared/schemas/module_interface_report_ir.schema.yaml`
 - `shared/schemas/rtl_partial_sim_report_ir.schema.yaml`
+- `shared/schemas/issue_nonissue_reason.schema.yaml`
+- `shared/schemas/simt_state.schema.yaml`
+- `shared/schemas/scoreboard_state.schema.yaml`
+- `shared/schemas/warp_memory_transaction.schema.yaml`
+- `shared/schemas/cache_request_status.schema.yaml`
+- `shared/schemas/noc_packet.schema.yaml`
+- `shared/schemas/counter_manifest.schema.yaml`
 
 ## Required Invariants
 
@@ -158,6 +215,9 @@ The output must satisfy:
 - Every cross-SM request, response, trace event, and performance event must preserve SM_ID routing.
 - No RTL module may share execution state across SMs except through declared memory, atomic, barrier, or fabric contracts.
 - Partial simulation compares local behavior against a `GOLDEN_CONTRACT_MODEL` slice.
+- RTL must expose issue/non-issue, SIMT, scoreboard, memory transaction, cache, ICNT, L2, DRAM queue, and writeback-release trace fields when implemented.
+- RTL must reject simulator-private latencies, queues, CUDA/PTX behavior, BookSim parameters, and AccelWattch internals as direct hardware truth.
+- Every stable counter must have a tap point and producer event.
 
 ## Failure Modes
 
@@ -206,6 +266,11 @@ This skill is incomplete unless the following exist:
 - `rtl_module_catalog.md`
 - `warp_exec_model.md`
 - `sm_instance_layout.md`
+- `rtl_contract_extraction_from_simulator_evidence.md`
+- `observable_trace_contract.md`
+- `counter_tap_point_contract.md`
+- `hardware_rewritten_mechanism_checklist.md`
+- `simulator_artifact_rejection_checklist.md`
 - `shared/schemas/toolchain_artifact_ir.schema.yaml`
 - `shared/schemas/program_image_ir.schema.yaml`
 - `shared/schemas/runtime_launch_ir.schema.yaml`
@@ -213,6 +278,13 @@ This skill is incomplete unless the following exist:
 - `shared/schemas/incremental_rtl_map.schema.yaml`
 - `shared/schemas/module_interface_report_ir.schema.yaml`
 - `shared/schemas/rtl_partial_sim_report_ir.schema.yaml`
+- `shared/schemas/issue_nonissue_reason.schema.yaml`
+- `shared/schemas/simt_state.schema.yaml`
+- `shared/schemas/scoreboard_state.schema.yaml`
+- `shared/schemas/warp_memory_transaction.schema.yaml`
+- `shared/schemas/cache_request_status.schema.yaml`
+- `shared/schemas/noc_packet.schema.yaml`
+- `shared/schemas/counter_manifest.schema.yaml`
 - `shared/tables/rtl_module_catalog.yaml`
 - `shared/tables/module_interface_contract_table.yaml`
 - `shared/tables/rtl_partial_sim_gate_table.yaml`

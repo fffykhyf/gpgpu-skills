@@ -1,0 +1,28 @@
+schema: config_parameter_taxonomy
+version: v6-gpgpusim
+owner_skill: gpgpu-arch
+producer_skill: any-reference-importing-skill
+consumer_skill:
+  - gpgpu-arch
+  - gpgpu-loop
+required:
+  - parameter_name
+  - category
+  - source_reference
+  - exposure_policy
+  - enters_hardware_contract
+  - owner_skill
+  - validation_rule
+alias_of: config_parameter_classification
+validation_rules:
+  - This schema is a compatibility alias for config_parameter_classification.
+  - All records must also validate against config_parameter_classification.
+example:
+  parameter_name: -gpgpu_n_clusters
+  category: hardware-private
+  source_reference: gpgpusim
+  exposure_policy: Yes
+  enters_hardware_contract: true
+  owner_skill: gpgpu-arch
+  validation_rule: classify_before_copying
+

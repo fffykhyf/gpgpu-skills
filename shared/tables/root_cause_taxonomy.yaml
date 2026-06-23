@@ -127,6 +127,39 @@ root_causes:
       - EXCESSIVE_DIVERGENCE_OVERHEAD
     requires: [performance_metric_ref, perf_attribution_graph_ref, contract_paths, rtl_module_paths, bottleneck_cycle_window, counter_evidence, alternative_patch_rejection]
     rewrite_candidate: ARCHITECTURE_PATCH
+  COUNTER_SCHEMA_ROOT_CAUSE:
+    subclasses:
+      - COUNTER_PRODUCER_MISSING
+      - PARSER_ONLY_COUNTER_USED_AS_STABLE
+      - DEFINED_ONLY_COUNTER_USED_AS_STABLE
+      - COUNTER_SAMPLE_WINDOW_AMBIGUOUS
+    requires: [counter_manifest_ref, producer_audit_ref, affected_counters]
+    rewrite_candidate: COUNTER_SCHEMA_PATCH
+  CONFIG_DRIFT_ROOT_CAUSE:
+    subclasses:
+      - SIMULATOR_PRIVATE_PARAMETER_IN_HARDWARE_CONTRACT
+      - CUDA_PTX_FIELD_IN_NATIVE_ABI
+      - FIXED_LATENCY_COPIED_AS_RTL_TRUTH
+      - TESTED_CONFIG_QUEUE_DEPTH_COPIED_AS_DEFAULT
+    requires: [config_classification_ref, contract_paths, rejected_parameter]
+    rewrite_candidate: SIMULATOR_ARTIFACT_REMOVAL_PATCH
+  ATTRIBUTION_VALIDITY_ROOT_CAUSE:
+    subclasses:
+      - ROOT_CAUSE_MISSING_SYMPTOM_COUNTER
+      - ROOT_CAUSE_MISSING_EXCLUSION_COUNTER
+      - ROOT_CAUSE_MISSING_QUEUE_OWNER
+      - POWER_USED_AS_PRIMARY_EVIDENCE
+    requires: [perf_attribution_graph_ref, missing_evidence]
+    rewrite_candidate: TEST_EVIDENCE_PATCH
+  SIMULATOR_ARTIFACT_ROOT_CAUSE:
+    subclasses:
+      - CPP_QUEUE_COPIED_TO_RTL
+      - BOOKSIM_CONFIG_COPIED_TO_FABRIC_TRUTH
+      - ACCELWATTCH_OBJECT_COPIED_TO_RTL
+      - CUDA_STREAM_STACK_COPIED_TO_ABI
+      - PTX_OPCODE_LATENCY_COPIED_TO_PIPELINE
+    requires: [artifact_path, provenance_path, removal_target]
+    rewrite_candidate: SIMULATOR_ARTIFACT_REMOVAL_PATCH
   TEST_EVIDENCE_ROOT_CAUSE:
     subclasses:
       - MISSING_GOLDEN_TRACE

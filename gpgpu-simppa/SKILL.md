@@ -84,6 +84,12 @@ Produces:
 - `ROOT_CAUSE_REPORT`
 - `TOOLCHAIN_ATTRIBUTION_REPORT`
 - `SIM_PERF_ATTRIBUTION_REPORT`
+- `COUNTER_MANIFEST`
+- `COUNTER_PRODUCER_AUDIT`
+- `STALL_REASON_MATRIX`
+- `MEMORY_STALL_MATRIX`
+- `PERFORMANCE_ATTRIBUTION_GRAPH`
+- `POWER_PROVENANCE_REPORT`
 
 Human-facing reports:
 - `VALIDATION_DASHBOARD.zh.md`
@@ -94,6 +100,15 @@ Human-facing reports:
 `REGRESSION_FINGERPRINT` are required in Pass Evidence Mode.
 `PERFORMANCE_METRIC_IR` is produced in both modes when trace evidence contains
 cycle or order information.
+
+Additional AI-facing artifacts:
+- English `COUNTER_MANIFEST.yaml`
+- English `COUNTER_PRODUCER_AUDIT.md`
+- English `STALL_REASON_MATRIX.csv`
+- English `MEMORY_STALL_MATRIX.csv`
+- English `PERFORMANCE_ATTRIBUTION_GRAPH.md`
+- English `POWER_PROVENANCE_REPORT.md`
+- English `ROOT_CAUSE_REPORT.md`
 
 ## Owned Decisions
 
@@ -118,6 +133,13 @@ This skill owns:
 - warp EXEC-mask diff
 - divergence path diff
 - memory fabric contention attribution
+- stable counter manifest generation
+- producer audit for every stable counter
+- stall reason matrix generation
+- memory attribution matrix generation
+- queue boundary attribution
+- power and energy provenance reporting
+- root cause evidence rule enforcement
 
 Required reference lessons:
 - `VORTEX_LSU_LANE_FORMAT`
@@ -145,6 +167,53 @@ English root cause and trace artifacts to `gpgpu-loop` through
 Do not expose full traces, full `NORMALIZED_TRACE_IR`, or full
 `PERF_ATTRIBUTION_GRAPH` by default unless the user asks, root cause is
 ambiguous, a regression reappears, or a downstream owner needs exact fields.
+
+## Stable Counter Manifest
+
+Every counter used for a stable conclusion must record name, producer module,
+producer event, meaning, unit, sample window, status, users, and stable/debug
+classification. Status is `producer-backed`, `defined-only`, or `parser-only`.
+
+## Producer Audit
+
+Do not treat visualizer or parser names as stable counters without producer
+proof. Parser-only and defined-only counters can identify evidence gaps but
+cannot be the sole basis for root cause or regression gating.
+
+## Stall Reason Matrix
+
+Produce scheduler and memory stall matrices with explicit dimensions. Stable
+reasons include `idle_control`, `ibuffer_empty`, `simt_redirect`,
+`scoreboard_wait`, `pipe_unavailable`, `barrier_wait`, `membar_wait`,
+`atomic_wait`, `shared_bank_conflict`, `coalescing_stall`, `cache_miss`,
+`cache_reservation_fail`, `mshr_fail`, `icnt_req_backpressure`,
+`icnt_return_backpressure`, `l2_queue_full`, `dram_queue_full`,
+`dram_timing_wait`, `return_path_stall`, and `scoreboard_release_wait`.
+
+## Memory Attribution Matrix
+
+Memory attribution must follow warp transaction formation, coalescer output,
+shared bank conflict, L1 status/reservation fail, MSHR, ICNT request path, L2
+queue, DRAM queue/timing/row locality/bank skew, return path, and scoreboard
+release. `MISS` and `RESERVATION_FAIL` must remain separate.
+
+## Queue Boundary Attribution
+
+Memory bottlenecks must name the exact queue boundary and owner stage, such as
+L2-to-DRAM queue, ICNT-to-shader response FIFO, or ICNT `has_buffer` injection
+failure. Generic `DRAM slow`, `NoC slow`, or `memory slow` labels are invalid.
+
+## Power / Energy Provenance
+
+Power and energy are derivative evidence from activity counters. Power cannot
+independently prove a bottleneck. Every power bucket must list consumed counters,
+producer status, source mode, sample window, and model/config provenance.
+
+## Root Cause Evidence Rule
+
+Any root cause must include symptom counter, exclusion counter, queue/stage
+owner, possible fix target, confidence, and contract or trace evidence. Missing
+producer paths route to `COUNTER_SCHEMA_PATCH` or `TEST_EVIDENCE_PATCH`.
 
 ## Forbidden Actions
 
@@ -186,6 +255,8 @@ This skill must use:
 - `shared/tables/revalidation_routing_table.yaml`
 - `shared/tables/rewrite_trigger_table.yaml`
 - `shared/tables/verification_backend_matrix.yaml`
+- `shared/tables/gpgpusim_config_taxonomy_seed.md`
+- `shared/tables/stall_reason_taxonomy.md`
 
 ## Required Schemas
 
@@ -205,8 +276,18 @@ This skill must validate:
 - `shared/schemas/trace_source_manifest_ir.schema.yaml`
 - `shared/schemas/stall_breakdown_ir.schema.yaml`
 - `shared/schemas/perf_attribution_graph.schema.yaml`
+- `shared/schemas/performance_attribution_graph.schema.yaml`
 - `shared/schemas/root_cause_report_ir.schema.yaml`
 - `shared/schemas/sim_perf_attribution_report_ir.schema.yaml`
+- `shared/schemas/counter_manifest.schema.yaml`
+- `shared/schemas/stall_reason_matrix.schema.yaml`
+- `shared/schemas/issue_nonissue_reason.schema.yaml`
+- `shared/schemas/warp_memory_transaction.schema.yaml`
+- `shared/schemas/coalescer_output_trace.schema.yaml`
+- `shared/schemas/cache_request_status.schema.yaml`
+- `shared/schemas/noc_packet.schema.yaml`
+- `shared/schemas/memory_request_lifecycle.schema.yaml`
+- `shared/schemas/memory_queue_boundary.schema.yaml`
 
 ## Required Invariants
 
@@ -236,6 +317,11 @@ The output must satisfy:
   source-of-truth checks.
 - Golden trace evidence derives from `GOLDEN_CONTRACT_MODEL`.
 - Golden image execution evidence derives from `PROGRAM_IMAGE_IR`.
+- Every stable counter has producer-backed, defined-only, or parser-only status.
+- Root causes and regression gates must use producer-backed symptom evidence or emit an evidence/schema patch route.
+- Performance attribution follows launch/occupancy, scheduler, scoreboard, SIMT, memory formation, shared bank, L1/MSHR, ICNT, L2, DRAM, return path, scoreboard release, then power derivative.
+- Memory bottlenecks must cite queue-boundary evidence and exclusion counters.
+- Power/energy evidence cannot be primary root-cause proof.
 
 ## Failure Modes
 
@@ -346,6 +432,13 @@ This skill is incomplete unless the following exist:
 - `legacy_validation_and_trace_constraints.md`
 - `multi_sm_trace_model.md`
 - `warp_trace_diff.md`
+- `counter_manifest_contract.md`
+- `producer_audit.md`
+- `stall_reason_matrix.md`
+- `memory_attribution_matrix.md`
+- `queue_boundary_attribution.md`
+- `power_energy_provenance.md`
+- `root_cause_evidence_rule.md`
 - `shared/schemas/normalized_trace_ir.schema.yaml`
 - `shared/schemas/correctness_gate_report_ir.schema.yaml`
 - `shared/schemas/first_divergence_report_ir.schema.yaml`
@@ -355,8 +448,17 @@ This skill is incomplete unless the following exist:
 - `shared/schemas/regression_fingerprint_ir.schema.yaml`
 - `shared/schemas/toolchain_attribution_report_ir.schema.yaml`
 - `shared/schemas/perf_attribution_graph.schema.yaml`
+- `shared/schemas/performance_attribution_graph.schema.yaml`
 - `shared/schemas/root_cause_report_ir.schema.yaml`
 - `shared/schemas/sim_perf_attribution_report_ir.schema.yaml`
+- `shared/schemas/counter_manifest.schema.yaml`
+- `shared/schemas/stall_reason_matrix.schema.yaml`
+- `shared/schemas/memory_request_lifecycle.schema.yaml`
+- `shared/schemas/memory_queue_boundary.schema.yaml`
+- `shared/templates/counter_manifest.md`
+- `shared/templates/root_cause_report.md`
+- `shared/templates/perf_root_cause_report_template.md`
+- `shared/templates/memory_queue_boundary_report.md`
 - `shared/tables/trace_normalization_table.yaml`
 - `shared/tables/correctness_gate_decision_table.yaml`
 - `shared/tables/pass_evidence_gate_table.yaml`

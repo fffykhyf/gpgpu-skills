@@ -1,0 +1,13 @@
+cases:
+  - case_id: fence_completion_defined_by_visibility_point
+    input_program: "st.global [x], 1; fence.cta; ld.global r1, [x]"
+    expected_golden_behavior: load observes visibility guaranteed by fence scope
+    expected_trace_fields: [scope, ordering_domain, affected_memory_spaces, visibility_point, completion_condition, stall_reason]
+    expected_counter_changes: [membar_wait_increments]
+    expected_non_issue_or_stall_reason: membar_wait
+    expected_outputs:
+      fence_visibility: completion_condition
+    required_evidence:
+      - visibility_point
+      - completion_condition
+

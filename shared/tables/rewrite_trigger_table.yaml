@@ -28,6 +28,14 @@ triggers:
     patch_options: [RTL_PATCH, ARCHITECTURE_PATCH]
   PERFORMANCE_ARCH_ROOT_CAUSE:
     patch_options: [ARCHITECTURE_PATCH]
+  COUNTER_SCHEMA_ROOT_CAUSE:
+    patch_options: [COUNTER_SCHEMA_PATCH, TEST_EVIDENCE_PATCH]
+  CONFIG_DRIFT_ROOT_CAUSE:
+    patch_options: [SIMULATOR_ARTIFACT_REMOVAL_PATCH, CONTRACT_PATCH, ARCHITECTURE_PATCH]
+  ATTRIBUTION_VALIDITY_ROOT_CAUSE:
+    patch_options: [TEST_EVIDENCE_PATCH, COUNTER_SCHEMA_PATCH]
+  SIMULATOR_ARTIFACT_ROOT_CAUSE:
+    patch_options: [SIMULATOR_ARTIFACT_REMOVAL_PATCH]
   TEST_EVIDENCE_ROOT_CAUSE:
     patch_options: [TEST_EVIDENCE_PATCH, PASS_EVIDENCE_PATCH]
   INSUFFICIENT_TRACE_EVIDENCE:
@@ -52,3 +60,6 @@ rewrite_blockers:
   - ambiguous_root_cause_without_evidence_patch
   - architecture_patch_without_alternative_rejection
   - performance_arch_root_cause_without_counter_evidence
+  - root_cause_without_symptom_and_exclusion_counter
+  - simulator_private_parameter_in_hardware_contract
+  - stable_counter_without_producer

@@ -1,0 +1,13 @@
+cases:
+  - case_id: contiguous_global_load_forms_one_transaction
+    input_program: "ld.global r1, [base + lane_id * 4]"
+    expected_golden_behavior: active lanes read corresponding words
+    expected_trace_fields: [warp_id, lane_addresses, active_mask, byte_mask, sector_mask, transaction_address, transaction_size]
+    expected_counter_changes: [coalesced_transaction_count_normal]
+    expected_non_issue_or_stall_reason: none
+    expected_outputs:
+      warp_memory_transaction: contiguous_group
+    required_evidence:
+      - lane_addresses
+      - coalesced_group_id
+

@@ -1,0 +1,71 @@
+schema: warp_memory_transaction
+version: v6-gpgpusim
+owner_skill: gpgpu-memory
+producer_skill:
+  - gpgpu-runtime
+  - gpgpu-rtl
+consumer_skill:
+  - gpgpu-memory
+  - gpgpu-interconnect
+  - gpgpu-simppa
+required:
+  - warp_id
+  - pc
+  - instruction_id
+  - access_type
+  - lane_addresses
+  - active_mask
+  - byte_mask
+  - sector_mask
+  - transaction_address
+  - transaction_size
+  - coalesced_group_id
+  - is_read
+  - is_write
+  - is_atomic
+  - owner_skill
+  - validation_rule
+properties:
+  warp_id: integer
+  pc: string
+  instruction_id: string
+  access_type: enum
+  lane_addresses: list
+  active_mask: string
+  byte_mask: string
+  sector_mask: string
+  transaction_address: string
+  transaction_size: integer
+  coalesced_group_id: string
+  is_read: boolean
+  is_write: boolean
+  is_atomic: boolean
+access_type_enum:
+  - global_load
+  - global_store
+  - shared_load
+  - shared_store
+  - local_load
+  - local_store
+  - atomic
+validation_rules:
+  - Every memory instruction must produce at least one warp_memory_transaction or an explicit zero-lane trap/reject event.
+  - Cache and DRAM attribution cannot precede this record.
+example:
+  warp_id: 0
+  pc: "0x100"
+  instruction_id: ld0
+  access_type: global_load
+  lane_addresses: ["0x1000", "0x1004"]
+  active_mask: "0x00000003"
+  byte_mask: "0x000000ff"
+  sector_mask: "0x1"
+  transaction_address: "0x1000"
+  transaction_size: 32
+  coalesced_group_id: cg0
+  is_read: true
+  is_write: false
+  is_atomic: false
+  owner_skill: gpgpu-memory
+  validation_rule: memory_request_formation_first
+

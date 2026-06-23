@@ -42,6 +42,11 @@ Produces:
 - `SYSTEM_CONTRACT_IR`
 - `GOLDEN_CONTRACT_MODEL`
 - `CONTRACT_SEMANTICS_REPORT`
+- `GOLDEN_FUNCTIONAL_MODEL_SPEC`
+- `SIMT_GOLDEN_TRACE_SPEC`
+- `MEMORY_TRANSACTION_GOLDEN_SPEC`
+- `ATOMIC_FENCE_BARRIER_GOLDEN_SPEC`
+- `COMPATIBILITY_PROFILE`
 
 Human-facing report:
 - `CONTRACT_FREEZE_SUMMARY.zh.md`
@@ -50,6 +55,12 @@ AI-facing artifacts:
 - English `SYSTEM_CONTRACT_IR.yaml`
 - English `GOLDEN_CONTRACT_MODEL.yaml`
 - English `CONTRACT_SEMANTICS_REPORT.yaml`
+- English `SYSTEM_CONTRACT_IR.md`
+- English `GOLDEN_FUNCTIONAL_MODEL_SPEC.md`
+- English `SIMT_GOLDEN_TRACE_SPEC.md`
+- English `MEMORY_TRANSACTION_GOLDEN_SPEC.md`
+- English `ATOMIC_FENCE_BARRIER_GOLDEN_SPEC.md`
+- English `COMPATIBILITY_PROFILE.md`
 
 ## Owned Decisions
 
@@ -75,6 +86,12 @@ This skill owns:
 - memory bundle semantic execution
 - contract fragment freeze
 - module twin model derivation
+- functional-vs-timing boundary enforcement
+- ISA functional semantics separate from timing stalls
+- SIMT functional trace contract
+- memory transaction functional contract
+- atomic, fence, and barrier golden semantics
+- optional CUDA/PTX compatibility profile boundary
 
 Required reference lessons:
 - `VORTEX_BARRIER_WSYNC_DRAIN`
@@ -93,6 +110,47 @@ ownership are clear enough to freeze. Full IR expansion is allowed during
 `CONTRACT_FREEZE`, when the user asks, or when a downstream owner needs exact
 fields. The full English contract, golden model, and semantics report must be
 registered in `ARTIFACT_MANIFEST_IR`.
+
+## Functional vs Timing Boundary
+
+`SYSTEM_CONTRACT_IR` defines functional correctness. Timing stalls, scoreboard
+wait cycles, cache latency, ICNT latency, DRAM timing, power, and visualization
+counters cannot define ISA, SIMT, memory, launch, fence, atomic, or barrier
+semantics. A fence never completes because a simulator waited N cycles; it
+completes because its visibility and drain condition is satisfied.
+
+## ISA Functional Semantics
+
+ISA behavior must be project-owned. PTX/CUDA behavior from GPGPU-Sim may only
+enter an optional compatibility profile. Native simple-gpgpu opcode effects,
+register writes, predicate effects, memory access generation, completion, and
+fault behavior must be defined in `SYSTEM_CONTRACT_IR`.
+
+## SIMT Functional Semantics
+
+Golden SIMT behavior must emit PC, active mask, reconvergence PC, call depth,
+divergence event, and reconvergence event. SIMT control correctness is checked
+independently from scoreboard dependency behavior.
+
+## Memory Transaction Functional Contract
+
+Golden memory semantics must define lane-mask memory behavior and coalescer
+input shape through `warp_memory_transaction`. Cache, MSHR, NoC, L2, and DRAM
+timing are separate from functional load/store/atomic correctness.
+
+## Atomic / Fence / Barrier Golden Semantics
+
+Atomic, fence, and barrier correctness must be defined by operation type,
+return-value behavior, serialization domain, visibility point, completion
+condition, participant mask, and release event. GPGPU-Sim atomics/fence notes
+are timing-side evidence only; full memory consistency semantics must come from
+this project-owned contract or a future deeper `cuda-sim/memory.cc` reader pass.
+
+## Optional CUDA/PTX Compatibility Profile
+
+Compute capability, PTX capability, CUDA stack/heap/sync limits, stream behavior,
+texture/constant cache behavior, and PTX-specific atomic/fence semantics must be
+isolated in `COMPATIBILITY_PROFILE.md` when selected and excluded otherwise.
 
 ## Forbidden Actions
 
@@ -121,6 +179,7 @@ This skill must use:
 - `shared/tables/source_of_truth_generation_table.yaml`
 - `shared/tables/provenance_table.yaml`
 - `shared/tables/enum_table.yaml`
+- `shared/tables/gpgpusim_config_taxonomy_seed.md`
 
 ## Required Schemas
 
@@ -132,6 +191,11 @@ This skill must validate:
 - `shared/schemas/system_contract_ir.schema.yaml`
 - `shared/schemas/golden_contract_model.schema.yaml`
 - `shared/schemas/contract_semantics_report_ir.schema.yaml`
+- `shared/schemas/simt_state.schema.yaml`
+- `shared/schemas/warp_memory_transaction.schema.yaml`
+- `shared/schemas/atomic_operation.schema.yaml`
+- `shared/schemas/fence_visibility.schema.yaml`
+- `shared/schemas/barrier_state.schema.yaml`
 
 ## Required Invariants
 
@@ -152,6 +216,12 @@ The output must satisfy:
 - Execution, memory, launch, config, and interface semantics have coverage evidence.
 - Feature-gated semantics functions are required only when their contract feature is enabled; disabled features must have executable reject/trap behavior or a documented non-executable reason.
 - Unmapped contract paths fail closed.
+- Functional correctness and timing attribution are separate planes.
+- Timing stalls must not define functional semantics.
+- SIMT state and scoreboard state must be independently checkable.
+- Memory transaction golden tests must cover lane masks and coalescer input.
+- Atomic return-value, fence ordering, and CTA barrier release tests are required when synchronization is enabled.
+- CUDA/PTX compatibility semantics are optional profile semantics, not native truth.
 
 ## Failure Modes
 
@@ -185,6 +255,11 @@ This skill is incomplete unless the following exist:
 - `contract_truth_and_state_model.md`
 - `executable_semantics_rules.md`
 - `golden_model_coverage_and_report.md`
+- `functional_timing_boundary.md`
+- `simt_golden_trace_spec.md`
+- `memory_transaction_golden_spec.md`
+- `atomic_fence_barrier_golden_spec.md`
+- `compatibility_profile_contract.md`
 - `../gpgpu-arch/warp_state_contract.md`
 - `../gpgpu-arch/sm_hierarchy_model.md`
 - `../gpgpu-runtime/lsu_instruction_bundle.md`
@@ -194,6 +269,11 @@ This skill is incomplete unless the following exist:
 - `shared/schemas/system_contract_ir.schema.yaml`
 - `shared/schemas/golden_contract_model.schema.yaml`
 - `shared/schemas/contract_semantics_report_ir.schema.yaml`
+- `shared/schemas/simt_state.schema.yaml`
+- `shared/schemas/warp_memory_transaction.schema.yaml`
+- `shared/schemas/atomic_operation.schema.yaml`
+- `shared/schemas/fence_visibility.schema.yaml`
+- `shared/schemas/barrier_state.schema.yaml`
 - `shared/tables/contract_semantics_binding_table.yaml`
 - `shared/tables/golden_model_coverage_table.yaml`
 - `shared/tables/config_ownership_table.yaml`

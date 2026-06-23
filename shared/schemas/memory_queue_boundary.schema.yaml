@@ -1,0 +1,56 @@
+schema: memory_queue_boundary
+version: v6-gpgpusim
+owner_skill: gpgpu-simppa
+producer_skill:
+  - gpgpu-memory
+  - gpgpu-interconnect
+consumer_skill:
+  - gpgpu-loop
+required:
+  - boundary_id
+  - request_id
+  - owner_stage
+  - queue_name
+  - enter_cycle
+  - exit_cycle
+  - occupancy
+  - backpressure_result
+  - owner_skill
+  - validation_rule
+properties:
+  boundary_id: string
+  request_id: string
+  owner_stage: enum
+  queue_name: string
+  enter_cycle: integer
+  exit_cycle: integer
+  occupancy: integer
+  capacity: integer
+  backpressure_result: string
+  release_event: string
+owner_stage_enum:
+  - lsu_to_l1
+  - l1_to_icnt
+  - icnt_to_l2
+  - l2_to_dram
+  - dram_scheduler
+  - dram_to_l2
+  - l2_to_icnt
+  - icnt_to_shader
+  - scoreboard_release
+validation_rules:
+  - Memory root cause must name owner_stage and queue_name.
+  - DRAM bottleneck is invalid if the dominant wait is before l2_to_dram.
+example:
+  boundary_id: b0
+  request_id: wmt0
+  owner_stage: l2_to_dram
+  queue_name: L2_to_DRAM_queue
+  enter_cycle: 27
+  exit_cycle: 60
+  occupancy: 64
+  capacity: 64
+  backpressure_result: full
+  owner_skill: gpgpu-simppa
+  validation_rule: memory_bottleneck_names_queue_boundary
+

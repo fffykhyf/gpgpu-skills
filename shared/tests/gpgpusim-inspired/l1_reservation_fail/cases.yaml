@@ -1,0 +1,13 @@
+cases:
+  - case_id: reservation_fail_not_cache_miss
+    input_program: "many outstanding ld.global requests to distinct cache lines"
+    expected_golden_behavior: loaded values eventually match memory
+    expected_trace_fields: [request_id, cache_level, status, reservation_fail_reason, mshr_id]
+    expected_counter_changes: [cache_reservation_fail_increments, mshr_fail_increments]
+    expected_non_issue_or_stall_reason: cache_reservation_fail
+    expected_outputs:
+      cache_request_status: RESERVATION_FAIL
+    required_evidence:
+      - reservation_fail_reason
+      - MSHR_ENTRY_FAIL
+

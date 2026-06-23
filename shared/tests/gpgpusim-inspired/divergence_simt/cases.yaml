@@ -1,0 +1,13 @@
+cases:
+  - case_id: simt_redirect_not_scoreboard_wait
+    input_program: "if lane_id < 16 then add r1, r1, 1 else add r2, r2, 1"
+    expected_golden_behavior: both paths execute under disjoint active masks and reconverge
+    expected_trace_fields: [warp_id, pc, active_mask, reconvergence_pc, divergence_event, non_issue_reason]
+    expected_counter_changes: [simt_redirect_or_divergence_counter_increments]
+    expected_non_issue_or_stall_reason: simt_redirect
+    expected_outputs:
+      simt_state: divergence_event
+    required_evidence:
+      - active_mask
+      - reconvergence_pc
+

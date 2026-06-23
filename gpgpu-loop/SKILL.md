@@ -55,6 +55,11 @@ Produces:
 - `ARCH_REWRITE_PLAN`
 - `REWRITE_DECISION_REPORT`
 - `REGRESSION_TRACKING_REPORT`
+- `REWRITE_TRIGGER_REPORT`
+- `COUNTER_REGRESSION_REPORT`
+- `ATTRIBUTION_VALIDITY_REPORT`
+- `PATCH_ROUTING_DECISION`
+- `CONFIG_DRIFT_REPORT`
 
 Human-facing reports:
 - `PATCH_CARD.zh.md`
@@ -64,6 +69,11 @@ AI-facing artifacts:
 - English `ARCH_REWRITE_PLAN.yaml`
 - English `REWRITE_DECISION_REPORT.yaml`
 - English `REGRESSION_TRACKING_REPORT.yaml`
+- English `REWRITE_TRIGGER_REPORT.md`
+- English `COUNTER_REGRESSION_REPORT.md`
+- English `ATTRIBUTION_VALIDITY_REPORT.md`
+- English `PATCH_ROUTING_DECISION.md`
+- English `CONFIG_DRIFT_REPORT.md`
 
 ## Owned Decisions
 
@@ -83,6 +93,11 @@ This skill owns:
 - advanced memory-path and synchronization migration-risk routing
 - revalidation routing
 - regression tracking
+- counter-gated regression selection
+- attribution-driven rewrite trigger selection
+- patch routing by queue/stage owner
+- config drift guard
+- simulator artifact guard
 
 Required reference lessons:
 - `VORTEX_SIMX_RTL_TWIN`
@@ -100,6 +115,38 @@ When a regression reappears or the same patch repeats, also emit
 the user asks, root cause is ambiguous, or the target owner needs exact patch
 fields. Full English rewrite, decision, and regression artifacts must be
 registered in `ARTIFACT_MANIFEST_IR`.
+
+## Counter-Gated Regression
+
+Functional correctness does not pass the loop when counters regress. Trigger
+rewrite for unexpected coalesced transaction growth, unexplained scoreboard wait,
+barrier/membar/atomic waits without contracts, cache reservation fail spikes,
+ICNT `has_buffer` failure spikes, L2 queue full misattributed as DRAM, missing
+counter producers, or simulator-private parameters entering hardware contracts.
+
+## Attribution-Driven Rewrite Trigger
+
+Trigger rewrite when a performance conclusion lacks symptom counter, exclusion
+counter, queue/stage owner, fix target, confidence, or producer-backed evidence.
+Power-only bottleneck claims are attribution failures.
+
+## Patch Routing Rule
+
+Route by owning contract: architecture, contract/golden, RTL, memory,
+interconnect, atomic sync, runtime ABI, counter schema, test evidence, or
+simulator artifact removal. Do not route by symptom wording alone.
+
+## Config Drift Guard
+
+Reject rewrite plans that let simulator-private parameters, CUDA/PTX compatibility
+fields, fixed latencies, tested-config queue depths, BookSim knobs, or
+AccelWattch coefficients enter native hardware/ABI contracts.
+
+## Simulator-Artifact Guard
+
+If a patch introduces C++ queues, BookSim config, AccelWattch internals, CUDA
+stream stack, fixed simulator latency, PTX opcode latency, or parser-only
+counters into design truth, route to `SIMULATOR_ARTIFACT_REMOVAL_PATCH`.
 
 ## Forbidden Actions
 
@@ -126,6 +173,8 @@ This skill must use:
 - `shared/tables/patch_taxonomy_table.yaml`
 - `shared/tables/revalidation_routing_table.yaml`
 - `shared/tables/root_cause_taxonomy.yaml`
+- `shared/tables/gpgpusim_config_taxonomy_seed.md`
+- `shared/tables/stall_reason_taxonomy.md`
 
 ## Required Schemas
 
@@ -137,6 +186,10 @@ This skill must validate:
 - `shared/schemas/arch_rewrite_plan.schema.yaml`
 - `shared/schemas/rewrite_decision_report_ir.schema.yaml`
 - `shared/schemas/regression_tracking_report_ir.schema.yaml`
+- `shared/schemas/counter_manifest.schema.yaml`
+- `shared/schemas/stall_reason_matrix.schema.yaml`
+- `shared/schemas/performance_attribution_graph.schema.yaml`
+- `shared/schemas/config_parameter_classification.schema.yaml`
 
 ## Required Invariants
 
@@ -148,6 +201,10 @@ The output must satisfy:
 - `RUNTIME_LAUNCH_ROOT_CAUSE` routes to `RUNTIME_PATCH`, not `TOOLCHAIN_PATCH`.
 - `PERFORMANCE_ARCH_ROOT_CAUSE` may trigger `ARCHITECTURE_PATCH` only with performance metric refs, causal graph refs, contract paths, RTL module paths, bottleneck cycle window, counter evidence, and rejected RTL/contract/runtime alternatives.
 - `PASS_EVIDENCE_PATCH` remains valid for incomplete pass evidence, unstable fingerprints, missing coverage, or insufficient trace collection.
+- Counter regressions can trigger rewrite even when final architectural state and memory dumps match golden.
+- Patch classes include `MEMORY_PATCH`, `INTERCONNECT_PATCH`, `ATOMIC_SYNC_PATCH`, `RUNTIME_ABI_PATCH`, `COUNTER_SCHEMA_PATCH`, and `SIMULATOR_ARTIFACT_REMOVAL_PATCH` in addition to existing architecture, contract, RTL, and test-evidence patch classes.
+- Root-cause routing must preserve queue/stage owner and producer-audit status.
+- Simulator-private parameter drift must route to config or simulator-artifact removal, not silently pass.
 - Every accepted rewrite routes to revalidation.
 
 ## Failure Modes
@@ -187,9 +244,17 @@ This skill is incomplete unless the following exist:
 - `regression_tracking.md`
 - `revalidation_routing.md`
 - `legacy_closure_repair_constraints.md`
+- `counter_gated_regression.md`
+- `attribution_driven_rewrite_trigger.md`
+- `patch_routing_rule.md`
+- `config_drift_guard.md`
+- `simulator_artifact_guard.md`
 - `shared/schemas/arch_rewrite_plan.schema.yaml`
 - `shared/schemas/rewrite_decision_report_ir.schema.yaml`
 - `shared/schemas/regression_tracking_report_ir.schema.yaml`
+- `shared/schemas/counter_manifest.schema.yaml`
+- `shared/schemas/performance_attribution_graph.schema.yaml`
+- `shared/templates/rewrite_trigger_report.md`
 - `shared/tables/rewrite_trigger_table.yaml`
 - `shared/tables/patch_taxonomy_table.yaml`
 - `shared/tables/revalidation_routing_table.yaml`

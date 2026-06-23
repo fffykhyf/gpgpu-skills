@@ -1,0 +1,48 @@
+schema: config_parameter_classification
+version: v6-gpgpusim
+owner_skill: gpgpu-arch
+producer_skill: any-reference-importing-skill
+consumer_skill:
+  - gpgpu-arch
+  - gpgpu-golden
+  - gpgpu-runtime
+  - gpgpu-rtl
+  - gpgpu-memory
+  - gpgpu-interconnect
+  - gpgpu-simppa
+required:
+  - parameter_name
+  - category
+  - source_reference
+  - provenance_path
+  - exposure_policy
+  - enters_hardware_contract
+  - owner_skill
+  - validation_rule
+properties:
+  parameter_name: string
+  category: enum
+  source_reference: string
+  provenance_path: string
+  value_or_default: string
+  legal_range: string
+  performance_effect: string
+  exposure_policy: enum
+  compatibility_profile: string
+  enters_hardware_contract: boolean
+  owner_skill: string
+  rejection_reason: string
+validation_rules:
+  - category is one of hardware-private, simulator-private, HW/SW ABI, test-only, debug-only.
+  - simulator-private parameters must set enters_hardware_contract to false.
+  - CUDA/PTX compatibility parameters must name an optional compatibility_profile.
+example:
+  parameter_name: -ptx_opcode_latency_int
+  category: simulator-private
+  source_reference: gpgpusim
+  provenance_path: configs/tested-cfgs/SM86_RTX3070/gpgpusim.config
+  exposure_policy: No
+  enters_hardware_contract: false
+  owner_skill: gpgpu-arch
+  validation_rule: reject_fixed_simulator_latency_as_rtl_truth
+

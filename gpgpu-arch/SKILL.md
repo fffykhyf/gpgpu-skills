@@ -45,6 +45,10 @@ Produces:
 - `CAPABILITY_PROFILE_IR`
 - `MICRO_CONSTRAINT_ESTIMATE_IR`
 - `ARCH_GENERATION_REPORT`
+- `CONFIG_CLASSIFICATION_TABLE`
+- `SM_ISSUE_GATE_CONTRACT`
+- `NON_ISSUE_REASON_TAXONOMY`
+- `SIMULATOR_ONLY_EXCLUSION_REPORT`
 
 Human-facing reports:
 - `DESIGN_BRIEF.zh.md`
@@ -55,6 +59,11 @@ AI-facing artifacts:
 - English `ARCH_IR.yaml`
 - English `MICRO_CONSTRAINT_ESTIMATE_IR.yaml`
 - English `ARCH_GENERATION_REPORT.yaml`
+- English `ARCH_IR.md`
+- English `CONFIG_CLASSIFICATION_TABLE.md`
+- English `SM_ISSUE_GATE_CONTRACT.md`
+- English `NON_ISSUE_REASON_TAXONOMY.md`
+- English `SIMULATOR_ONLY_EXCLUSION_REPORT.md`
 
 ## Owned Decisions
 
@@ -76,6 +85,11 @@ This skill owns:
 - memory coalescer placement and response-shape restoration
 - verification backend matrix selection
 - capability profile selection
+- imported evidence classification before architecture use
+- SM issue/non-issue contract selection
+- scheduler-visible warp, SIMT, scoreboard, and pipe state contract
+- simulator-only architecture artifact rejection
+- architecture-level performance attribution order
 
 ## Preset Selection Rules
 
@@ -110,6 +124,43 @@ Do not expose full `ARCH_IR` to the user unless the user explicitly asks for it,
 `output_mode` is `CONTRACT_FREEZE`, root cause analysis needs exact affected
 architecture paths, or a downstream owner needs exact fields.
 
+## Imported Evidence Classification
+
+Before any mechanism from GPGPU-Sim, Vortex, MIAOW, Rocket, XiangShan, or another
+reference can influence `ARCH_IR`, classify it with
+`shared/schemas/config_parameter_classification.schema.yaml` and the intake rules
+in `imported_evidence_classification.md`. Simulator-private, debug-only, and
+parser-only items must not enter hardware contracts.
+
+## SM Issue / Non-Issue Contract
+
+Every generated SM architecture must emit `SM_ISSUE_GATE_CONTRACT.md` and answer:
+SM count, warp schedulers per SM, issue width, scoreboard collision checks, SIMT
+PC/active-mask ownership, pipe-unavailable attribution, and whether barrier,
+membar, atomic, and memory backpressure waits are independent from scoreboard.
+
+## Scheduler-Visible State Contract
+
+Every architecture candidate that can execute warps must expose `warp_state`,
+`SIMT_state`, `Scoreboard_state`, and `pipe_state` as scheduler-visible state.
+SIMT owns PC, active mask, reconvergence, call depth, and divergence. Scoreboard
+owns pending destinations, long-op destinations, reserve/release events, and
+collision results.
+
+## Simulator-Only Exclusion Rules
+
+Reject fixed latencies, C++ queues, BookSim parameters, AccelWattch objects,
+CUDA stream stack behavior, PTX opcode latency tables, SM86 queue depths, and
+parser-only visualizer variables as architecture truth. Emit
+`SIMULATOR_ONLY_EXCLUSION_REPORT.md` when such evidence is encountered.
+
+## Architecture-Level Performance Attribution Rules
+
+Performance-driven architecture changes must rule out launch/occupancy,
+scheduler non-issue, scoreboard dependency, SIMT divergence, memory formation,
+shared bank conflicts, L1/MSHR, ICNT, L2 queues, return path, and scoreboard
+release before blaming DRAM or changing topology.
+
 In `DEBUG_REGRESSION`, show only the architecture delta and rejected alternatives
 in Chinese, while passing affected `ARCH_IR` paths as English AI artifact refs.
 
@@ -140,6 +191,8 @@ This skill must use:
 - `shared/tables/verification_backend_matrix.yaml`
 - `shared/tables/provenance_table.yaml`
 - `shared/tables/enum_table.yaml`
+- `shared/tables/gpgpusim_config_taxonomy_seed.md`
+- `shared/tables/stall_reason_taxonomy.md`
 
 ## Required Schemas
 
@@ -154,6 +207,11 @@ This skill must validate:
 - `shared/schemas/arch_ir.schema.yaml`
 - `shared/schemas/micro_constraint_estimate_ir.schema.yaml`
 - `shared/schemas/arch_generation_report_ir.schema.yaml`
+- `shared/schemas/config_parameter_classification.schema.yaml`
+- `shared/schemas/config_parameter_taxonomy.schema.yaml`
+- `shared/schemas/issue_nonissue_reason.schema.yaml`
+- `shared/schemas/simt_state.schema.yaml`
+- `shared/schemas/scoreboard_state.schema.yaml`
 
 ## Required Invariants
 
@@ -172,6 +230,12 @@ The output must satisfy:
 - This skill must not emit system contract truth, golden semantics, RTL bindings, performance attribution, or rewrite patches.
 - Every intent requirement has an owner or explicit non-goal.
 - Every architecture parameter has allowed provenance.
+- Every imported parameter has classification, provenance, exposure policy, and hardware-contract decision.
+- No simulator-private parameter may enter `ARCH_IR` as hardware truth.
+- CUDA/PTX compatibility fields must be isolated in an optional compatibility profile.
+- Every executable SM candidate has warp state, SIMT state, scoreboard state, issue gate, non-issue reason taxonomy, and memory request generation boundary.
+- Every non-issued warp must have an attributable `non_issue_reason`.
+- Barrier, membar, atomic, SIMT redirect, memory backpressure, and scoreboard waits must remain distinct.
 - Area, memory pressure, warp occupancy, register pressure, and bandwidth estimates carry assumptions and bounds.
 
 ## Failure Modes
@@ -206,6 +270,12 @@ This skill is incomplete unless the following exist:
 - `capability_profile_and_preset.md`
 - `warp_state_contract.md`
 - `sm_hierarchy_model.md`
+- `imported_evidence_classification.md`
+- `sm_issue_gate_contract_gpgpusim.md`
+- `non_issue_reason_taxonomy.md`
+- `scheduler_visible_state_contract.md`
+- `simulator_only_exclusion_rules.md`
+- `architecture_performance_attribution_rules.md`
 - `shared/tables/output_mode_table.yaml`
 - `shared/tables/artifact_visibility_table.yaml`
 - `shared/tables/report_language_policy.yaml`
@@ -214,6 +284,13 @@ This skill is incomplete unless the following exist:
 - `shared/schemas/arch_ir.schema.yaml`
 - `shared/schemas/micro_constraint_estimate_ir.schema.yaml`
 - `shared/schemas/arch_generation_report_ir.schema.yaml`
+- `shared/schemas/config_parameter_classification.schema.yaml`
+- `shared/schemas/issue_nonissue_reason.schema.yaml`
+- `shared/schemas/simt_state.schema.yaml`
+- `shared/schemas/scoreboard_state.schema.yaml`
+- `shared/templates/imported_reference_intake.md`
+- `shared/templates/config_classification_table.md`
+- `shared/templates/sm_issue_gate_contract.md`
 - `shared/tables/micro_constraint_estimator_table.yaml`
 - `shared/tables/verification_backend_matrix.yaml`
 - `shared/tests/architecture_generator/cases.yaml`

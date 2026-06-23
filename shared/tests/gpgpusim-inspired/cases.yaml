@@ -1,0 +1,19 @@
+cases:
+  - case_id: gpgpusim_inspired_contract_smoke_suite
+    expected_outputs:
+      schemas:
+        - issue_nonissue_reason
+        - warp_memory_transaction
+        - cache_request_status
+        - noc_packet
+        - atomic_operation
+        - fence_visibility
+        - barrier_state
+        - counter_manifest
+    required_evidence:
+      - input_program
+      - expected_golden_behavior
+      - expected_trace_fields
+      - expected_counter_changes
+      - expected_non_issue_or_stall_reason
+

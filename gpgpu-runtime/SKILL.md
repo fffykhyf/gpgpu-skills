@@ -45,6 +45,11 @@ Produces:
 - `LOADER_CONTRACT_IR`
 - `ASSEMBLER_BINDING_REPORT`
 - `TOOLCHAIN_SMOKE_REPORT`
+- `LAUNCH_DESCRIPTOR`
+- `PROGRAM_IMAGE`
+- `ARGUMENT_LAYOUT`
+- `COALESCER_INPUT_TRACE`
+- `RUNTIME_ROUNDTRIP_TEST`
 
 Human-facing output:
 - toolchain/runtime section in `VALIDATION_DASHBOARD.zh.md`
@@ -57,6 +62,11 @@ AI-facing artifacts:
 - English `RUNTIME_LAUNCH_IR.yaml`
 - English `LOADER_CONTRACT_IR.yaml`
 - English `TOOLCHAIN_SMOKE_REPORT.yaml`
+- English `LAUNCH_DESCRIPTOR.schema.yaml`
+- English `PROGRAM_IMAGE.schema.yaml`
+- English `ARGUMENT_LAYOUT.md`
+- English `COALESCER_INPUT_TRACE.md`
+- English `RUNTIME_ROUNDTRIP_TEST.md`
 
 ## Owned Decisions
 
@@ -72,6 +82,10 @@ This skill owns:
 - deterministic derivation of `docs/program_image_format.md`
 - decode-stage `MEMORY_BUNDLE` derivation
 - rule-based memory coalescing contract generation
+- launch descriptor contract generation
+- argument layout contract generation
+- coalescer input trace generation
+- optional CUDA/OpenCL compatibility mapping
 - assembly IR validation
 - assembler/disassembler round-trip validation
 - program image layout validation
@@ -102,6 +116,40 @@ Do not expose full `ASSEMBLY_IR`, `PROGRAM_IMAGE_IR`, `RUNTIME_LAUNCH_IR`, or
 `PATCH_CARD.zh.md` with the failed gate, evidence summary, owner, and required
 revalidation while retaining full English artifacts in `ARTIFACT_MANIFEST_IR`.
 
+## Launch Descriptor Contract
+
+Every runtime output must derive a launch descriptor with `kernel_id`,
+`entry_pc`, `grid_dim`, `block_dim`, `shared_memory_bytes`, `argument_layout`,
+`program_image`, `constant_memory`, and `global_memory_init`. This descriptor is
+the frontend-to-golden/RTL handoff; CUDA streams and launch latency are not part
+of the native ABI.
+
+## Program Image Contract
+
+`PROGRAM_IMAGE_IR` and generated program-image artifacts must remain derived
+from `SYSTEM_CONTRACT_IR.launch_model.program_image_format`. Program image
+metadata must include entry PC, ISA hash, section layout, constant/global memory
+initialization, and loader-visible symbols.
+
+## Argument Layout Contract
+
+Argument layout must derive from `SYSTEM_CONTRACT_IR.launch_model` and record
+offset, size, alignment, pointer class, and memory-space binding. Runtime
+round-trip tests must prove host-side encoding matches golden launch decoding.
+
+## Coalescer Input Trace Generation
+
+Memory instructions must generate a coalescer input trace with instruction id,
+access type, memory space, lane address vector or expression, active mask, byte
+enables, ordering scope, and coalescing policy reference. This is input evidence
+for `gpgpu-memory`, not cache timing.
+
+## Optional CUDA/OpenCL Compatibility Mapping
+
+CUDA stream stack, kernel launch latency, compute capability, OpenCL object
+model, PTX capability, and frontend-specific memory quirks may only appear in an
+optional compatibility profile. They must not enter the base ABI.
+
 ## Forbidden Actions
 
 This skill must not:
@@ -130,6 +178,7 @@ This skill must use:
 - `shared/tables/runtime_launch_binding_table.yaml`
 - `shared/tables/loader_contract_table.yaml`
 - `shared/tables/toolchain_validation_gate_table.yaml`
+- `shared/tables/gpgpusim_config_taxonomy_seed.md`
 
 ## Required Schemas
 
@@ -147,6 +196,9 @@ This skill must validate:
 - `shared/schemas/loader_contract_ir.schema.yaml`
 - `shared/schemas/assembler_binding_report_ir.schema.yaml`
 - `shared/schemas/toolchain_smoke_report_ir.schema.yaml`
+- `shared/schemas/warp_memory_transaction.schema.yaml`
+- `shared/schemas/coalescer_output_trace.schema.yaml`
+- `shared/schemas/config_parameter_classification.schema.yaml`
 
 ## Required Invariants
 
@@ -161,6 +213,9 @@ The output must satisfy:
 - Memory instructions must emit `MEMORY_BUNDLE` before LSU issue.
 - `MEMORY_BUNDLE` must contain address vector, lane mask, access type, memory space, byte enables, ordering scope, and coalescing policy reference.
 - Coalescing must be rule-based, including contiguous-address merge, aligned single transaction, bank-conflict split, and divergence fallback.
+- Runtime must emit launch descriptor, argument layout, and coalescer input trace artifacts for memory-capable programs.
+- CUDA streams, launch latency, compute capability, and OpenCL object model must be optional compatibility metadata only.
+- Coalescer input traces must be generated before cache/L2/DRAM attribution.
 
 ## Failure Modes
 
@@ -212,6 +267,10 @@ This skill is incomplete unless the following exist:
 - `toolchain_smoke_gates.md`
 - `memory_coalescing_contract.md`
 - `lsu_instruction_bundle.md`
+- `launch_descriptor_contract.md`
+- `argument_layout_contract.md`
+- `coalescer_input_trace_generation.md`
+- `compatibility_mapping_rules.md`
 - `shared/schemas/toolchain_artifact_ir.schema.yaml`
 - `shared/schemas/assembly_ir.schema.yaml`
 - `shared/schemas/program_image_ir.schema.yaml`
@@ -219,6 +278,9 @@ This skill is incomplete unless the following exist:
 - `shared/schemas/loader_contract_ir.schema.yaml`
 - `shared/schemas/assembler_binding_report_ir.schema.yaml`
 - `shared/schemas/toolchain_smoke_report_ir.schema.yaml`
+- `shared/schemas/warp_memory_transaction.schema.yaml`
+- `shared/schemas/coalescer_output_trace.schema.yaml`
+- `shared/templates/warp_memory_transaction_contract.md`
 - `shared/tables/toolchain_artifact_generation_table.yaml`
 - `shared/tables/assembly_syntax_table.yaml`
 - `shared/tables/instruction_encoding_derivation_table.yaml`

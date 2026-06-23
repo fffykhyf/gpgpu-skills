@@ -1,0 +1,13 @@
+cases:
+  - case_id: scoreboard_collision_blocks_issue
+    input_program: "ld.global r1, [r2]; add r3, r1, r4"
+    expected_golden_behavior: add executes after load result is visible
+    expected_trace_fields: [cycle, core_id, warp_id, pc, issue_valid, non_issue_reason, scoreboard_collision]
+    expected_counter_changes: [scoreboard_wait_increments]
+    expected_non_issue_or_stall_reason: scoreboard_wait
+    expected_outputs:
+      issue_nonissue_reason: scoreboard_wait
+    required_evidence:
+      - pending_dest_regs
+      - collision_result
+

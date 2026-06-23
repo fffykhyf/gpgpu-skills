@@ -1,0 +1,59 @@
+schema: issue_nonissue_reason
+version: v6-gpgpusim
+owner_skill: gpgpu-arch
+producer_skill:
+  - gpgpu-rtl
+  - gpgpu-simppa
+consumer_skill:
+  - gpgpu-arch
+  - gpgpu-rtl
+  - gpgpu-simppa
+required:
+  - cycle
+  - core_id
+  - warp_id
+  - pc
+  - issue_valid
+  - non_issue_reason
+  - gate_results
+  - owner_skill
+  - validation_rule
+properties:
+  cycle: integer
+  core_id: integer
+  warp_id: integer
+  pc: string
+  issue_valid: boolean
+  non_issue_reason: enum
+  gate_results: map
+  scoreboard_collision: boolean
+  pipe_selected: string
+  pipe_available: boolean
+  memory_backpressure: boolean
+reason_enum:
+  - issued
+  - idle_control
+  - ibuffer_empty
+  - simt_redirect
+  - scoreboard_wait
+  - pipe_unavailable
+  - barrier_wait
+  - membar_wait
+  - atomic_wait
+  - memory_backpressure
+validation_rules:
+  - issue_valid false requires exactly one primary non_issue_reason.
+  - scoreboard_wait, simt_redirect, barrier_wait, membar_wait, and atomic_wait must not be collapsed into each other.
+example:
+  cycle: 42
+  core_id: 0
+  warp_id: 3
+  pc: "0x80"
+  issue_valid: false
+  non_issue_reason: scoreboard_wait
+  gate_results:
+    warp_valid: true
+    scoreboard_clear: false
+  owner_skill: gpgpu-rtl
+  validation_rule: issue_must_explain_non_issue
+

@@ -15,11 +15,23 @@ node_classes:
   - barrier_state
   - branch_divergence
   - memory_request
+  - warp_memory_transaction
+  - memory_queue_boundary
   - memory_response
   - cache_event
+  - cache_reservation_fail
+  - mshr_event
   - bank_conflict
   - coalescing_event
   - interface_backpressure
+  - noc_packet
+  - l2_queue
+  - dram_queue
+  - return_path
+  - scoreboard_release
+  - counter_manifest
+  - producer_audit
+  - power_derivative
   - rtl_pipeline_stage
   - toolchain_artifact
   - runtime_launch_event
@@ -35,13 +47,18 @@ edge_classes:
   - precedes
   - depends_on
   - routes_to
+  - excludes
+  - produced_by
+  - releases
 required_chain:
   performance_claim:
     - cycle_window
     - warp
     - bottleneck_category
+    - counter_manifest
     - rtl_pipeline_stage
     - contract_rule
+    - memory_queue_boundary
   toolchain_claim:
     - instruction
     - toolchain_artifact

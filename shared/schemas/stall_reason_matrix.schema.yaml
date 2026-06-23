@@ -1,0 +1,32 @@
+schema: stall_reason_matrix
+version: v6-gpgpusim
+owner_skill: gpgpu-simppa
+producer_skill:
+  - gpgpu-simppa
+consumer_skill:
+  - gpgpu-loop
+required:
+  - matrix_id
+  - dimensions
+  - entries
+  - producer_audit_ref
+  - owner_skill
+  - validation_rule
+properties:
+  matrix_id: string
+  dimensions: list
+  entries: list
+  producer_audit_ref: string
+  stable_reason_enum: list
+validation_rules:
+  - Memory stalls must include access_type and stall_reason dimensions.
+  - Unknown or unproduced stall reasons require COUNTER_SCHEMA_PATCH or TEST_EVIDENCE_PATCH routing.
+example:
+  matrix_id: sm0_kernel0
+  dimensions: [access_type, stall_reason]
+  entries:
+    - {access_type: global_load, stall_reason: cache_reservation_fail, count: 12}
+  producer_audit_ref: COUNTER_PRODUCER_AUDIT.md
+  owner_skill: gpgpu-simppa
+  validation_rule: stall_reason_matrix_has_producers
+

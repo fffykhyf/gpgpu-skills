@@ -1,0 +1,57 @@
+schema: noc_packet
+version: v6-gpgpusim
+owner_skill: gpgpu-interconnect
+producer_skill:
+  - gpgpu-interconnect
+  - gpgpu-rtl
+consumer_skill:
+  - gpgpu-simppa
+  - gpgpu-loop
+required:
+  - packet_id
+  - class
+  - src
+  - dst
+  - byte_size
+  - flit_count
+  - vc_class
+  - has_buffer_result
+  - push_cycle
+  - pop_cycle
+  - owner_skill
+  - validation_rule
+properties:
+  packet_id: string
+  class: enum
+  src: string
+  dst: string
+  byte_size: integer
+  flit_count: integer
+  vc_class: string
+  has_buffer_result: boolean
+  push_cycle: integer
+  pop_cycle: integer
+class_enum:
+  - read_req
+  - read_reply
+  - write_req
+  - write_reply
+  - atomic_req
+  - atomic_reply
+validation_rules:
+  - has_buffer_result false must be counted as icnt_req_backpressure or icnt_return_backpressure by direction.
+  - Packet size and class must be present before NoC congestion attribution.
+example:
+  packet_id: p0
+  class: read_req
+  src: sm0
+  dst: l2p0
+  byte_size: 40
+  flit_count: 1
+  vc_class: req
+  has_buffer_result: true
+  push_cycle: 20
+  pop_cycle: 35
+  owner_skill: gpgpu-interconnect
+  validation_rule: noc_packet_contract
+

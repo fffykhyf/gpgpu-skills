@@ -1,0 +1,13 @@
+cases:
+  - case_id: atomic_return_value_releases_scoreboard
+    input_program: "atom.add r1, [addr], 1; add r2, r1, 1"
+    expected_golden_behavior: r1 receives old value and r2 uses returned value
+    expected_trace_fields: [operation_type, address, lane_mask, byte_mask, return_value_behavior, completion_event]
+    expected_counter_changes: [atomic_wait_increments]
+    expected_non_issue_or_stall_reason: atomic_wait
+    expected_outputs:
+      atomic_operation: scoreboard_release_condition
+    required_evidence:
+      - return_value_behavior
+      - completion_event
+

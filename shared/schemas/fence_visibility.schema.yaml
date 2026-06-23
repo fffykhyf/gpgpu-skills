@@ -1,0 +1,41 @@
+schema: fence_visibility
+version: v6-gpgpusim
+owner_skill: gpgpu-atomic-sync
+producer_skill:
+  - gpgpu-atomic-sync
+  - gpgpu-golden
+consumer_skill:
+  - gpgpu-rtl
+  - gpgpu-simppa
+required:
+  - scope
+  - ordering_domain
+  - affected_memory_spaces
+  - visibility_point
+  - completion_condition
+  - cache_policy
+  - stall_reason
+  - owner_skill
+  - validation_rule
+properties:
+  scope: enum
+  ordering_domain: string
+  affected_memory_spaces: list
+  visibility_point: string
+  completion_condition: string
+  cache_policy: map
+  stall_reason: enum
+validation_rules:
+  - Fence completion must be defined by visibility point, not fixed cycle delay.
+  - GPGPU-Sim timing evidence cannot be the full memory consistency model.
+example:
+  scope: cta
+  ordering_domain: global_memory
+  affected_memory_spaces: [global]
+  visibility_point: l2_visible
+  completion_condition: prior_writes_reach_l2
+  cache_policy: {flush_l1: false, invalidate_l1: false}
+  stall_reason: membar_wait
+  owner_skill: gpgpu-atomic-sync
+  validation_rule: fence_visibility_not_fixed_latency
+

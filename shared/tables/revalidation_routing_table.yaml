@@ -102,6 +102,16 @@ routes:
       - csr_launch_sequence
       - completion_fault_observation
       - rtl_golden_trace_diff
+  RUNTIME_ABI_PATCH:
+    required_modules:
+      - gpgpu-runtime
+      - gpgpu-golden
+      - gpgpu-simppa
+    required_gates:
+      - launch_descriptor_roundtrip
+      - argument_layout_roundtrip
+      - compatibility_profile_check
+      - golden_image_execution
   RTL_PATCH:
     required_modules:
       - gpgpu-rtl
@@ -110,6 +120,53 @@ routes:
       - module_partial_sim
       - rtl_golden_trace_diff
       - memory_dump_compare
+  MEMORY_PATCH:
+    required_modules:
+      - gpgpu-memory
+      - gpgpu-rtl
+      - gpgpu-simppa
+    required_gates:
+      - warp_memory_transaction_trace
+      - coalescer_output_trace
+      - cache_status_matrix
+      - memory_lifecycle_trace
+  INTERCONNECT_PATCH:
+    required_modules:
+      - gpgpu-interconnect
+      - gpgpu-rtl
+      - gpgpu-simppa
+    required_gates:
+      - noc_packet_trace
+      - icnt_backpressure_trace
+      - queue_boundary_report
+  ATOMIC_SYNC_PATCH:
+    required_modules:
+      - gpgpu-atomic-sync
+      - gpgpu-golden
+      - gpgpu-rtl
+      - gpgpu-simppa
+    required_gates:
+      - atomic_operation_contract
+      - fence_visibility_test
+      - cta_barrier_release_test
+      - rtl_golden_trace_diff
+  COUNTER_SCHEMA_PATCH:
+    required_modules:
+      - gpgpu-simppa
+    required_gates:
+      - counter_manifest_validation
+      - counter_producer_audit
+      - stall_reason_matrix_validation
+  SIMULATOR_ARTIFACT_REMOVAL_PATCH:
+    required_modules:
+      - gpgpu-arch
+      - gpgpu-golden
+      - gpgpu-rtl
+      - gpgpu-simppa
+    required_gates:
+      - config_classification_check
+      - simulator_artifact_rejection_report
+      - contract_diff_check
   TEST_EVIDENCE_PATCH:
     required_modules:
       - gpgpu-simppa
@@ -132,6 +189,22 @@ root_cause_to_patch_route:
     patch_type: RUNTIME_PATCH
     target_skill: gpgpu-runtime
     revalidation: [runtime_arg_encoding, csr_launch_sequence, completion_fault_observation, rtl_golden_trace_diff]
+  COUNTER_SCHEMA_ROOT_CAUSE:
+    patch_type: COUNTER_SCHEMA_PATCH
+    target_skill: gpgpu-simppa
+    revalidation: [counter_manifest_validation, counter_producer_audit, stall_reason_matrix_validation]
+  CONFIG_DRIFT_ROOT_CAUSE:
+    patch_type: SIMULATOR_ARTIFACT_REMOVAL_PATCH
+    target_skill: gpgpu-arch
+    revalidation: [config_classification_check, simulator_artifact_rejection_report, contract_diff_check]
+  ATTRIBUTION_VALIDITY_ROOT_CAUSE:
+    patch_type: TEST_EVIDENCE_PATCH
+    target_skill: gpgpu-simppa
+    revalidation: [perf_attribution_graph, counter_producer_audit, trace_completeness_check]
+  SIMULATOR_ARTIFACT_ROOT_CAUSE:
+    patch_type: SIMULATOR_ARTIFACT_REMOVAL_PATCH
+    target_skill: gpgpu-arch
+    revalidation: [simulator_artifact_rejection_report, config_classification_check, rtl_contract_check]
   RTL_FUNCTIONAL_ROOT_CAUSE:
     patch_type: RTL_PATCH
     target_skill: gpgpu-rtl

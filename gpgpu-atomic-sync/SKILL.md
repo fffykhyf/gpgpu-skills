@@ -43,6 +43,11 @@ Produces:
 - `ATOMIC_EXECUTION_MODEL`
 - `BARRIER_FENCE_CONTRACT`
 - `SYNC_CONSISTENCY_REPORT`
+- `ATOMIC_OPERATION_SPEC`
+- `FENCE_VISIBILITY_SPEC`
+- `CTA_BARRIER_SPEC`
+- `MEMORY_CONSISTENCY_LITMUS`
+- `SYNC_STALL_COUNTER_SPEC`
 
 Human-facing report:
 - synchronization section in `VALIDATION_DASHBOARD.zh.md`
@@ -51,6 +56,11 @@ AI-facing artifacts:
 - English `ATOMIC_EXECUTION_MODEL.yaml`
 - English `BARRIER_FENCE_CONTRACT.yaml`
 - English `SYNC_CONSISTENCY_REPORT.yaml`
+- English `ATOMIC_OPERATION_SPEC.md`
+- English `FENCE_VISIBILITY_SPEC.md`
+- English `CTA_BARRIER_SPEC.md`
+- English `MEMORY_CONSISTENCY_LITMUS.md`
+- English `SYNC_STALL_COUNTER_SPEC.md`
 
 ## Owned Decisions
 
@@ -64,6 +74,11 @@ This skill owns:
 - grid barrier semantics
 - fence ordering semantics
 - synchronization trace classification
+- atomic operation contract
+- fence scope and visibility contract
+- CTA barrier contract
+- memory ordering litmus test selection
+- synchronization stall attribution
 
 Required reference lessons:
 - `VORTEX_BARRIER_WSYNC_DRAIN`
@@ -76,6 +91,42 @@ output is a concise Chinese status section: atomic verdict, fence verdict,
 barrier verdict, affected scope, and required revalidation.
 
 Register full artifacts in `ARTIFACT_MANIFEST_IR`.
+
+## Atomic Operation Contract
+
+Atomic operations must define operation type, address, lane mask, byte mask,
+return-value behavior, destination register if any, completion event,
+serialization domain, and scoreboard release condition. Atomic requests must
+state when they issue and when a waiting warp may resume.
+
+## Fence Scope / Visibility Contract
+
+Fence contracts must define scope, ordering domain, affected memory spaces,
+visibility point, completion condition, cache flush or invalidate policy, and
+stall reason. A fence cannot complete because of a fixed timing delay.
+
+## CTA Barrier Contract
+
+CTA barriers must define CTA id, expected participant count, arrival mask,
+release condition, waiting warp list, and release event. Barrier wait is not a
+generic scheduler stall.
+
+## Memory Ordering Litmus Tests
+
+Synchronization contracts must include litmus tests for same-address atomic
+serialization, atomic return value, fence visibility, CTA barrier release,
+store/fence/load ordering, and scoreboard release after atomic or load
+completion.
+
+## Synchronization Stall Attribution
+
+Stable synchronization reasons are `atomic_wait`, `atomic_split_or_replay`,
+`membar_wait`, `fence_flush_or_invalidate`, and `barrier_wait`. Each reason
+requires a synchronization contract event and release condition.
+
+GPGPU-Sim atomics/fence notes only provide timing-side reference. Full memory
+consistency semantics must be defined in our own golden contract or by a future
+deeper `cuda-sim/memory.cc` reader pass.
 
 ## Forbidden Actions
 
@@ -96,6 +147,7 @@ This skill must use:
 - `shared/tables/human_report_template_table.yaml`
 - `shared/tables/revalidation_routing_table.yaml`
 - `shared/tables/root_cause_taxonomy.yaml`
+- `shared/tables/stall_reason_taxonomy.md`
 
 ## Required Schemas
 
@@ -106,6 +158,9 @@ This skill must validate:
 - `shared/schemas/artifact_visibility_ir.schema.yaml`
 - `shared/schemas/system_contract_ir.schema.yaml`
 - `shared/schemas/normalized_trace_ir.schema.yaml`
+- `shared/schemas/atomic_operation.schema.yaml`
+- `shared/schemas/fence_visibility.schema.yaml`
+- `shared/schemas/barrier_state.schema.yaml`
 
 ## Required Invariants
 
@@ -115,6 +170,11 @@ The output must satisfy:
 - every atomic event has source SM, address, scope, serialization point, and visibility event
 - every fence event names drain scope and completion condition
 - every barrier event names participant scope and release condition
+- atomic_wait, atomic_split_or_replay, membar_wait, fence_flush_or_invalidate, and barrier_wait must be separately attributable.
+- atomic requests must define lane participation, return value behavior, destination register, completion event, serialization domain, and scoreboard release.
+- fence visibility must define scope, ordering domain, affected spaces, visibility point, completion condition, and cache policy.
+- barrier release must define participant mask and release condition.
+- GPGPU-Sim timing-side atomic/fence evidence is insufficient as a full memory consistency model.
 - AI artifacts are registered in `ARTIFACT_MANIFEST_IR`
 
 ## Failure Modes
@@ -148,6 +208,14 @@ The report must include:
 This skill is incomplete unless the following exist:
 - `atomic_execution_model.md`
 - `barrier_fence_contract.md`
+- `atomic_operation_contract.md`
+- `fence_scope_visibility_contract.md`
+- `cta_barrier_contract.md`
+- `memory_ordering_litmus_tests.md`
+- `synchronization_stall_attribution.md`
+- `shared/schemas/atomic_operation.schema.yaml`
+- `shared/schemas/fence_visibility.schema.yaml`
+- `shared/schemas/barrier_state.schema.yaml`
 
 When a required schema, table, example, or test is missing, emit
 `INSUFFICIENT_SKILL_ASSET` rather than inventing behavior.

@@ -1,0 +1,46 @@
+schema: atomic_operation
+version: v6-gpgpusim
+owner_skill: gpgpu-atomic-sync
+producer_skill:
+  - gpgpu-atomic-sync
+  - gpgpu-rtl
+consumer_skill:
+  - gpgpu-golden
+  - gpgpu-simppa
+required:
+  - operation_type
+  - address
+  - lane_mask
+  - byte_mask
+  - return_value_behavior
+  - completion_event
+  - serialization_domain
+  - scoreboard_release_condition
+  - owner_skill
+  - validation_rule
+properties:
+  operation_type: string
+  address: string
+  lane_mask: string
+  byte_mask: string
+  return_value_behavior: enum
+  destination_register: string
+  completion_event: map
+  serialization_domain: string
+  scoreboard_release_condition: string
+validation_rules:
+  - Atomic operations with return values must name destination_register and release condition.
+  - atomic_wait must not be reported as generic memory_wait.
+example:
+  operation_type: atomic_add
+  address: "0x2000"
+  lane_mask: "0x0000000f"
+  byte_mask: "0x0000ffff"
+  return_value_behavior: old_value_per_lane
+  destination_register: r9
+  completion_event: {cycle: 90, event: atomic_reply}
+  serialization_domain: global_address
+  scoreboard_release_condition: completion_event_observed
+  owner_skill: gpgpu-atomic-sync
+  validation_rule: atomic_completion_defined
+

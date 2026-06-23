@@ -1,0 +1,13 @@
+cases:
+  - case_id: icnt_has_buffer_failure_routes_to_fabric
+    input_program: "multi-SM global load burst"
+    expected_golden_behavior: all loads complete with correct values
+    expected_trace_fields: [packet_id, class, src, dst, byte_size, flit_count, has_buffer_result]
+    expected_counter_changes: [icnt_req_backpressure_increments]
+    expected_non_issue_or_stall_reason: icnt_req_backpressure
+    expected_outputs:
+      noc_packet: has_buffer_result_false
+    required_evidence:
+      - packet_class
+      - has_buffer_result
+

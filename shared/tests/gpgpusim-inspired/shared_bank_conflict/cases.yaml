@@ -1,0 +1,13 @@
+cases:
+  - case_id: shared_bank_conflict_is_not_global_coalescing
+    input_program: "ld.shared r1, [shared_base + (lane_id % 2) * 4]"
+    expected_golden_behavior: lanes read shared-memory values with correct masks
+    expected_trace_fields: [warp_id, access_type, lane_addresses, bank_ids, conflict_count, non_issue_reason]
+    expected_counter_changes: [shared_bank_conflict_increments]
+    expected_non_issue_or_stall_reason: shared_bank_conflict
+    expected_outputs:
+      stall_reason_matrix: shared_bank_conflict
+    required_evidence:
+      - bank_mapping_function
+      - conflict_count
+

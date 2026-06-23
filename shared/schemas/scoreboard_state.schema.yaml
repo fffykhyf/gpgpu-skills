@@ -1,0 +1,44 @@
+schema: scoreboard_state
+version: v6-gpgpusim
+owner_skill: gpgpu-arch
+producer_skill:
+  - gpgpu-rtl
+  - gpgpu-simppa
+consumer_skill:
+  - gpgpu-arch
+  - gpgpu-loop
+required:
+  - warp_id
+  - pending_dest_regs
+  - longop_dest_regs
+  - reserve_event
+  - release_event
+  - collision_result
+  - owner_skill
+  - validation_rule
+properties:
+  warp_id: integer
+  pending_dest_regs: list
+  longop_dest_regs: list
+  reserve_event: map
+  release_event: map
+  collision_result: map
+validation_rules:
+  - Scoreboard state owns pending destinations and long-op destinations only.
+  - Memory return and writeback events must release the matching reserved destination.
+example:
+  warp_id: 2
+  pending_dest_regs: [r7]
+  longop_dest_regs: [r7]
+  reserve_event:
+    cycle: 10
+    instruction_id: i42
+  release_event:
+    cycle: 80
+    source: memory_return
+  collision_result:
+    blocked: true
+    reg: r7
+  owner_skill: gpgpu-rtl
+  validation_rule: reserve_check_release_consistency
+

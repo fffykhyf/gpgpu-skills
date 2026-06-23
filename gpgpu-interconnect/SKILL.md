@@ -44,6 +44,12 @@ Produces:
 - `SM_TO_MEMORY_FABRIC_IR`
 - `FABRIC_CONTENTION_REPORT`
 - `MEMORY_REQUEST_QUEUE_REPORT`
+- `NOC_PACKET_SPEC`
+- `ICNT_BACKPRESSURE_SPEC`
+- `L2_SUBPARTITION_QUEUE_SPEC`
+- `DRAM_SCHEDULER_SPEC`
+- `ADDRESS_MAPPING_EVIDENCE`
+- `RETURN_PATH_SPEC`
 
 Human-facing report:
 - interconnect section in `VALIDATION_DASHBOARD.zh.md`
@@ -53,6 +59,12 @@ AI-facing artifacts:
 - English `SM_TO_MEMORY_FABRIC_IR.yaml`
 - English `FABRIC_CONTENTION_REPORT.yaml`
 - English `MEMORY_REQUEST_QUEUE_REPORT.yaml`
+- English `NOC_PACKET_SPEC.md`
+- English `ICNT_BACKPRESSURE_SPEC.md`
+- English `L2_SUBPARTITION_QUEUE_SPEC.md`
+- English `DRAM_SCHEDULER_SPEC.md`
+- English `ADDRESS_MAPPING_EVIDENCE.md`
+- English `RETURN_PATH_SPEC.md`
 
 ## Owned Decisions
 
@@ -66,6 +78,12 @@ This skill owns:
 - L2 cache slicing policy handoff
 - source SM ID preservation
 - fabric trace event schema
+- packet contract
+- ICNT buffer and backpressure contract
+- L2 subpartition queue contract
+- DRAM-facing queue boundary handoff
+- address mapping evidence contract
+- return path contract
 
 Required reference lessons:
 - `VORTEX_CACHE_MSHR_RESPONSE_ROUTE`
@@ -79,6 +97,42 @@ affected SM IDs, request merging status, and required revalidation.
 
 All full routing tables and queue traces must be registered in
 `ARTIFACT_MANIFEST_IR`.
+
+## Packet Contract
+
+Every fabric packet must expose packet class, source, destination, request or
+response direction, byte size, flit count, `has_buffer` result, queue enter
+cycle, and queue exit cycle.
+
+## ICNT Buffer / Backpressure Contract
+
+ICNT attribution must distinguish request packet volume, response packet volume,
+request `has_buffer` failure, response FIFO full, L2-to-ICNT queue full, and
+ICNT-to-shader congestion. Do not report only `NoC slow`.
+
+## L2 Subpartition Queue Contract
+
+L2/subpartition evidence must name source SM, destination slice/subpartition,
+queue name, occupancy/capacity, hit/miss result, L2-to-DRAM event, and return
+queue event.
+
+## DRAM Queue / Scheduler Contract
+
+This skill may report DRAM-facing queue boundaries but must not define DRAM
+scheduling truth. It must pass L2-to-DRAM queue occupancy, arrival order, queue
+enter/exit cycles, and address mapping fields to `gpgpu-memory`.
+
+## Address Mapping Evidence Contract
+
+Bank skew, row locality, and partition imbalance claims require address mapping
+evidence: physical address, partition/channel, L2 slice, bank, bank group when
+present, row, column, and hashing/indexing provenance.
+
+## Return Path Contract
+
+Return path attribution must separate DRAM-to-L2, L2-to-ICNT, ICNT-to-shader,
+cluster/LSU response FIFO, and scoreboard release. Return congestion is distinct
+from request injection pressure.
 
 ## Forbidden Actions
 
@@ -99,6 +153,7 @@ This skill must use:
 - `shared/tables/human_report_template_table.yaml`
 - `shared/tables/revalidation_routing_table.yaml`
 - `shared/tables/root_cause_taxonomy.yaml`
+- `shared/tables/stall_reason_taxonomy.md`
 
 ## Required Schemas
 
@@ -110,6 +165,9 @@ This skill must validate:
 - `shared/schemas/system_contract_ir.schema.yaml`
 - `shared/schemas/incremental_rtl_map.schema.yaml`
 - `shared/schemas/normalized_trace_ir.schema.yaml`
+- `shared/schemas/noc_packet.schema.yaml`
+- `shared/schemas/memory_queue_boundary.schema.yaml`
+- `shared/schemas/memory_request_lifecycle.schema.yaml`
 
 ## Required Invariants
 
@@ -118,6 +176,9 @@ The output must satisfy:
 - every route names source SM, destination L2 slice or memory target, arbitration class, and ordering scope
 - request merging across SM is explicit and never changes memory visibility
 - congestion evidence maps to links, queues, and source SMs
+- NoC bottlenecks must state request/response packet volume, has-buffer failure, or return FIFO pressure.
+- DRAM bottleneck claims must be handed off with row locality, bank skew, queue occupancy, or address mapping evidence rather than asserted generically.
+- Request path and return path must remain separately attributable.
 - interconnect artifacts preserve `ARTIFACT_MANIFEST_IR` provenance
 
 ## Failure Modes
@@ -150,6 +211,15 @@ The report must include:
 This skill is incomplete unless the following exist:
 - `noc_routing_contract.md`
 - `sm_to_memory_fabric.md`
+- `packet_contract.md`
+- `icnt_backpressure_contract.md`
+- `l2_subpartition_queue_contract.md`
+- `dram_scheduler_boundary_contract.md`
+- `address_mapping_evidence_contract.md`
+- `return_path_contract.md`
+- `shared/schemas/noc_packet.schema.yaml`
+- `shared/schemas/memory_queue_boundary.schema.yaml`
+- `shared/templates/memory_queue_boundary_report.md`
 
 When a required schema, table, example, or test is missing, emit
 `INSUFFICIENT_SKILL_ASSET` rather than inventing behavior.

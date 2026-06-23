@@ -1,0 +1,38 @@
+schema: barrier_state
+version: v6-gpgpusim
+owner_skill: gpgpu-atomic-sync
+producer_skill:
+  - gpgpu-atomic-sync
+  - gpgpu-rtl
+consumer_skill:
+  - gpgpu-golden
+  - gpgpu-simppa
+required:
+  - cta_id
+  - expected_participant_count
+  - arrival_mask
+  - release_condition
+  - waiting_warp_list
+  - release_event
+  - owner_skill
+  - validation_rule
+properties:
+  cta_id: integer
+  expected_participant_count: integer
+  arrival_mask: string
+  release_condition: string
+  waiting_warp_list: list
+  release_event: map
+validation_rules:
+  - Barrier wait requires participant tracking and release condition.
+  - Barrier state must not be represented only as a scheduler stall.
+example:
+  cta_id: 0
+  expected_participant_count: 4
+  arrival_mask: "0b1111"
+  release_condition: all_expected_warps_arrived
+  waiting_warp_list: [0, 1, 2, 3]
+  release_event: {cycle: 55}
+  owner_skill: gpgpu-atomic-sync
+  validation_rule: barrier_release_defined
+

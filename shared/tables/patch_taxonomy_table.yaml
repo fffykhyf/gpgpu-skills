@@ -35,9 +35,27 @@ patch_classes:
   RUNTIME_PATCH:
     target_owner: gpgpu-runtime
     examples: [runtime_arg_buffer_fix, kernel_launch_sequence_fix, csr_launch_sequence_fix, completion_fault_observation_fix]
+  RUNTIME_ABI_PATCH:
+    target_owner: gpgpu-runtime
+    examples: [launch_descriptor_contract_fix, argument_layout_contract_fix, compatibility_profile_mapping_fix]
   RTL_PATCH:
     target_owner: gpgpu-rtl
     examples: [pipeline_relayout, scoreboard_redesign, lsq_replay_policy_change, interface_latency_adjustment]
+  MEMORY_PATCH:
+    target_owner: gpgpu-memory
+    examples: [warp_memory_transaction_fix, coalescer_contract_fix, cache_reservation_fail_fix, memory_return_path_fix]
+  INTERCONNECT_PATCH:
+    target_owner: gpgpu-interconnect
+    examples: [noc_packet_contract_fix, icnt_backpressure_contract_fix, l2_queue_boundary_fix, return_path_fix]
+  ATOMIC_SYNC_PATCH:
+    target_owner: gpgpu-atomic-sync
+    examples: [atomic_operation_contract_fix, fence_visibility_contract_fix, cta_barrier_contract_fix]
+  COUNTER_SCHEMA_PATCH:
+    target_owner: gpgpu-simppa
+    examples: [counter_manifest_fix, producer_audit_fix, stall_reason_matrix_fix]
+  SIMULATOR_ARTIFACT_REMOVAL_PATCH:
+    target_owner: gpgpu-arch
+    examples: [remove_fixed_latency_truth, remove_cuda_stream_abi_truth, remove_booksim_config_truth, remove_parser_only_counter_gate]
   TEST_EVIDENCE_PATCH:
     target_owner: gpgpu-simppa
     examples: [trace_tap_addition, missing_evidence_collection, attribution_rerun]

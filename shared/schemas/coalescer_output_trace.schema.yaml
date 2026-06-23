@@ -1,0 +1,38 @@
+schema: coalescer_output_trace
+version: v6-gpgpusim
+owner_skill: gpgpu-memory
+producer_skill:
+  - gpgpu-runtime
+  - gpgpu-rtl
+consumer_skill:
+  - gpgpu-simppa
+required:
+  - instruction_id
+  - warp_id
+  - input_lane_count
+  - output_transaction_count
+  - transactions
+  - amplification
+  - owner_skill
+  - validation_rule
+properties:
+  instruction_id: string
+  warp_id: integer
+  input_lane_count: integer
+  output_transaction_count: integer
+  transactions: list
+  amplification: number
+  split_reason: string
+validation_rules:
+  - transactions must reference warp_memory_transaction ids.
+  - amplification above target must be routed as a counter regression even when functional output passes.
+example:
+  instruction_id: ld0
+  warp_id: 0
+  input_lane_count: 32
+  output_transaction_count: 4
+  transactions: [wmt0, wmt1, wmt2, wmt3]
+  amplification: 4.0
+  owner_skill: gpgpu-memory
+  validation_rule: coalescer_output_trace_required
+
