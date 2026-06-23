@@ -42,6 +42,18 @@ Produces:
 - `ASSEMBLER_BINDING_REPORT`
 - `TOOLCHAIN_SMOKE_REPORT`
 
+Human-facing output:
+- toolchain/runtime section in `VALIDATION_DASHBOARD.zh.md`
+- `PATCH_CARD.zh.md` when toolchain or runtime evidence fails
+
+AI-facing artifacts:
+- English `TOOLCHAIN_ARTIFACT_IR.yaml`
+- English `ASSEMBLY_IR.yaml`
+- English `PROGRAM_IMAGE_IR.yaml`
+- English `RUNTIME_LAUNCH_IR.yaml`
+- English `LOADER_CONTRACT_IR.yaml`
+- English `TOOLCHAIN_SMOKE_REPORT.yaml`
+
 ## Owned Decisions
 
 This skill owns:
@@ -62,6 +74,24 @@ This skill owns:
 - golden program-image execution smoke validation
 - source-of-truth hash and semantic equivalence checks
 
+## Human and AI Output Policy
+
+Assembler, disassembler, program image, runtime launch, and loader artifacts are
+AI-facing English artifacts. Human-facing output must show only concise Chinese
+status fields:
+
+- assembler roundtrip status
+- program image hash
+- entry PC
+- arg buffer hash
+- loader memory init hash
+- smoke verdict
+
+Do not expose full `ASSEMBLY_IR`, `PROGRAM_IMAGE_IR`, `RUNTIME_LAUNCH_IR`, or
+`LOADER_CONTRACT_IR` by default. On toolchain or runtime failure, emit
+`PATCH_CARD.zh.md` with the failed gate, evidence summary, owner, and required
+revalidation while retaining full English artifacts in `ARTIFACT_MANIFEST_IR`.
+
 ## Forbidden Actions
 
 This skill must not:
@@ -78,6 +108,10 @@ This skill must not:
 ## Required Tables
 
 This skill must use:
+- `shared/tables/output_mode_table.yaml`
+- `shared/tables/artifact_visibility_table.yaml`
+- `shared/tables/report_language_policy.yaml`
+- `shared/tables/human_report_template_table.yaml`
 - `shared/tables/source_of_truth_generation_table.yaml`
 - `shared/tables/toolchain_artifact_generation_table.yaml`
 - `shared/tables/assembly_syntax_table.yaml`
@@ -90,6 +124,10 @@ This skill must use:
 ## Required Schemas
 
 This skill must validate:
+- `shared/schemas/output_mode_ir.schema.yaml`
+- `shared/schemas/artifact_manifest_ir.schema.yaml`
+- `shared/schemas/human_report_manifest_ir.schema.yaml`
+- `shared/schemas/artifact_visibility_ir.schema.yaml`
 - `shared/schemas/system_contract_ir.schema.yaml`
 - `shared/schemas/golden_contract_model.schema.yaml`
 - `shared/schemas/toolchain_artifact_ir.schema.yaml`

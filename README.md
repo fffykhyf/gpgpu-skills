@@ -48,6 +48,20 @@ Architecture Generator
 - `PERF_ATTRIBUTION_GRAPH`
 - `ARCH_REWRITE_PLAN`
 
+## Artifact Visibility and Language
+
+Human-facing reports are written in Chinese and use `.zh.md`. They are concise,
+conclusion-oriented, and shown by default.
+
+AI-facing artifacts are written in English and use `.yaml`, `.json`, or
+`.en.md`. They contain the complete structured IR, evidence, traces, reports,
+and patch plans, but are not shown to humans by default.
+
+Default output mode is `FAST_ITERATION`. Full IR expansion is opt-in unless
+`CONTRACT_FREEZE` or `DEBUG_REGRESSION` requires exact fields. Every human report
+must cite its source AI artifacts through `ARTIFACT_MANIFEST_IR` so the system
+can keep complete evidence without forcing people to read it every round.
+
 ## Legacy Migration
 
 The former 9-stage top-level GPGPU skills and the old `legacy/` skill archive have been deleted from the active skill namespace. Their useful constraints were migrated into the current owner skills as `legacy_*_constraints.md` references. New work must use the six current top-level skills; old truth, validation, memory, RTL, and closure behavior must not reappear as separate top-level skills.
@@ -59,6 +73,7 @@ Only v5 assets are retained under `shared/`; old top-level examples, old IR refe
 - `shared/schemas/` defines IR and report contracts.
 - `shared/tables/` defines deterministic decision tables.
 - `shared/examples/self_correcting_minimal_simt/` demonstrates the closed loop.
+- `shared/templates/` defines Chinese human report templates and English AI report templates.
 - `shared/tests/` contains regression cases and the asset validator.
 - `shared/flow/` describes the active design flow.
 

@@ -52,6 +52,15 @@ Produces:
 - `REWRITE_DECISION_REPORT`
 - `REGRESSION_TRACKING_REPORT`
 
+Human-facing reports:
+- `PATCH_CARD.zh.md`
+- `REGRESSION_SUMMARY.zh.md`
+
+AI-facing artifacts:
+- English `ARCH_REWRITE_PLAN.yaml`
+- English `REWRITE_DECISION_REPORT.yaml`
+- English `REGRESSION_TRACKING_REPORT.yaml`
+
 ## Owned Decisions
 
 This skill owns:
@@ -66,6 +75,20 @@ This skill owns:
 - test evidence patch planning
 - revalidation routing
 - regression tracking
+
+## Human and AI Output Policy
+
+`ARCH_REWRITE_PLAN`, `REWRITE_DECISION_REPORT`, and
+`REGRESSION_TRACKING_REPORT` are AI-facing English artifacts. Human-facing output
+must be `PATCH_CARD.zh.md`, written in Chinese and limited to issue summary,
+evidence summary, selected patch type, owner module, required revalidation, and
+regression risks.
+
+When a regression reappears or the same patch repeats, also emit
+`REGRESSION_SUMMARY.zh.md`. Do not expose the full rewrite YAML by default unless
+the user asks, root cause is ambiguous, or the target owner needs exact patch
+fields. Full English rewrite, decision, and regression artifacts must be
+registered in `ARTIFACT_MANIFEST_IR`.
 
 ## Forbidden Actions
 
@@ -84,6 +107,10 @@ This skill must not:
 ## Required Tables
 
 This skill must use:
+- `shared/tables/output_mode_table.yaml`
+- `shared/tables/artifact_visibility_table.yaml`
+- `shared/tables/report_language_policy.yaml`
+- `shared/tables/human_report_template_table.yaml`
 - `shared/tables/rewrite_trigger_table.yaml`
 - `shared/tables/patch_taxonomy_table.yaml`
 - `shared/tables/revalidation_routing_table.yaml`
@@ -92,6 +119,10 @@ This skill must use:
 ## Required Schemas
 
 This skill must validate:
+- `shared/schemas/output_mode_ir.schema.yaml`
+- `shared/schemas/artifact_manifest_ir.schema.yaml`
+- `shared/schemas/human_report_manifest_ir.schema.yaml`
+- `shared/schemas/artifact_visibility_ir.schema.yaml`
 - `shared/schemas/arch_rewrite_plan.schema.yaml`
 - `shared/schemas/rewrite_decision_report_ir.schema.yaml`
 - `shared/schemas/regression_tracking_report_ir.schema.yaml`

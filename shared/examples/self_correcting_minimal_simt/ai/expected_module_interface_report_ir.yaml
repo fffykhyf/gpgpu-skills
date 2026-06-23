@@ -1,0 +1,17 @@
+verdict: PASS
+incremental_rtl_map_hash: hash_incremental_rtl_map_minimal_simt
+signal_consistency:
+  status: PASS
+handshake_correctness:
+  status: PASS
+latency_compatibility:
+  status: PASS
+pipeline_boundary_correctness:
+  status: PASS
+payload_stability:
+  status: PASS
+tag_uniqueness:
+  status: PASS
+combinational_ready_loop_check:
+  status: PASS
+failed_interfaces: []

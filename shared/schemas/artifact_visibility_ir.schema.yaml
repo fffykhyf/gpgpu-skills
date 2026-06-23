@@ -1,0 +1,38 @@
+schema: ARTIFACT_VISIBILITY_IR
+version: v1
+type: object
+required:
+  - artifact_name
+  - artifact_kind
+  - visibility
+  - language
+  - default_show_to_human
+  - expansion_triggers
+properties:
+  artifact_name: string
+  artifact_kind:
+    type: enum
+    values:
+      - HUMAN_REPORT
+      - AI_ARTIFACT
+      - DEBUG_EVIDENCE
+      - INTERNAL_CACHE
+  visibility:
+    type: enum
+    values:
+      - HUMAN_REQUIRED
+      - HUMAN_OPTIONAL
+      - AI_REQUIRED
+      - DEBUG_ONLY
+      - INTERNAL_CACHE
+  language:
+    type: enum
+    values:
+      - zh-CN
+      - en-US
+  default_show_to_human: boolean
+  expansion_triggers: list[string]
+failure_rules:
+  human_report_not_visible: HUMAN_REPORT_VISIBILITY_MISMATCH
+  ai_artifact_visible_by_default: AI_ARTIFACT_VISIBILITY_MISMATCH
+  wrong_artifact_language: ARTIFACT_LANGUAGE_MISMATCH

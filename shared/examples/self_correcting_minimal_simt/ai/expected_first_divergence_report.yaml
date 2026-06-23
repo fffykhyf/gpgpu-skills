@@ -1,0 +1,17 @@
+verdict: NO_DIVERGENCE_FOUND
+first_divergence_type: MEMORY_VALUE_MISMATCH
+cycle: 40
+warp_id: 2
+pc: "0x00000008"
+contract_paths:
+  - memory_model.request_lifecycle
+rtl_module_paths:
+  - load_store_queue
+toolchain_artifact_paths: []
+precondition_window:
+  - cycle_40_lsq_request
+postcondition_window:
+  - cycle_96_lsq_response
+evidence_hashes:
+  - hash_lsq_partial_trace
+confidence: HIGH

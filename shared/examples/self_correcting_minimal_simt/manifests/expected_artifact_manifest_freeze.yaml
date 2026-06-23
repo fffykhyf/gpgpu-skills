@@ -1,0 +1,91 @@
+run_id: self_correcting_minimal_simt_freeze
+output_mode: CONTRACT_FREEZE
+ai_artifacts:
+  - artifact_name: DESIGN_INTENT_IR
+    artifact_type: yaml
+    path: shared/examples/self_correcting_minimal_simt/ai/expected_design_intent_ir.yaml
+    language: en-US
+    visibility: AI_REQUIRED
+    content_hash: hash_design_intent_minimal_simt
+    producer_skill: gpgpu-arch
+    consumed_by: [gpgpu-golden]
+  - artifact_name: ARCH_IR
+    artifact_type: yaml
+    path: shared/examples/self_correcting_minimal_simt/ai/expected_arch_ir.yaml
+    language: en-US
+    visibility: AI_REQUIRED
+    content_hash: hash_arch_minimal_simt
+    producer_skill: gpgpu-arch
+    consumed_by: [gpgpu-golden, gpgpu-loop]
+  - artifact_name: MICRO_CONSTRAINT_ESTIMATE_IR
+    artifact_type: yaml
+    path: shared/examples/self_correcting_minimal_simt/ai/expected_micro_constraint_estimate.yaml
+    language: en-US
+    visibility: AI_REQUIRED
+    content_hash: hash_micro_constraint_minimal_simt
+    producer_skill: gpgpu-arch
+    consumed_by: [gpgpu-golden]
+  - artifact_name: SYSTEM_CONTRACT_IR
+    artifact_type: yaml
+    path: shared/examples/self_correcting_minimal_simt/ai/expected_system_contract_ir.yaml
+    language: en-US
+    visibility: AI_REQUIRED
+    content_hash: hash_system_contract_minimal_simt
+    producer_skill: gpgpu-golden
+    consumed_by: [gpgpu-runtime, gpgpu-rtl, gpgpu-simppa]
+  - artifact_name: GOLDEN_CONTRACT_MODEL
+    artifact_type: yaml
+    path: shared/examples/self_correcting_minimal_simt/ai/expected_golden_contract_model.yaml
+    language: en-US
+    visibility: AI_REQUIRED
+    content_hash: hash_golden_contract_model_minimal_simt
+    producer_skill: gpgpu-golden
+    consumed_by: [gpgpu-runtime, gpgpu-rtl, gpgpu-simppa]
+  - artifact_name: CONTRACT_SEMANTICS_REPORT
+    artifact_type: yaml
+    path: shared/examples/self_correcting_minimal_simt/ai/expected_contract_semantics_report_ir.yaml
+    language: en-US
+    visibility: AI_REQUIRED
+    content_hash: hash_contract_semantics_report_minimal_simt
+    producer_skill: gpgpu-golden
+    consumed_by: [gpgpu-runtime, gpgpu-rtl]
+  - artifact_name: TOOLCHAIN_ARTIFACT_IR
+    artifact_type: yaml
+    path: shared/examples/self_correcting_minimal_simt/ai/expected_toolchain_artifact_ir.yaml
+    language: en-US
+    visibility: AI_REQUIRED
+    content_hash: hash_toolchain_artifact_minimal_simt
+    producer_skill: gpgpu-runtime
+    consumed_by: [gpgpu-rtl, gpgpu-simppa]
+  - artifact_name: TOOLCHAIN_SMOKE_REPORT
+    artifact_type: yaml
+    path: shared/examples/self_correcting_minimal_simt/ai/expected_toolchain_smoke_report.yaml
+    language: en-US
+    visibility: AI_REQUIRED
+    content_hash: hash_toolchain_smoke_minimal_simt
+    producer_skill: gpgpu-runtime
+    consumed_by: [gpgpu-simppa]
+  - artifact_name: PASS_EVIDENCE_REPORT
+    artifact_type: yaml
+    path: shared/examples/self_correcting_minimal_simt/ai/expected_pass_evidence_report_ir.yaml
+    language: en-US
+    visibility: AI_REQUIRED
+    content_hash: hash_pass_evidence_minimal_simt
+    producer_skill: gpgpu-simppa
+    consumed_by: [gpgpu-loop]
+human_reports:
+  - report_name: CONTRACT_FREEZE_SUMMARY
+    path: shared/examples/self_correcting_minimal_simt/human/CONTRACT_FREEZE_SUMMARY.zh.md
+    language: zh-CN
+    visibility: HUMAN_REQUIRED
+    source_artifacts: [SYSTEM_CONTRACT_IR, GOLDEN_CONTRACT_MODEL, CONTRACT_SEMANTICS_REPORT]
+  - report_name: ARCHITECTURE_DECISION
+    path: shared/examples/self_correcting_minimal_simt/human/ARCHITECTURE_DECISION.zh.md
+    language: zh-CN
+    visibility: HUMAN_REQUIRED
+    source_artifacts: [ARCH_IR, MICRO_CONSTRAINT_ESTIMATE_IR]
+  - report_name: VALIDATION_DASHBOARD
+    path: shared/examples/self_correcting_minimal_simt/human/VALIDATION_DASHBOARD.zh.md
+    language: zh-CN
+    visibility: HUMAN_REQUIRED
+    source_artifacts: [TOOLCHAIN_SMOKE_REPORT, PASS_EVIDENCE_REPORT]

@@ -9,8 +9,6 @@ import yaml
 
 ROOT = Path(__file__).resolve().parents[2]
 
-DESCRIPTION_CATALOG = "file_descriptions.zh.md"
-
 TOP_LEVEL_SKILLS = [
     "gpgpu-arch",
     "gpgpu-golden",
@@ -69,6 +67,7 @@ SKILL_SECTIONS = [
     "## Input IR",
     "## Output IR",
     "## Owned Decisions",
+    "## Human and AI Output Policy",
     "## Forbidden Actions",
     "## Required Tables",
     "## Required Schemas",
@@ -80,6 +79,10 @@ SKILL_SECTIONS = [
 
 NEW_SCHEMAS = [
     "mode_selection_ir.schema.yaml",
+    "output_mode_ir.schema.yaml",
+    "artifact_manifest_ir.schema.yaml",
+    "human_report_manifest_ir.schema.yaml",
+    "artifact_visibility_ir.schema.yaml",
     "design_intent_ir.schema.yaml",
     "arch_ir.schema.yaml",
     "micro_constraint_estimate_ir.schema.yaml",
@@ -119,6 +122,11 @@ NEW_TABLES = [
     "enum_table.yaml",
     "provenance_table.yaml",
     "mode_decision_table.yaml",
+    "output_mode_table.yaml",
+    "artifact_visibility_table.yaml",
+    "report_language_policy.yaml",
+    "human_report_template_table.yaml",
+    "ai_artifact_retention_table.yaml",
     "architecture_preset_library.yaml",
     "hard_constraint_table.yaml",
     "quality_target_table.yaml",
@@ -158,6 +166,7 @@ NEW_TABLES = [
 ]
 
 TEST_DIRS = [
+    "artifact_visibility",
     "architecture_generator",
     "system_contract_golden_engine",
     "toolchain_runtime_artifact_engine",
@@ -172,6 +181,7 @@ SHARED_DIRS = [
     "references",
     "schemas",
     "tables",
+    "templates",
     "tests",
 ]
 
@@ -179,13 +189,26 @@ SHARED_EXAMPLE_DIRS = [
     "self_correcting_minimal_simt",
 ]
 
-EXAMPLE_FILES = [
+EXAMPLE_ROOT = "shared/examples/self_correcting_minimal_simt"
+
+EXAMPLE_ROOT_FILES = [
     "input_request.md",
+]
+
+EXAMPLE_LAYER_DIRS = [
+    "ai",
+    "human",
+    "manifests",
+]
+
+EXAMPLE_AI_FILES = [
     "input_kernel.asm",
+    "expected_design_intent_ir.yaml",
     "expected_arch_ir.yaml",
     "expected_micro_constraint_estimate.yaml",
     "expected_system_contract_ir.yaml",
     "expected_golden_contract_model.yaml",
+    "expected_contract_semantics_report_ir.yaml",
     "expected_assembly_ir.yaml",
     "expected_toolchain_artifact_ir.yaml",
     "expected_program_image_ir.yaml",
@@ -196,8 +219,58 @@ EXAMPLE_FILES = [
     "expected_disassembly.asm",
     "expected_memory_dump.yaml",
     "expected_incremental_rtl_map.yaml",
+    "expected_module_interface_report_ir.yaml",
+    "expected_rtl_partial_sim_report_ir.yaml",
+    "expected_correctness_gate_report_ir.yaml",
+    "expected_pass_evidence_report_ir.yaml",
+    "expected_trace_coverage_report_ir.yaml",
+    "expected_performance_metric_ir.yaml",
+    "expected_regression_fingerprint.yaml",
+    "expected_first_divergence_report.yaml",
     "expected_perf_attribution_graph.yaml",
+    "expected_root_cause_report.yaml",
     "expected_arch_rewrite_plan.yaml",
+    "expected_rewrite_decision_report.yaml",
+    "expected_regression_tracking_report.yaml",
+]
+
+EXAMPLE_HUMAN_FILES = [
+    "DESIGN_BRIEF.zh.md",
+    "ARCHITECTURE_DECISION.zh.md",
+    "CONTRACT_FREEZE_SUMMARY.zh.md",
+    "IMPLEMENTATION_DASHBOARD.zh.md",
+    "VALIDATION_DASHBOARD.zh.md",
+    "DEBUG_SUMMARY.zh.md",
+    "PATCH_CARD.zh.md",
+    "REGRESSION_SUMMARY.zh.md",
+]
+
+EXAMPLE_MANIFEST_FILES = [
+    "expected_artifact_manifest_fast.yaml",
+    "expected_artifact_manifest_freeze.yaml",
+    "expected_artifact_manifest_debug.yaml",
+]
+
+TEMPLATE_DIRS = [
+    "ai",
+    "human",
+]
+
+HUMAN_TEMPLATE_FILES = [
+    "design_brief.zh.md",
+    "architecture_decision.zh.md",
+    "contract_freeze_summary.zh.md",
+    "implementation_dashboard.zh.md",
+    "validation_dashboard.zh.md",
+    "debug_summary.zh.md",
+    "patch_card.zh.md",
+    "regression_summary.zh.md",
+]
+
+AI_TEMPLATE_FILES = [
+    "artifact_manifest.en.md",
+    "root_cause_report.en.md",
+    "rewrite_decision_report.en.md",
 ]
 
 REFERENCE_LESSONS = [
@@ -215,18 +288,26 @@ TOP_LEVEL_REQUIRED_TEXT: Dict[str, List[str]] = {
         "MICRO_CONSTRAINT_ESTIMATE_IR",
         "ARCH_IR is a candidate graph",
         "must not emit system contract truth",
+        "DESIGN_BRIEF.zh.md",
+        "ARCHITECTURE_DECISION.zh.md",
+        "ARTIFACT_MANIFEST_IR",
     ],
     "gpgpu-golden/SKILL.md": [
         "GOLDEN_CONTRACT_MODEL",
         "executable reference semantics",
         "must not define independent ISA",
         "instruction encoding truth for assembler/disassembler derivation",
+        "CONTRACT_FREEZE_SUMMARY.zh.md",
+        "ARTIFACT_MANIFEST_IR",
     ],
     "gpgpu-runtime/SKILL.md": [
         "TOOLCHAIN_ARTIFACT_IR",
         "PROGRAM_IMAGE_IR",
         "must not define independent ISA",
         "SOURCE_OF_TRUTH_DRIFT",
+        "VALIDATION_DASHBOARD.zh.md",
+        "PATCH_CARD.zh.md",
+        "ARTIFACT_MANIFEST_IR",
     ],
     "gpgpu-rtl/SKILL.md": [
         "INCREMENTAL_RTL_MAP",
@@ -234,6 +315,8 @@ TOP_LEVEL_REQUIRED_TEXT: Dict[str, List[str]] = {
         "module by module",
         "Interface Contract Checker",
         "RTL Partial Simulator",
+        "IMPLEMENTATION_DASHBOARD.zh.md",
+        "ARTIFACT_MANIFEST_IR",
     ],
     "gpgpu-simppa/SKILL.md": [
         "PERF_ATTRIBUTION_GRAPH",
@@ -244,6 +327,9 @@ TOP_LEVEL_REQUIRED_TEXT: Dict[str, List[str]] = {
         "cycle",
         "contract path",
         "RTL module",
+        "VALIDATION_DASHBOARD.zh.md",
+        "DEBUG_SUMMARY.zh.md",
+        "ARTIFACT_MANIFEST_IR",
     ],
     "gpgpu-loop/SKILL.md": [
         "ARCH_REWRITE_PLAN",
@@ -251,6 +337,9 @@ TOP_LEVEL_REQUIRED_TEXT: Dict[str, List[str]] = {
         "Contract Patch",
         "Toolchain Patch",
         "RTL Patch",
+        "PATCH_CARD.zh.md",
+        "REGRESSION_SUMMARY.zh.md",
+        "ARTIFACT_MANIFEST_IR",
     ],
 }
 
@@ -363,50 +452,9 @@ def require_exact_dir_names(path: Path, allowed_names: List[str], failures: List
     if not path.exists():
         return
     allowed = set(allowed_names)
-    actual = {child.name for child in path.iterdir() if child.is_dir()}
+    actual = {child.name for child in path.iterdir() if child.is_dir() and child.name != "__pycache__"}
     for name in sorted(actual - allowed):
         failures.append(f"unexpected directory in {path.relative_to(ROOT)}: {name}")
-
-
-def iter_documented_files() -> List[str]:
-    files: List[str] = []
-    for path in ROOT.rglob("*"):
-        if not path.is_file():
-            continue
-        if ".git" in path.parts:
-            continue
-        files.append(path.relative_to(ROOT).as_posix())
-    return sorted(files)
-
-
-def require_file_description_catalog(failures: List[str]) -> None:
-    catalog_path = ROOT / DESCRIPTION_CATALOG
-    require_text(
-        catalog_path,
-        [
-            "# Skill 文件中文说明索引",
-            "## 覆盖规则",
-            "内容说明：",
-            "具体例子：",
-        ],
-        failures,
-    )
-    if not catalog_path.exists():
-        return
-
-    text = catalog_path.read_text(encoding="utf-8")
-    for rel_path in iter_documented_files():
-        heading = f"### `{rel_path}`"
-        if heading not in text:
-            failures.append(f"missing file description entry: {rel_path}")
-            continue
-        start = text.index(heading)
-        next_heading = text.find("\n### `", start + len(heading))
-        section = text[start:] if next_heading == -1 else text[start:next_heading]
-        if "内容说明：" not in section:
-            failures.append(f"missing content explanation in file description: {rel_path}")
-        if "具体例子：" not in section:
-            failures.append(f"missing concrete example in file description: {rel_path}")
 
 
 def load_yaml(rel_path: str, failures: List[str]):
@@ -433,6 +481,153 @@ def require_all_present(required_fields: List[str], data: dict, rel_path: str, f
     for field in required_fields:
         if field not in data:
             failures.append(f"{rel_path} missing schema required field {field!r}")
+
+
+def require_visibility_policy(failures: List[str]) -> None:
+    output_modes = load_yaml("shared/tables/output_mode_table.yaml", failures)
+    modes = output_modes.get("modes") or {}
+    expected_modes = {"FAST_ITERATION", "CONTRACT_FREEZE", "DEBUG_REGRESSION"}
+    if set(modes.keys()) != expected_modes:
+        failures.append("output_mode_table.yaml must define exactly FAST_ITERATION, CONTRACT_FREEZE, DEBUG_REGRESSION")
+
+    expected_max = {
+        "FAST_ITERATION": 5,
+        "CONTRACT_FREEZE": 4,
+        "DEBUG_REGRESSION": 4,
+    }
+    for mode, max_reports in expected_max.items():
+        mode_rule = modes.get(mode) or {}
+        if mode_rule.get("max_human_visible_reports") != max_reports:
+            failures.append(f"{mode} max_human_visible_reports must be {max_reports}")
+        human_visible = mode_rule.get("human_visible") or []
+        failure_human_visible = mode_rule.get("failure_human_visible") or []
+        if len(human_visible) > max_reports:
+            failures.append(f"{mode} exposes too many default human reports")
+        if len(human_visible) + len(failure_human_visible) > max_reports:
+            failures.append(f"{mode} exposes too many human reports including failure reports")
+        for report in human_visible + failure_human_visible:
+            if not report.endswith(".zh.md"):
+                failures.append(f"{mode} human report must use .zh.md suffix: {report}")
+        for artifact in mode_rule.get("ai_required") or []:
+            if artifact.endswith(".zh.md"):
+                failures.append(f"{mode} ai_required must not contain human report {artifact}")
+
+    language_policy = load_yaml("shared/tables/report_language_policy.yaml", failures)
+    if (language_policy.get("human_reports") or {}).get("language") != "zh-CN":
+        failures.append("human_reports language must be zh-CN")
+    if (language_policy.get("ai_artifacts") or {}).get("language") != "en-US":
+        failures.append("ai_artifacts language must be en-US")
+
+    visibility_table = load_yaml("shared/tables/artifact_visibility_table.yaml", failures)
+    classes = visibility_table.get("visibility_classes") or {}
+    expected_classes = {
+        "HUMAN_REQUIRED": ("zh-CN", True),
+        "HUMAN_OPTIONAL": ("zh-CN", False),
+        "AI_REQUIRED": ("en-US", False),
+        "DEBUG_ONLY": ("en-US", False),
+        "INTERNAL_CACHE": ("en-US", False),
+    }
+    for class_name, (language, default_show) in expected_classes.items():
+        rule = classes.get(class_name) or {}
+        if rule.get("language") != language:
+            failures.append(f"{class_name} language must be {language}")
+        if rule.get("default_show_to_human") != default_show:
+            failures.append(f"{class_name} default_show_to_human must be {default_show}")
+
+
+def require_templates(failures: List[str]) -> None:
+    require_exact_dir_names(ROOT / "shared" / "templates", TEMPLATE_DIRS, failures)
+    require_exact_dir_names(ROOT / "shared" / "templates" / "human", ["zh"], failures)
+    require_exact_dir_names(ROOT / "shared" / "templates" / "ai", ["en"], failures)
+    require_exact_file_names(ROOT / "shared" / "templates" / "human" / "zh", HUMAN_TEMPLATE_FILES, failures)
+    require_exact_file_names(ROOT / "shared" / "templates" / "ai" / "en", AI_TEMPLATE_FILES, failures)
+
+    template_table = load_yaml("shared/tables/human_report_template_table.yaml", failures)
+    templates = template_table.get("templates") or {}
+    for report_type, rule in templates.items():
+        path = ROOT / rule.get("path", "")
+        require_nonempty(path, failures)
+        text = path.read_text(encoding="utf-8") if path.exists() else ""
+        for section in rule.get("required_sections") or []:
+            if f"## {section}" not in text:
+                failures.append(f"{rule.get('path')} missing required section {section!r}")
+        if not rule.get("source_ai_artifacts"):
+            failures.append(f"human report template {report_type} missing source_ai_artifacts")
+
+
+def require_layered_example(failures: List[str]) -> None:
+    example_root = ROOT / EXAMPLE_ROOT
+    require_exact_file_names(example_root, EXAMPLE_ROOT_FILES, failures)
+    require_exact_dir_names(example_root, EXAMPLE_LAYER_DIRS, failures)
+    require_exact_file_names(example_root / "ai", EXAMPLE_AI_FILES, failures)
+    require_exact_file_names(example_root / "human", EXAMPLE_HUMAN_FILES, failures)
+    require_exact_file_names(example_root / "manifests", EXAMPLE_MANIFEST_FILES, failures)
+
+    for filename in EXAMPLE_ROOT_FILES:
+        require_nonempty(example_root / filename, failures)
+    for filename in EXAMPLE_AI_FILES:
+        require_nonempty(example_root / "ai" / filename, failures)
+    for filename in EXAMPLE_HUMAN_FILES:
+        path = example_root / "human" / filename
+        require_text(path, ["# ", "Source AI artifacts:"], failures)
+        if not filename.endswith(".zh.md"):
+            failures.append(f"human example must use .zh.md suffix: {filename}")
+    for filename in EXAMPLE_MANIFEST_FILES:
+        require_nonempty(example_root / "manifests" / filename, failures)
+
+
+def require_manifest_consistency(failures: List[str]) -> None:
+    output_modes = load_yaml("shared/tables/output_mode_table.yaml", failures)
+    mode_rules = output_modes.get("modes") or {}
+    allowed_visibilities = {"HUMAN_REQUIRED", "HUMAN_OPTIONAL", "AI_REQUIRED", "DEBUG_ONLY", "INTERNAL_CACHE"}
+
+    for filename in EXAMPLE_MANIFEST_FILES:
+        rel_path = f"{EXAMPLE_ROOT}/manifests/{filename}"
+        manifest = load_yaml(rel_path, failures)
+        output_mode = manifest.get("output_mode")
+        if output_mode not in mode_rules:
+            failures.append(f"{rel_path} has unknown output_mode {output_mode!r}")
+            continue
+
+        ai_artifacts = manifest.get("ai_artifacts") or []
+        human_reports = manifest.get("human_reports") or []
+        max_reports = (mode_rules.get(output_mode) or {}).get("max_human_visible_reports")
+        if max_reports is not None and len(human_reports) > max_reports:
+            failures.append(f"{rel_path} exposes {len(human_reports)} human reports, max is {max_reports}")
+
+        ai_names = set()
+        for artifact in ai_artifacts:
+            name = artifact.get("artifact_name")
+            ai_names.add(name)
+            if artifact.get("language") != "en-US":
+                failures.append(f"{rel_path} AI artifact {name!r} must use language en-US")
+            if artifact.get("visibility") not in allowed_visibilities - {"HUMAN_REQUIRED", "HUMAN_OPTIONAL"}:
+                failures.append(f"{rel_path} AI artifact {name!r} has invalid visibility {artifact.get('visibility')!r}")
+            if not artifact.get("producer_skill"):
+                failures.append(f"{rel_path} AI artifact {name!r} missing producer_skill")
+            if not artifact.get("content_hash"):
+                failures.append(f"{rel_path} AI artifact {name!r} missing content_hash")
+            artifact_path = ROOT / str(artifact.get("path", ""))
+            require(artifact_path, failures)
+            if artifact_path.exists() and artifact_path.suffix == ".md" and not artifact_path.name.endswith(".en.md"):
+                failures.append(f"{rel_path} AI markdown artifact must use .en.md suffix: {artifact_path.relative_to(ROOT)}")
+
+        for report in human_reports:
+            report_name = report.get("report_name")
+            if report.get("language") != "zh-CN":
+                failures.append(f"{rel_path} human report {report_name!r} must use language zh-CN")
+            if report.get("visibility") not in {"HUMAN_REQUIRED", "HUMAN_OPTIONAL"}:
+                failures.append(f"{rel_path} human report {report_name!r} has invalid visibility {report.get('visibility')!r}")
+            source_artifacts = report.get("source_artifacts") or []
+            if not source_artifacts:
+                failures.append(f"{rel_path} human report {report_name!r} missing source_artifacts")
+            for source in source_artifacts:
+                if source not in ai_names:
+                    failures.append(f"{rel_path} human report {report_name!r} references missing AI artifact {source!r}")
+            report_path = ROOT / str(report.get("path", ""))
+            require(report_path, failures)
+            if report_path.exists() and not report_path.name.endswith(".zh.md"):
+                failures.append(f"{rel_path} human report must use .zh.md suffix: {report_path.relative_to(ROOT)}")
 
 
 def require_asset_semantics(failures: List[str]) -> None:
@@ -471,14 +666,14 @@ def require_asset_semantics(failures: List[str]) -> None:
             )
 
     perf_graph = load_yaml(
-        "shared/examples/self_correcting_minimal_simt/expected_perf_attribution_graph.yaml",
+        "shared/examples/self_correcting_minimal_simt/ai/expected_perf_attribution_graph.yaml",
         failures,
     )
     perf_graph_schema = load_yaml("shared/schemas/perf_attribution_graph.schema.yaml", failures)
     require_all_present(
         perf_graph_schema.get("required") or [],
         perf_graph,
-        "shared/examples/self_correcting_minimal_simt/expected_perf_attribution_graph.yaml",
+        "shared/examples/self_correcting_minimal_simt/ai/expected_perf_attribution_graph.yaml",
         failures,
     )
     graph_root_cause = (
@@ -506,14 +701,14 @@ def require_asset_semantics(failures: List[str]) -> None:
             )
 
     rewrite_plan = load_yaml(
-        "shared/examples/self_correcting_minimal_simt/expected_arch_rewrite_plan.yaml",
+        "shared/examples/self_correcting_minimal_simt/ai/expected_arch_rewrite_plan.yaml",
         failures,
     )
     arch_rewrite_schema = load_yaml("shared/schemas/arch_rewrite_plan.schema.yaml", failures)
     require_all_present(
         arch_rewrite_schema.get("required") or [],
         rewrite_plan,
-        "shared/examples/self_correcting_minimal_simt/expected_arch_rewrite_plan.yaml",
+        "shared/examples/self_correcting_minimal_simt/ai/expected_arch_rewrite_plan.yaml",
         failures,
     )
     trigger_root_cause = rewrite_plan.get("trigger_root_cause")
@@ -548,8 +743,8 @@ def require_asset_semantics(failures: List[str]) -> None:
 
     stale_root_cause = "MEMORY_IMBALANCE"
     stale_scan_paths = [
-        "shared/examples/self_correcting_minimal_simt/expected_perf_attribution_graph.yaml",
-        "shared/examples/self_correcting_minimal_simt/expected_arch_rewrite_plan.yaml",
+        "shared/examples/self_correcting_minimal_simt/ai/expected_perf_attribution_graph.yaml",
+        "shared/examples/self_correcting_minimal_simt/ai/expected_arch_rewrite_plan.yaml",
         "shared/tests/architecture_rewrite_loop_controller/cases.yaml",
     ]
     for rel_path in stale_scan_paths:
@@ -729,8 +924,10 @@ def main() -> int:
         path = ROOT / "shared" / "tests" / test_dir / "cases.yaml"
         require_text(path, ["case_id:", "expected_outputs:", "required_evidence:"], failures)
 
-    for filename in EXAMPLE_FILES:
-        require_nonempty(ROOT / "shared" / "examples" / "self_correcting_minimal_simt" / filename, failures)
+    require_visibility_policy(failures)
+    require_templates(failures)
+    require_layered_example(failures)
+    require_manifest_consistency(failures)
 
     for rel_path in REFERENCE_FILES:
         require_nonempty(ROOT / rel_path, failures)
@@ -749,6 +946,9 @@ def main() -> int:
             "INCREMENTAL_RTL_MAP",
             "PERF_ATTRIBUTION_GRAPH",
             "ARCH_REWRITE_PLAN",
+            "Human-facing reports are written in Chinese",
+            "AI-facing artifacts are written in English",
+            "Default output mode is `FAST_ITERATION`",
             "former 9-stage top-level GPGPU skills and the old `legacy/` skill archive have been deleted",
         ],
         failures,
@@ -763,6 +963,10 @@ def main() -> int:
             "Incremental RTL Binding Engine",
             "Simulation + Performance Attribution Engine",
             "Architecture Rewrite Loop Controller",
+            "Artifact Visibility Policy",
+            "FAST_ITERATION",
+            "CONTRACT_FREEZE",
+            "DEBUG_REGRESSION",
             "Legacy v4 top-level skills and the old `legacy/` skill archive are not active wrappers",
         ],
         failures,

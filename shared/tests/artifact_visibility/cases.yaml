@@ -1,0 +1,60 @@
+cases:
+  - case_id: fast_iteration_human_reports_are_chinese
+    input_mode: FAST_ITERATION
+    expected_outputs:
+      required_human_reports:
+        - DESIGN_BRIEF.zh.md
+        - ARCHITECTURE_DECISION.zh.md
+        - VALIDATION_DASHBOARD.zh.md
+      forbidden_human_outputs:
+        - full SYSTEM_CONTRACT_IR
+        - full NORMALIZED_TRACE_IR
+      max_human_visible_reports: 5
+    required_evidence:
+      - report_language_policy
+      - artifact_visibility_table
+      - artifact_manifest
+
+  - case_id: ai_artifacts_are_english_structured
+    input_mode: CONTRACT_FREEZE
+    expected_outputs:
+      required_ai_artifacts:
+        - DESIGN_INTENT_IR
+        - ARCH_IR
+        - SYSTEM_CONTRACT_IR
+        - GOLDEN_CONTRACT_MODEL
+      language: en-US
+      visibility: AI_REQUIRED
+    required_evidence:
+      - artifact_manifest
+      - output_mode_table
+      - yaml_parse
+
+  - case_id: debug_mode_emits_patch_card
+    input_mode: DEBUG_REGRESSION
+    expected_outputs:
+      required_human_reports:
+        - DEBUG_SUMMARY.zh.md
+        - PATCH_CARD.zh.md
+        - REGRESSION_SUMMARY.zh.md
+      required_ai_artifacts:
+        - ROOT_CAUSE_REPORT
+        - ARCH_REWRITE_PLAN
+        - REWRITE_DECISION_REPORT
+      max_human_visible_reports: 4
+    required_evidence:
+      - root_cause_report
+      - rewrite_decision_report
+      - regression_tracking_report
+
+  - case_id: manifest_links_human_reports_to_ai_artifacts
+    input_mode: FAST_ITERATION
+    expected_outputs:
+      every_human_report_has_source_artifacts: true
+      every_ai_artifact_has_producer_skill: true
+      every_ai_artifact_has_visibility: true
+      every_ai_artifact_language: en-US
+      every_human_report_language: zh-CN
+    required_evidence:
+      - artifact_manifest_ir
+      - human_report_manifest_ir

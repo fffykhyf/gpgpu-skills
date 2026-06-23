@@ -1,0 +1,17 @@
+verdict: PASS_WITH_PERFORMANCE_WARNING
+module_results:
+  warp_scheduler: PASS
+  load_store_queue: PASS_WITH_WARNING
+local_trace_hashes:
+  load_store_queue: hash_lsq_partial_trace
+local_scoreboard_results:
+  wakeup_after_response: PASS
+interface_transaction_results:
+  valid_ready_stability: PASS
+  response_tag_match: PASS
+golden_slice_compare_results:
+  vector_add_memory_slice: PASS
+timing_feedback_results:
+  lsq_backpressure_observable: PASS
+module_case_results:
+  load_store_queue_replay_window: WARNING

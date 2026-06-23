@@ -1,0 +1,75 @@
+run_id: self_correcting_minimal_simt_debug
+output_mode: DEBUG_REGRESSION
+ai_artifacts:
+  - artifact_name: FIRST_DIVERGENCE_REPORT
+    artifact_type: yaml
+    path: shared/examples/self_correcting_minimal_simt/ai/expected_first_divergence_report.yaml
+    language: en-US
+    visibility: DEBUG_ONLY
+    content_hash: hash_first_divergence_minimal_simt
+    producer_skill: gpgpu-simppa
+    consumed_by: [gpgpu-loop]
+  - artifact_name: ROOT_CAUSE_REPORT
+    artifact_type: yaml
+    path: shared/examples/self_correcting_minimal_simt/ai/expected_root_cause_report.yaml
+    language: en-US
+    visibility: DEBUG_ONLY
+    content_hash: hash_root_cause_lsq_replay
+    producer_skill: gpgpu-simppa
+    consumed_by: [gpgpu-loop]
+  - artifact_name: PERF_ATTRIBUTION_GRAPH
+    artifact_type: yaml
+    path: shared/examples/self_correcting_minimal_simt/ai/expected_perf_attribution_graph.yaml
+    language: en-US
+    visibility: DEBUG_ONLY
+    content_hash: hash_perf_attribution_lsq_replay
+    producer_skill: gpgpu-simppa
+    consumed_by: [gpgpu-loop]
+  - artifact_name: ARCH_REWRITE_PLAN
+    artifact_type: yaml
+    path: shared/examples/self_correcting_minimal_simt/ai/expected_arch_rewrite_plan.yaml
+    language: en-US
+    visibility: AI_REQUIRED
+    content_hash: hash_rewrite_memory_replay_lsq
+    producer_skill: gpgpu-loop
+    consumed_by: [gpgpu-rtl, gpgpu-simppa]
+  - artifact_name: REWRITE_DECISION_REPORT
+    artifact_type: yaml
+    path: shared/examples/self_correcting_minimal_simt/ai/expected_rewrite_decision_report.yaml
+    language: en-US
+    visibility: AI_REQUIRED
+    content_hash: hash_rewrite_decision_memory_replay_lsq
+    producer_skill: gpgpu-loop
+    consumed_by: [gpgpu-rtl, gpgpu-simppa]
+  - artifact_name: REGRESSION_FINGERPRINT
+    artifact_type: yaml
+    path: shared/examples/self_correcting_minimal_simt/ai/expected_regression_fingerprint.yaml
+    language: en-US
+    visibility: INTERNAL_CACHE
+    content_hash: hash_regression_minimal_simt_after_lsq_patch
+    producer_skill: gpgpu-simppa
+    consumed_by: [gpgpu-loop]
+  - artifact_name: REGRESSION_TRACKING_REPORT
+    artifact_type: yaml
+    path: shared/examples/self_correcting_minimal_simt/ai/expected_regression_tracking_report.yaml
+    language: en-US
+    visibility: INTERNAL_CACHE
+    content_hash: hash_regression_tracking_minimal_simt
+    producer_skill: gpgpu-loop
+    consumed_by: [gpgpu-loop]
+human_reports:
+  - report_name: DEBUG_SUMMARY
+    path: shared/examples/self_correcting_minimal_simt/human/DEBUG_SUMMARY.zh.md
+    language: zh-CN
+    visibility: HUMAN_REQUIRED
+    source_artifacts: [FIRST_DIVERGENCE_REPORT, ROOT_CAUSE_REPORT, PERF_ATTRIBUTION_GRAPH]
+  - report_name: PATCH_CARD
+    path: shared/examples/self_correcting_minimal_simt/human/PATCH_CARD.zh.md
+    language: zh-CN
+    visibility: HUMAN_REQUIRED
+    source_artifacts: [ROOT_CAUSE_REPORT, ARCH_REWRITE_PLAN, REWRITE_DECISION_REPORT]
+  - report_name: REGRESSION_SUMMARY
+    path: shared/examples/self_correcting_minimal_simt/human/REGRESSION_SUMMARY.zh.md
+    language: zh-CN
+    visibility: HUMAN_REQUIRED
+    source_artifacts: [REGRESSION_FINGERPRINT, REGRESSION_TRACKING_REPORT]

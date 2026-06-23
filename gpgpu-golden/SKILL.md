@@ -38,6 +38,14 @@ Produces:
 - `GOLDEN_CONTRACT_MODEL`
 - `CONTRACT_SEMANTICS_REPORT`
 
+Human-facing report:
+- `CONTRACT_FREEZE_SUMMARY.zh.md`
+
+AI-facing artifacts:
+- English `SYSTEM_CONTRACT_IR.yaml`
+- English `GOLDEN_CONTRACT_MODEL.yaml`
+- English `CONTRACT_SEMANTICS_REPORT.yaml`
+
 ## Owned Decisions
 
 This skill owns:
@@ -57,6 +65,20 @@ This skill owns:
 - executable reference semantics derivation
 - golden model coverage checking
 
+## Human and AI Output Policy
+
+`SYSTEM_CONTRACT_IR` and `GOLDEN_CONTRACT_MODEL` are AI-facing English
+artifacts. Human-facing output must be `CONTRACT_FREEZE_SUMMARY.zh.md`, written
+in Chinese and focused on what is frozen, what is derived, what is forbidden,
+and what requires revalidation.
+
+Do not expose the full `SYSTEM_CONTRACT_IR` by default. Human review must focus
+on whether ISA, ABI, memory ordering, launch ABI, interface semantics, and config
+ownership are clear enough to freeze. Full IR expansion is allowed during
+`CONTRACT_FREEZE`, when the user asks, or when a downstream owner needs exact
+fields. The full English contract, golden model, and semantics report must be
+registered in `ARTIFACT_MANIFEST_IR`.
+
 ## Forbidden Actions
 
 This skill must not:
@@ -73,6 +95,10 @@ This skill must not:
 ## Required Tables
 
 This skill must use:
+- `shared/tables/output_mode_table.yaml`
+- `shared/tables/artifact_visibility_table.yaml`
+- `shared/tables/report_language_policy.yaml`
+- `shared/tables/human_report_template_table.yaml`
 - `shared/tables/system_truth_ownership_table.yaml` if present during migration
 - `shared/tables/config_ownership_table.yaml`
 - `shared/tables/contract_semantics_binding_table.yaml`
@@ -84,6 +110,10 @@ This skill must use:
 ## Required Schemas
 
 This skill must validate:
+- `shared/schemas/output_mode_ir.schema.yaml`
+- `shared/schemas/artifact_manifest_ir.schema.yaml`
+- `shared/schemas/human_report_manifest_ir.schema.yaml`
+- `shared/schemas/artifact_visibility_ir.schema.yaml`
 - `shared/schemas/system_contract_ir.schema.yaml`
 - `shared/schemas/golden_contract_model.schema.yaml`
 - `shared/schemas/contract_semantics_report_ir.schema.yaml`
@@ -137,6 +167,9 @@ This skill is incomplete unless the following exist:
 - `contract_truth_and_state_model.md`
 - `executable_semantics_rules.md`
 - `golden_model_coverage_and_report.md`
+- `shared/tables/output_mode_table.yaml`
+- `shared/tables/artifact_visibility_table.yaml`
+- `shared/tables/report_language_policy.yaml`
 - `shared/schemas/system_contract_ir.schema.yaml`
 - `shared/schemas/golden_contract_model.schema.yaml`
 - `shared/schemas/contract_semantics_report_ir.schema.yaml`

@@ -1,0 +1,23 @@
+table: ai_artifact_retention_table
+version: v1
+retention_classes:
+  CONTRACT_TRUTH:
+    artifacts: [SYSTEM_CONTRACT_IR, GOLDEN_CONTRACT_MODEL, CONTRACT_SEMANTICS_REPORT]
+    retain_until: contract_version_replaced
+    required_metadata: [content_hash, producer_skill, consumed_by]
+  TOOLCHAIN_DERIVED:
+    artifacts: [TOOLCHAIN_ARTIFACT_IR, ASSEMBLY_IR, PROGRAM_IMAGE_IR, RUNTIME_LAUNCH_IR, LOADER_CONTRACT_IR, TOOLCHAIN_SMOKE_REPORT]
+    retain_until: source_contract_hash_replaced
+    required_metadata: [content_hash, source_contract_hash, producer_skill]
+  RTL_BINDING:
+    artifacts: [INCREMENTAL_RTL_MAP, MODULE_INTERFACE_REPORT, RTL_PARTIAL_SIM_REPORT]
+    retain_until: rtl_binding_superseded
+    required_metadata: [content_hash, producer_skill, consumed_by]
+  DEBUG_EVIDENCE:
+    artifacts: [NORMALIZED_TRACE_IR, FIRST_DIVERGENCE_REPORT, PERF_ATTRIBUTION_GRAPH, ROOT_CAUSE_REPORT]
+    retain_until: regression_fingerprint_superseded
+    required_metadata: [content_hash, trace_window, producer_skill]
+  HUMAN_REPORTS:
+    artifacts: [DESIGN_BRIEF, ARCHITECTURE_DECISION, CONTRACT_FREEZE_SUMMARY, IMPLEMENTATION_DASHBOARD, VALIDATION_DASHBOARD, DEBUG_SUMMARY, PATCH_CARD, REGRESSION_SUMMARY]
+    retain_until: run_summary_superseded
+    required_metadata: [source_ai_artifacts, language, visibility]

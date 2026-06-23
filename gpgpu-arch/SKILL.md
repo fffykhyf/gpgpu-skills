@@ -42,6 +42,16 @@ Produces:
 - `MICRO_CONSTRAINT_ESTIMATE_IR`
 - `ARCH_GENERATION_REPORT`
 
+Human-facing reports:
+- `DESIGN_BRIEF.zh.md`
+- `ARCHITECTURE_DECISION.zh.md`
+
+AI-facing artifacts:
+- English `DESIGN_INTENT_IR.yaml`
+- English `ARCH_IR.yaml`
+- English `MICRO_CONSTRAINT_ESTIMATE_IR.yaml`
+- English `ARCH_GENERATION_REPORT.yaml`
+
 ## Owned Decisions
 
 This skill owns:
@@ -64,6 +74,21 @@ Apply deterministic preset rules before free-form candidate synthesis:
 
 When multiple rules match, use the first applicable rule in `shared/tables/architecture_preset_library.yaml`, record the selected rule, and list lower-priority matching presets in `rejected_alternatives`. If the selected preset fails a hard constraint, emit the failure instead of guessing a replacement.
 
+## Human and AI Output Policy
+
+When `output_mode` is `FAST_ITERATION`, emit only concise Chinese
+human-facing summaries by default: `DESIGN_BRIEF.zh.md` and
+`ARCHITECTURE_DECISION.zh.md`. Full `DESIGN_INTENT_IR`, `ARCH_IR`, and
+`MICRO_CONSTRAINT_ESTIMATE_IR` must still be generated as English AI artifacts
+and registered in `ARTIFACT_MANIFEST_IR`.
+
+Do not expose full `ARCH_IR` to the user unless the user explicitly asks for it,
+`output_mode` is `CONTRACT_FREEZE`, root cause analysis needs exact affected
+architecture paths, or a downstream owner needs exact fields.
+
+In `DEBUG_REGRESSION`, show only the architecture delta and rejected alternatives
+in Chinese, while passing affected `ARCH_IR` paths as English AI artifact refs.
+
 ## Forbidden Actions
 
 This skill must not:
@@ -79,6 +104,10 @@ This skill must not:
 
 This skill must use:
 - `shared/tables/mode_decision_table.yaml`
+- `shared/tables/output_mode_table.yaml`
+- `shared/tables/artifact_visibility_table.yaml`
+- `shared/tables/report_language_policy.yaml`
+- `shared/tables/human_report_template_table.yaml`
 - `shared/tables/architecture_preset_library.yaml`
 - `shared/tables/hard_constraint_table.yaml`
 - `shared/tables/quality_target_table.yaml`
@@ -91,6 +120,10 @@ This skill must use:
 
 This skill must validate:
 - `shared/schemas/mode_selection_ir.schema.yaml`
+- `shared/schemas/output_mode_ir.schema.yaml`
+- `shared/schemas/artifact_manifest_ir.schema.yaml`
+- `shared/schemas/human_report_manifest_ir.schema.yaml`
+- `shared/schemas/artifact_visibility_ir.schema.yaml`
 - `shared/schemas/design_intent_ir.schema.yaml`
 - `shared/schemas/arch_ir.schema.yaml`
 - `shared/schemas/micro_constraint_estimate_ir.schema.yaml`
@@ -135,6 +168,9 @@ The report must include:
 
 This skill is incomplete unless the following exist:
 - `legacy_request_and_candidate_constraints.md`
+- `shared/tables/output_mode_table.yaml`
+- `shared/tables/artifact_visibility_table.yaml`
+- `shared/tables/report_language_policy.yaml`
 - `shared/schemas/mode_selection_ir.schema.yaml`
 - `shared/schemas/design_intent_ir.schema.yaml`
 - `shared/schemas/arch_ir.schema.yaml`

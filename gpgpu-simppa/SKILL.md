@@ -79,6 +79,10 @@ Produces:
 - `TOOLCHAIN_ATTRIBUTION_REPORT`
 - `SIM_PERF_ATTRIBUTION_REPORT`
 
+Human-facing reports:
+- `VALIDATION_DASHBOARD.zh.md`
+- `DEBUG_SUMMARY.zh.md` on failure or ambiguity
+
 `FIRST_DIVERGENCE_REPORT` is required in Failure Attribution Mode.
 `PASS_EVIDENCE_REPORT`, `TRACE_COVERAGE_REPORT`, and
 `REGRESSION_FINGERPRINT` are required in Pass Evidence Mode.
@@ -105,6 +109,23 @@ This skill owns:
 - execution correctness evidence aggregation
 - report generation for rewrite routing or regression tracking
 
+## Human and AI Output Policy
+
+Normalized traces, first divergence reports, performance attribution graphs, and
+root cause reports are AI-facing English artifacts. Human-facing output must be
+a concise Chinese `VALIDATION_DASHBOARD.zh.md`.
+
+On a passing run, humans should see RTL vs golden verdict, memory dump status,
+coverage sufficiency, performance warnings, and regression fingerprint stability.
+On failure, emit `DEBUG_SUMMARY.zh.md` with first divergence cycle, warp, PC,
+mismatch type, likely root cause, owner, and next patch route. Pass the full
+English root cause and trace artifacts to `gpgpu-loop` through
+`ARTIFACT_MANIFEST_IR`.
+
+Do not expose full traces, full `NORMALIZED_TRACE_IR`, or full
+`PERF_ATTRIBUTION_GRAPH` by default unless the user asks, root cause is
+ambiguous, a regression reappears, or a downstream owner needs exact fields.
+
 ## Forbidden Actions
 
 This skill must not:
@@ -123,6 +144,10 @@ This skill must not:
 ## Required Tables
 
 This skill must use:
+- `shared/tables/output_mode_table.yaml`
+- `shared/tables/artifact_visibility_table.yaml`
+- `shared/tables/report_language_policy.yaml`
+- `shared/tables/human_report_template_table.yaml`
 - `shared/tables/trace_normalization_table.yaml`
 - `shared/tables/correctness_gate_decision_table.yaml`
 - `shared/tables/trace_source_manifest_table.yaml`
@@ -144,6 +169,10 @@ This skill must use:
 ## Required Schemas
 
 This skill must validate:
+- `shared/schemas/output_mode_ir.schema.yaml`
+- `shared/schemas/artifact_manifest_ir.schema.yaml`
+- `shared/schemas/human_report_manifest_ir.schema.yaml`
+- `shared/schemas/artifact_visibility_ir.schema.yaml`
 - `shared/schemas/normalized_trace_ir.schema.yaml`
 - `shared/schemas/correctness_gate_report_ir.schema.yaml`
 - `shared/schemas/first_divergence_report_ir.schema.yaml`

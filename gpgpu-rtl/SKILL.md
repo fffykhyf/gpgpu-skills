@@ -41,6 +41,14 @@ Produces:
 - `MODULE_INTERFACE_REPORT`
 - `RTL_PARTIAL_SIM_REPORT`
 
+Human-facing report:
+- `IMPLEMENTATION_DASHBOARD.zh.md`
+
+AI-facing artifacts:
+- English `INCREMENTAL_RTL_MAP.yaml`
+- English `MODULE_INTERFACE_REPORT.yaml`
+- English `RTL_PARTIAL_SIM_REPORT.yaml`
+
 ## Owned Decisions
 
 This skill owns:
@@ -62,6 +70,19 @@ This skill owns:
 - partial simulation gate generation
 - local trace schema binding
 
+## Human and AI Output Policy
+
+`INCREMENTAL_RTL_MAP`, `MODULE_INTERFACE_REPORT`, and
+`RTL_PARTIAL_SIM_REPORT` are AI-facing English artifacts. Human-facing output
+must be `IMPLEMENTATION_DASHBOARD.zh.md`, written in Chinese and limited to
+module binding status, interface status, local partial simulation status,
+blocked modules, risks, and next module owner.
+
+Do not expose every module's full YAML by default. Register full binding,
+interface, and partial-sim artifacts in `ARTIFACT_MANIFEST_IR` and expand them
+only when the user asks, an interface is ambiguous, or a downstream owner needs
+exact fields.
+
 ## Forbidden Actions
 
 This skill must not:
@@ -75,6 +96,10 @@ This skill must not:
 ## Required Tables
 
 This skill must use:
+- `shared/tables/output_mode_table.yaml`
+- `shared/tables/artifact_visibility_table.yaml`
+- `shared/tables/report_language_policy.yaml`
+- `shared/tables/human_report_template_table.yaml`
 - `shared/tables/rtl_module_catalog.yaml`
 - `shared/tables/module_interface_contract_table.yaml`
 - `shared/tables/rtl_partial_sim_gate_table.yaml`
@@ -83,6 +108,10 @@ This skill must use:
 ## Required Schemas
 
 This skill must validate:
+- `shared/schemas/output_mode_ir.schema.yaml`
+- `shared/schemas/artifact_manifest_ir.schema.yaml`
+- `shared/schemas/human_report_manifest_ir.schema.yaml`
+- `shared/schemas/artifact_visibility_ir.schema.yaml`
 - `shared/schemas/system_contract_ir.schema.yaml`
 - `shared/schemas/golden_contract_model.schema.yaml`
 - `shared/schemas/toolchain_artifact_ir.schema.yaml`

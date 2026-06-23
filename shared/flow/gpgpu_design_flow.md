@@ -2,6 +2,46 @@
 
 This flow is a self-correcting GPGPU design system. Skills are modules. Schemas define accepted IR. Tables define decisions. Examples and tests define regression behavior.
 
+## Artifact Visibility Policy
+
+All structured IRs and evidence reports are AI-facing artifacts by default.
+Human-facing outputs must be concise Chinese reports. A skill must not expose
+full machine IR to the user unless one of these triggers applies:
+
+1. The user explicitly asks for the full artifact.
+2. Contract freeze requires human review of exact semantics.
+3. Root cause evidence is ambiguous.
+4. A regression reappears and needs exact historical fields.
+5. A downstream owner needs exact fields to implement or validate a patch.
+
+Default behavior:
+
+- Human Reports are written in Chinese, use `.zh.md`, and are shown by default.
+- AI Artifacts are written in English, use `.yaml`, `.json`, or `.en.md`, and
+  are registered in `ARTIFACT_MANIFEST_IR` instead of shown by default.
+- Debug Evidence is retained in English and summarized for humans in Chinese
+  dashboards, debug summaries, or patch cards.
+
+The guiding rule is: keep complete engineering evidence, but reduce what a
+human must read by default.
+
+## Output Modes
+
+The active output mode is defined by `shared/schemas/output_mode_ir.schema.yaml`
+and `shared/tables/output_mode_table.yaml`.
+
+- `FAST_ITERATION`: quick design and early implementation loops. Humans see
+  a small Chinese design brief, architecture decision, implementation dashboard,
+  validation dashboard, and a patch card only on failure.
+- `CONTRACT_FREEZE`: review before freezing ISA, ABI, memory model, launch ABI,
+  interface semantics, and config ownership. Humans see a Chinese freeze
+  summary and the relevant decision/dashboard reports; AI keeps complete English
+  IRs.
+- `DEBUG_REGRESSION`: failure, ambiguous root cause, recurring regression, or
+  insufficient trace evidence. Humans see Chinese debug summary, patch card, and
+  regression summary; AI keeps normalized traces, root cause reports, rewrite
+  plans, and regression tracking artifacts.
+
 ## Active Flow
 
 ```text
@@ -23,6 +63,7 @@ Output:
 - `DESIGN_INTENT_IR`
 - `ARCH_IR`
 - `MICRO_CONSTRAINT_ESTIMATE_IR`
+- Human reports: `DESIGN_BRIEF.zh.md`, `ARCHITECTURE_DECISION.zh.md`
 
 This module estimates area, memory pressure, warp occupancy, register pressure, shared-memory pressure, bandwidth need, and unrealizable risks before contract freeze.
 
@@ -35,6 +76,7 @@ Output:
 - `SYSTEM_CONTRACT_IR`
 - `GOLDEN_CONTRACT_MODEL`
 - `CONTRACT_SEMANTICS_REPORT`
+- Human report: `CONTRACT_FREEZE_SUMMARY.zh.md`
 
 `SYSTEM_CONTRACT_IR` is the only semantic truth source. `GOLDEN_CONTRACT_MODEL` is executable reference semantics derived from it, not a second simulator or second ISA source.
 
@@ -50,6 +92,8 @@ Output:
 - `RUNTIME_LAUNCH_IR`
 - `LOADER_CONTRACT_IR`
 - `TOOLCHAIN_SMOKE_REPORT`
+- Human dashboard contribution: toolchain/runtime fields in `VALIDATION_DASHBOARD.zh.md`
+- Human failure report: `PATCH_CARD.zh.md` when toolchain or runtime evidence fails
 
 This module derives assembler, disassembler, ISA table, program image, runtime launch, and loader artifacts from `SYSTEM_CONTRACT_IR`. It must not define independent ISA, ABI, program image, loader, or runtime truth.
 
@@ -62,6 +106,7 @@ Output:
 - `INCREMENTAL_RTL_MAP`
 - `MODULE_INTERFACE_REPORT`
 - `RTL_PARTIAL_SIM_REPORT`
+- Human report: `IMPLEMENTATION_DASHBOARD.zh.md`
 
 RTL is assembled module by module. Each module declares consumed contract paths, provided signals, required signals, latency contract, local trace schema, and partial simulation evidence.
 
@@ -86,6 +131,7 @@ Output:
 - `ROOT_CAUSE_REPORT`
 - `TOOLCHAIN_ATTRIBUTION_REPORT`
 - `SIM_PERF_ATTRIBUTION_REPORT`
+- Human reports: `VALIDATION_DASHBOARD.zh.md`, and on failure `DEBUG_SUMMARY.zh.md`
 
 The correctness gate selects Failure Attribution Mode or Pass Evidence Mode.
 `RTL == golden` is not a skip: a passing run still records pass evidence,
@@ -103,6 +149,7 @@ Output:
 - `ARCH_REWRITE_PLAN`
 - `REWRITE_DECISION_REPORT`
 - `REGRESSION_TRACKING_REPORT`
+- Human reports: `PATCH_CARD.zh.md`, `REGRESSION_SUMMARY.zh.md`
 
 The controller may propose Architecture Patch, Contract Patch, Toolchain Patch, RTL Patch, or Test Evidence Patch. It must not directly mutate IR. Every patch routes to the owning module and triggers revalidation.
 

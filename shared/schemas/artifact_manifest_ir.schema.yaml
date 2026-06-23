@@ -1,0 +1,34 @@
+schema: ARTIFACT_MANIFEST_IR
+version: v1
+type: object
+required:
+  - run_id
+  - output_mode
+  - ai_artifacts
+  - human_reports
+properties:
+  run_id: string
+  output_mode: string
+  ai_artifacts:
+    type: list
+    item_fields:
+      artifact_name: string
+      artifact_type: string
+      path: string
+      language: string
+      visibility: string
+      content_hash: string
+      producer_skill: string
+      consumed_by: list[string]
+  human_reports:
+    type: list
+    item_fields:
+      report_name: string
+      path: string
+      language: string
+      visibility: string
+      source_artifacts: list[string]
+failure_rules:
+  missing_artifact_owner: ARTIFACT_PRODUCER_MISSING
+  missing_content_hash: ARTIFACT_HASH_MISSING
+  human_report_without_source: HUMAN_REPORT_SOURCE_MISSING
