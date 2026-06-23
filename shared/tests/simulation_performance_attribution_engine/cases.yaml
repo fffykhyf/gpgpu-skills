@@ -318,6 +318,47 @@ cases:
     required_evidence:
       - LOADER_CONTRACT_MISMATCH
       - loader_init
+
+  - case_id: simx_rtl_trace_missing_byte_enable_is_weak_pass
+    input_artifacts:
+      - shared/examples/self_correcting_minimal_simt/expected_golden_contract_model.yaml
+      - shared/examples/self_correcting_minimal_simt/expected_incremental_rtl_map.yaml
+    expected_outputs:
+      - NORMALIZED_TRACE_IR
+      - PASS_EVIDENCE_REPORT
+      - TRACE_COVERAGE_REPORT
+    expected_mode: PASS_EVIDENCE_MODE
+    expected_verdict: PASS_WITH_INSUFFICIENT_EVIDENCE
+    required_evidence:
+      - TRACE_FIELD_MISSING
+      - byte_enable_missing
+      - CORRECTNESS_PASS_WEAK
+
+  - case_id: cache_replay_order_mismatch_routes_to_memory_system
+    input_artifacts:
+      - shared/examples/self_correcting_minimal_simt/expected_golden_contract_model.yaml
+      - shared/examples/self_correcting_minimal_simt/expected_incremental_rtl_map.yaml
+    expected_outputs:
+      - NORMALIZED_TRACE_IR
+      - FIRST_DIVERGENCE_REPORT
+      - ROOT_CAUSE_REPORT
+    expected_mode: FAILURE_ATTRIBUTION_MODE
+    expected_root_cause: MEMORY_SYSTEM_ROOT_CAUSE
+    required_evidence:
+      - CACHE_REPLAY_ORDER_MISMATCH
+      - request_tag
+      - response_tag
+
+  - case_id: ppa_claim_without_saif_is_rejected
+    input_artifacts:
+      - shared/examples/self_correcting_minimal_simt/expected_performance_metric_ir.yaml
+    expected_outputs:
+      - PERFORMANCE_METRIC_IR
+      - SIM_PERF_ATTRIBUTION_REPORT
+    expected_failure_mode: PPA_CLAIM_WITHOUT_SYNTHESIS_BUNDLE
+    required_evidence:
+      - PPA_CLAIM_WITHOUT_SYNTHESIS_BUNDLE
+      - POWER_CLAIM_WITHOUT_SAIF
       - loader_contract_hash
 
   - case_id: case_insufficient_trace_evidence

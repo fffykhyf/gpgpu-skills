@@ -48,6 +48,11 @@ definitions:
       - output_interfaces
       - latency_contract
       - local_trace_schema
+      - sim_twin_module
+      - unit_test_gate
+      - trace_required_fields
+      - backend_support_matrix
+      - verification_artifact_refs
       - local_simulation_evidence
       - timing_feedback
     properties:
@@ -60,6 +65,11 @@ definitions:
       output_interfaces: list
       latency_contract: map
       local_trace_schema: string
+      sim_twin_module: string
+      unit_test_gate: map
+      trace_required_fields: list
+      backend_support_matrix: map
+      verification_artifact_refs: list
       local_simulation_evidence: map
       timing_feedback: TIMING_FEEDBACK
   INTERFACE_BINDING_IR:

@@ -30,8 +30,8 @@ full-system verification.
 `shared/tables/rtl_partial_sim_gate_table.yaml` owns the concrete case list.
 At minimum it must cover:
 
-- scoreboard: RAW dependency stall, writeback wakeup, multiple wavefront independence
-- wavefront scheduler: round-robin fairness, skip stalled wavefront, no-ready-wavefront idle
+- scoreboard: RAW dependency stall, writeback wakeup, multiple warp independence
+- warp scheduler: round-robin fairness, skip stalled warp, no-ready-warp idle
 - load/store queue: ready-low payload stable, tag unique, response wakeup, fault
   propagation
 - LDS bank unit: bank conflict stall, lane-mask byte enable,

@@ -1,6 +1,6 @@
 verdict: PASS_WITH_PERFORMANCE_WARNING
 module_results:
-  wavefront_scheduler: PASS
+  warp_scheduler: PASS
   load_store_queue: PASS_WITH_WARNING
 local_trace_hashes:
   load_store_queue: hash_lsq_partial_trace

@@ -3,25 +3,79 @@ version: v5
 type: object
 required:
   - system_contract_ir_hash
-  - launch_abi
-  - entry_pc
-  - grid_dim
-  - block_dim
-  - arg_buffer_layout
-  - arg_buffer_bytes
-  - csr_write_sequence
-  - completion_observation
+  - public_launch_abi
+  - program_image_entry
+  - arg_staging
+  - control_plane_sequence
+  - device_dispatch_view
+  - completion_fault_observation
+  - backend_capability
+  - launch_trace_chain
   - canonical_hash
 properties:
   system_contract_ir_hash: string
-  launch_abi: string
-  entry_symbol: string
-  entry_pc: integer
-  grid_dim: map
-  block_dim: map
-  wavefront_size: integer
-  arg_buffer_layout: map
-  arg_buffer_bytes: string
-  csr_write_sequence: list
-  completion_observation: map
+  public_launch_abi:
+    type: object
+    required: [kernel_name, args_host, args_size, ndim, grid_dim, block_dim, local_memory_size]
+    properties:
+      kernel_name: string
+      args_host: string
+      args_size: integer
+      ndim: integer
+      grid_dim: map
+      block_dim: map
+      local_memory_size: integer
+      cluster_dim_or_workgroup_cluster: map
+  program_image_entry:
+    type: object
+    required: [image_format, symbol_table, entry_symbol, entry_pc, fallback_symbol]
+    properties:
+      image_format: string
+      symbol_table: map
+      entry_symbol: string
+      entry_pc: integer
+      fallback_symbol: string
+  arg_staging:
+    type: object
+    required: [host_pointer, device_scratch_addr, arg_buffer_bytes, alignment]
+    properties:
+      host_pointer: string
+      device_scratch_addr: string
+      arg_buffer_bytes: string
+      alignment: integer
+  control_plane_sequence:
+    type: object
+    required: [csr_writes, start_command]
+    properties:
+      queue_record_optional: map
+      mmio_writes_optional: list
+      dcr_writes_optional: list
+      csr_writes: list
+      start_command: map
+  device_dispatch_view:
+    type: object
+    required: [startup_pc, kernel_entry_pc, arg_pointer, grid_dim, block_dim, derived_cluster_fields]
+    properties:
+      startup_pc: integer
+      kernel_entry_pc: integer
+      arg_pointer: string
+      grid_dim: map
+      block_dim: map
+      derived_cluster_fields: map
+  completion_fault_observation:
+    type: object
+    required: [done_bit_or_seqnum, event_completion, fault_code, timeout_policy]
+    properties:
+      done_bit_or_seqnum: string
+      event_completion: string
+      fault_code: string
+      timeout_policy: string
+  backend_capability: map
+  launch_trace_chain: list
   canonical_hash: string
+failure_modes:
+  - UNWIRED_LAUNCH_ABI_FIELD
+  - LAUNCH_FIELD_TRACE_BREAK
+  - COMPLETION_FAULT_UNOBSERVABLE
+  - BACKEND_CAPABILITY_MISMATCH
+  - RUNTIME_PRIVATE_STATE_LEAKED_AS_ABI

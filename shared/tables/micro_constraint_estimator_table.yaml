@@ -1,45 +1,45 @@
 version: v5
 estimators:
   area_estimate:
-    inputs: [cu_count, wavefront_slots_per_cu, wavefront_size, registers_per_thread, integer_width_bits, shared_memory_bytes_per_cu, cache_size_bytes_per_cu, issue_width, pipeline_stage_count]
+    inputs: [sm_count, warp_slots_per_sm, warp_size, registers_per_thread, integer_width_bits, shared_memory_bytes_per_sm, cache_size_bytes_per_sm, issue_width, pipeline_stage_count]
     output: area_estimate
     rule:
       deterministic: true
       units: relative_area_units
       formulas:
-        register_file_area_units: "cu_count * wavefront_slots_per_cu * wavefront_size * registers_per_thread * integer_width_bits"
-        shared_memory_area_units: "cu_count * shared_memory_bytes_per_cu"
-        cache_area_units: "cu_count * cache_size_bytes_per_cu"
-        pipeline_area_units: "cu_count * issue_width * pipeline_stage_count"
+        register_file_area_units: "sm_count * warp_slots_per_sm * warp_size * registers_per_thread * integer_width_bits"
+        shared_memory_area_units: "sm_count * shared_memory_bytes_per_sm"
+        cache_area_units: "sm_count * cache_size_bytes_per_sm"
+        pipeline_area_units: "sm_count * issue_width * pipeline_stage_count"
         total_area_units: "register_file_area_units + shared_memory_area_units + cache_area_units + pipeline_area_units"
       classification:
         small_fpga: "total_area_units <= small_fpga_area_budget_units"
         area_risk: "total_area_units > small_fpga_area_budget_units"
     failure_mode: UNREALIZABLE_MICRO_CONSTRAINT
   memory_pressure_estimate:
-    inputs: [load_store_mix, expected_memory_latency_cycles, coalescing_efficiency, wavefront_occupancy_bound]
+    inputs: [load_store_mix, expected_memory_latency_cycles, coalescing_efficiency, warp_occupancy_bound]
     output: memory_pressure_estimate
     rule:
       deterministic: true
       formulas:
         memory_ops_per_instruction: "load_fraction + store_fraction"
-        effective_latency_hiding_wavefronts: "max(1, wavefront_occupancy_bound.max_resident_wavefronts)"
-        unhidden_memory_pressure_score: "expected_memory_latency_cycles * memory_ops_per_instruction / (effective_latency_hiding_wavefronts * max(coalescing_efficiency, 0.01))"
+        effective_latency_hiding_warps: "max(1, warp_occupancy_bound.max_resident_warps)"
+        unhidden_memory_pressure_score: "expected_memory_latency_cycles * memory_ops_per_instruction / (effective_latency_hiding_warps * max(coalescing_efficiency, 0.01))"
       classification:
         low: "unhidden_memory_pressure_score < 4"
         medium: "unhidden_memory_pressure_score >= 4 and unhidden_memory_pressure_score < 16"
         high: "unhidden_memory_pressure_score >= 16"
     failure_mode: MEMORY_PRESSURE_UNBOUNDED
-  wavefront_occupancy_bound:
-    inputs: [register_file_entries, registers_per_thread, wavefront_size, shared_memory_bytes_per_cu, shared_memory_bytes_per_block, wavefront_slots_per_cu]
-    output: wavefront_occupancy_bound
+  warp_occupancy_bound:
+    inputs: [register_file_entries, registers_per_thread, warp_size, shared_memory_bytes_per_sm, shared_memory_bytes_per_block, warp_slots_per_sm]
+    output: warp_occupancy_bound
     rule:
       deterministic: true
       formulas:
-        register_limited_wavefronts: "floor(register_file_entries / (registers_per_thread * wavefront_size))"
-        shared_memory_limited_wavefronts: "wavefront_slots_per_cu if shared_memory_bytes_per_block == 0 else floor(shared_memory_bytes_per_cu / shared_memory_bytes_per_block)"
-        max_resident_wavefronts: "min(wavefront_slots_per_cu, register_limited_wavefronts, shared_memory_limited_wavefronts)"
-        limiting_resource: "argmin({wavefront_slots_per_cu, register_limited_wavefronts, shared_memory_limited_wavefronts})"
+        register_limited_warps: "floor(register_file_entries / (registers_per_thread * warp_size))"
+        shared_memory_limited_warps: "warp_slots_per_sm if shared_memory_bytes_per_block == 0 else floor(shared_memory_bytes_per_sm / shared_memory_bytes_per_block)"
+        max_resident_warps: "min(warp_slots_per_sm, register_limited_warps, shared_memory_limited_warps)"
+        limiting_resource: "argmin({warp_slots_per_sm, register_limited_warps, shared_memory_limited_warps})"
     failure_mode: OCCUPANCY_BOUND_FAIL
   minimum_bandwidth_need:
     inputs: [load_store_mix, bytes_per_memory_op, target_throughput_ops_per_cycle, coalescing_efficiency]

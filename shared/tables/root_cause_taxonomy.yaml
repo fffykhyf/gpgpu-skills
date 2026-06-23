@@ -57,6 +57,11 @@ root_causes:
   MEMORY_SYSTEM_ROOT_CAUSE:
     subclasses:
       - COALESCING_MISMATCH
+      - COALESCER_RESPONSE_SHAPE_MISMATCH
+      - COALESCER_TAG_RESTORE_MISMATCH
+      - CACHE_REPLAY_ORDER_MISMATCH
+      - MSHR_DEADLOCK_GUARD_MISSING
+      - SCOREBOARD_WAKEUP_BEFORE_FINAL_RESPONSE
       - BYTE_ENABLE_MISMATCH
       - LANE_MASK_MISMATCH
       - LSQ_ORDERING_MISMATCH
@@ -64,7 +69,7 @@ root_causes:
       - RESPONSE_ROUTING_MISMATCH
       - BANK_CONFLICT_OVERHEAD
       - MEMORY_REPLAY_OVERHEAD
-    requires: [memory_request, contract_paths, rtl_module_paths]
+    requires: [memory_request, request_tag, response_tag, contract_paths, rtl_module_paths]
     rewrite_candidate: RTL_PATCH
   SCHEDULER_ROOT_CAUSE:
     subclasses:
@@ -73,7 +78,7 @@ root_causes:
       - UNFAIR_WARP_SELECTION
       - READY_WARP_NOT_ISSUED
       - EXCESSIVE_BARRIER_WAIT
-    requires: [wavefront, scheduler_state, contract_paths, rtl_module_paths]
+    requires: [warp, scheduler_state, contract_paths, rtl_module_paths]
     rewrite_candidate: RTL_PATCH
   PERFORMANCE_ARCH_ROOT_CAUSE:
     subclasses:

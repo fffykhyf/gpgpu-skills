@@ -10,29 +10,29 @@ module_partial_sim_cases:
   scoreboard:
     - case_id: raw_dependency_stall
       purpose: RAW dependency stall
-      required_trace_fields: [wavefront_id, src_reg, dst_reg, dependency_stall]
+      required_trace_fields: [warp_id, src_reg, dst_reg, dependency_stall]
       golden_slice: execution_model.scoreboard
     - case_id: writeback_wakeup
       purpose: writeback wakeup
-      required_trace_fields: [wavefront_id, dst_reg, writeback_event, wakeup_event]
+      required_trace_fields: [warp_id, dst_reg, writeback_event, wakeup_event]
       golden_slice: state_model.scoreboard_state
-    - case_id: multiple_wavefront_independence
-      purpose: multiple wavefront independence
-      required_trace_fields: [wavefront_id, dependency_bits, selected_wavefront]
+    - case_id: multiple_warp_independence
+      purpose: multiple warp independence
+      required_trace_fields: [warp_id, dependency_bits, selected_warp]
       golden_slice: state_model.scoreboard_state
-  wavefront_scheduler:
+  warp_scheduler:
     - case_id: round_robin_fairness
       purpose: round-robin fairness
-      required_trace_fields: [ready_wavefront_mask, scheduler_cursor, selected_wavefront]
+      required_trace_fields: [ready_warp_mask, scheduler_cursor, selected_warp]
       golden_slice: execution_model.scheduler
-    - case_id: skip_stalled_wavefront
-      purpose: skip stalled wavefront
-      required_trace_fields: [ready_wavefront_mask, dependency_stall, selected_wavefront]
+    - case_id: skip_stalled_warp
+      purpose: skip stalled warp
+      required_trace_fields: [ready_warp_mask, dependency_stall, selected_warp]
       golden_slice: execution_model.scheduler
-    - case_id: no_ready_wavefront_idle
-      purpose: no ready wavefront idle
-      required_trace_fields: [ready_wavefront_mask, issue_valid]
-      golden_slice: state_model.wavefront_state
+    - case_id: no_ready_warp_idle
+      purpose: no ready warp idle
+      required_trace_fields: [ready_warp_mask, issue_valid]
+      golden_slice: state_model.warp_state
   load_store_queue:
     - case_id: ready_low_payload_stable
       purpose: ready low payload stable
@@ -44,7 +44,7 @@ module_partial_sim_cases:
       golden_slice: interface_semantics_model.tag_uniqueness
     - case_id: response_wakeup
       purpose: response wakeup
-      required_trace_fields: [response_tag, wavefront_id, wakeup_event]
+      required_trace_fields: [response_tag, warp_id, wakeup_event]
       golden_slice: memory_model.request_lifecycle
     - case_id: fault_propagation
       purpose: fault propagation

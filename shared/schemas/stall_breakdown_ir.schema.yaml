@@ -3,7 +3,7 @@ version: v5
 type: object
 required:
   - scoreboard_dependency
-  - no_ready_wavefront
+  - no_ready_warp
   - memory_wait
   - lsq_full
   - coalescer_wait
@@ -17,7 +17,7 @@ required:
   - unknown
 properties:
   scoreboard_dependency: integer
-  no_ready_wavefront: integer
+  no_ready_warp: integer
   memory_wait: integer
   lsq_full: integer
   coalescer_wait: integer

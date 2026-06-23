@@ -25,3 +25,29 @@ cases:
     forbidden_outputs:
       - INCREMENTAL_RTL_MAP
       - ARCH_REWRITE_PLAN
+
+  - case_id: launch_abi_field_chain_complete
+    input_artifacts:
+      - shared/examples/self_correcting_minimal_simt/expected_system_contract_ir.yaml
+      - shared/examples/self_correcting_minimal_simt/expected_program_image_ir.yaml
+    expected_outputs:
+      - RUNTIME_LAUNCH_IR
+      - TOOLCHAIN_SMOKE_REPORT
+    expected_failure_mode: null
+    required_evidence:
+      - public_launch_abi
+      - arg_staging
+      - control_plane_sequence
+      - device_dispatch_view
+      - completion_fault_observation
+      - launch_trace_chain
+
+  - case_id: rejects_unwired_launch_field
+    input_artifacts:
+      - shared/examples/self_correcting_minimal_simt/expected_runtime_launch_ir.yaml
+    expected_outputs:
+      - RUNTIME_LAUNCH_IR
+    expected_failure_mode: UNWIRED_LAUNCH_ABI_FIELD
+    required_evidence:
+      - public_launch_abi
+      - LAUNCH_FIELD_TRACE_BREAK

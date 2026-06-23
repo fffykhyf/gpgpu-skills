@@ -7,7 +7,7 @@ patch_targets:
   - load_store_queue.queue_depth
 owner_module: gpgpu-rtl
 expected_impact:
-  reduce_wavefront_stall_cycles: true
+  reduce_warp_stall_cycles: true
   preserve_system_contract: true
 required_revalidation_gates:
   - module_partial_sim

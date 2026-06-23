@@ -1,6 +1,6 @@
 system_contract_ir_hash: hash_system_contract_minimal_simt
 execution_semantics_functions:
-  - select_wavefront
+  - select_warp
   - update_active_mask
   - apply_scoreboard_dependency
   - commit_pipeline_visible_state

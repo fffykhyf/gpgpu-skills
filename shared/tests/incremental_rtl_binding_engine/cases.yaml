@@ -21,3 +21,30 @@ cases:
     forbidden_outputs:
       - PERF_ATTRIBUTION_GRAPH
       - ARCH_REWRITE_PLAN
+
+  - case_id: register_writeback_requires_byteen_and_eop
+    input_artifacts:
+      - shared/examples/self_correcting_minimal_simt/expected_incremental_rtl_map.yaml
+    expected_outputs:
+      - MODULE_INTERFACE_REPORT
+      - RTL_PARTIAL_SIM_REPORT
+    expected_failure_mode: WRITEBACK_BYTE_ENABLE_MISSING
+    required_evidence:
+      - byte_enable_or_byte_select
+      - final_packet
+      - scoreboard_release_event
+      - SCOREBOARD_RELEASE_WITHOUT_FINAL_EOP
+
+  - case_id: coalescer_response_restore_contract
+    input_artifacts:
+      - shared/examples/self_correcting_minimal_simt/expected_incremental_rtl_map.yaml
+    expected_outputs:
+      - MODULE_INTERFACE_REPORT
+      - RTL_PARTIAL_SIM_REPORT
+    expected_failure_mode: null
+    required_evidence:
+      - original_request_tag
+      - per_lane_offset
+      - restored_lane_mask
+      - restored_lane_data
+      - coalescer_response_restore

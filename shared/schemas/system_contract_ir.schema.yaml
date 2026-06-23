@@ -29,6 +29,8 @@ properties:
       - assembly_syntax
       - pseudo_instruction_rules
       - unsupported_instruction_behavior
+      - control_opcode_model
+      - isa_model_hash
     properties:
       opcodes: map
       instruction_encodings:
@@ -72,13 +74,47 @@ properties:
           enabled: bool
           expansion_rules: map
       unsupported_instruction_behavior: string
+      control_opcode_model:
+        type: object
+        required:
+          - control_ops
+          - variant_bits
+          - overloaded_fields
+          - derived_views
+        properties:
+          control_ops:
+            type: object
+            example:
+              TMC: {semantic: write_exec_mask}
+              WSPAWN: {semantic: spawn_warps}
+              SPLIT: {semantic: divergence_push_or_select}
+              JOIN: {semantic: reconvergence_pop_or_else_path}
+              BAR: {semantic: barrier_arrive_or_wait}
+              WSYNC: {semantic: drain_prior_warp_work}
+          variant_bits: map
+          overloaded_fields: list
+          derived_views:
+            type: object
+            required:
+              - assembler
+              - disassembler
+              - rtl_decode
+              - simulator_decode
+              - docs
+            properties:
+              assembler: string
+              disassembler: string
+              rtl_decode: string
+              simulator_decode: string
+              docs: string
+      isa_model_hash: string
   execution_model: map
   state_model:
     type: object
     required:
       - pc_table
       - exec_mask_table
-      - wavefront_state
+      - warp_state
       - scheduler_state
       - register_file_state
       - scoreboard_state
@@ -91,7 +127,7 @@ properties:
     properties:
       pc_table: map
       exec_mask_table: map
-      wavefront_state: map
+      warp_state: map
       scheduler_state: map
       register_file_state: map
       scoreboard_state: map

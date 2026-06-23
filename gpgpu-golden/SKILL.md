@@ -67,9 +67,9 @@ This skill owns:
 - source-of-truth ownership
 - executable reference semantics derivation
 - golden model coverage checking
-- wavefront-step simulator semantics
+- warp-step simulator semantics
 - EXEC-mask evolution engine
-- CU-parallel execution model
+- SM-parallel execution model
 - memory bundle semantic execution
 
 ## Human and AI Output Policy
@@ -136,8 +136,8 @@ The output must satisfy:
 - `SYSTEM_CONTRACT_IR.state_model` is structured with canonical state tables for trace diff.
 - `SYSTEM_CONTRACT_IR.interface_semantics_model` owns request/response lifecycle semantics.
 - `GOLDEN_CONTRACT_MODEL` is executable reference semantics derived from `SYSTEM_CONTRACT_IR`.
-- `GOLDEN_CONTRACT_MODEL` steps wavefront state with explicit EXEC-mask evolution.
-- `GOLDEN_CONTRACT_MODEL` models CU-parallel execution without shared execution state across CUs.
+- `GOLDEN_CONTRACT_MODEL` steps warp state with explicit EXEC-mask evolution.
+- `GOLDEN_CONTRACT_MODEL` models SM-parallel execution without shared execution state across SMs.
 - `GOLDEN_CONTRACT_MODEL` executes decode-time `MEMORY_BUNDLE` semantics before LSU/coalescer effects.
 - `GOLDEN_CONTRACT_MODEL` must not define independent ISA, memory, launch, scheduler, config, or interface truth.
 - Every executable semantics function maps to a contract path.
@@ -177,8 +177,8 @@ This skill is incomplete unless the following exist:
 - `contract_truth_and_state_model.md`
 - `executable_semantics_rules.md`
 - `golden_model_coverage_and_report.md`
-- `../gpgpu-arch/wavefront_state_contract.md`
-- `../gpgpu-arch/cu_hierarchy_model.md`
+- `../gpgpu-arch/warp_state_contract.md`
+- `../gpgpu-arch/sm_hierarchy_model.md`
 - `../gpgpu-runtime/lsu_instruction_bundle.md`
 - `shared/tables/output_mode_table.yaml`
 - `shared/tables/artifact_visibility_table.yaml`

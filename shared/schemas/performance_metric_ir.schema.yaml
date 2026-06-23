@@ -12,6 +12,7 @@ required:
   - stall_breakdown
   - memory_metrics
   - scheduler_metrics
+  - backend_perf_evidence
   - warning_flags
   - performance_metric_hash
 properties:
@@ -20,12 +21,13 @@ properties:
   issue_cycles: integer
   commit_cycles: integer
   ipc: number
-  wavefront_eligible_rate: number
-  wavefront_issue_rate: number
+  warp_eligible_rate: number
+  warp_issue_rate: number
   issue_utilization: number
   pipeline_utilization: map
   stall_breakdown: map
   memory_metrics: map
   scheduler_metrics: map
+  backend_perf_evidence: map
   warning_flags: list
   performance_metric_hash: string

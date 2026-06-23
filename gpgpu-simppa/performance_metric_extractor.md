@@ -32,8 +32,8 @@ performance_metric_ir:
   commit_cycles: integer
 
   ipc: float
-  wavefront_eligible_rate: float
-  wavefront_issue_rate: float
+  warp_eligible_rate: float
+  warp_issue_rate: float
   issue_utilization: float
   pipeline_utilization:
     fetch: float
@@ -45,7 +45,7 @@ performance_metric_ir:
 
   stall_breakdown:
     scoreboard_dependency: integer
-    no_ready_wavefront: integer
+    no_ready_warp: integer
     memory_wait: integer
     lsq_full: integer
     coalescer_wait: integer
@@ -67,9 +67,9 @@ performance_metric_ir:
     memory_replay_count: integer
 
   scheduler_metrics:
-    ready_wavefront_count_avg: float
-    eligible_wavefront_count_avg: float
-    issued_wavefront_count: integer
+    ready_warp_count_avg: float
+    eligible_warp_count_avg: float
+    issued_warp_count: integer
     ready_but_not_issued_cycles: integer
 
   warning_flags:
@@ -80,6 +80,31 @@ performance_metric_ir:
     - LOW_OCCUPANCY
 ```
 
+## Backend PPA Evidence
+
+Performance, FPGA, or power claims require an artifact bundle, not only a
+passing simulation log.
+
+```yaml
+backend_perf_evidence:
+  runtime_counter_dump: optional path
+  simulator_perf_counter: optional path
+  rtl_cycle_counter: optional path
+  vcd_available: bool
+  saif_available: bool
+  synthesis_utilization_report: optional path
+  timing_report: optional path
+  power_report: optional path
+  fpga_run_log: optional path
+```
+
+Warnings:
+
+- `PPA_CLAIM_WITHOUT_SYNTHESIS_BUNDLE`
+- `POWER_CLAIM_WITHOUT_SAIF`
+- `FPGA_CLAIM_WITHOUT_BACKEND_RUN`
+- `PERF_COUNTER_UNBOUND_TO_CONTRACT`
+
 ## Extraction Rules
 
 - Use normalized event types and stall reason taxonomy only.
@@ -88,3 +113,5 @@ performance_metric_ir:
 - Do not convert a metric warning into a root cause without bottleneck graph
   evidence.
 - Preserve `performance_metric_hash` for regression fingerprinting.
+- Reject PPA claims when `backend_perf_evidence` lacks the required backend
+  matrix artifacts.

@@ -1,15 +1,15 @@
-# CU Hierarchy Model
+# SM Hierarchy Model
 
-This file defines the architecture hierarchy for the L3 CU-centric upgrade.
-`CU` replaces `SM` as the canonical execution island in GPGPU skills.
+This file defines the architecture hierarchy for the L3 SM-centric upgrade.
+`SM` is the canonical execution island in GPGPU skills.
 
 ## Hierarchy
 
 ```text
 GPU
-  -> CU array
-      -> CU
-          -> Wavepool
+  -> SM array
+      -> SM
+          -> Warp pool
           -> Exec context table
           -> SIMD lanes
           -> SGPR bank
@@ -20,15 +20,15 @@ GPU
           -> Trace adapter
 ```
 
-## CU is the canonical execution island
+## SM is the canonical execution island
 
-A CU is the smallest independently scheduled execution island. It owns the
-resident wavefront resources and the local issue contract.
+A SM is the smallest independently scheduled execution island. It owns the
+resident warp resources and the local issue contract.
 
-Required CU fields:
-- `cu_id`
-- `wavefront_slots`
-- `wavefront_size_options`
+Required SM fields:
+- `sm_id`
+- `warp_slots`
+- `warp_size_options`
 - `issue_width`
 - `simd_lane_count`
 - `lds_capacity_bytes`
@@ -40,22 +40,22 @@ Required CU fields:
 
 ## Required Subsystems
 
-### Wavepool
+### Warp pool
 
-The wavepool stores resident wavefront identity, queued fetch/decode packets,
-and per-wavefront resource bases.
+The warp pool stores resident warp identity, queued fetch/decode packets,
+and per-warp resource bases.
 
 Required state:
-- resident wavefront bitmap
+- resident warp bitmap
 - dispatch tag map
-- per-wavefront PC
+- per-warp PC
 - SGPR/VGPR/LDS base fields
 - instruction queue occupancy
 - queue reset causes
 
 ### Exec context table
 
-The exec context table owns per-wavefront control and predicate state.
+The exec context table owns per-warp control and predicate state.
 
 Required state:
 - EXEC mask
@@ -70,11 +70,11 @@ Required state:
 
 SIMD lanes execute vector operations under EXEC-mask driven gating. The
 architecture contract must define whether the design supports 32-thread,
-64-thread, or configurable wavefront widths.
+64-thread, or configurable warp widths.
 
 ### LDS
 
-LDS is local to the CU unless the system contract explicitly defines a
+LDS is local to the SM unless the system contract explicitly defines a
 different scope. LDS addresses must not be treated as a global-memory alias.
 
 ### LSU
@@ -85,28 +85,28 @@ LDS, and reports completion back to issue state.
 
 ### Issue Arbiter
 
-The Issue Arbiter selects ready wavefront work using an inspectable equation:
+The Issue Arbiter selects ready warp work using an inspectable equation:
 decoded valid, FU class, GPR readiness, special-state readiness, memory wait,
 branch wait, barrier wait, max in-flight, and FU availability.
 
 ## Independence Rule
 
-CU is fully independent execution island.
+SM is fully independent execution island.
 
 Required invariant:
-- no shared execution state across CU
-- no cross-CU dependency for wavefront residency, PC, EXEC, SGPR, VGPR, LDS, or issue readiness
-- cross-CU interaction occurs only through defined memory, atomic, barrier, or system fabric contracts
+- no shared execution state across SM
+- no cross-SM dependency for warp residency, PC, EXEC, SGPR, VGPR, LDS, or issue readiness
+- cross-SM interaction occurs only through defined memory, atomic, barrier, or system fabric contracts
 
-## Multi-CU Routing
+## Multi-SM Routing
 
-Multi-CU architecture must define:
-- `cu_count`
-- workgroup-to-CU dispatch mapping
-- wavefront-to-CU residency rule
-- CU_ID routing rule for traces and memory requests
+Multi-SM architecture must define:
+- `sm_count`
+- workgroup-to-SM dispatch mapping
+- warp-to-SM residency rule
+- SM_ID routing rule for traces and memory requests
 - memory fabric request source ID
-- per-CU performance counter partition
+- per-SM performance counter partition
 
 ## Forbidden Architecture Defaults
 
@@ -118,17 +118,17 @@ The generator must not silently emit:
 - generic `execution pipeline` as the top execution contract
 
 Use:
-- `cu_count`
-- `wavefront_slots_per_cu`
-- `wavefront_scheduler`
-- `CU issue model`
+- `sm_count`
+- `warp_slots_per_sm`
+- `warp_scheduler`
+- `SM issue model`
 - typed decode/issue/memory bundle contracts
 
 ## L3 Acceptance
 
 A generated `ARCH_IR` reaches L3 only if:
-- it uses CU instead of SM as the top execution island
-- wavefront state includes explicit EXEC lifecycle
-- LDS is local to CU and separately tagged from global memory
+- it declares SM as the top execution island
+- warp state includes explicit EXEC lifecycle
+- LDS is local to SM and separately tagged from global memory
 - coalescer policy is contract-defined
-- multi-CU independence is enforced
+- multi-SM independence is enforced

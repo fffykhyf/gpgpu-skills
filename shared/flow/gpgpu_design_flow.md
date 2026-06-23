@@ -1,6 +1,6 @@
 # GPGPU Design Flow
 
-This flow is a self-correcting GPGPU design system. Skills are modules. Schemas define accepted IR. Tables define decisions. Examples and tests define regression behavior. The active abstraction is a CU-centric wavefront execution contract model.
+This flow is a self-correcting GPGPU design system. Skills are modules. Schemas define accepted IR. Tables define decisions. Examples and tests define regression behavior. The active abstraction is a SM-centric warp execution contract model.
 
 ## Artifact Visibility Policy
 
@@ -59,28 +59,28 @@ Architecture Generator
 
 ## L3 contract layer
 
-CU is the canonical execution island. L3 contracts add:
+SM is the canonical execution island. L3 contracts add:
 
-- `wavefront_state_contract.md`: wavefront lifecycle, EXEC mask evolution,
+- `warp_state_contract.md`: warp lifecycle, EXEC mask evolution,
   branch divergence model, and reconvergence stack.
-- `cu_hierarchy_model.md`: CU hierarchy with wavepool, exec context table, LDS,
-  LSU front-end, SIMD lanes, and CU issue model.
+- `sm_hierarchy_model.md`: SM hierarchy with warp pool, exec context table, LDS,
+  LSU front-end, SIMD lanes, and SM issue model.
 - `memory_coalescing_contract.md`: rule-based coalescing before issue.
 - `lsu_instruction_bundle.md`: decode-stage `MEMORY_BUNDLE` contract.
-- `cu_instance_layout.md`: CU_ID routing, wave dispatch mapping, and no
-  cross-CU dependency.
-- `multi_cu_trace_model.md`: CU-level trace partitioning and memory ordering per
-  CU.
+- `sm_instance_layout.md`: SM_ID routing, warp dispatch mapping, and no
+  cross-SM dependency.
+- `multi_sm_trace_model.md`: SM-level trace partitioning and memory ordering per
+  SM.
 
 ## L4 system memory and synchronization layer
 
 L4 contracts add:
 
-- `gpgpu-interconnect`: explicit NoC routing, CU-to-L2 routing, request queues,
-  request merging across CU, and congestion evidence.
+- `gpgpu-interconnect`: explicit NoC routing, SM-to-L2 routing, request queues,
+  request merging across SM, and congestion evidence.
 - `gpgpu-memory`: DRAM controller contract, bank-level parallelism model,
-  writeback/write-through policy, and cross-CU coherence.
-- `gpgpu-atomic-sync`: atomic serialization point, per-CU atomic ordering,
+  writeback/write-through policy, and cross-SM coherence.
+- `gpgpu-atomic-sync`: atomic serialization point, per-SM atomic ordering,
   global atomic consistency, hierarchical barriers, and fence ordering
   semantics.
 
@@ -95,7 +95,7 @@ Output:
 - `MICRO_CONSTRAINT_ESTIMATE_IR`
 - Human reports: `DESIGN_BRIEF.zh.md`, `ARCHITECTURE_DECISION.zh.md`
 
-This module estimates area, memory pressure, wavefront occupancy, register pressure, LDS pressure, bandwidth need, and unrealizable risks before contract freeze.
+This module estimates area, memory pressure, warp occupancy, register pressure, LDS pressure, bandwidth need, and unrealizable risks before contract freeze.
 
 ## Module 2: System Contract + Golden Semantics Engine
 
@@ -167,7 +167,7 @@ The correctness gate selects Failure Attribution Mode or Pass Evidence Mode.
 `RTL == golden` is not a skip: a passing run still records pass evidence,
 coverage, performance metrics, and a regression fingerprint. Failure mode finds
 the first deterministic divergence before producing root cause and rewrite
-routing. Performance conclusions must connect cycle, CU, wavefront, bottleneck evidence,
+routing. Performance conclusions must connect cycle, SM, warp, bottleneck evidence,
 contract path, and RTL module or toolchain artifact evidence.
 
 ## Module 6: Architecture Rewrite Loop Controller

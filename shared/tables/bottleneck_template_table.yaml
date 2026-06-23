@@ -1,19 +1,19 @@
 version: v5
 templates:
   memory_latency_template:
-    required_nodes: [cycle_window, wavefront, memory_request, memory_response, rtl_pipeline_stage, contract_rule]
+    required_nodes: [cycle_window, warp, memory_request, memory_response, rtl_pipeline_stage, contract_rule]
     dominant_stall_reasons: [memory_wait]
   shared_bank_conflict_template:
-    required_nodes: [cycle_window, wavefront, bank_conflict, rtl_pipeline_stage, contract_rule]
+    required_nodes: [cycle_window, warp, bank_conflict, rtl_pipeline_stage, contract_rule]
     dominant_stall_reasons: [bank_conflict]
   scoreboard_dependency_template:
-    required_nodes: [cycle_window, wavefront, scoreboard_dependency, register_writeback, contract_rule]
+    required_nodes: [cycle_window, warp, scoreboard_dependency, register_writeback, contract_rule]
     dominant_stall_reasons: [scoreboard_dependency]
   scheduler_underutilization_template:
     required_nodes: [cycle_window, scheduler_state, scoreboard_dependency, rtl_pipeline_stage, contract_rule]
-    dominant_stall_reasons: [no_ready_wavefront]
+    dominant_stall_reasons: [no_ready_warp]
   barrier_synchronization_template:
-    required_nodes: [cycle_window, barrier_state, wavefront, rtl_pipeline_stage, contract_rule]
+    required_nodes: [cycle_window, barrier_state, warp, rtl_pipeline_stage, contract_rule]
     dominant_stall_reasons: [barrier_wait]
   branch_divergence_template:
     required_nodes: [cycle_window, branch_divergence, active_mask_event, contract_rule]

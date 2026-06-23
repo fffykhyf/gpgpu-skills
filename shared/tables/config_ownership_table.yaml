@@ -1,8 +1,8 @@
 table: config_ownership_table
 version: v5
 parameters:
-  wavefront_size: {owner: gpgpu-golden, visibility: hw_sw_abi, consumers: [runtime, rtl, sim, validation]}
-  wavefront_slots_per_cu: {owner: gpgpu-golden, visibility: hardware_private, consumers: [rtl, sim, validation]}
+  warp_size: {owner: gpgpu-golden, visibility: hw_sw_abi, consumers: [runtime, rtl, sim, validation]}
+  warp_slots_per_sm: {owner: gpgpu-golden, visibility: hardware_private, consumers: [rtl, sim, validation]}
   trace_enable: {owner: gpgpu-simppa, visibility: debug_only, consumers: [validation]}
   simulator_seed: {owner: gpgpu-golden, visibility: simulator_private, consumers: [sim]}
   test_timeout_cycles: {owner: gpgpu-simppa, visibility: test_only, consumers: [validation]}

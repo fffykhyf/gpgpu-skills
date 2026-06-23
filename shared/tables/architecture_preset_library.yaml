@@ -1,18 +1,18 @@
 table: architecture_preset_library
 version: v5
 selection_rules:
-  - rule_id: CU_WAVEFRONT_L3_TARGET
+  - rule_id: SM_WARP_L3_TARGET
     priority: 5
     match:
-      abstraction_target: CU_WAVEFRONT_L3
-    prefer_preset: MINIMAL_WAVEFRONT_CU
-    rationale: L3 designs use CU plus wavefront contracts instead of legacy CU scheduler defaults.
-  - rule_id: MULTI_CU_L4_TARGET
+      abstraction_target: SM_WARP_L3
+    prefer_preset: MINIMAL_WARP_SM
+    rationale: L3 designs use SM plus warp contracts instead of legacy SM scheduler defaults.
+  - rule_id: MULTI_SM_L4_TARGET
     priority: 6
     match:
-      abstraction_target: CU_WAVEFRONT_L4
-    prefer_preset: MULTI_CU_WAVEFRONT_GPGPU
-    rationale: L4 designs need NoC, DRAM, coherence, atomic, and fence contracts across CUs.
+      abstraction_target: SM_WARP_L4
+    prefer_preset: MULTI_SM_WARP_GPGPU
+    rationale: L4 designs need NoC, DRAM, coherence, atomic, and fence contracts across SMs.
   - rule_id: VALIDATION_TARGET_VERTICAL_SLICE
     priority: 10
     match:
@@ -29,73 +29,73 @@ selection_rules:
       runtime_requirement: absent
       frontend_requirement: absent
       vertical_slice_requirement: absent
-    prefer_preset: MINIMAL_WAVEFRONT_CU_TEACHING
+    prefer_preset: MINIMAL_WARP_SM_TEACHING
     rationale: Teaching-only explanations should minimize architecture surface area when no runtime or frontend path is required.
-  - rule_id: MEMORY_LATENCY_HIDING_OR_MULTI_WAVEFRONT
+  - rule_id: MEMORY_LATENCY_HIDING_OR_MULTI_WARP
     priority: 30
     match_any:
       - workload_needs_memory_latency_hiding: true
-      - wavefront_slots_per_cu_gt: 1
-    prefer_preset: MULTI_WAVEFRONT_SINGLE_CU
+      - warp_slots_per_sm_gt: 1
+    prefer_preset: MULTI_WARP_SINGLE_SM
     unless_rule_matched: VALIDATION_TARGET_VERTICAL_SLICE
-    rationale: Memory latency hiding and more than one resident wavefront require multi-wavefront scheduling and scoreboard behavior.
+    rationale: Memory latency hiding and more than one resident warp require multi-warp scheduling and scoreboard behavior.
 presets:
-  - preset_id: MINIMAL_WAVEFRONT_CU
-    description: Single CU wavefront design with explicit wavepool, EXEC mask lifecycle, LDS, LSU front-end, and CU issue model.
+  - preset_id: MINIMAL_WARP_SM
+    description: Single SM warp design with explicit warp pool, EXEC mask lifecycle, LDS, LSU front-end, and SM issue model.
     parameters:
-      cu_count: 1
-      wavefront_size: 32
-      wavefront_slots_per_cu: 4
-      wavefront_scheduler_policy: SCOREBOARD_ROUND_ROBIN
+      sm_count: 1
+      warp_size: 32
+      warp_slots_per_sm: 4
+      warp_scheduler_policy: SCOREBOARD_ROUND_ROBIN
       issue_width: 1
-      cu_hierarchy: [wavepool, exec_context_table, simd_lanes, lds, lsu_frontend, issue_arbiter]
+      sm_hierarchy: [warp_pool, exec_context_table, simd_lanes, lds, lsu_frontend, issue_arbiter]
       register_file:
         sgpr_count: 512
         vgpr_count: 1024
         integer_width_bits: 32
       lds:
-        bytes_per_cu: 4096
+        bytes_per_sm: 4096
         banks: 4
       memory_hierarchy:
         coalescer: RULE_BASED
         global_interface_bits: 64
-      isa_profile: WAVEFRONT_SIMT_BASE
+      isa_profile: WARP_SIMT_BASE
       launch_abi: SIMPLE_MMIO_DOORBELL_V1
     provenance: DESIGN_PRESET
-  - preset_id: MULTI_CU_WAVEFRONT_GPGPU
-    description: Multi-CU wavefront GPGPU with CU_ID routing, NoC/L2/DRAM path, coherence hooks, atomics, and fence semantics.
+  - preset_id: MULTI_SM_WARP_GPGPU
+    description: Multi-SM warp GPGPU with SM_ID routing, NoC/L2/DRAM path, coherence hooks, atomics, and fence semantics.
     parameters:
-      cu_count: 4
-      wavefront_size: 32
-      wavefront_slots_per_cu: 8
-      wavefront_scheduler_policy: SCOREBOARD_ROUND_ROBIN
+      sm_count: 4
+      warp_size: 32
+      warp_slots_per_sm: 8
+      warp_scheduler_policy: SCOREBOARD_ROUND_ROBIN
       issue_width: 1
       memory_hierarchy:
-        l1_per_cu: true
+        l1_per_sm: true
         l2_slices: 2
         dram_channels: 1
-        noc_routing: EXPLICIT_CU_TO_L2
+        noc_routing: EXPLICIT_SM_TO_L2
         coherence: L2_VISIBLE_WRITEBACK
       synchronization:
         atomics: L2_SERIALIZED
         fences: DEVICE_SCOPE
-        barriers: [wavefront, CU, grid_optional]
-      isa_profile: WAVEFRONT_SIMT_L4
+        barriers: [warp, SM, grid_optional]
+      isa_profile: WARP_SIMT_L4
       launch_abi: SIMPLE_MMIO_DOORBELL_V1
     provenance: DESIGN_PRESET
-  - preset_id: MINIMAL_WAVEFRONT_CU_TEACHING
-    description: Single CU, single resident wavefront, teaching-friendly integer SIMT core.
+  - preset_id: MINIMAL_WARP_SM_TEACHING
+    description: Single SM, single resident warp, teaching-friendly integer SIMT core.
     parameters:
-      cu_count: 1
-      wavefront_size: 8
-      wavefront_slots_per_cu: 1
+      sm_count: 1
+      warp_size: 8
+      warp_slots_per_sm: 1
       scheduler_policy: ROUND_ROBIN
       issue_width: 1
       register_file:
         registers_per_thread: 16
         integer_width_bits: 32
       shared_memory:
-        bytes_per_cu: 0
+        bytes_per_sm: 0
         banks: 0
       memory_hierarchy:
         cache_policy: NONE
@@ -103,19 +103,19 @@ presets:
       isa_profile: RV32I_SIMT_MINIMAL
       launch_abi: SIMPLE_MMIO_DOORBELL_V1
     provenance: DESIGN_PRESET
-  - preset_id: MULTI_WAVEFRONT_SINGLE_CU
-    description: Single CU with multiple resident wavefronts, scoreboard wakeup, and optional direct-mapped L1.
+  - preset_id: MULTI_WARP_SINGLE_SM
+    description: Single SM with multiple resident warps, scoreboard wakeup, and optional direct-mapped L1.
     parameters:
-      cu_count: 1
-      wavefront_size: 8
-      wavefront_slots_per_cu: 4
+      sm_count: 1
+      warp_size: 8
+      warp_slots_per_sm: 4
       scheduler_policy: SCOREBOARD_ROUND_ROBIN
       issue_width: 1
       register_file:
         registers_per_thread: 32
         integer_width_bits: 32
       shared_memory:
-        bytes_per_cu: 4096
+        bytes_per_sm: 4096
         banks: 4
       memory_hierarchy:
         cache_policy: DIRECT_MAPPED_L1
@@ -126,10 +126,10 @@ presets:
   - preset_id: MINIMAL_VERTICAL_SLICE_GPGPU
     description: Small end-to-end SIMT GPU prototype with CUDA-like frontend, assembler, program image, RTL simulation, and golden memory dump check.
     parameters:
-      cu_count: 4
-      allowed_cu_count: [1, 4]
-      wavefront_size: 8
-      wavefront_slots_per_cu: 4
+      sm_count: 4
+      allowed_sm_count: [1, 4]
+      warp_size: 8
+      warp_slots_per_sm: 4
       scheduler_policy: ROUND_ROBIN
       issue_width: 1
       pipeline: IF_ID_EX_MEM_WB

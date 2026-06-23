@@ -28,7 +28,7 @@ first_divergence_report:
   first_divergence_type: PC_MISMATCH | NEXT_PC_MISMATCH | DECODE_MISMATCH | ACTIVE_MASK_MISMATCH | PREDICATE_MASK_MISMATCH | REGISTER_WRITEBACK_MISMATCH | MEMORY_ADDRESS_MISMATCH | MEMORY_VALUE_MISMATCH | MEMORY_BYTE_ENABLE_MISMATCH | RESPONSE_TAG_MISMATCH | CSR_MISMATCH | BARRIER_STATE_MISMATCH | FAULT_STATUS_MISMATCH | COMPLETION_STATUS_MISMATCH
   cycle: optional integer
   step_id: optional integer
-  wavefront_id: optional integer
+  warp_id: optional integer
   pc: optional string
   golden_event: object
   rtl_event: object
@@ -46,7 +46,7 @@ first_divergence_report:
 - Prefer the first deterministic architectural divergence.
 - Do not report final memory mismatch as root cause. It is a symptom unless it
   is the first observable architectural divergence available.
-- Prefer event pairs that share instruction identity, wavefront identity, and
+- Prefer event pairs that share instruction identity, warp identity, and
   deterministic order.
 - If PC, decode, active mask, and register evidence are all missing, emit
   `INSUFFICIENT_TRACE`.

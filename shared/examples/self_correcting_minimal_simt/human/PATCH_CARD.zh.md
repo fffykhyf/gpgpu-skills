@@ -19,7 +19,7 @@
 
 ## 修复计划
 - 修改目标：`load_store_queue.replay_policy` 和 queue depth。
-- 预期效果：减少 wavefront stall cycles。
+- 预期效果：减少 warp stall cycles。
 - 不修改的内容：不修改 ISA、ABI、program image 或 golden semantics。
 
 ## 重新验证

@@ -140,7 +140,7 @@ The output must satisfy:
 - `ARCH_REWRITE_PLAN` may propose architecture, contract, golden-model, toolchain, runtime, RTL, pass-evidence, or test-evidence patches, but must not directly mutate `ARCH_IR`, `SYSTEM_CONTRACT_IR`, `GOLDEN_CONTRACT_MODEL`, `TOOLCHAIN_ARTIFACT_IR`, `PROGRAM_IMAGE_IR`, `RUNTIME_LAUNCH_IR`, `LOADER_CONTRACT_IR`, `INCREMENTAL_RTL_MAP`, or traces.
 - Every patch has owner module, patch target, expected impact, required revalidation gates, regression risks, and rejected alternatives.
 - Architecture Patch, Contract Patch, Golden Model Patch, Toolchain Patch, Runtime Patch, RTL Patch, Interconnect Patch, Memory Patch, Atomic Sync Patch, Pass Evidence Patch, and Test Evidence Patch are distinct patch classes.
-- L3/L4 rewrites must route CU hierarchy, wavefront state, memory bundle, NoC, DRAM, coherence, atomic, barrier, and fence changes to their owning skill.
+- L3/L4 rewrites must route SM hierarchy, warp state, memory bundle, NoC, DRAM, coherence, atomic, barrier, and fence changes to their owning skill.
 - `RUNTIME_LAUNCH_ROOT_CAUSE` routes to `RUNTIME_PATCH`, not `TOOLCHAIN_PATCH`.
 - `PERFORMANCE_ARCH_ROOT_CAUSE` may trigger `ARCHITECTURE_PATCH` only with performance metric refs, causal graph refs, contract paths, RTL module paths, bottleneck cycle window, counter evidence, and rejected RTL/contract/runtime alternatives.
 - `PASS_EVIDENCE_PATCH` remains valid for incomplete pass evidence, unstable fingerprints, missing coverage, or insufficient trace collection.

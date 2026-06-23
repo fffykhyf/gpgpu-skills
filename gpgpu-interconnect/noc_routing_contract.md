@@ -1,12 +1,12 @@
 # NoC Routing Contract
 
-This contract defines L4 routing between CUs, L2 slices, and memory-system
+This contract defines L4 routing between SMs, L2 slices, and memory-system
 targets.
 
 ## Required Routing State
 
 Every route entry must include:
-- source `cu_id`
+- source `sm_id`
 - source queue ID
 - destination L2 slice or memory target
 - virtual channel or traffic class
@@ -15,13 +15,13 @@ Every route entry must include:
 - expected latency range
 - congestion counter path
 
-## CU to L2 routing table
+## SM to L2 routing table
 
-CU to L2 routing table:
-- maps each CU to one or more L2 slices
+SM to L2 routing table:
+- maps each SM to one or more L2 slices
 - defines address hashing or static slice selection
 - records fallback route on slice backpressure
-- preserves source CU for trace and attribution
+- preserves source SM for trace and attribution
 
 ## Arbitration Policy
 
@@ -49,15 +49,15 @@ congestion model must expose:
 - dropped or retried request count
 - link utilization
 - arbitration wait cycles
-- top blocked source CU
+- top blocked source SM
 
-## Memory Request Queue Per CU
+## Memory Request Queue Per SM
 
-memory request queue per CU is required. The queue owns source ordering before
+memory request queue per SM is required. The queue owns source ordering before
 requests enter shared fabric arbitration.
 
 Required fields:
-- `cu_id`
+- `sm_id`
 - `request_sequence`
 - `bundle_id`
 - `memory_space`
@@ -69,7 +69,7 @@ Required fields:
 ## Failure Routing
 
 Route failures:
-- missing CU ID -> `gpgpu-rtl`
+- missing SM ID -> `gpgpu-rtl`
 - ambiguous route -> `gpgpu-interconnect`
 - incorrect memory visibility -> `gpgpu-memory`
 - atomic/fence ordering mismatch -> `gpgpu-atomic-sync`

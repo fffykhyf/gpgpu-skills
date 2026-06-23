@@ -55,7 +55,7 @@ Every module record must reference a `MODULE_BINDING_TEMPLATE` from
 
 Required templates:
 
-- `wavefront_scheduler_template`
+- `warp_scheduler_template`
 - `scoreboard_template`
 - `register_file_template`
 - `lsq_template`
@@ -74,8 +74,8 @@ Required templates:
 The old global RTL map is replaced by module-by-module assembly. The catalog
 must include the relevant subset of:
 
-- `cu_top`
-- `wavefront_scheduler`
+- `sm_top`
+- `warp_scheduler`
 - `decode_issue_unit`
 - `register_file`
 - `scoreboard`

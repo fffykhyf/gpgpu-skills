@@ -3,7 +3,7 @@ node_classes:
   - cycle_window
   - order_window
   - block
-  - wavefront
+  - warp
   - lane
   - instruction
   - pc_event
@@ -38,7 +38,7 @@ edge_classes:
 required_chain:
   performance_claim:
     - cycle_window
-    - wavefront
+    - warp
     - bottleneck_category
     - rtl_pipeline_stage
     - contract_rule

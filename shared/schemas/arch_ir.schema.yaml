@@ -7,6 +7,7 @@ required:
   - graph_nodes
   - graph_edges
   - constraint_proof
+  - verification_profile
   - provenance
   - rejected_alternatives
   - unresolved_risks
@@ -20,6 +21,22 @@ properties:
     type: list
     item_schema: ARCH_GRAPH_EDGE
   constraint_proof: map
+  verification_profile:
+    type: object
+    required:
+      - simulator_required
+      - rtl_sim_required
+      - module_unit_required
+      - runtime_launch_required
+      - synthesis_required_if_backend_fpga
+      - ppa_required_if_performance_target
+    properties:
+      simulator_required: bool
+      rtl_sim_required: bool
+      module_unit_required: bool
+      runtime_launch_required: bool
+      synthesis_required_if_backend_fpga: bool
+      ppa_required_if_performance_target: bool
   provenance: map
   rejected_alternatives: list
   unresolved_risks: list
@@ -34,6 +51,10 @@ definitions:
       - output_ports
       - required_contract_paths
       - scaling_parameters
+      - state_owner
+      - implementation_policy
+      - verification_hooks
+      - backend_matrix
     properties:
       node_id: string
       node_type: string
@@ -42,6 +63,10 @@ definitions:
       output_ports: list
       required_contract_paths: list
       scaling_parameters: list
+      state_owner: list
+      implementation_policy: map
+      verification_hooks: map
+      backend_matrix: map
     rule: graph_nodes must be structured maps, not bare string module names.
   ARCH_GRAPH_EDGE:
     type: object

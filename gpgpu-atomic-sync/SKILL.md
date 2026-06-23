@@ -1,6 +1,6 @@
 ---
 name: gpgpu-atomic-sync
-description: Use when atomic operations, wavefront/CU/grid barriers, memory fences, ordering scopes, serialization points, or synchronization consistency must be defined or debugged.
+description: Use when atomic operations, warp/SM/grid barriers, memory fences, ordering scopes, serialization points, or synchronization consistency must be defined or debugged.
 ---
 
 # GPGPU Atomic and Synchronization Contract Engine
@@ -27,7 +27,7 @@ Downstream:
 
 Consumes:
 - `SYSTEM_CONTRACT_IR`
-- `CU_TO_MEMORY_FABRIC_IR`
+- `SM_TO_MEMORY_FABRIC_IR`
 - `CACHE_COHERENCE_MODEL`
 - memory and atomic traces
 - barrier and fence traces
@@ -51,11 +51,11 @@ AI-facing artifacts:
 
 This skill owns:
 - atomic serialization point
-- per-CU atomic ordering
+- per-SM atomic ordering
 - global atomic consistency model
 - warp barrier compatibility for legacy wording
-- wavefront barrier semantics
-- CU barrier semantics
+- warp barrier semantics
+- SM barrier semantics
 - grid barrier semantics
 - fence ordering semantics
 - synchronization trace classification
@@ -101,9 +101,9 @@ This skill must validate:
 ## Required Invariants
 
 The output must satisfy:
-- ATOMIC_EXECUTION_MODEL defines atomic serialization point and per-CU atomic ordering
+- ATOMIC_EXECUTION_MODEL defines atomic serialization point and per-SM atomic ordering
 - BARRIER_FENCE_CONTRACT defines hierarchical barrier and fence semantics
-- every atomic event has source CU, address, scope, serialization point, and visibility event
+- every atomic event has source SM, address, scope, serialization point, and visibility event
 - every fence event names drain scope and completion condition
 - every barrier event names participant scope and release condition
 - AI artifacts are registered in `ARTIFACT_MANIFEST_IR`
@@ -131,7 +131,7 @@ The report must include:
 - atomic_results
 - barrier_results
 - fence_results
-- affected_cu_ids
+- affected_sm_ids
 - downstream_contract
 
 ## Concrete Assets Required

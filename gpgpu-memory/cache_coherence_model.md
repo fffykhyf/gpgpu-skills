@@ -1,6 +1,6 @@
 # Cache Coherence Model
 
-This contract defines cross-CU cache and memory visibility.
+This contract defines cross-SM cache and memory visibility.
 
 ## Cache Policy
 
@@ -30,13 +30,13 @@ Required fields:
 - visibility completion event
 - cache invalidation or update action
 
-## Cross-CU Coherence
+## Cross-SM Coherence
 
-cross-CU coherence must define:
-- which writes become visible to other CUs
-- when reads can observe another CU's writes
+cross-SM coherence must define:
+- which writes become visible to other SMs
+- when reads can observe another SM's writes
 - how L1 private caches interact with shared L2
-- whether LDS is excluded from cross-CU visibility
+- whether LDS is excluded from cross-SM visibility
 - how fences force visibility
 
 ## Coherence State Model
@@ -54,7 +54,7 @@ why correctness still holds.
 ## Failure Modes
 
 Failures include:
-- stale read across CU
+- stale read across SM
 - write visibility missing
 - dirty writeback lost
 - invalidation missing

@@ -55,6 +55,53 @@ Each interface binding must define:
 - CSR visibility and runtime handoff are declared for `CSR_MMIO`
 - no combinational ready loop exists
 
+## Required Identity Fields
+
+Every scheduler, issue, writeback, memory, and trace-bearing interface must
+preserve these identity fields unless the module contract proves they are not
+in scope:
+
+```yaml
+required_identity_fields:
+  - sm_id
+  - warp_id
+  - cta_or_workgroup_id
+  - packet_id_or_sid
+  - sop
+  - eop
+  - pc
+  - instruction_id_or_uuid
+  - exec_mask_or_tmask
+```
+
+Writeback interfaces must additionally expose:
+
+```yaml
+writeback_required_fields:
+  - rd
+  - dst_type
+  - lane_mask
+  - byte_enable_or_byte_select
+  - data
+  - final_packet
+  - scoreboard_release_event
+```
+
+Memory request/response interfaces must additionally expose:
+
+```yaml
+memory_required_fields:
+  - request_tag
+  - response_tag
+  - original_tag
+  - lane_mask
+  - byte_enable
+  - per_lane_offset
+  - address
+  - data
+  - eop
+```
+
 ## Adapter Rule
 
 An adapter is allowed only when `adapter.allowed = true` and
@@ -73,3 +120,8 @@ is forbidden.
 - `PAYLOAD_STABILITY_FAIL`
 - `COMBINATIONAL_READY_LOOP`
 - `FAULT_COMPLETION_PATH_UNBOUND`
+- `IDENTITY_FIELD_DROPPED`
+- `WRITEBACK_BYTE_ENABLE_MISSING`
+- `SCOREBOARD_RELEASE_WITHOUT_FINAL_EOP`
+- `COALESCER_RESPONSE_SHAPE_MISMATCH`
+- `TRACE_TAP_INSUFFICIENT_FOR_FIRST_DIVERGENCE`

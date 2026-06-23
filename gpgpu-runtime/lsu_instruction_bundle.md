@@ -19,8 +19,8 @@ The bundle is produced after:
 `MEMORY_BUNDLE` contains:
 - `bundle_id`
 - `producer_stage`
-- `cu_id`
-- `wavefront_id`
+- `sm_id`
+- `warp_id`
 - `pc`
 - `opcode`
 - address vector
@@ -66,7 +66,7 @@ Consumer:
 ## Validation Gates
 
 Required checks:
-- address vector width equals wavefront lane count
+- address vector width equals warp lane count
 - lane mask is derived from EXEC plus predicate constraints
 - access type matches instruction class
 - memory space is explicit

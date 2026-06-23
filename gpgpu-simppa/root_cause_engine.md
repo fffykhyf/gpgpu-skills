@@ -58,6 +58,11 @@ RTL_INTERFACE_ROOT_CAUSE:
 
 MEMORY_SYSTEM_ROOT_CAUSE:
   - COALESCING_MISMATCH
+  - COALESCER_RESPONSE_SHAPE_MISMATCH
+  - COALESCER_TAG_RESTORE_MISMATCH
+  - CACHE_REPLAY_ORDER_MISMATCH
+  - MSHR_DEADLOCK_GUARD_MISSING
+  - SCOREBOARD_WAKEUP_BEFORE_FINAL_RESPONSE
   - BYTE_ENABLE_MISMATCH
   - LANE_MASK_MISMATCH
   - LSQ_ORDERING_MISMATCH
@@ -118,6 +123,9 @@ root_cause_report:
   mask, predicate, register writeback, branch, or barrier state.
 - Prefer RTL interface root cause when valid/ready, payload stability, response
   tag, ordering, or backpressure contract evidence fails.
+- Prefer memory-system root cause when coalescer response restoration, cache
+  replay order, MSHR almost-full gating, or final-response scoreboard wakeup
+  evidence fails.
 - Prefer performance architecture root cause only when correctness passes or
   correctness failure is unrelated and the bottleneck graph is complete.
 - If multiple causes cannot be ranked from evidence, emit

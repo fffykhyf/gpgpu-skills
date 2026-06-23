@@ -1,5 +1,15 @@
 version: v5
 required_pass_checks:
+  pass_strength:
+    strong:
+      - final_state_match
+      - completion_fault_match
+      - trace_schema_complete
+      - first_divergence_diff_clean
+      - required_backend_matrix_passed
+    weak:
+      - final_state_match
+      - trace_missing_key_fields_or_backend_matrix_incomplete
   evidence_completeness:
     - system_contract_hash
     - golden_model_hash

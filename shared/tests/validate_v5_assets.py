@@ -163,6 +163,7 @@ NEW_TABLES = [
     "report_generation_table.yaml",
     "perf_attribution_taxonomy.yaml",
     "root_cause_taxonomy.yaml",
+    "verification_backend_matrix.yaml",
     "rewrite_trigger_table.yaml",
     "patch_taxonomy_table.yaml",
     "revalidation_routing_table.yaml",
@@ -345,17 +346,17 @@ TOP_LEVEL_REQUIRED_TEXT: Dict[str, List[str]] = {
         "ARTIFACT_MANIFEST_IR",
     ],
     "gpgpu-interconnect/SKILL.md": [
-        "CU_TO_MEMORY_FABRIC_IR",
+        "SM_TO_MEMORY_FABRIC_IR",
         "NOC_ROUTING_CONTRACT",
-        "CU to L2 routing table",
-        "request merging across CU",
+        "SM to L2 routing table",
+        "request merging across SM",
         "ARTIFACT_MANIFEST_IR",
     ],
     "gpgpu-memory/SKILL.md": [
         "DRAM_CONTROLLER_CONTRACT",
         "CACHE_COHERENCE_MODEL",
         "bank-level parallelism model",
-        "cross-CU coherence",
+        "cross-SM coherence",
         "ARTIFACT_MANIFEST_IR",
     ],
     "gpgpu-atomic-sync/SKILL.md": [
@@ -408,8 +409,8 @@ MIGRATED_REQUIRED_TEXT: Dict[str, List[str]] = {
 
 REFERENCE_FILES = [
     "gpgpu-arch/legacy_request_and_candidate_constraints.md",
-    "gpgpu-arch/wavefront_state_contract.md",
-    "gpgpu-arch/cu_hierarchy_model.md",
+    "gpgpu-arch/warp_state_contract.md",
+    "gpgpu-arch/sm_hierarchy_model.md",
     "gpgpu-golden/contract_truth_and_state_model.md",
     "gpgpu-golden/executable_semantics_rules.md",
     "gpgpu-golden/golden_model_coverage_and_report.md",
@@ -425,8 +426,8 @@ REFERENCE_FILES = [
     "gpgpu-rtl/interface_binding_and_checker.md",
     "gpgpu-rtl/partial_simulation_gates.md",
     "gpgpu-rtl/rtl_module_catalog.md",
-    "gpgpu-rtl/wavefront_exec_model.md",
-    "gpgpu-rtl/cu_instance_layout.md",
+    "gpgpu-rtl/warp_exec_model.md",
+    "gpgpu-rtl/sm_instance_layout.md",
     "gpgpu-simppa/trace_ingestion_and_normalization.md",
     "gpgpu-simppa/correctness_gate_and_mode_selection.md",
     "gpgpu-simppa/differential_correctness_engine.md",
@@ -438,23 +439,26 @@ REFERENCE_FILES = [
     "gpgpu-simppa/toolchain_trace_attribution.md",
     "gpgpu-simppa/report_generation_rules.md",
     "gpgpu-simppa/legacy_validation_and_trace_constraints.md",
-    "gpgpu-simppa/multi_cu_trace_model.md",
-    "gpgpu-simppa/wavefront_trace_diff.md",
+    "gpgpu-simppa/multi_sm_trace_model.md",
+    "gpgpu-simppa/warp_trace_diff.md",
     "gpgpu-loop/rewrite_trigger.md",
     "gpgpu-loop/patch_taxonomy.md",
     "gpgpu-loop/regression_tracking.md",
     "gpgpu-loop/revalidation_routing.md",
     "gpgpu-loop/legacy_closure_repair_constraints.md",
     "gpgpu-interconnect/noc_routing_contract.md",
-    "gpgpu-interconnect/cu_to_memory_fabric.md",
+    "gpgpu-interconnect/sm_to_memory_fabric.md",
     "gpgpu-memory/dram_controller_contract.md",
     "gpgpu-memory/cache_coherence_model.md",
+    "gpgpu-memory/l1_coalescer_cache_contract.md",
+    "gpgpu-memory/mshr_deadlock_guard.md",
+    "gpgpu-memory/memory_response_routing.md",
     "gpgpu-atomic-sync/atomic_execution_model.md",
     "gpgpu-atomic-sync/barrier_fence_contract.md",
 ]
 
 L3_L4_REQUIRED_TEXT: Dict[str, List[str]] = {
-    "gpgpu-arch/wavefront_state_contract.md": [
+    "gpgpu-arch/warp_state_contract.md": [
         "ACTIVE",
         "PENDING",
         "STALLED",
@@ -466,35 +470,35 @@ L3_L4_REQUIRED_TEXT: Dict[str, List[str]] = {
         "branch divergence model",
         "reconvergence stack",
     ],
-    "gpgpu-arch/cu_hierarchy_model.md": [
-        "CU is the canonical execution island",
-        "Wavepool",
+    "gpgpu-arch/sm_hierarchy_model.md": [
+        "SM is the canonical execution island",
+        "Warp pool",
         "SIMD lanes",
         "LDS",
         "LSU",
         "Issue Arbiter",
-        "no shared execution state across CU",
+        "no shared execution state across SM",
     ],
-    "gpgpu-rtl/wavefront_exec_model.md": [
+    "gpgpu-rtl/warp_exec_model.md": [
         "Execution Granularity",
-        "wavefront = 32/64 threads",
+        "warp = 32/64 threads",
         "VGPR bank",
         "SGPR bank",
         "EXEC mask register",
         "VCC/SCC flags",
         "EXEC-mask driven SIMD gating",
-        "per-wave context switching",
+        "per-warp context switching",
         "scoreboard interaction with EXEC mask",
     ],
-    "gpgpu-rtl/cu_instance_layout.md": [
-        "CU contains",
+    "gpgpu-rtl/sm_instance_layout.md": [
+        "SM contains",
         "N SIMD lanes",
-        "Wavepool",
+        "Warp pool",
         "LSU front-end",
         "LDS SRAM",
-        "CU_ID routing rule",
-        "wave dispatch mapping",
-        "no cross-CU dependency",
+        "SM_ID routing rule",
+        "warp dispatch mapping",
+        "no cross-SM dependency",
     ],
     "gpgpu-runtime/memory_coalescing_contract.md": [
         "Coalescing Rules",
@@ -502,7 +506,7 @@ L3_L4_REQUIRED_TEXT: Dict[str, List[str]] = {
         "aligned accesses",
         "bank conflict",
         "divergence",
-        "wavefront memory bundle formation BEFORE issue",
+        "warp memory bundle formation BEFORE issue",
         "not per-instruction LSQ only",
     ],
     "gpgpu-runtime/lsu_instruction_bundle.md": [
@@ -512,28 +516,28 @@ L3_L4_REQUIRED_TEXT: Dict[str, List[str]] = {
         "access type",
         "decode stage emits MEMORY_BUNDLE",
     ],
-    "gpgpu-simppa/multi_cu_trace_model.md": [
-        "CU-level trace partitioning",
-        "wavefront interleaving model",
-        "memory ordering per CU",
-        "multi-CU independence",
+    "gpgpu-simppa/multi_sm_trace_model.md": [
+        "SM-level trace partitioning",
+        "warp interleaving model",
+        "memory ordering per SM",
+        "multi-SM independence",
     ],
-    "gpgpu-simppa/wavefront_trace_diff.md": [
+    "gpgpu-simppa/warp_trace_diff.md": [
         "EXEC mask diff",
-        "wave state diff",
+        "warp state diff",
         "divergence path diff",
         "instruction trace diff is insufficient",
     ],
     "gpgpu-interconnect/noc_routing_contract.md": [
-        "CU to L2 routing table",
+        "SM to L2 routing table",
         "arbitration policy",
         "latency model",
         "congestion model",
-        "memory request queue per CU",
+        "memory request queue per SM",
     ],
-    "gpgpu-interconnect/cu_to_memory_fabric.md": [
-        "CU -> L1 -> L2 -> DRAM",
-        "request merging across CU",
+    "gpgpu-interconnect/sm_to_memory_fabric.md": [
+        "SM -> L1 -> L2 -> DRAM",
+        "request merging across SM",
         "L2 cache slicing policy",
     ],
     "gpgpu-memory/dram_controller_contract.md": [
@@ -544,17 +548,17 @@ L3_L4_REQUIRED_TEXT: Dict[str, List[str]] = {
     "gpgpu-memory/cache_coherence_model.md": [
         "writeback vs write-through policy",
         "atomic visibility rules",
-        "cross-CU coherence",
+        "cross-SM coherence",
     ],
     "gpgpu-atomic-sync/atomic_execution_model.md": [
         "atomic serialization point",
-        "per-CU atomic ordering",
+        "per-SM atomic ordering",
         "global atomic consistency model",
     ],
     "gpgpu-atomic-sync/barrier_fence_contract.md": [
         "warp barrier",
-        "wavefront barrier",
-        "CU barrier",
+        "WSYNC / Warp-Sync Drain",
+        "SM barrier",
         "grid barrier",
         "fence ordering semantics",
     ],
@@ -1021,8 +1025,8 @@ def require_l3_l4_upgrade_contracts(failures: List[str]) -> None:
     require_text(
         ROOT / "README.md",
         [
-            "CU-centric wavefront execution contract model",
-            "L3: CU + wavefront + coalescer + LDS + multi-CU routing",
+            "SM-centric warp execution contract model",
+            "L3: SM + warp + coalescer + LDS + multi-SM routing",
             "L4: NoC + DRAM + coherence + atomic + fence consistency",
         ],
         failures,
@@ -1031,8 +1035,8 @@ def require_l3_l4_upgrade_contracts(failures: List[str]) -> None:
     require_text(
         ROOT / "shared" / "flow" / "gpgpu_design_flow.md",
         [
-            "CU-centric wavefront execution contract model",
-            "CU is the canonical execution island",
+            "SM-centric warp execution contract model",
+            "SM is the canonical execution island",
             "L3 contract layer",
             "L4 system memory and synchronization layer",
         ],
@@ -1044,15 +1048,15 @@ def require_l3_l4_upgrade_contracts(failures: List[str]) -> None:
         "shared/examples/self_correcting_minimal_simt/ai/expected_incremental_rtl_map.yaml",
         "shared/examples/self_correcting_minimal_simt/ai/expected_perf_attribution_graph.yaml",
     ]:
-        require_text(ROOT / rel_path, ["cu", "wavefront"], failures)
+        require_text(ROOT / rel_path, ["sm", "warp"], failures)
 
     require_text(
         ROOT / "shared" / "tables" / "architecture_preset_library.yaml",
         [
-            "MINIMAL_WAVEFRONT_CU",
-            "MULTI_CU_WAVEFRONT_GPGPU",
-            "cu_count",
-            "wavefront_slots_per_cu",
+            "MINIMAL_WARP_SM",
+            "MULTI_SM_WARP_GPGPU",
+            "sm_count",
+            "warp_slots_per_sm",
         ],
         failures,
     )

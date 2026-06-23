@@ -1,7 +1,7 @@
 # GPGPU Skills
 
 This repository now defines a self-correcting GPGPU design system built around
-a CU-centric wavefront execution contract model.
+a SM-centric warp execution contract model.
 
 ## Goals
 
@@ -11,7 +11,7 @@ a CU-centric wavefront execution contract model.
 4. Build RTL incrementally module by module with interface checks.
 5. Normalize execution traces and build causal performance attribution.
 6. Produce architecture, contract, toolchain, RTL, or test-evidence rewrite plans.
-7. Extend L3/L4 contracts for CU, wavefront, memory hierarchy, interconnect,
+7. Extend L3/L4 contracts for SM, warp, memory hierarchy, interconnect,
    coherence, atomic, and fence behavior.
 
 ## Current Top-Level Skills
@@ -43,12 +43,12 @@ Architecture Generator
 
 ## L3/L4 Upgrade Target
 
-L3: CU + wavefront + coalescer + LDS + multi-CU routing.
+L3: SM + warp + coalescer + LDS + multi-SM routing.
 
 L4: NoC + DRAM + coherence + atomic + fence consistency.
 
-The canonical execution island is `CU`, not `SM`. A CU owns the wavepool, exec
-context table, LDS, LSU front-end, SIMD lanes, and CU issue model. Wavefront
+The canonical execution island is `SM`. A SM owns the warp pool, exec
+context table, LDS, LSU front-end, SIMD lanes, and SM issue model. Warp
 state includes explicit EXEC mask lifecycle, branch divergence, and
 reconvergence behavior. Memory instructions are formed as decode-time
 `MEMORY_BUNDLE` artifacts before LSU/coalescer issue.
@@ -69,7 +69,7 @@ reconvergence behavior. Memory instructions are formed as decode-time
 - `PERF_ATTRIBUTION_GRAPH`
 - `ARCH_REWRITE_PLAN`
 - `NOC_ROUTING_CONTRACT`
-- `CU_TO_MEMORY_FABRIC_IR`
+- `SM_TO_MEMORY_FABRIC_IR`
 - `DRAM_CONTROLLER_CONTRACT`
 - `CACHE_COHERENCE_MODEL`
 - `ATOMIC_EXECUTION_MODEL`

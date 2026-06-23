@@ -12,17 +12,17 @@ atomic serialization point must be exactly one of:
 
 The selected point must be recorded per memory scope.
 
-## Per-CU Atomic Ordering
+## Per-SM Atomic Ordering
 
-per-CU atomic ordering must define:
-- source CU order
-- wavefront order
+per-SM atomic ordering must define:
+- source SM order
+- warp order
 - issue order
 - serialization order
 - response order
 - visibility completion event
 
-The model must state whether atomics from the same CU can pass non-atomic memory
+The model must state whether atomics from the same SM can pass non-atomic memory
 operations and which fences prevent that.
 
 ## Global Atomic Consistency Model
@@ -38,8 +38,8 @@ global atomic consistency model must define:
 ## Required Trace Fields
 
 Atomic trace events must include:
-- `cu_id`
-- `wavefront_id`
+- `sm_id`
+- `warp_id`
 - `pc`
 - `address`
 - `operation`
@@ -54,5 +54,5 @@ Atomic trace events must include:
 L4 atomic support passes only if:
 - atomic ordering defined
 - serialization point is explicit
-- per-CU and global ordering are distinguishable
+- per-SM and global ordering are distinguishable
 - cache/coherence visibility agrees with the atomic model

@@ -18,7 +18,7 @@ each memory bundle.
 
 ## Bundle Formation
 
-wavefront memory bundle formation BEFORE issue is required.
+warp memory bundle formation BEFORE issue is required.
 
 Decode and toolchain artifacts must distinguish:
 - arithmetic instruction record
@@ -37,8 +37,8 @@ or memory fabric issue.
 
 Required bundle fields:
 - `bundle_id`
-- `cu_id`
-- `wavefront_id`
+- `sm_id`
+- `warp_id`
 - `pc`
 - `address_vector`
 - `lane_mask`
@@ -47,6 +47,35 @@ Required bundle fields:
 - `memory_space`
 - `ordering_scope`
 - `coalescing_rule_trace`
+
+## Response Shape Restore
+
+Coalescer correctness requires both request reduction and response restoration.
+The coalescer must preserve the original lane shape before merging and prove
+that every response can be restored to that shape.
+
+```yaml
+coalescer_request_record:
+  original_bundle_id: string
+  original_request_tag: string
+  original_lane_mask: string
+  original_byte_enable_vector: list
+  per_lane_offset: list
+  merged_line_addr: string
+  coalesced_request_tag: string
+  split_reason_or_merge_rule: string
+
+coalescer_response_restore:
+  response_tag: string
+  original_request_tag: string
+  restored_lane_mask: string
+  restored_lane_data: list
+  restored_byte_enable: list
+  final_eop: bool
+```
+
+The coalescer must not only prove that it reduced request count; it must prove
+that `coalescer_response_restore` reconstructs the original lane-shaped response.
 
 ## LDS and Global Memory
 
@@ -57,7 +86,7 @@ The contract must separate:
 - `scratch`
 - implementation-specific spaces
 
-LDS accesses route to CU-local storage. Global accesses route to L1/L2/DRAM
+LDS accesses route to SM-local storage. Global accesses route to L1/L2/DRAM
 fabric. A bundle with mixed spaces must split before issue.
 
 ## Failure Modes
@@ -68,6 +97,8 @@ Coalescing evidence must identify:
 - divergence split
 - byte-enable mismatch
 - lane-mask mismatch
+- coalescer response shape mismatch
+- coalescer tag restore mismatch
 - memory-space mismatch
 - unsupported access width
 
@@ -78,6 +109,6 @@ Human-facing reports should show only concise status:
 - merged transaction count
 - split transaction count
 - top split reason
-- affected CU/wavefront
+- affected SM/warp
 
 Full bundle YAML is AI-facing and must be registered in `ARTIFACT_MANIFEST_IR`.

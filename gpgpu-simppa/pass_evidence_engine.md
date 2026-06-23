@@ -20,7 +20,7 @@ credible enough for regression tracking and performance comparison.
 
 ```yaml
 pass_evidence_report:
-  verdict: CORRECTNESS_PASS | PASS_WITH_INSUFFICIENT_EVIDENCE | PASS_WITH_PERFORMANCE_WARNING | PASS_WITH_TRACE_DIVERGENCE_WARNING
+  verdict: CORRECTNESS_PASS_STRONG | CORRECTNESS_PASS_WEAK | PASS_WITH_INSUFFICIENT_EVIDENCE | PASS_WITH_PERFORMANCE_WARNING | PASS_WITH_TRACE_DIVERGENCE_WARNING
   evidence_completeness:
     system_contract_hash: string
     golden_model_hash: string
@@ -50,6 +50,25 @@ pass_evidence_report:
     - performance_below_target
     - unstable_trace_hash
 ```
+
+## Pass Strength
+
+`CORRECTNESS_PASS_STRONG` requires:
+
+- final state match
+- completion/fault match
+- trace schema complete
+- first-divergence diff clean
+- required backend matrix passed
+
+`CORRECTNESS_PASS_WEAK` means:
+
+- final state matches
+- trace misses key fields, runtime launch evidence is incomplete, or backend
+  matrix is incomplete
+
+Weak pass is valid for local iteration but cannot support FPGA, PPA, or release
+claims.
 
 ## REGRESSION_FINGERPRINT Shape
 

@@ -46,7 +46,7 @@ event:
   order_key: optional string
 
   block_id: optional integer
-  wavefront_id: optional integer
+  warp_id: optional integer
   lane_id: optional integer
   thread_id: optional integer
   lane_mask: optional string
@@ -88,6 +88,61 @@ event:
   dependencies: list
   evidence_hash: string
 ```
+
+## Minimum Trusted Trace Fields
+
+Trace diff is trusted only after the normalized trace carries this minimum
+schema:
+
+```yaml
+minimum_trusted_trace_fields:
+  identity:
+    - cycle
+    - uuid_or_instruction_id
+    - sm_id
+    - warp_id
+    - cta_or_workgroup_id
+    - packet_id_or_sid
+    - sop
+    - eop
+  instruction:
+    - pc
+    - encoded_instruction
+    - decoded_instruction
+    - opcode
+    - fu_type
+  mask:
+    - exec_mask_or_tmask
+    - predicate_mask
+  writeback:
+    - rd
+    - dst_type
+    - byte_enable_or_byte_select
+    - dst_data
+  memory:
+    - request_tag
+    - response_tag
+    - address
+    - byte_enable
+    - data
+    - lane_mask
+  scheduler:
+    - ready
+    - stalled
+    - stall_reason
+    - scoreboard_busy
+  barrier:
+    - barrier_id
+    - phase
+    - arrive
+    - wait
+    - release
+```
+
+If trace lacks `byte_enable`, packet/EOP identity, or request/response tags,
+it cannot high-confidence localize register-file, scoreboard, coalescer, cache
+replay, or response-restore failures. Emit `PASS_WITH_INSUFFICIENT_EVIDENCE`
+or `TRACE_FIELD_MISSING` rather than a strong pass.
 
 ## Source Rules
 

@@ -11,7 +11,7 @@ must connect:
 
 ```text
 cycle_or_order_window
-  -> wavefront_or_block_context
+  -> warp_or_block_context
   -> bottleneck_or_divergence_event
   -> RTL module path or toolchain artifact path
   -> SYSTEM_CONTRACT_IR path
@@ -20,7 +20,7 @@ cycle_or_order_window
 Memory-specific chains may still use:
 
 ```text
-wavefront_stall
+warp_stall
   -> scoreboard_dependency
   -> memory_request
   -> cache_miss / bank_conflict / ordering_wait
@@ -33,7 +33,7 @@ wavefront_stall
 - `cycle_window`
 - `order_window`
 - `block`
-- `wavefront`
+- `warp`
 - `lane`
 - `instruction`
 - `pc_event`
@@ -89,16 +89,16 @@ Example:
 scheduler_underutilization_template:
   nodes:
     - cycle_window
-    - low_eligible_wavefront_count
+    - low_eligible_warp_count
     - scoreboard_or_barrier_or_divergence
     - scheduler_policy
-    - wavefront_scheduler_module
+    - warp_scheduler_module
     - execution_model_scheduler_contract
   edges:
-    - cycle_window blocked_by low_eligible_wavefront_count
-    - low_eligible_wavefront_count caused_by scoreboard_or_barrier_or_divergence
-    - scoreboard_or_barrier_or_divergence maps_to wavefront_scheduler_module
-    - wavefront_scheduler_module maps_to execution_model_scheduler_contract
+    - cycle_window blocked_by low_eligible_warp_count
+    - low_eligible_warp_count caused_by scoreboard_or_barrier_or_divergence
+    - scoreboard_or_barrier_or_divergence maps_to warp_scheduler_module
+    - warp_scheduler_module maps_to execution_model_scheduler_contract
 ```
 
 Toolchain example:

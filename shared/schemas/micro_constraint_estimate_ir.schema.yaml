@@ -4,7 +4,7 @@ type: object
 required:
   - area_estimate
   - memory_pressure_estimate
-  - wavefront_occupancy_bound
+  - warp_occupancy_bound
   - register_pressure_bound
   - shared_memory_pressure_bound
   - minimum_bandwidth_need
@@ -12,7 +12,7 @@ required:
 properties:
   area_estimate: map
   memory_pressure_estimate: map
-  wavefront_occupancy_bound: map
+  warp_occupancy_bound: map
   register_pressure_bound: map
   shared_memory_pressure_bound: map
   minimum_bandwidth_need: map

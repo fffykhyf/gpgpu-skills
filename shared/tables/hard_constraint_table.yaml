@@ -2,7 +2,7 @@ table: hard_constraint_table
 version: v4
 constraints:
   - id: WARP_WIDTH_MATCHES_ACTIVE_MASK
-    expression: wavefront_size == active_mask_width
+    expression: warp_size == active_mask_width
     on_fail: HARD_CONSTRAINT_FAIL
   - id: ISSUE_WIDTH_PORT_LIMIT
     expression: issue_width <= execution_unit_ports
@@ -11,7 +11,7 @@ constraints:
     expression: memory_request_width_bits <= global_interface_bits
     on_fail: HARD_CONSTRAINT_FAIL
   - id: WARP_SIZE_SUPPORTED
-    expression: wavefront_size in [4, 8, 16, 32]
+    expression: warp_size in [4, 8, 16, 32]
     on_fail: HARD_CONSTRAINT_FAIL
   - id: PRESET_SUPPORTS_REQUIRED_FEATURES
     expression: required_features subset_of preset.supported_features

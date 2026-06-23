@@ -27,6 +27,24 @@ Generated artifacts, runtime stubs, RTL maps, simulators, validators, markdown
 docs, and examples are derived artifacts. They must reference contract paths and
 contract hashes; they must not become independent truth owners.
 
+## Vortex-Derived Source-of-Truth Rule
+
+`SYSTEM_CONTRACT_IR` is the only allowed source for ISA, launch ABI, state, and
+trace semantics. These artifacts are derived views only:
+
+- assembler opcode table
+- disassembler table
+- RTL decode table
+- simulator decode table
+- intrinsic header
+- startup assembly
+- ISA documentation
+
+Every derived view must carry the same `isa_model_hash` and cite the exact
+`SYSTEM_CONTRACT_IR.isa_model` paths for opcode, field layout, variant bits,
+overloaded fields, and pseudo-instruction expansion. Docs may explain the ISA,
+but docs must never become the ISA source.
+
 ## Contract Freeze Algorithm
 
 1. Import `ARCH_IR` and `DESIGN_INTENT_IR`.
@@ -55,6 +73,14 @@ semantic field must carry:
 Unknown enum values, magic constants, undocumented CSR fields, implicit memory
 ordering, implicit ABI layout, implicit ISA encoding, or implicit launch
 behavior must fail closed.
+
+Vortex-derived failure modes:
+
+- `SOURCE_OF_TRUTH_DRIFT`
+- `DERIVED_OPCODE_TABLE_MISMATCH`
+- `DOC_IMPL_SEMANTIC_CONFLICT`
+- `INTRINSIC_ENCODING_MISMATCH`
+- `SIMULATOR_RTL_DECODE_MISMATCH`
 
 ## Canonical State Model
 
@@ -117,5 +143,5 @@ contract can be consumed deterministically:
 
 Golden traces must replay deterministically from `GOLDEN_CONTRACT_MODEL`, cite
 contract hashes, cover mandatory semantic fields, and locate first divergence by
-field and rule path. They must not redefine ISA, wavefront model, state transitions,
+field and rule path. They must not redefine ISA, warp model, state transitions,
 or memory behavior.

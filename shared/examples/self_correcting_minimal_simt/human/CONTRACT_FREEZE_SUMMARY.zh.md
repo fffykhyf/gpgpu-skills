@@ -4,9 +4,9 @@
 - ISA：vector-add 所需 load/add/store/branch/end 指令语义。
 - ABI：flat argument buffer，A/B/C pointer 顺序。
 - memory model：global memory request lifecycle 和 memory dump range。
-- launch model：entry PC、grid/block dim、wavefront size、CSR start/done。
+- launch model：entry PC、grid/block dim、warp size、CSR start/done。
 - interface semantics：valid/ready memory request、response tag、loader visibility。
-- config ownership：wavefront size、max wavefronts、base addresses 由 contract owner 管理。
+- config ownership：warp size、max warps、base addresses 由 contract owner 管理。
 
 ## 派生关系
 - assembler 从哪里派生：`SYSTEM_CONTRACT_IR.isa_model`。

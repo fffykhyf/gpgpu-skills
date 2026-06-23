@@ -1,0 +1,47 @@
+table: verification_backend_matrix
+version: v5
+gate_classes:
+  toolchain_smoke:
+    required_for: [all]
+    checks:
+      - assembler_roundtrip
+      - program_image_layout
+      - loader_contract
+  runtime_launch:
+    required_for: [vertical_slice, fpga_target]
+    checks:
+      - arg_encoding
+      - entry_pc
+      - start_done
+      - fault_visibility
+  module_unit:
+    required_for: [rtl_module_change]
+    checks:
+      - local_golden_compare
+      - interface_protocol
+      - trace_tap
+  rtl_sim:
+    required_for: [rtl_change]
+    checks:
+      - rtl_vs_golden
+      - normalized_trace_diff
+  regression:
+    required_for: [contract_freeze, release_candidate]
+    checks:
+      - divergence
+      - memory
+      - barrier
+      - runtime
+  synthesis:
+    required_for: [ppa_claim, fpga_target]
+    checks:
+      - utilization
+      - timing
+      - power
+      - saif_coverage
+  fpga_smoke:
+    required_for: [fpga_target]
+    checks:
+      - bitstream_or_hw_run
+      - host_runtime
+      - memory_result

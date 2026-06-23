@@ -3,13 +3,13 @@ area_estimate:
   confidence: medium
   rule_ref: area_estimate.rule.formulas.total_area_units
   assumptions:
-    cu_count: 1
-    wavefront_slots_per_cu: 4
-    wavefront_size: 8
+    sm_count: 1
+    warp_slots_per_sm: 4
+    warp_size: 8
     registers_per_thread: 32
     integer_width_bits: 32
-    shared_memory_bytes_per_cu: 0
-    cache_size_bytes_per_cu: 1024
+    shared_memory_bytes_per_sm: 0
+    cache_size_bytes_per_sm: 1024
     issue_width: 1
     pipeline_stage_count: 5
   deterministic_terms:
@@ -24,11 +24,11 @@ memory_pressure_estimate:
   rule_ref: memory_pressure_estimate.rule.formulas.unhidden_memory_pressure_score
   deterministic_terms:
     memory_ops_per_instruction: "load_fraction + store_fraction"
-    effective_latency_hiding_wavefronts: "max(1, wavefront_occupancy_bound.max_resident_wavefronts)"
-wavefront_occupancy_bound:
-  max_resident_wavefronts: 4
+    effective_latency_hiding_warps: "max(1, warp_occupancy_bound.max_resident_warps)"
+warp_occupancy_bound:
+  max_resident_warps: 4
   limiting_resource: register_file_size
-  rule_ref: wavefront_occupancy_bound.rule.formulas.max_resident_wavefronts
+  rule_ref: warp_occupancy_bound.rule.formulas.max_resident_warps
 register_pressure_bound:
   registers_per_thread: 8
 shared_memory_pressure_bound:
@@ -37,4 +37,4 @@ minimum_bandwidth_need:
   bytes_per_cycle: 8
   rule_ref: minimum_bandwidth_need.rule.formulas.bytes_per_cycle
 known_unrealizable_risks:
-  - four_wavefronts_can_saturate_single_entry_lsq
+  - four_warps_can_saturate_single_entry_lsq

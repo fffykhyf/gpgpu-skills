@@ -21,3 +21,28 @@ cases:
     forbidden_outputs:
       - INCREMENTAL_RTL_MAP
       - PERF_ATTRIBUTION_GRAPH
+
+  - case_id: rejects_doc_as_isa_truth
+    input_artifacts:
+      - shared/examples/self_correcting_minimal_simt/expected_system_contract_ir.yaml
+    expected_outputs:
+      - CONTRACT_SEMANTICS_REPORT
+    expected_failure_mode: SOURCE_OF_TRUTH_DRIFT
+    required_evidence:
+      - docs_are_derived_view
+      - rtl_decode_hash_mismatch
+      - simulator_decode_hash_mismatch
+      - DERIVED_OPCODE_TABLE_MISMATCH
+
+  - case_id: control_opcode_overloaded_fields_are_explicit
+    input_artifacts:
+      - shared/examples/self_correcting_minimal_simt/expected_arch_ir.yaml
+    expected_outputs:
+      - SYSTEM_CONTRACT_IR
+      - GOLDEN_CONTRACT_MODEL
+    expected_failure_mode: null
+    required_evidence:
+      - variant_bits
+      - overloaded_fields
+      - control_opcode_model
+      - isa_model_hash

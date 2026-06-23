@@ -11,7 +11,7 @@
 
 ## 硬约束
 - ISA / ABI：
-- wavefront / CU：
+- warp / SM：
 - memory：
 - RTL / FPGA / ASIC：
 

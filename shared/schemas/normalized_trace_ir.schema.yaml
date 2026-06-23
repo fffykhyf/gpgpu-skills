@@ -36,7 +36,12 @@ event_schema:
     - cycle
     - step_id
     - block_id
-    - wavefront_id
+    - sm_id
+    - warp_id
+    - cta_or_workgroup_id
+    - packet_id_or_sid
+    - sop
+    - eop
     - lane_id
     - thread_id
     - lane_mask
@@ -59,8 +64,11 @@ event_schema:
     - memory_addr
     - access_size
     - byte_enable
+    - byte_enable_or_byte_select
     - request_tag
     - response_tag
+    - original_tag
+    - per_lane_offset
     - memory_latency
     - fault_code
     - csr_addr

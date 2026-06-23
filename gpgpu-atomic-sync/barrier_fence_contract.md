@@ -6,27 +6,26 @@ This contract defines hierarchical barrier and fence semantics.
 
 Supported barrier scopes:
 - warp barrier
-- wavefront barrier
-- CU barrier
+- SM barrier
 - grid barrier
 
-`warp barrier` appears only for compatibility with legacy wording. The canonical
-execution unit is `wavefront barrier`.
+The canonical execution unit is the warp; SM and grid barriers are broader
+contracts with explicit participant sets.
 
-## Wavefront Barrier
+## Warp Barrier
 
-A wavefront barrier synchronizes active lanes inside one wavefront. It must
+A warp barrier synchronizes active lanes inside one warp. It must
 define:
 - participating lane mask
 - release condition
 - interaction with EXEC mask
 - trace event
 
-## CU Barrier
+## SM Barrier
 
-A CU barrier synchronizes wavefronts resident in one CU or one workgroup mapped
-to one CU. It must define:
-- participant wavefront set
+A SM barrier synchronizes warps resident in one SM or one workgroup mapped
+to one SM. It must define:
+- participant warp set
 - arrival bitmap
 - release bitmap
 - timeout or unsupported condition
@@ -34,8 +33,8 @@ to one CU. It must define:
 
 ## Grid Barrier
 
-A grid barrier synchronizes across CUs. It must define:
-- participant CU set
+A grid barrier synchronizes across SMs. It must define:
+- participant SM set
 - global arrival count
 - memory visibility rule
 - unsupported fallback if the hardware/runtime cannot guarantee it
@@ -43,18 +42,41 @@ A grid barrier synchronizes across CUs. It must define:
 ## Fence Ordering Semantics
 
 fence ordering semantics must define:
-- scope: wavefront, CU, device, or system
+- scope: warp, SM, device, or system
 - affected memory spaces
 - request drain condition
 - cache visibility action
 - atomic interaction
 - completion event
 
+## WSYNC / Warp-Sync Drain
+
+`WSYNC` or a warp-sync drain is not a regular scoreboard hazard:
+
+- it does not modify EXEC mask
+- it waits for work issued before the sync instruction to retire
+- it releases on pending-work drain, not on ordinary register wakeup
+- it must emit a trace event with `sm_id`, `warp_id`, prior-work count, and release cycle
+
+## BAR / Barrier Semantics
+
+`BAR` must define:
+
+- arrival event
+- participant set
+- phase
+- wait mask
+- release mask
+- local memory / LSU drain condition
+- optional async arrive/wait fields
+
+Unsupported async barrier modes must be rejected rather than accepted silently.
+
 ## Hierarchical Rule
 
 hierarchical barrier and fence semantics:
-- wavefront barrier must not imply CU barrier
-- CU barrier must not imply grid barrier unless explicitly declared
+- warp barrier must not imply SM barrier
+- SM barrier must not imply grid barrier unless explicitly declared
 - fence scope must be at least as large as the memory visibility claim
 - grid barrier requires fabric and memory-system participation
 
@@ -66,3 +88,7 @@ Failures include:
 - missing memory visibility action
 - grid barrier used when unsupported
 - barrier/fence trace missing scope
+- `WSYNC_CLASSIFIED_AS_SCOREBOARD_HAZARD`
+- `BARRIER_RELEASE_WITHOUT_LSU_DRAIN`
+- `BARRIER_PHASE_ADVANCE_MISMATCH`
+- `ASYNC_BARRIER_UNSUPPORTED_BUT_ACCEPTED`

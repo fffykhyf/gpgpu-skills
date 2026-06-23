@@ -1,6 +1,6 @@
 ---
 name: gpgpu-memory
-description: Use when DRAM controller behavior, L2/cache hierarchy, cache coherence, cross-CU memory visibility, memory ordering, or shared-memory-system contracts must be defined or validated.
+description: Use when DRAM controller behavior, L2/cache hierarchy, cache coherence, cross-SM memory visibility, memory ordering, or shared-memory-system contracts must be defined or validated.
 ---
 
 # GPGPU Memory System Contract Engine
@@ -27,7 +27,7 @@ Downstream:
 
 Consumes:
 - `SYSTEM_CONTRACT_IR`
-- `CU_TO_MEMORY_FABRIC_IR`
+- `SM_TO_MEMORY_FABRIC_IR`
 - memory request traces
 - L2/DRAM traces
 - coherence requirements
@@ -56,7 +56,7 @@ This skill owns:
 - DRAM burst scheduling
 - bank-level parallelism model
 - writeback vs write-through policy
-- cross-CU coherence
+- cross-SM coherence
 - atomic visibility rules handoff
 - cache line state model
 - memory visibility evidence
@@ -65,7 +65,7 @@ This skill owns:
 
 Full DRAM and coherence models are AI-facing English artifacts. Human-facing
 output is a concise Chinese dashboard: DRAM verdict, coherence verdict, top
-bank conflict, affected CU IDs, and revalidation gates.
+bank conflict, affected SM IDs, and revalidation gates.
 
 Register full artifacts in `ARTIFACT_MANIFEST_IR`.
 
@@ -73,9 +73,9 @@ Register full artifacts in `ARTIFACT_MANIFEST_IR`.
 
 This skill must not:
 - redefine ISA memory instructions
-- redefine CU issue readiness
+- redefine SM issue readiness
 - define atomic serialization point independently from `gpgpu-atomic-sync`
-- hide cross-CU visibility in cache implementation details
+- hide cross-SM visibility in cache implementation details
 - treat simulation memory arrays as production cache/DRAM truth
 
 ## Required Tables
@@ -102,9 +102,9 @@ This skill must validate:
 
 The output must satisfy:
 - DRAM_CONTROLLER_CONTRACT defines ordering, burst scheduling, and bank-level parallelism model
-- CACHE_COHERENCE_MODEL defines writeback vs write-through policy and cross-CU coherence
+- CACHE_COHERENCE_MODEL defines writeback vs write-through policy and cross-SM coherence
 - cache coherence never changes atomic visibility rules without atomic-sync ownership
-- every memory visibility claim cites source CU, address range, request order, and response order
+- every memory visibility claim cites source SM, address range, request order, and response order
 - AI artifacts are registered in `ARTIFACT_MANIFEST_IR`
 
 ## Failure Modes
@@ -114,7 +114,7 @@ This skill must emit:
 - `DRAM_BANK_MODEL_MISSING`
 - `CACHE_POLICY_UNDEFINED`
 - `COHERENCE_STATE_MISSING`
-- `CROSS_CU_VISIBILITY_MISMATCH`
+- `CROSS_SM_VISIBILITY_MISMATCH`
 - `ATOMIC_VISIBILITY_UNBOUND`
 - `INSUFFICIENT_SKILL_ASSET`
 
@@ -129,7 +129,7 @@ The report must include:
 - memory_visibility_results
 - dram_scheduling_results
 - coherence_results
-- affected_cu_ids
+- affected_sm_ids
 - downstream_contract
 
 ## Concrete Assets Required
@@ -137,6 +137,9 @@ The report must include:
 This skill is incomplete unless the following exist:
 - `dram_controller_contract.md`
 - `cache_coherence_model.md`
+- `l1_coalescer_cache_contract.md`
+- `mshr_deadlock_guard.md`
+- `memory_response_routing.md`
 
 When a required schema, table, example, or test is missing, emit
 `INSUFFICIENT_SKILL_ASSET` rather than inventing behavior.

@@ -6,7 +6,7 @@ performance attribution.
 ## Memory Request Ordering
 
 memory request ordering must define:
-- source CU order
+- source SM order
 - address order
 - read/write order
 - fence drain order
@@ -40,7 +40,7 @@ bank-level parallelism model must define:
 
 Required DRAM trace fields:
 - request ID
-- source CU
+- source SM
 - L2 slice
 - DRAM channel
 - bank

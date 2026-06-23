@@ -1,19 +1,19 @@
-# Wavefront Execution Model
+# Warp Execution Model
 
-This file defines the RTL binding contract for wavefront execution. It replaces
-generic warp scheduler and execution pipeline language with a wavefront
-scheduler plus CU issue model.
+This file defines the RTL binding contract for warp execution. It replaces
+generic warp scheduler and execution pipeline language with a warp
+scheduler plus SM issue model.
 
 ## Execution Granularity
 
 Execution Granularity:
-- wavefront = 32/64 threads
+- warp = 32/64 threads
 - the exact width must be a parameter from `SYSTEM_CONTRACT_IR`
 - lane count must not be copied from MIAOW constants without derivation
 
 The RTL binding must preserve:
-- `cu_id`
-- `wavefront_id`
+- `sm_id`
+- `warp_id`
 - `pc`
 - `exec_mask`
 - `decoded_instruction_record`
@@ -39,26 +39,26 @@ Required local state:
 SIMD lane enable must be derived from:
 - current `EXEC mask register`
 - instruction predicate mask
-- wavefront lane count
+- warp lane count
 - fault or trap lane suppression if present
 
 Forbidden bindings:
-- tying all lanes active because the wavefront is valid
+- tying all lanes active because the warp is valid
 - hiding lane gating inside an unnamed ALU wrapper
 - treating VCC/SCC/EXEC writes as ordinary SGPR writes without special-state release evidence
 
-## Per-wave context switching
+## Per-warp context switching
 
-Required phrase: per-wave context switching.
+Required phrase: per-warp context switching.
 
-The CU issue model may switch between resident wavefronts every issue slot.
+The SM issue model may switch between resident warps every issue slot.
 
 Required binding evidence:
-- wavefront ID selects SGPR/VGPR bases or physical banks
-- issue readout selects decoded instruction record by wavefront ID
-- special-state reads are indexed by wavefront ID
-- LSU memory bundles carry wavefront ID until completion
-- trace events include CU ID and wavefront ID
+- warp ID selects SGPR/VGPR bases or physical banks
+- issue readout selects decoded instruction record by warp ID
+- special-state reads are indexed by warp ID
+- LSU memory bundles carry warp ID until completion
+- trace events include SM ID and warp ID
 
 ## Scoreboard interaction with EXEC mask
 
@@ -72,7 +72,7 @@ Scoreboard readiness must combine:
 - barrier wait state
 - max in-flight state
 
-EXEC writes must set and release special-state dependencies. A wavefront blocked
+EXEC writes must set and release special-state dependencies. A warp blocked
 on EXEC must not issue a dependent branch, predicate, SIMD, or LSU operation.
 
 ## Partial Simulation Gate
@@ -91,5 +91,5 @@ The RTL skill must produce AI-facing English artifacts:
 - `MODULE_INTERFACE_REPORT`
 - `RTL_PARTIAL_SIM_REPORT`
 
-These artifacts must reference this model when binding wavefront scheduler,
+These artifacts must reference this model when binding warp scheduler,
 special-state, SIMD, scoreboard, and LSU modules.

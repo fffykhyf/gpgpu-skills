@@ -80,6 +80,10 @@ root_cause_to_patch_route:
     patch_type: RTL_PATCH
     target_skill: gpgpu-rtl
     revalidation: [module_partial_sim, rtl_golden_trace_diff, memory_dump_compare]
+  MEMORY_SYSTEM_ROOT_CAUSE:
+    patch_type: RTL_PATCH
+    target_skill: gpgpu-rtl
+    revalidation: [module_partial_sim, memory_response_restore, rtl_golden_trace_diff, memory_dump_compare]
   PERFORMANCE_ARCH_ROOT_CAUSE:
     patch_type: ARCHITECTURE_PATCH
     target_skill: gpgpu-arch

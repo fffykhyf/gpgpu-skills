@@ -1,14 +1,14 @@
 ---
 name: gpgpu-interconnect
-description: Use when CU memory requests must be routed through NoC, L1/L2 fabric, cross-CU queues, congestion models, or CU-to-memory fabric contracts before DRAM, coherence, atomic, or fence behavior is evaluated.
+description: Use when SM memory requests must be routed through NoC, L1/L2 fabric, cross-SM queues, congestion models, or SM-to-memory fabric contracts before DRAM, coherence, atomic, or fence behavior is evaluated.
 ---
 
 # GPGPU Interconnect Contract Engine
 
 ## Role
 
-This skill defines the L4 interconnect contract between CU-local memory
-front-ends and the shared memory hierarchy. It owns NoC routing, CU-to-L2
+This skill defines the L4 interconnect contract between SM-local memory
+front-ends and the shared memory hierarchy. It owns NoC routing, SM-to-L2
 mapping, request queues, fabric arbitration, and congestion evidence.
 
 ## Position in Flow
@@ -32,14 +32,14 @@ Consumes:
 - `SYSTEM_CONTRACT_IR`
 - `INCREMENTAL_RTL_MAP`
 - `MEMORY_BUNDLE`
-- per-CU trace partitions
+- per-SM trace partitions
 - memory hierarchy constraints
 
 ## Output IR
 
 Produces:
 - `NOC_ROUTING_CONTRACT`
-- `CU_TO_MEMORY_FABRIC_IR`
+- `SM_TO_MEMORY_FABRIC_IR`
 - `FABRIC_CONTENTION_REPORT`
 - `MEMORY_REQUEST_QUEUE_REPORT`
 
@@ -48,28 +48,28 @@ Human-facing report:
 
 AI-facing artifacts:
 - English `NOC_ROUTING_CONTRACT.yaml`
-- English `CU_TO_MEMORY_FABRIC_IR.yaml`
+- English `SM_TO_MEMORY_FABRIC_IR.yaml`
 - English `FABRIC_CONTENTION_REPORT.yaml`
 - English `MEMORY_REQUEST_QUEUE_REPORT.yaml`
 
 ## Owned Decisions
 
 This skill owns:
-- CU to L2 routing table
-- memory request queue per CU
+- SM to L2 routing table
+- memory request queue per SM
 - fabric arbitration policy
 - NoC latency model
 - congestion model
-- request merging across CU
+- request merging across SM
 - L2 cache slicing policy handoff
-- source CU ID preservation
+- source SM ID preservation
 - fabric trace event schema
 
 ## Human and AI Output Policy
 
 NoC and fabric contracts are AI-facing English artifacts. Human-facing output is
 limited to Chinese dashboard status: routing verdict, top congested link,
-affected CU IDs, request merging status, and required revalidation.
+affected SM IDs, request merging status, and required revalidation.
 
 All full routing tables and queue traces must be registered in
 `ARTIFACT_MANIFEST_IR`.
@@ -82,7 +82,7 @@ This skill must not:
 - define atomic serialization semantics
 - define barrier or fence semantics
 - mutate `SYSTEM_CONTRACT_IR`
-- hide source CU IDs in global memory traces
+- hide source SM IDs in global memory traces
 
 ## Required Tables
 
@@ -108,20 +108,20 @@ This skill must validate:
 ## Required Invariants
 
 The output must satisfy:
-- every memory request entering the fabric has a `cu_id`
-- every route names source CU, destination L2 slice or memory target, arbitration class, and ordering scope
-- request merging across CU is explicit and never changes memory visibility
-- congestion evidence maps to links, queues, and source CUs
+- every memory request entering the fabric has a `sm_id`
+- every route names source SM, destination L2 slice or memory target, arbitration class, and ordering scope
+- request merging across SM is explicit and never changes memory visibility
+- congestion evidence maps to links, queues, and source SMs
 - interconnect artifacts preserve `ARTIFACT_MANIFEST_IR` provenance
 
 ## Failure Modes
 
 This skill must emit:
 - `NOC_ROUTE_MISSING`
-- `CU_ID_ROUTE_MISSING`
+- `SM_ID_ROUTE_MISSING`
 - `FABRIC_ARBITRATION_AMBIGUOUS`
 - `REQUEST_QUEUE_OVERFLOW`
-- `CROSS_CU_MERGE_UNSAFE`
+- `CROSS_SM_MERGE_UNSAFE`
 - `CONGESTION_MODEL_MISSING`
 - `INSUFFICIENT_SKILL_ASSET`
 
@@ -132,18 +132,18 @@ The report must include:
 - system_contract_ir_hash
 - incremental_rtl_map_hash
 - routing_contract_hash
-- cu_to_memory_fabric_hash
+- sm_to_memory_fabric_hash
 - route_results
 - queue_results
 - congestion_results
-- affected_cu_ids
+- affected_sm_ids
 - downstream_contract
 
 ## Concrete Assets Required
 
 This skill is incomplete unless the following exist:
 - `noc_routing_contract.md`
-- `cu_to_memory_fabric.md`
+- `sm_to_memory_fabric.md`
 
 When a required schema, table, example, or test is missing, emit
 `INSUFFICIENT_SKILL_ASSET` rather than inventing behavior.
