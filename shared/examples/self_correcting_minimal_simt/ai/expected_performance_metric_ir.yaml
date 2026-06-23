@@ -3,11 +3,11 @@ active_cycles: 86
 issue_cycles: 44
 commit_cycles: 42
 ipc: 0.44
-warp_eligible_rate: 0.61
-warp_issue_rate: 0.46
+wavefront_eligible_rate: 0.61
+wavefront_issue_rate: 0.46
 issue_utilization: 0.46
 pipeline_utilization:
-  decode_execute_pipeline: 0.58
+  decode_issue_unit: 0.58
 stall_breakdown:
   memory_wait_cycles: 42
   scheduler_wait_cycles: 8
@@ -15,7 +15,7 @@ memory_metrics:
   replay_count: 7
   scoreboard_wait_cycles: 42
 scheduler_metrics:
-  ready_warp_not_issued: 0
+  ready_wavefront_not_issued: 0
 warning_flags:
   - MEMORY_REPLAY_OVERHEAD
 performance_metric_hash: hash_performance_metric_minimal_simt

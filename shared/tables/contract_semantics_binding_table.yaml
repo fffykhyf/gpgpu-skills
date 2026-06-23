@@ -1,9 +1,9 @@
 version: v5
 bindings:
   - contract_path: execution_model.scheduler
-    semantics_function: select_warp
-    required_inputs: [ready_warps, scheduler_cursor, scoreboard_state]
-    outputs: [selected_warp]
+    semantics_function: select_wavefront
+    required_inputs: [ready_wavefronts, scheduler_cursor, scoreboard_state]
+    outputs: [selected_wavefront]
   - contract_path: execution_model.simt.active_mask_rule
     semantics_function: update_active_mask
     required_inputs: [exec_mask, branch_result]
@@ -15,7 +15,7 @@ bindings:
     outputs: [next_exec_mask, next_pc, simt_stack_state]
   - contract_path: execution_model.scoreboard
     semantics_function: apply_scoreboard_dependency
-    required_inputs: [selected_warp, scoreboard_state]
+    required_inputs: [selected_wavefront, scoreboard_state]
     outputs: [issue_allowed, dependency_stall_reason]
   - contract_path: state_model.pipeline_visible_state
     semantics_function: commit_pipeline_visible_state
@@ -72,7 +72,7 @@ bindings:
     outputs: [decoded_arguments]
   - contract_path: launch_model.grid_block_thread_mapping
     semantics_function: grid_block_thread_map
-    required_inputs: [grid_dim, block_dim, warp_size]
+    required_inputs: [grid_dim, block_dim, wavefront_size]
     outputs: [logical_thread_map]
   - contract_path: launch_model.kernel_entry
     semantics_function: kernel_entry_resolve

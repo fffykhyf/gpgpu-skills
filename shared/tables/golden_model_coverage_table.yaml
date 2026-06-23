@@ -1,7 +1,7 @@
 version: v5
 coverage_gates:
   execution_semantics:
-    required_functions: [select_warp, update_active_mask, apply_scoreboard_dependency]
+    required_functions: [select_wavefront, update_active_mask, apply_scoreboard_dependency]
     required_if_feature_enabled:
       simt_divergence:
         contract_path: execution_model.features.simt_divergence

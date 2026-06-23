@@ -78,7 +78,7 @@ properties:
     required:
       - pc_table
       - exec_mask_table
-      - warp_state
+      - wavefront_state
       - scheduler_state
       - register_file_state
       - scoreboard_state
@@ -91,7 +91,7 @@ properties:
     properties:
       pc_table: map
       exec_mask_table: map
-      warp_state: map
+      wavefront_state: map
       scheduler_state: map
       register_file_state: map
       scoreboard_state: map

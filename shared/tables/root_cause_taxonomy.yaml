@@ -73,7 +73,7 @@ root_causes:
       - UNFAIR_WARP_SELECTION
       - READY_WARP_NOT_ISSUED
       - EXCESSIVE_BARRIER_WAIT
-    requires: [warp, scheduler_state, contract_paths, rtl_module_paths]
+    requires: [wavefront, scheduler_state, contract_paths, rtl_module_paths]
     rewrite_candidate: RTL_PATCH
   PERFORMANCE_ARCH_ROOT_CAUSE:
     subclasses:

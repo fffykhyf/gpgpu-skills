@@ -11,7 +11,7 @@ workload_profile:
 target_platform: FPGA_SMALL
 hard_constraints:
   - one_sm
-  - max_4_logical_warps
+  - max_4_logical_wavefronts
   - observable_lsq_backpressure
 soft_constraints:
   - small_area

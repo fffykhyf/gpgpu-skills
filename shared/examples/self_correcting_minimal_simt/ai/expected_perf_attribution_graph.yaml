@@ -6,8 +6,10 @@ trace_window:
 nodes:
   - id: cycle_window_40_96
     class: cycle_window
-  - id: warp_2
-    class: warp
+  - id: cu_0
+    class: cu
+  - id: wavefront_2
+    class: wavefront
   - id: dep_r4_load
     class: scoreboard_dependency
   - id: mem_req_17
@@ -17,7 +19,10 @@ nodes:
   - id: contract_request_lifecycle
     class: contract_rule
 edges:
-  - from: warp_2
+  - from: cu_0
+    to: wavefront_2
+    class: owns
+  - from: wavefront_2
     to: dep_r4_load
     class: blocked_by
   - from: dep_r4_load
@@ -37,7 +42,7 @@ toolchain_artifact_path_index: {}
 bottleneck_summary:
   root_cause_class: MEMORY_SYSTEM_ROOT_CAUSE
   root_cause_subclass: MEMORY_REPLAY_OVERHEAD
-  description: LSQ backpressure stalls warp scoreboard wakeup.
+  description: LSQ backpressure stalls wavefront scoreboard wakeup.
   bottleneck_cycle_window:
     start_cycle: 40
     end_cycle: 96

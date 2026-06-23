@@ -1,6 +1,7 @@
 # GPGPU Skills
 
-This repository now defines a self-correcting GPGPU design system.
+This repository now defines a self-correcting GPGPU design system built around
+a CU-centric wavefront execution contract model.
 
 ## Goals
 
@@ -10,6 +11,8 @@ This repository now defines a self-correcting GPGPU design system.
 4. Build RTL incrementally module by module with interface checks.
 5. Normalize execution traces and build causal performance attribution.
 6. Produce architecture, contract, toolchain, RTL, or test-evidence rewrite plans.
+7. Extend L3/L4 contracts for CU, wavefront, memory hierarchy, interconnect,
+   coherence, atomic, and fence behavior.
 
 ## Current Top-Level Skills
 
@@ -19,6 +22,9 @@ This repository now defines a self-correcting GPGPU design system.
 4. `gpgpu-rtl`
 5. `gpgpu-simppa`
 6. `gpgpu-loop`
+7. `gpgpu-interconnect`
+8. `gpgpu-memory`
+9. `gpgpu-atomic-sync`
 
 ## Flow
 
@@ -27,10 +33,25 @@ Architecture Generator
   -> System Contract + Golden Semantics Engine
   -> Toolchain + Runtime Artifact Engine
   -> Incremental RTL Binding Engine
+  -> Interconnect Contract Engine
+  -> Memory System Contract Engine
+  -> Atomic and Synchronization Contract Engine
   -> Simulation + Performance Attribution Engine
   -> Architecture Rewrite Loop Controller
-  -> back to Architecture Generator / Contract / Toolchain / RTL Binding
+  -> back to Architecture Generator / Contract / Toolchain / RTL Binding / Memory
 ```
+
+## L3/L4 Upgrade Target
+
+L3: CU + wavefront + coalescer + LDS + multi-CU routing.
+
+L4: NoC + DRAM + coherence + atomic + fence consistency.
+
+The canonical execution island is `CU`, not `SM`. A CU owns the wavepool, exec
+context table, LDS, LSU front-end, SIMD lanes, and CU issue model. Wavefront
+state includes explicit EXEC mask lifecycle, branch divergence, and
+reconvergence behavior. Memory instructions are formed as decode-time
+`MEMORY_BUNDLE` artifacts before LSU/coalescer issue.
 
 ## Core Outputs
 
@@ -47,6 +68,12 @@ Architecture Generator
 - `INCREMENTAL_RTL_MAP`
 - `PERF_ATTRIBUTION_GRAPH`
 - `ARCH_REWRITE_PLAN`
+- `NOC_ROUTING_CONTRACT`
+- `CU_TO_MEMORY_FABRIC_IR`
+- `DRAM_CONTROLLER_CONTRACT`
+- `CACHE_COHERENCE_MODEL`
+- `ATOMIC_EXECUTION_MODEL`
+- `BARRIER_FENCE_CONTRACT`
 
 ## Artifact Visibility and Language
 
@@ -64,7 +91,7 @@ can keep complete evidence without forcing people to read it every round.
 
 ## Legacy Migration
 
-The former 9-stage top-level GPGPU skills and the old `legacy/` skill archive have been deleted from the active skill namespace. Their useful constraints were migrated into the current owner skills as `legacy_*_constraints.md` references. New work must use the six current top-level skills; old truth, validation, memory, RTL, and closure behavior must not reappear as separate top-level skills.
+The former 9-stage top-level GPGPU skills and the old `legacy/` skill archive have been deleted from the active skill namespace. Their useful constraints were migrated into the current owner skills as `legacy_*_constraints.md` references. New work must use the current top-level skills; old truth, validation, memory, RTL, and closure behavior must not reappear as unowned wrappers.
 
 ## Shared Assets
 

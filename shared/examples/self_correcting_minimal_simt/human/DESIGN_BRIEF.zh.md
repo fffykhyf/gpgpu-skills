@@ -2,16 +2,16 @@
 
 ## 目标
 - 本轮目标：设计一个最小 self-correcting SIMT GPGPU vertical slice。
-- 目标复杂度：教学级、单 SM、小 FPGA 面积。
+- 目标复杂度：教学级、单 CU、小 FPGA 面积。
 - 目标平台：FPGA-oriented prototype。
 - 主要 workload：vector-add hand-written assembly。
 
 ## 非目标
-- 本轮明确不做：完整 CUDA frontend、多 SM cache coherence、复杂 memory hierarchy。
+- 本轮明确不做：完整 CUDA frontend、multi-CU cache coherence、复杂 memory hierarchy。
 
 ## 硬约束
 - ISA / ABI：ISA 和 launch ABI 必须由 `SYSTEM_CONTRACT_IR` 冻结。
-- warp / SM：1 个 SM，最多 4 个 logical warps。
+- wavefront / CU：1 个 CU，最多 4 个 logical wavefronts。
 - memory：LSQ backpressure 必须可观测。
 - RTL / FPGA / ASIC：先跑 vertical slice RTL smoke，不做 ASIC PPA。
 

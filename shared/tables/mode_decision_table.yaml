@@ -19,4 +19,4 @@ decisions:
   - match: trace_or_divergence
     mode: TRACE_DEBUG
     next_skill: gpgpu-simppa
-forbidden_outputs: [warp_size, sm_count, cache_policy, scheduler_policy, isa_encoding, memory_hierarchy, register_file_size, rtl_pipeline]
+forbidden_outputs: [wavefront_size, cu_count, cache_policy, scheduler_policy, isa_encoding, memory_hierarchy, register_file_size, rtl_pipeline]

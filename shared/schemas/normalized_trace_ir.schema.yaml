@@ -36,7 +36,7 @@ event_schema:
     - cycle
     - step_id
     - block_id
-    - warp_id
+    - wavefront_id
     - lane_id
     - thread_id
     - lane_mask

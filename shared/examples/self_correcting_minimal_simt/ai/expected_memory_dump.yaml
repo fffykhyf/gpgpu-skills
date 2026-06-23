@@ -9,6 +9,6 @@ memory_objects:
 trace_summary:
   fetched_from_program_image: true
   decoded_instruction_count: 6
-  completed_warps: 1
-  faulted_warps: 0
+  completed_wavefronts: 1
+  faulted_wavefronts: 0
 verdict: PASS

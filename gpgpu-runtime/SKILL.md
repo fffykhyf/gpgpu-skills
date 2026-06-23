@@ -16,6 +16,9 @@ Upstream:
 
 Downstream:
 - `gpgpu-rtl`
+- `gpgpu-interconnect`
+- `gpgpu-memory`
+- `gpgpu-atomic-sync`
 - `gpgpu-simppa`
 - `gpgpu-loop`
 
@@ -66,6 +69,8 @@ This skill owns:
 - deterministic derivation of `tools/loader.py`
 - deterministic derivation of `docs/isa.md`
 - deterministic derivation of `docs/program_image_format.md`
+- decode-stage `MEMORY_BUNDLE` derivation
+- rule-based memory coalescing contract generation
 - assembly IR validation
 - assembler/disassembler round-trip validation
 - program image layout validation
@@ -148,6 +153,9 @@ The output must satisfy:
 - `RUNTIME_LAUNCH_IR.launch_abi` derives from `SYSTEM_CONTRACT_IR.launch_model.abi`.
 - `LOADER_CONTRACT_IR` derives from `SYSTEM_CONTRACT_IR.launch_model.loader_contract`.
 - Golden execution must consume `PROGRAM_IMAGE_IR`, decode instruction bytes, and emit expected trace or memory dump.
+- Memory instructions must emit `MEMORY_BUNDLE` before LSU issue.
+- `MEMORY_BUNDLE` must contain address vector, lane mask, access type, memory space, byte enables, ordering scope, and coalescing policy reference.
+- Coalescing must be rule-based, including contiguous-address merge, aligned single transaction, bank-conflict split, and divergence fallback.
 
 ## Failure Modes
 
@@ -197,6 +205,8 @@ This skill is incomplete unless the following exist:
 - `program_image_and_loader_contract.md`
 - `runtime_launch_artifact_rules.md`
 - `toolchain_smoke_gates.md`
+- `memory_coalescing_contract.md`
+- `lsu_instruction_bundle.md`
 - `shared/schemas/toolchain_artifact_ir.schema.yaml`
 - `shared/schemas/assembly_ir.schema.yaml`
 - `shared/schemas/program_image_ir.schema.yaml`

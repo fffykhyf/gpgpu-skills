@@ -16,6 +16,9 @@ TOP_LEVEL_SKILLS = [
     "gpgpu-rtl",
     "gpgpu-simppa",
     "gpgpu-loop",
+    "gpgpu-interconnect",
+    "gpgpu-memory",
+    "gpgpu-atomic-sync",
 ]
 
 REMOVED_TOP_LEVEL_SKILLS = [
@@ -341,6 +344,27 @@ TOP_LEVEL_REQUIRED_TEXT: Dict[str, List[str]] = {
         "REGRESSION_SUMMARY.zh.md",
         "ARTIFACT_MANIFEST_IR",
     ],
+    "gpgpu-interconnect/SKILL.md": [
+        "CU_TO_MEMORY_FABRIC_IR",
+        "NOC_ROUTING_CONTRACT",
+        "CU to L2 routing table",
+        "request merging across CU",
+        "ARTIFACT_MANIFEST_IR",
+    ],
+    "gpgpu-memory/SKILL.md": [
+        "DRAM_CONTROLLER_CONTRACT",
+        "CACHE_COHERENCE_MODEL",
+        "bank-level parallelism model",
+        "cross-CU coherence",
+        "ARTIFACT_MANIFEST_IR",
+    ],
+    "gpgpu-atomic-sync/SKILL.md": [
+        "ATOMIC_EXECUTION_MODEL",
+        "BARRIER_FENCE_CONTRACT",
+        "atomic serialization point",
+        "hierarchical barrier and fence semantics",
+        "ARTIFACT_MANIFEST_IR",
+    ],
 }
 
 MIGRATED_REQUIRED_TEXT: Dict[str, List[str]] = {
@@ -384,6 +408,8 @@ MIGRATED_REQUIRED_TEXT: Dict[str, List[str]] = {
 
 REFERENCE_FILES = [
     "gpgpu-arch/legacy_request_and_candidate_constraints.md",
+    "gpgpu-arch/wavefront_state_contract.md",
+    "gpgpu-arch/cu_hierarchy_model.md",
     "gpgpu-golden/contract_truth_and_state_model.md",
     "gpgpu-golden/executable_semantics_rules.md",
     "gpgpu-golden/golden_model_coverage_and_report.md",
@@ -393,10 +419,14 @@ REFERENCE_FILES = [
     "gpgpu-runtime/program_image_and_loader_contract.md",
     "gpgpu-runtime/runtime_launch_artifact_rules.md",
     "gpgpu-runtime/toolchain_smoke_gates.md",
+    "gpgpu-runtime/memory_coalescing_contract.md",
+    "gpgpu-runtime/lsu_instruction_bundle.md",
     "gpgpu-rtl/module_binding_rules.md",
     "gpgpu-rtl/interface_binding_and_checker.md",
     "gpgpu-rtl/partial_simulation_gates.md",
     "gpgpu-rtl/rtl_module_catalog.md",
+    "gpgpu-rtl/wavefront_exec_model.md",
+    "gpgpu-rtl/cu_instance_layout.md",
     "gpgpu-simppa/trace_ingestion_and_normalization.md",
     "gpgpu-simppa/correctness_gate_and_mode_selection.md",
     "gpgpu-simppa/differential_correctness_engine.md",
@@ -408,12 +438,127 @@ REFERENCE_FILES = [
     "gpgpu-simppa/toolchain_trace_attribution.md",
     "gpgpu-simppa/report_generation_rules.md",
     "gpgpu-simppa/legacy_validation_and_trace_constraints.md",
+    "gpgpu-simppa/multi_cu_trace_model.md",
+    "gpgpu-simppa/wavefront_trace_diff.md",
     "gpgpu-loop/rewrite_trigger.md",
     "gpgpu-loop/patch_taxonomy.md",
     "gpgpu-loop/regression_tracking.md",
     "gpgpu-loop/revalidation_routing.md",
     "gpgpu-loop/legacy_closure_repair_constraints.md",
+    "gpgpu-interconnect/noc_routing_contract.md",
+    "gpgpu-interconnect/cu_to_memory_fabric.md",
+    "gpgpu-memory/dram_controller_contract.md",
+    "gpgpu-memory/cache_coherence_model.md",
+    "gpgpu-atomic-sync/atomic_execution_model.md",
+    "gpgpu-atomic-sync/barrier_fence_contract.md",
 ]
+
+L3_L4_REQUIRED_TEXT: Dict[str, List[str]] = {
+    "gpgpu-arch/wavefront_state_contract.md": [
+        "ACTIVE",
+        "PENDING",
+        "STALLED",
+        "WAITING_MEMORY",
+        "DIVERGED",
+        "RECONVERGING",
+        "RETIRED",
+        "EXEC mask evolution rules",
+        "branch divergence model",
+        "reconvergence stack",
+    ],
+    "gpgpu-arch/cu_hierarchy_model.md": [
+        "CU is the canonical execution island",
+        "Wavepool",
+        "SIMD lanes",
+        "LDS",
+        "LSU",
+        "Issue Arbiter",
+        "no shared execution state across CU",
+    ],
+    "gpgpu-rtl/wavefront_exec_model.md": [
+        "Execution Granularity",
+        "wavefront = 32/64 threads",
+        "VGPR bank",
+        "SGPR bank",
+        "EXEC mask register",
+        "VCC/SCC flags",
+        "EXEC-mask driven SIMD gating",
+        "per-wave context switching",
+        "scoreboard interaction with EXEC mask",
+    ],
+    "gpgpu-rtl/cu_instance_layout.md": [
+        "CU contains",
+        "N SIMD lanes",
+        "Wavepool",
+        "LSU front-end",
+        "LDS SRAM",
+        "CU_ID routing rule",
+        "wave dispatch mapping",
+        "no cross-CU dependency",
+    ],
+    "gpgpu-runtime/memory_coalescing_contract.md": [
+        "Coalescing Rules",
+        "lanes with contiguous addresses",
+        "aligned accesses",
+        "bank conflict",
+        "divergence",
+        "wavefront memory bundle formation BEFORE issue",
+        "not per-instruction LSQ only",
+    ],
+    "gpgpu-runtime/lsu_instruction_bundle.md": [
+        "MEMORY_BUNDLE",
+        "address vector",
+        "lane mask",
+        "access type",
+        "decode stage emits MEMORY_BUNDLE",
+    ],
+    "gpgpu-simppa/multi_cu_trace_model.md": [
+        "CU-level trace partitioning",
+        "wavefront interleaving model",
+        "memory ordering per CU",
+        "multi-CU independence",
+    ],
+    "gpgpu-simppa/wavefront_trace_diff.md": [
+        "EXEC mask diff",
+        "wave state diff",
+        "divergence path diff",
+        "instruction trace diff is insufficient",
+    ],
+    "gpgpu-interconnect/noc_routing_contract.md": [
+        "CU to L2 routing table",
+        "arbitration policy",
+        "latency model",
+        "congestion model",
+        "memory request queue per CU",
+    ],
+    "gpgpu-interconnect/cu_to_memory_fabric.md": [
+        "CU -> L1 -> L2 -> DRAM",
+        "request merging across CU",
+        "L2 cache slicing policy",
+    ],
+    "gpgpu-memory/dram_controller_contract.md": [
+        "memory request ordering",
+        "burst scheduling",
+        "bank-level parallelism model",
+    ],
+    "gpgpu-memory/cache_coherence_model.md": [
+        "writeback vs write-through policy",
+        "atomic visibility rules",
+        "cross-CU coherence",
+    ],
+    "gpgpu-atomic-sync/atomic_execution_model.md": [
+        "atomic serialization point",
+        "per-CU atomic ordering",
+        "global atomic consistency model",
+    ],
+    "gpgpu-atomic-sync/barrier_fence_contract.md": [
+        "warp barrier",
+        "wavefront barrier",
+        "CU barrier",
+        "grid barrier",
+        "fence ordering semantics",
+    ],
+}
 
 
 def require(path: Path, failures: List[str]) -> None:
@@ -869,6 +1014,50 @@ def require_asset_semantics(failures: List[str]) -> None:
         failures.append("PASS_EVIDENCE_PATCH must remain in patch taxonomy")
 
 
+def require_l3_l4_upgrade_contracts(failures: List[str]) -> None:
+    for rel_path, needles in L3_L4_REQUIRED_TEXT.items():
+        require_text(ROOT / rel_path, needles, failures)
+
+    require_text(
+        ROOT / "README.md",
+        [
+            "CU-centric wavefront execution contract model",
+            "L3: CU + wavefront + coalescer + LDS + multi-CU routing",
+            "L4: NoC + DRAM + coherence + atomic + fence consistency",
+        ],
+        failures,
+    )
+
+    require_text(
+        ROOT / "shared" / "flow" / "gpgpu_design_flow.md",
+        [
+            "CU-centric wavefront execution contract model",
+            "CU is the canonical execution island",
+            "L3 contract layer",
+            "L4 system memory and synchronization layer",
+        ],
+        failures,
+    )
+
+    for rel_path in [
+        "shared/examples/self_correcting_minimal_simt/ai/expected_arch_ir.yaml",
+        "shared/examples/self_correcting_minimal_simt/ai/expected_incremental_rtl_map.yaml",
+        "shared/examples/self_correcting_minimal_simt/ai/expected_perf_attribution_graph.yaml",
+    ]:
+        require_text(ROOT / rel_path, ["cu", "wavefront"], failures)
+
+    require_text(
+        ROOT / "shared" / "tables" / "architecture_preset_library.yaml",
+        [
+            "MINIMAL_WAVEFRONT_CU",
+            "MULTI_CU_WAVEFRONT_GPGPU",
+            "cu_count",
+            "wavefront_slots_per_cu",
+        ],
+        failures,
+    )
+
+
 def main() -> int:
     failures: List[str] = []
 
@@ -979,6 +1168,7 @@ def main() -> int:
         require_text(ROOT / rel_path, needles, failures)
 
     require_asset_semantics(failures)
+    require_l3_l4_upgrade_contracts(failures)
 
     if failures:
         print("GPGPU skill v5 self-correcting asset contract failed:")

@@ -32,6 +32,8 @@ Consumes:
 - module interface contract table
 - RTL partial simulation gate table
 - target platform constraints
+- `wavefront_exec_model.md`
+- `cu_instance_layout.md`
 
 ## Output IR
 
@@ -69,6 +71,10 @@ This skill owns:
 - local timing and synthesis feedback hooks
 - partial simulation gate generation
 - local trace schema binding
+- CU instance layout binding
+- wavefront execution model binding
+- EXEC-mask driven SIMD gating checks
+- CU_ID routing checks
 
 ## Human and AI Output Policy
 
@@ -137,6 +143,10 @@ The output must satisfy:
 - Interface mismatch prevents full-system simulation.
 - Valid/ready and request/response interfaces must prove `no_combinational_ready_loop`.
 - Memory path modules must decompose load/store queue, coalescer, shared memory bank unit, L1/global adapter, response router, and fault/completion responsibilities unless an explicit template declares a checked fusion.
+- L3/L4 bindings must consume `cu_instance_layout.md` and `wavefront_exec_model.md`.
+- L3/L4 bindings must use wavefront scheduler + CU issue model instead of warp scheduler, SM scheduler, or generic execution pipeline as the top execution contract.
+- Every cross-CU request, response, trace event, and performance event must preserve CU_ID routing.
+- No RTL module may share execution state across CUs except through declared memory, atomic, barrier, or fabric contracts.
 - Partial simulation compares local behavior against a `GOLDEN_CONTRACT_MODEL` slice.
 
 ## Failure Modes
@@ -184,6 +194,8 @@ This skill is incomplete unless the following exist:
 - `interface_binding_and_checker.md`
 - `partial_simulation_gates.md`
 - `rtl_module_catalog.md`
+- `wavefront_exec_model.md`
+- `cu_instance_layout.md`
 - `shared/schemas/toolchain_artifact_ir.schema.yaml`
 - `shared/schemas/program_image_ir.schema.yaml`
 - `shared/schemas/runtime_launch_ir.schema.yaml`

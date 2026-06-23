@@ -55,12 +55,12 @@ Every module record must reference a `MODULE_BINDING_TEMPLATE` from
 
 Required templates:
 
-- `warp_scheduler_template`
+- `wavefront_scheduler_template`
 - `scoreboard_template`
 - `register_file_template`
 - `lsq_template`
 - `coalescer_template`
-- `shared_memory_bank_unit_template`
+- `lds_bank_unit_template`
 - `l1_cache_or_global_adapter_template`
 - `memory_response_router_template`
 - `fault_completion_unit_template`
@@ -74,15 +74,15 @@ Required templates:
 The old global RTL map is replaced by module-by-module assembly. The catalog
 must include the relevant subset of:
 
-- `sm_core`
-- `warp_scheduler`
-- `decode_execute_pipeline`
+- `cu_top`
+- `wavefront_scheduler`
+- `decode_issue_unit`
 - `register_file`
 - `scoreboard`
 - `simt_stack`
 - `load_store_queue`
 - `coalescer`
-- `shared_memory_bank_unit`
+- `lds_bank_unit`
 - `l1_cache_or_global_adapter`
 - `memory_response_router`
 - `fault_completion_unit`
@@ -107,7 +107,7 @@ here. Memory modules must bind:
 - coalescing lanes and masks
 - byte enables
 - load/store queue tags
-- shared-memory bank selection and bank conflict stalls
+- LDS bank selection and bank conflict stalls
 - cache/global request and response protocol
 - atomics and fences as contract-bound operations or reject/trap paths
 - fault propagation

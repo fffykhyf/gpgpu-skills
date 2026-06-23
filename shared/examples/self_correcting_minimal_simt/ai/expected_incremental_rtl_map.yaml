@@ -5,32 +5,32 @@ program_image_ir_hash: hash_program_image_vecadd
 runtime_launch_ir_hash: hash_runtime_launch_vecadd
 loader_contract_ir_hash: hash_loader_contract_vecadd
 modules:
-  - module_id: warp_scheduler
-    template_id: warp_scheduler_template
+  - module_id: wavefront_scheduler
+    template_id: wavefront_scheduler_template
     module_kind: control
     consumed_contract_paths:
       - execution_model.scheduler
       - state_model.scheduler_state
-    required_local_state: [scheduler_cursor, ready_warp_mask]
-    input_interfaces: [scoreboard_to_warp_scheduler]
-    output_interfaces: [warp_scheduler_to_decode_execute_pipeline]
+    required_local_state: [scheduler_cursor, ready_wavefront_mask]
+    input_interfaces: [scoreboard_to_wavefront_scheduler]
+    output_interfaces: [wavefront_scheduler_to_decode_issue_unit]
     latency_contract:
       latency_min: 0
       latency_max: 1
-    local_trace_schema: warp_scheduler_trace_v1
+    local_trace_schema: wavefront_scheduler_trace_v1
     local_simulation_evidence:
       verdict: PASS
-      cases: [round_robin_fairness, skip_stalled_warp, no_ready_warp_idle]
-      local_trace_hash: hash_warp_scheduler_partial_trace
+      cases: [round_robin_fairness, skip_stalled_wavefront, no_ready_wavefront_idle]
+      local_trace_hash: hash_wavefront_scheduler_partial_trace
     timing_feedback:
       local_timing_risk: low
-      critical_signal_paths: [ready_warp_mask_to_selected_warp]
+      critical_signal_paths: [ready_wavefront_mask_to_selected_wavefront]
       estimated_register_count: 16
       estimated_sram_macro_need: none
       fanout_risk: low
       combinational_ready_loop_check:
         no_combinational_ready_loop: true
-        checked_interfaces: [scoreboard_to_warp_scheduler, warp_scheduler_to_decode_execute_pipeline]
+        checked_interfaces: [scoreboard_to_wavefront_scheduler, wavefront_scheduler_to_decode_issue_unit]
   - module_id: scoreboard
     template_id: scoreboard_template
     module_kind: hazard_tracker
@@ -38,25 +38,25 @@ modules:
       - execution_model.scoreboard
       - state_model.scoreboard_state
     required_local_state: [pending_register_bits]
-    input_interfaces: [decode_execute_pipeline_to_scoreboard, memory_response_router_to_scoreboard]
-    output_interfaces: [scoreboard_to_warp_scheduler]
+    input_interfaces: [decode_issue_unit_to_scoreboard, memory_response_router_to_scoreboard]
+    output_interfaces: [scoreboard_to_wavefront_scheduler]
     latency_contract:
       latency_min: 0
       latency_max: 1
     local_trace_schema: scoreboard_trace_v1
     local_simulation_evidence:
       verdict: PASS
-      cases: [raw_dependency_stall, writeback_wakeup, multiple_warp_independence]
+      cases: [raw_dependency_stall, writeback_wakeup, multiple_wavefront_independence]
       local_trace_hash: hash_scoreboard_partial_trace
     timing_feedback:
       local_timing_risk: medium
-      critical_signal_paths: [dependency_matrix_to_ready_warp_mask]
+      critical_signal_paths: [dependency_matrix_to_ready_wavefront_mask]
       estimated_register_count: 128
       estimated_sram_macro_need: none
       fanout_risk: medium
       combinational_ready_loop_check:
         no_combinational_ready_loop: true
-        checked_interfaces: [scoreboard_to_warp_scheduler]
+        checked_interfaces: [scoreboard_to_wavefront_scheduler]
   - module_id: load_store_queue
     template_id: lsq_template
     module_kind: memory_pipeline
@@ -65,7 +65,7 @@ modules:
       - memory_model.ordering
       - state_model.memory_stall_state
     required_local_state: [pending_memory_ops, request_tags, stall_state]
-    input_interfaces: [decode_execute_pipeline_to_load_store_queue, memory_response_router_to_load_store_queue]
+    input_interfaces: [decode_issue_unit_to_load_store_queue, memory_response_router_to_load_store_queue]
     output_interfaces: [load_store_queue_to_coalescer, load_store_queue_to_fault_completion_unit]
     latency_contract:
       latency_min: 1
@@ -201,7 +201,7 @@ modules:
       - config_contract.hw_sw_abi
     required_local_state: [start_bit, done_bit, fault_bit, kernel_entry, arg_base]
     input_interfaces: [host_to_csr_runtime_interface, fault_completion_unit_to_csr_runtime_interface]
-    output_interfaces: [csr_runtime_interface_to_sm_core]
+    output_interfaces: [csr_runtime_interface_to_cu_top]
     latency_contract:
       latency_min: 0
       latency_max: 1
@@ -218,7 +218,7 @@ modules:
       fanout_risk: low
       combinational_ready_loop_check:
         no_combinational_ready_loop: true
-        checked_interfaces: [host_to_csr_runtime_interface, csr_runtime_interface_to_sm_core]
+        checked_interfaces: [host_to_csr_runtime_interface, csr_runtime_interface_to_cu_top]
 module_interfaces:
   - interface_id: load_store_queue_to_coalescer
     producer_module: load_store_queue
@@ -370,5 +370,5 @@ timing_feedback:
     local_timing_risk: high
     no_combinational_ready_loop: true
 unresolved_binding_risks:
-  - lsq_backpressure_can_reduce_warp_occupancy
+  - lsq_backpressure_can_reduce_wavefront_occupancy
   - l1_cache_or_global_adapter_timing_needs_later_synthesis_check

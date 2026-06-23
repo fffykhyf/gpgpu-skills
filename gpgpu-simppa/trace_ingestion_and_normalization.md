@@ -46,7 +46,7 @@ event:
   order_key: optional string
 
   block_id: optional integer
-  warp_id: optional integer
+  wavefront_id: optional integer
   lane_id: optional integer
   thread_id: optional integer
   lane_mask: optional string

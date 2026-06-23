@@ -2,7 +2,7 @@ version: v5
 patch_classes:
   ARCHITECTURE_PATCH:
     target_owner: gpgpu-arch
-    examples: [warp_size_change, sm_partition_change, issue_width_change, memory_hierarchy_change]
+    examples: [wavefront_size_change, cu_partition_change, issue_width_change, memory_hierarchy_change]
   CONTRACT_PATCH:
     target_owner: gpgpu-golden
     examples: [scheduling_rule_change, memory_ordering_change, launch_abi_change, scoreboard_semantic_change]

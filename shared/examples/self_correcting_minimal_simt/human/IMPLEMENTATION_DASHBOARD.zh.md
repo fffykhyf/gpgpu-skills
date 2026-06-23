@@ -8,7 +8,7 @@
 ## 模块绑定状态
 | 模块 | 状态 | 证据摘要 |
 |---|---|---|
-| warp_scheduler | PASS | scheduler contract paths 已绑定 |
+| wavefront_scheduler | PASS | scheduler contract paths 已绑定 |
 | load_store_queue | WARNING | replay/backpressure 需要 performance evidence |
 | cache_global_interface | PASS | request/response path 已绑定 |
 

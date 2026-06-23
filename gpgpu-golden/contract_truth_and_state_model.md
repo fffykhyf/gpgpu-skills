@@ -117,5 +117,5 @@ contract can be consumed deterministically:
 
 Golden traces must replay deterministically from `GOLDEN_CONTRACT_MODEL`, cite
 contract hashes, cover mandatory semantic fields, and locate first divergence by
-field and rule path. They must not redefine ISA, warp model, state transitions,
+field and rule path. They must not redefine ISA, wavefront model, state transitions,
 or memory behavior.

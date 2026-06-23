@@ -10,7 +10,7 @@ block_dim:
   x: 4
   y: 1
   z: 1
-warp_size: 4
+wavefront_size: 4
 arg_buffer_layout:
   endian: little
   alignment: 8

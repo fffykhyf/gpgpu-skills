@@ -31,7 +31,7 @@ The final cross-run output for this engine is `SIM_PERF_ATTRIBUTION_REPORT`,
 with supporting `CORRECTNESS_GATE_REPORT`, `PASS_EVIDENCE_REPORT`,
 `PERF_ATTRIBUTION_GRAPH`, `ROOT_CAUSE_REPORT`, and normalized trace evidence.
 
-Runtime validation must not infer scheduler policy, allocate warps absent from
+Runtime validation must not infer scheduler policy, allocate wavefronts absent from
 the contract, optimize memory visibility, modify config defaults, or treat the
 backend transport as the launch ABI.
 
@@ -92,7 +92,7 @@ report. The graph should connect:
 cycle
   -> warp
   -> scoreboard or scheduler state
-  -> memory request or execution pipeline event
+  -> memory request or CU issue model event
   -> cache miss, bank conflict, replay, dependency, or pipeline bubble
   -> RTL module path
   -> SYSTEM_CONTRACT_IR path

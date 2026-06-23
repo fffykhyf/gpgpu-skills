@@ -6,7 +6,7 @@
 
 ## 首次分歧
 - cycle：
-- warp：
+- wavefront：
 - pc：
 - mismatch type：
 

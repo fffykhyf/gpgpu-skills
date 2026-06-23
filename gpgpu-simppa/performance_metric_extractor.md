@@ -32,8 +32,8 @@ performance_metric_ir:
   commit_cycles: integer
 
   ipc: float
-  warp_eligible_rate: float
-  warp_issue_rate: float
+  wavefront_eligible_rate: float
+  wavefront_issue_rate: float
   issue_utilization: float
   pipeline_utilization:
     fetch: float
@@ -45,7 +45,7 @@ performance_metric_ir:
 
   stall_breakdown:
     scoreboard_dependency: integer
-    no_ready_warp: integer
+    no_ready_wavefront: integer
     memory_wait: integer
     lsq_full: integer
     coalescer_wait: integer
@@ -67,9 +67,9 @@ performance_metric_ir:
     memory_replay_count: integer
 
   scheduler_metrics:
-    ready_warp_count_avg: float
-    eligible_warp_count_avg: float
-    issued_warp_count: integer
+    ready_wavefront_count_avg: float
+    eligible_wavefront_count_avg: float
+    issued_wavefront_count: integer
     ready_but_not_issued_cycles: integer
 
   warning_flags:

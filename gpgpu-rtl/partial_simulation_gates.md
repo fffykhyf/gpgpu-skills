@@ -30,11 +30,11 @@ full-system verification.
 `shared/tables/rtl_partial_sim_gate_table.yaml` owns the concrete case list.
 At minimum it must cover:
 
-- scoreboard: RAW dependency stall, writeback wakeup, multiple warp independence
-- warp scheduler: round-robin fairness, skip stalled warp, no-ready-warp idle
+- scoreboard: RAW dependency stall, writeback wakeup, multiple wavefront independence
+- wavefront scheduler: round-robin fairness, skip stalled wavefront, no-ready-wavefront idle
 - load/store queue: ready-low payload stable, tag unique, response wakeup, fault
   propagation
-- shared memory bank unit: bank conflict stall, lane-mask byte enable,
+- LDS bank unit: bank conflict stall, lane-mask byte enable,
   aligned/misaligned behavior
 - CSR runtime: start, done, fault, kernel entry, arg base
 - program image loader interface: program image load, entry PC fetch, first
@@ -43,8 +43,8 @@ At minimum it must cover:
 
 ## Gate Rule
 
-A module with `PARTIAL_SIM_FAIL`, `INTERFACE_PROTOCOL_MISMATCH`,
-`GOLDEN_SLICE_MISMATCH`, or `COMBINATIONAL_READY_LOOP` cannot be used in
+A module with `PARTIAL_SIM_FAIL`, `INTERFACE_PROTOCOL_MICUATCH`,
+`GOLDEN_SLICE_MICUATCH`, or `COMBINATIONAL_READY_LOOP` cannot be used in
 full-system simulation.
 
 Program-image and runtime partial gates also fail closed on

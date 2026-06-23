@@ -6,7 +6,7 @@
 
 ## 首次分歧
 - cycle：40。
-- warp：2。
+- wavefront：2。
 - pc：vector-add load/use window。
 - mismatch type：不是 correctness mismatch，是 replay overhead。
 

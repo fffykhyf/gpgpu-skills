@@ -19,7 +19,7 @@ properties:
   entry_pc: integer
   grid_dim: map
   block_dim: map
-  warp_size: integer
+  wavefront_size: integer
   arg_buffer_layout: map
   arg_buffer_bytes: string
   csr_write_sequence: list

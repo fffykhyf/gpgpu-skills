@@ -2,7 +2,7 @@ version: v5
 stall_reasons:
   scoreboard_dependency:
     root_cause_family: SCHEDULER_ROOT_CAUSE
-  no_ready_warp:
+  no_ready_wavefront:
     root_cause_family: SCHEDULER_ROOT_CAUSE
   memory_wait:
     root_cause_family: MEMORY_SYSTEM_ROOT_CAUSE

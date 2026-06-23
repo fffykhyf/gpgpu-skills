@@ -57,6 +57,11 @@ Consumes:
 - `golden_contract_trace`
 - `module_partial_sim_trace`
 - `memory_trace`
+- `interconnect_trace`
+- `dram_trace`
+- `coherence_trace`
+- `atomic_trace`
+- `barrier_fence_trace`
 - `runtime_launch_trace`
 - `assembler_trace`
 - `disassembler_trace`
@@ -108,6 +113,10 @@ This skill owns:
 - toolchain/runtime trace attribution
 - execution correctness evidence aggregation
 - report generation for rewrite routing or regression tracking
+- CU-level trace partitioning
+- wavefront EXEC-mask diff
+- divergence path diff
+- memory fabric contention attribution
 
 ## Human and AI Output Policy
 
@@ -117,7 +126,8 @@ a concise Chinese `VALIDATION_DASHBOARD.zh.md`.
 
 On a passing run, humans should see RTL vs golden verdict, memory dump status,
 coverage sufficiency, performance warnings, and regression fingerprint stability.
-On failure, emit `DEBUG_SUMMARY.zh.md` with first divergence cycle, warp, PC,
+On failure, emit `DEBUG_SUMMARY.zh.md` with first divergence cycle, CU,
+wavefront, PC,
 mismatch type, likely root cause, owner, and next patch route. Pass the full
 English root cause and trace artifacts to `gpgpu-loop` through
 `ARTIFACT_MANIFEST_IR`.
@@ -198,9 +208,11 @@ The output must satisfy:
   divergence over final-state symptoms.
 - Pass Evidence Mode must report evidence completeness, architectural state
   comparison, trace coverage, performance metrics, and regression fingerprint.
-- `PERF_ATTRIBUTION_GRAPH` must connect cycle or order window, warp or block,
+- `PERF_ATTRIBUTION_GRAPH` must connect cycle or order window, CU and wavefront,
   bottleneck/event evidence, contract path, and RTL module evidence when it is
   used for root cause or performance rewrite decisions.
+- L3/L4 trace comparison must include CU-level trace partitioning, EXEC mask diff, wave state diff, and divergence path diff.
+- Memory stall classification must distinguish coalescing stall, LDS stall, inter-CU contention, DRAM bank conflict, atomic serialization wait, and fence drain wait.
 - A performance root cause without this causal chain must be
   `INSUFFICIENT_TRACE_EVIDENCE`.
 - Every bottleneck node has trace evidence.
@@ -318,6 +330,8 @@ This skill is incomplete unless the following exist:
 - `toolchain_trace_attribution.md`
 - `report_generation_rules.md`
 - `legacy_validation_and_trace_constraints.md`
+- `multi_cu_trace_model.md`
+- `wavefront_trace_diff.md`
 - `shared/schemas/normalized_trace_ir.schema.yaml`
 - `shared/schemas/correctness_gate_report_ir.schema.yaml`
 - `shared/schemas/first_divergence_report_ir.schema.yaml`

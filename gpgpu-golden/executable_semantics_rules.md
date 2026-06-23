@@ -50,7 +50,7 @@ Required launch functions:
 | Semantics function | Purpose |
 |---|---|
 | `abi_decode` | Decode launch arguments from the ABI layout. |
-| `grid_block_thread_map` | Map grid and block dimensions to logical threads and warps. |
+| `grid_block_thread_map` | Map grid and block dimensions to logical threads and wavefronts. |
 | `kernel_entry_resolve` | Resolve the program image entry point. |
 | `completion_or_fault_observe` | Produce observable completion or fault state. |
 
@@ -92,7 +92,7 @@ Each rule record must define:
 
 - Reject if a function has no contract path.
 - Reject if a function reads fields outside `SYSTEM_CONTRACT_IR`.
-- Reject if a function invents scheduler, warp, ISA, memory, launch, config, or
+- Reject if a function invents scheduler, wavefront, ISA, memory, launch, config, or
   interface semantics.
 - Reject hidden memory ordering defaults.
 - Reject duplicate request behavior not declared in the contract.

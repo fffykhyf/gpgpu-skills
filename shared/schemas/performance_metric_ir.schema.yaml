@@ -20,8 +20,8 @@ properties:
   issue_cycles: integer
   commit_cycles: integer
   ipc: number
-  warp_eligible_rate: number
-  warp_issue_rate: number
+  wavefront_eligible_rate: number
+  wavefront_issue_rate: number
   issue_utilization: number
   pipeline_utilization: map
   stall_breakdown: map

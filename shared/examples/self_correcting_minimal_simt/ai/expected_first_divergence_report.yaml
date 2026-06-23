@@ -1,7 +1,7 @@
 verdict: NO_DIVERGENCE_FOUND
 first_divergence_type: MEMORY_VALUE_MISMATCH
 cycle: 40
-warp_id: 2
+wavefront_id: 2
 pc: "0x00000008"
 contract_paths:
   - memory_model.request_lifecycle

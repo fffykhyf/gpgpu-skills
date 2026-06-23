@@ -13,8 +13,8 @@ levels:
       - issue_cycles
       - commit_cycles
       - ipc
-      - warp_eligible_rate
-      - warp_issue_rate
+      - wavefront_eligible_rate
+      - wavefront_issue_rate
       - issue_utilization
       - pipeline_utilization
       - stall_breakdown
@@ -26,4 +26,4 @@ warning_thresholds:
   HIGH_MEMORY_STALL: memory_wait_dominates_stall_breakdown
   HIGH_BANK_CONFLICT: shared_bank_conflict_rate_above_target
   HIGH_INTERFACE_BACKPRESSURE: interface_backpressure_above_target
-  LOW_OCCUPANCY: ready_warp_count_avg_below_target
+  LOW_OCCUPANCY: ready_wavefront_count_avg_below_target

@@ -1,40 +1,40 @@
 version: v5
 modules:
-  sm_core:
-    template: sm_core_template
-    required_contract_paths: [architecture_model.sm_count, architecture_model.max_warps_per_sm, interface_semantics_model.request_acceptance]
-    required_interfaces: [csr_runtime_interface, warp_scheduler, decode_execute_pipeline]
-  warp_scheduler:
-    template: warp_scheduler_template
-    required_contract_paths: [execution_model.scheduler, state_model.scheduler_state, state_model.warp_state]
-    required_interfaces: [scoreboard, decode_execute_pipeline]
-  decode_execute_pipeline:
-    template: decode_execute_pipeline_template
+  cu_top:
+    template: cu_top_template
+    required_contract_paths: [architecture_model.cu_count, architecture_model.wavefront_slots_per_cu, interface_semantics_model.request_acceptance]
+    required_interfaces: [csr_runtime_interface, wavefront_scheduler, decode_issue_unit]
+  wavefront_scheduler:
+    template: wavefront_scheduler_template
+    required_contract_paths: [execution_model.scheduler, state_model.scheduler_state, state_model.wavefront_state]
+    required_interfaces: [scoreboard, decode_issue_unit]
+  decode_issue_unit:
+    template: decode_issue_unit_template
     required_contract_paths: [isa_model.opcodes, isa_model.instruction_encodings, execution_model.simt, state_model.pipeline_visible_state]
     required_interfaces: [register_file, scoreboard, load_store_queue, fault_completion_unit]
   register_file:
     template: register_file_template
     required_contract_paths: [state_model.register_file_state, config_contract.hw_sw_abi]
-    required_interfaces: [decode_execute_pipeline]
+    required_interfaces: [decode_issue_unit]
   scoreboard:
     template: scoreboard_template
     required_contract_paths: [execution_model.scoreboard, state_model.scoreboard_state]
-    required_interfaces: [warp_scheduler, decode_execute_pipeline, load_store_queue, memory_response_router]
+    required_interfaces: [wavefront_scheduler, decode_issue_unit, load_store_queue, memory_response_router]
   simt_stack:
     template: simt_stack_template
     required_contract_paths: [execution_model.features.simt_divergence, state_model.simt_stack_state]
-    required_interfaces: [decode_execute_pipeline, warp_scheduler]
+    required_interfaces: [decode_issue_unit, wavefront_scheduler]
     optional_when_feature_disabled: execution_model.features.simt_divergence
   load_store_queue:
     template: lsq_template
     required_contract_paths: [memory_model.request_lifecycle, memory_model.ordering, state_model.memory_stall_state]
-    required_interfaces: [decode_execute_pipeline, scoreboard, coalescer, memory_response_router, fault_completion_unit]
+    required_interfaces: [decode_issue_unit, scoreboard, coalescer, memory_response_router, fault_completion_unit]
   coalescer:
     template: coalescer_template
     required_contract_paths: [memory_model.coalescing, memory_model.address_spaces]
-    required_interfaces: [load_store_queue, shared_memory_bank_unit, l1_cache_or_global_adapter]
-  shared_memory_bank_unit:
-    template: shared_memory_bank_unit_template
+    required_interfaces: [load_store_queue, lds_bank_unit, l1_cache_or_global_adapter]
+  lds_bank_unit:
+    template: lds_bank_unit_template
     required_contract_paths: [memory_model.address_spaces, memory_model.request_lifecycle]
     required_interfaces: [coalescer, memory_response_router]
   l1_cache_or_global_adapter:
@@ -44,11 +44,11 @@ modules:
   memory_response_router:
     template: memory_response_router_template
     required_contract_paths: [memory_model.request_lifecycle, interface_semantics_model.tag_uniqueness, interface_semantics_model.response_ordering]
-    required_interfaces: [load_store_queue, scoreboard, shared_memory_bank_unit, l1_cache_or_global_adapter, fault_completion_unit]
+    required_interfaces: [load_store_queue, scoreboard, lds_bank_unit, l1_cache_or_global_adapter, fault_completion_unit]
   fault_completion_unit:
     template: fault_completion_unit_template
     required_contract_paths: [memory_model.fault_behavior, launch_model.completion_fault_observation, interface_semantics_model.fault_response]
-    required_interfaces: [decode_execute_pipeline, load_store_queue, memory_response_router, csr_runtime_interface]
+    required_interfaces: [decode_issue_unit, load_store_queue, memory_response_router, csr_runtime_interface]
   interconnect:
     template: interconnect_template
     required_contract_paths: [interface_semantics_model.request_acceptance, interface_semantics_model.payload_stability, interface_semantics_model.response_ordering]
@@ -57,73 +57,73 @@ modules:
     template: csr_runtime_template
     required_contract_paths: [launch_model.abi, launch_model.kernel_entry, launch_model.argument_buffer_layout, launch_model.completion_fault_observation, config_contract.hw_sw_abi]
     required_artifacts: [RUNTIME_LAUNCH_IR, LOADER_CONTRACT_IR]
-    required_interfaces: [sm_core, fault_completion_unit, interconnect, runtime_arg_buffer_interface]
+    required_interfaces: [cu_top, fault_completion_unit, interconnect, runtime_arg_buffer_interface]
   program_image_loader_interface:
     template: program_image_loader_template
     required_contract_paths: [launch_model.program_image_format, launch_model.loader_contract, launch_model.kernel_entry]
     required_artifacts: [PROGRAM_IMAGE_IR, LOADER_CONTRACT_IR]
-    required_interfaces: [instruction_memory_init, runtime_arg_buffer_interface, sm_core]
+    required_interfaces: [instruction_memory_init, runtime_arg_buffer_interface, cu_top]
   instruction_memory_init:
     template: instruction_memory_init_template
     required_contract_paths: [launch_model.program_image_format, isa_model.instruction_encodings]
     required_artifacts: [PROGRAM_IMAGE_IR, LOADER_CONTRACT_IR]
-    required_interfaces: [program_image_loader_interface, decode_execute_pipeline]
+    required_interfaces: [program_image_loader_interface, decode_issue_unit]
   runtime_arg_buffer_interface:
     template: runtime_arg_buffer_template
     required_contract_paths: [launch_model.argument_buffer_layout, config_contract.hw_sw_abi]
     required_artifacts: [RUNTIME_LAUNCH_IR, LOADER_CONTRACT_IR]
     required_interfaces: [csr_runtime_interface, program_image_loader_interface, register_file]
 module_binding_templates:
-  warp_scheduler_template:
-    required_contract_paths: [execution_model.scheduler, state_model.scheduler_state, state_model.warp_state]
-    required_local_state: [scheduler_cursor, ready_warp_mask]
-    required_input_interfaces: [scoreboard_to_warp_scheduler]
-    required_output_interfaces: [warp_scheduler_to_decode_execute_pipeline]
-    required_partial_sim_cases: [round_robin_fairness, skip_stalled_warp, no_ready_warp_idle]
-    required_trace_fields: [cycle, ready_warp_mask, selected_warp, stall_reason]
-    forbidden_hidden_state: [private_priority_override, uncontracted_warp_mask]
+  wavefront_scheduler_template:
+    required_contract_paths: [execution_model.scheduler, state_model.scheduler_state, state_model.wavefront_state]
+    required_local_state: [scheduler_cursor, ready_wavefront_mask]
+    required_input_interfaces: [scoreboard_to_wavefront_scheduler]
+    required_output_interfaces: [wavefront_scheduler_to_decode_issue_unit]
+    required_partial_sim_cases: [round_robin_fairness, skip_stalled_wavefront, no_ready_wavefront_idle]
+    required_trace_fields: [cycle, ready_wavefront_mask, selected_wavefront, stall_reason]
+    forbidden_hidden_state: [private_priority_override, uncontracted_wavefront_mask]
     timing_checks: [local_timing_risk, fanout_risk, no_combinational_ready_loop]
   scoreboard_template:
     required_contract_paths: [execution_model.scoreboard, state_model.scoreboard_state]
-    required_local_state: [pending_register_bits, warp_dependency_matrix]
-    required_input_interfaces: [decode_execute_pipeline_to_scoreboard, memory_response_router_to_scoreboard]
-    required_output_interfaces: [scoreboard_to_warp_scheduler]
-    required_partial_sim_cases: [raw_dependency_stall, writeback_wakeup, multiple_warp_independence]
-    required_trace_fields: [cycle, warp_id, src_regs, dst_reg, dependency_stall, wakeup_event]
-    forbidden_hidden_state: [untracked_dependency_bit, global_single_warp_stall]
+    required_local_state: [pending_register_bits, wavefront_dependency_matrix]
+    required_input_interfaces: [decode_issue_unit_to_scoreboard, memory_response_router_to_scoreboard]
+    required_output_interfaces: [scoreboard_to_wavefront_scheduler]
+    required_partial_sim_cases: [raw_dependency_stall, writeback_wakeup, multiple_wavefront_independence]
+    required_trace_fields: [cycle, wavefront_id, src_regs, dst_reg, dependency_stall, wakeup_event]
+    forbidden_hidden_state: [untracked_dependency_bit, global_single_wavefront_stall]
     timing_checks: [fanout_risk, no_combinational_ready_loop]
   register_file_template:
     required_contract_paths: [state_model.register_file_state, config_contract.hw_sw_abi]
     required_local_state: [integer_registers]
-    required_input_interfaces: [decode_execute_pipeline_to_register_file]
-    required_output_interfaces: [register_file_to_decode_execute_pipeline]
+    required_input_interfaces: [decode_issue_unit_to_register_file]
+    required_output_interfaces: [register_file_to_decode_issue_unit]
     required_partial_sim_cases: [read_after_write_visibility, lane_masked_write, reset_zero_or_contract_init]
-    required_trace_fields: [cycle, warp_id, lane_mask, read_addr, write_addr, write_data]
+    required_trace_fields: [cycle, wavefront_id, lane_mask, read_addr, write_addr, write_data]
     forbidden_hidden_state: [implicit_register_alias, undocumented_zero_register]
     timing_checks: [estimated_register_count, fanout_risk]
   lsq_template:
     required_contract_paths: [memory_model.request_lifecycle, memory_model.ordering, state_model.memory_stall_state]
     required_local_state: [pending_memory_ops, request_tags, stall_state]
-    required_input_interfaces: [decode_execute_pipeline_to_load_store_queue, memory_response_router_to_load_store_queue]
+    required_input_interfaces: [decode_issue_unit_to_load_store_queue, memory_response_router_to_load_store_queue]
     required_output_interfaces: [load_store_queue_to_coalescer, load_store_queue_to_fault_completion_unit]
     required_partial_sim_cases: [ready_low_payload_stable, tag_unique, response_wakeup, fault_propagation]
-    required_trace_fields: [cycle, warp_id, op_id, request_tag, addr, lane_mask, stall, response, fault]
+    required_trace_fields: [cycle, wavefront_id, op_id, request_tag, addr, lane_mask, stall, response, fault]
     forbidden_hidden_state: [untracked_replay_queue, implicit_tag_allocator]
     timing_checks: [local_timing_risk, no_combinational_ready_loop]
   coalescer_template:
     required_contract_paths: [memory_model.coalescing, memory_model.address_spaces]
     required_local_state: [lane_request_buffer]
     required_input_interfaces: [load_store_queue_to_coalescer]
-    required_output_interfaces: [coalescer_to_shared_memory_bank_unit, coalescer_to_l1_cache_or_global_adapter]
+    required_output_interfaces: [coalescer_to_lds_bank_unit, coalescer_to_l1_cache_or_global_adapter]
     required_partial_sim_cases: [lane_mask_byte_enable, contiguous_lane_coalescing, invalid_address_reject]
     required_trace_fields: [cycle, lane_mask, addresses, byte_enable, coalesced_transactions]
     forbidden_hidden_state: [implicit_address_space_override]
     timing_checks: [critical_signal_paths, fanout_risk]
-  shared_memory_bank_unit_template:
+  lds_bank_unit_template:
     required_contract_paths: [memory_model.address_spaces, memory_model.request_lifecycle]
-    required_local_state: [bank_busy_state, shared_memory_array]
-    required_input_interfaces: [coalescer_to_shared_memory_bank_unit]
-    required_output_interfaces: [shared_memory_bank_unit_to_memory_response_router]
+    required_local_state: [bank_busy_state, lds_array]
+    required_input_interfaces: [coalescer_to_lds_bank_unit]
+    required_output_interfaces: [lds_bank_unit_to_memory_response_router]
     required_partial_sim_cases: [bank_conflict_stall, lane_mask_byte_enable, aligned_misaligned_behavior]
     required_trace_fields: [cycle, bank_id, lane_mask, byte_enable, bank_conflict, response_tag]
     forbidden_hidden_state: [silent_bank_conflict_drop]
@@ -140,16 +140,16 @@ module_binding_templates:
   memory_response_router_template:
     required_contract_paths: [memory_model.request_lifecycle, interface_semantics_model.tag_uniqueness, interface_semantics_model.response_ordering]
     required_local_state: [outstanding_tag_table]
-    required_input_interfaces: [shared_memory_bank_unit_to_memory_response_router, l1_cache_or_global_adapter_to_memory_response_router]
+    required_input_interfaces: [lds_bank_unit_to_memory_response_router, l1_cache_or_global_adapter_to_memory_response_router]
     required_output_interfaces: [memory_response_router_to_load_store_queue, memory_response_router_to_scoreboard, memory_response_router_to_fault_completion_unit]
     required_partial_sim_cases: [tag_unique, response_wakeup, fault_propagation]
-    required_trace_fields: [cycle, response_tag, target_warp, wakeup, fault]
+    required_trace_fields: [cycle, response_tag, target_wavefront, wakeup, fault]
     forbidden_hidden_state: [tag_rewrite_without_trace]
     timing_checks: [fanout_risk, no_combinational_ready_loop]
   fault_completion_unit_template:
     required_contract_paths: [memory_model.fault_behavior, launch_model.completion_fault_observation, interface_semantics_model.fault_response]
     required_local_state: [completion_status, fault_status]
-    required_input_interfaces: [decode_execute_pipeline_to_fault_completion_unit, load_store_queue_to_fault_completion_unit, memory_response_router_to_fault_completion_unit]
+    required_input_interfaces: [decode_issue_unit_to_fault_completion_unit, load_store_queue_to_fault_completion_unit, memory_response_router_to_fault_completion_unit]
     required_output_interfaces: [fault_completion_unit_to_csr_runtime_interface]
     required_partial_sim_cases: [fault_propagation, done_status, trap_or_poison_status]
     required_trace_fields: [cycle, fault_code, completion_status, csr_status]
@@ -159,7 +159,7 @@ module_binding_templates:
     required_contract_paths: [launch_model.abi, launch_model.kernel_entry, launch_model.completion_fault_observation, config_contract.hw_sw_abi]
     required_local_state: [start_bit, done_bit, fault_bit, kernel_entry, arg_base]
     required_input_interfaces: [host_to_csr_runtime_interface, fault_completion_unit_to_csr_runtime_interface]
-    required_output_interfaces: [csr_runtime_interface_to_sm_core]
+    required_output_interfaces: [csr_runtime_interface_to_cu_top]
     required_partial_sim_cases: [start, done, fault, kernel_entry, arg_base]
     required_trace_fields: [cycle, start, done, fault, kernel_entry, arg_base]
     forbidden_hidden_state: [undocumented_csr, untracked_arg_base]
@@ -168,7 +168,7 @@ module_binding_templates:
     required_contract_paths: [launch_model.program_image_format, launch_model.loader_contract, launch_model.kernel_entry]
     required_local_state: [entry_pc_latch, imem_init_state, dmem_init_state]
     required_input_interfaces: [host_program_image_load]
-    required_output_interfaces: [program_image_loader_to_instruction_memory_init, program_image_loader_to_sm_core]
+    required_output_interfaces: [program_image_loader_to_instruction_memory_init, program_image_loader_to_cu_top]
     required_partial_sim_cases: [program_image_load, entry_pc_fetch, first_instruction_decode]
     required_trace_fields: [cycle, entry_pc, segment_name, image_offset, encoded_instruction]
     forbidden_hidden_state: [implicit_entry_pc, undocumented_image_layout]
@@ -177,7 +177,7 @@ module_binding_templates:
     required_contract_paths: [launch_model.program_image_format, isa_model.instruction_encodings]
     required_local_state: [instruction_memory_array]
     required_input_interfaces: [program_image_loader_to_instruction_memory_init]
-    required_output_interfaces: [instruction_memory_to_decode_execute_pipeline]
+    required_output_interfaces: [instruction_memory_to_decode_issue_unit]
     required_partial_sim_cases: [program_image_load, first_instruction_decode]
     required_trace_fields: [cycle, pc, image_offset, encoded_instruction, decoded_instruction]
     forbidden_hidden_state: [instruction_patch_without_contract]

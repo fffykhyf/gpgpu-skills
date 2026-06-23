@@ -2,7 +2,7 @@ schema: DESIGN_INTENT_IR
 version: v4
 type: object
 required: [schema_version, intent_id, objective, non_goals, workload_profile, target_platform, hard_constraints, soft_constraints, required_features, optional_features, validation_target, prototype_kind, prototype_credibility_target, provenance]
-forbidden_fields: [warp_size, sm_count, cache_policy, scheduler_policy, isa_encoding, memory_hierarchy, register_file_size, rtl_pipeline]
+forbidden_fields: [wavefront_size, cu_count, cache_policy, scheduler_policy, isa_encoding, memory_hierarchy, register_file_size, rtl_pipeline]
 properties:
   objective: {type: string, min_length: 1}
   non_goals:

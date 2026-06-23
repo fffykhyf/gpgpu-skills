@@ -16,7 +16,7 @@ properties:
   first_divergence_type: enum
   cycle: integer
   step_id: integer
-  warp_id: integer
+  wavefront_id: integer
   pc: string
   golden_event: map
   rtl_event: map

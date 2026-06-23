@@ -19,6 +19,7 @@ Upstream:
 
 Downstream:
 - `gpgpu-golden`
+- `gpgpu-interconnect` when L4 multi-CU fabric is in scope
 
 ## Input IR
 
@@ -63,14 +64,21 @@ This skill owns:
 - micro-constraint estimation
 - hard-constraint prefiltering
 - candidate risk reporting
+- CU-centric hierarchy selection
+- wavefront state contract selection
+- L3/L4 scope classification
 
 ## Preset Selection Rules
 
 Apply deterministic preset rules before free-form candidate synthesis:
 
 1. If `validation_target` or `prototype_credibility_target` contains all of `compile_kernel_to_program_image`, `rtl_sim_smoke_test`, and `memory_dump_golden_check`, prefer `MINIMAL_VERTICAL_SLICE_GPGPU`.
-2. If the user target is teaching only and there is no runtime, frontend, or vertical-slice requirement, prefer `MINIMAL_SIMT_CORE`.
-3. If the workload needs memory latency hiding or `max_warps_per_sm > 1`, prefer `MULTI_WARP_SINGLE_SM` unless rule 1 already selected the vertical-slice preset.
+2. If the user target is teaching only and there is no runtime, frontend, or vertical-slice requirement, prefer `MINIMAL_WAVEFRONT_CU_TEACHING`.
+3. If the request targets L3 or L4, prefer `MINIMAL_WAVEFRONT_CU` or
+   `MULTI_CU_WAVEFRONT_GPGPU` before legacy-compatible presets.
+4. If the workload needs memory latency hiding or `wavefront_slots_per_cu > 1`,
+   prefer a multi-wavefront CU preset unless rule 1 already selected the
+   vertical-slice preset.
 
 When multiple rules match, use the first applicable rule in `shared/tables/architecture_preset_library.yaml`, record the selected rule, and list lower-priority matching presets in `rejected_alternatives`. If the selected preset fails a hard constraint, emit the failure instead of guessing a replacement.
 
@@ -135,10 +143,14 @@ The output must satisfy:
 - `ARCH_IR is a candidate graph`
 - Every `ARCH_IR.graph_nodes` entry is a structured graph node with `node_id`, `node_type`, `owned_state`, `input_ports`, `output_ports`, `required_contract_paths`, and `scaling_parameters`.
 - `MICRO_CONSTRAINT_ESTIMATE_IR is a feasibility estimate`
+- L3/L4 candidates use CU as the canonical execution island instead of SM.
+- L3/L4 candidates use wavefront scheduler + CU issue model instead of warp scheduler, SM scheduler, or generic execution pipeline as the top execution contract.
+- Wavefront state must include EXEC mask lifecycle, divergence, and reconvergence status when control flow is in scope.
+- Memory-capable candidates must include decode-time `MEMORY_BUNDLE`, rule-based coalescer, LDS, LSU front-end, and CU_ID routing hooks.
 - This skill must not emit system contract truth, golden semantics, RTL bindings, performance attribution, or rewrite patches.
 - Every intent requirement has an owner or explicit non-goal.
 - Every architecture parameter has allowed provenance.
-- Area, memory pressure, warp occupancy, register pressure, and bandwidth estimates carry assumptions and bounds.
+- Area, memory pressure, wavefront occupancy, register pressure, and bandwidth estimates carry assumptions and bounds.
 
 ## Failure Modes
 
@@ -168,6 +180,8 @@ The report must include:
 
 This skill is incomplete unless the following exist:
 - `legacy_request_and_candidate_constraints.md`
+- `wavefront_state_contract.md`
+- `cu_hierarchy_model.md`
 - `shared/tables/output_mode_table.yaml`
 - `shared/tables/artifact_visibility_table.yaml`
 - `shared/tables/report_language_policy.yaml`

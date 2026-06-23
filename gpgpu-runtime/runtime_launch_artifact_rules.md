@@ -10,7 +10,7 @@ Required fields:
 - `entry_pc`
 - `grid_dim`
 - `block_dim`
-- `warp_size`
+- `wavefront_size`
 - `arg_buffer_layout`
 - `arg_buffer_bytes`
 - `csr_write_sequence`
