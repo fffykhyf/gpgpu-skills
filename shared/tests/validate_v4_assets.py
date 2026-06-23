@@ -7,6 +7,8 @@ from typing import Dict, List
 
 ROOT = Path(__file__).resolve().parents[2]
 
+DESCRIPTION_CATALOG = "file_descriptions.zh.md"
+
 TOP_LEVEL_SKILLS = [
     "gpgpu-architecture-generator",
     "gpgpu-system-contract-golden-engine",
@@ -291,6 +293,47 @@ def require_exact_dir_names(path: Path, allowed_names: List[str], failures: List
         failures.append(f"unexpected directory in {path.relative_to(ROOT)}: {name}")
 
 
+def iter_documented_files() -> List[str]:
+    files: List[str] = []
+    for path in ROOT.rglob("*"):
+        if not path.is_file():
+            continue
+        if ".git" in path.parts:
+            continue
+        files.append(path.relative_to(ROOT).as_posix())
+    return sorted(files)
+
+
+def require_file_description_catalog(failures: List[str]) -> None:
+    catalog_path = ROOT / DESCRIPTION_CATALOG
+    require_text(
+        catalog_path,
+        [
+            "# Skill 文件中文说明索引",
+            "## 覆盖规则",
+            "内容说明：",
+            "具体例子：",
+        ],
+        failures,
+    )
+    if not catalog_path.exists():
+        return
+
+    text = catalog_path.read_text(encoding="utf-8")
+    for rel_path in iter_documented_files():
+        heading = f"### `{rel_path}`"
+        if heading not in text:
+            failures.append(f"missing file description entry: {rel_path}")
+            continue
+        start = text.index(heading)
+        next_heading = text.find("\n### `", start + len(heading))
+        section = text[start:] if next_heading == -1 else text[start:next_heading]
+        if "内容说明：" not in section:
+            failures.append(f"missing content explanation in file description: {rel_path}")
+        if "具体例子：" not in section:
+            failures.append(f"missing concrete example in file description: {rel_path}")
+
+
 def main() -> int:
     failures: List[str] = []
 
@@ -352,6 +395,8 @@ def main() -> int:
     for rel_path in REFERENCE_FILES:
         require_nonempty(ROOT / rel_path, failures)
 
+    require_file_description_catalog(failures)
+
     for lesson in REFERENCE_LESSONS:
         require(ROOT / "shared" / "references" / lesson, failures)
 
@@ -388,6 +433,17 @@ def main() -> int:
             "INCREMENTAL_RTL_MAP",
             "PERF_ATTRIBUTION_GRAPH",
             "ARCH_REWRITE_PLAN",
+        ],
+        failures,
+    )
+
+    require_text(
+        ROOT / "skill_summary.md",
+        [
+            "# GPGPU Skill v5 总结",
+            "五个核心 skill",
+            "file_descriptions.zh.md",
+            "self-correcting GPGPU design system",
         ],
         failures,
     )
