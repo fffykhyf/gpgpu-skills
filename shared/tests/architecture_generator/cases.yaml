@@ -1,0 +1,17 @@
+cases:
+  - case_id: architecture_generator_memory_pressure_prefilter
+    input_artifacts:
+      - shared/examples/self_correcting_minimal_simt/input_request.md
+    expected_outputs:
+      - DESIGN_INTENT_IR
+      - ARCH_IR
+      - MICRO_CONSTRAINT_ESTIMATE_IR
+    expected_failure_mode: null
+    required_evidence:
+      - area_estimate
+      - memory_pressure_estimate
+      - warp_occupancy_bound
+    forbidden_outputs:
+      - SYSTEM_CONTRACT_IR
+      - GOLDEN_CONTRACT_MODEL
+      - ARCH_REWRITE_PLAN

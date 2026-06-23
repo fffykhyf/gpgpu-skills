@@ -1,0 +1,17 @@
+area_estimate:
+  class: small_fpga
+  confidence: medium
+memory_pressure_estimate:
+  class: high_for_single_lsq
+  cause: vector_add_global_load_store_mix
+warp_occupancy_bound:
+  max_resident_warps: 4
+  limiting_resource: register_file_size
+register_pressure_bound:
+  registers_per_thread: 8
+shared_memory_pressure_bound:
+  bytes_per_block: 0
+minimum_bandwidth_need:
+  bytes_per_cycle: 8
+known_unrealizable_risks:
+  - four_warps_can_saturate_single_entry_lsq

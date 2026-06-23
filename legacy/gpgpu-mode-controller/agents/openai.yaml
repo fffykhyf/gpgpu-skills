@@ -1,5 +1,0 @@
-interface:
-  display_name: "GPGPU Mode Controller"
-  short_description: "Select REPRODUCE or DESIGN before compilation."
-  default_prompt: "Use $gpgpu-mode-controller to select REPRODUCE or DESIGN before GPGPU compilation."
-

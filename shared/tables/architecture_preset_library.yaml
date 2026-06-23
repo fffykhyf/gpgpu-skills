@@ -1,5 +1,5 @@
 table: architecture_preset_library
-version: v4
+version: v5
 presets:
   - preset_id: MINIMAL_SIMT_CORE
     description: Single SM, single resident warp, teaching-friendly integer SIMT core.

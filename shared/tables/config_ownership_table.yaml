@@ -1,17 +1,17 @@
 table: config_ownership_table
-version: v4
+version: v5
 parameters:
-  warp_size: {owner: gpgpu-spec-lock, visibility: hw_sw_abi, consumers: [runtime, rtl, sim, validation]}
-  max_warps_per_sm: {owner: gpgpu-spec-lock, visibility: hardware_private, consumers: [rtl, sim, validation]}
-  trace_enable: {owner: gpgpu-artifact-contract-engine, visibility: debug_only, consumers: [validation]}
-  simulator_seed: {owner: gpgpu-artifact-contract-engine, visibility: simulator_private, consumers: [sim]}
-  test_timeout_cycles: {owner: gpgpu-artifact-contract-engine, visibility: test_only, consumers: [validation]}
-  total_threads: {owner: gpgpu-runtime-validator, visibility: hw_sw_abi, consumers: [runtime, validation]}
-  block_dim: {owner: gpgpu-runtime-validator, visibility: hw_sw_abi, consumers: [runtime, validation]}
-  base_data_addr: {owner: gpgpu-runtime-validator, visibility: test_only, consumers: [runtime, validation]}
-  base_a: {owner: gpgpu-runtime-validator, visibility: test_only, consumers: [runtime, validation]}
-  base_b: {owner: gpgpu-runtime-validator, visibility: test_only, consumers: [runtime, validation]}
-  base_c: {owner: gpgpu-runtime-validator, visibility: test_only, consumers: [runtime, validation]}
-  memory_dump_range: {owner: gpgpu-implementation-validator, visibility: test_only, consumers: [validation]}
-  finish_delay_cycles: {owner: gpgpu-implementation-validator, visibility: test_only, consumers: [rtl, validation]}
+  warp_size: {owner: gpgpu-system-contract-golden-engine, visibility: hw_sw_abi, consumers: [runtime, rtl, sim, validation]}
+  max_warps_per_sm: {owner: gpgpu-system-contract-golden-engine, visibility: hardware_private, consumers: [rtl, sim, validation]}
+  trace_enable: {owner: gpgpu-simulation-performance-attribution-engine, visibility: debug_only, consumers: [validation]}
+  simulator_seed: {owner: gpgpu-system-contract-golden-engine, visibility: simulator_private, consumers: [sim]}
+  test_timeout_cycles: {owner: gpgpu-simulation-performance-attribution-engine, visibility: test_only, consumers: [validation]}
+  total_threads: {owner: gpgpu-system-contract-golden-engine, visibility: hw_sw_abi, consumers: [runtime, validation]}
+  block_dim: {owner: gpgpu-system-contract-golden-engine, visibility: hw_sw_abi, consumers: [runtime, validation]}
+  base_data_addr: {owner: gpgpu-system-contract-golden-engine, visibility: test_only, consumers: [runtime, validation]}
+  base_a: {owner: gpgpu-system-contract-golden-engine, visibility: test_only, consumers: [runtime, validation]}
+  base_b: {owner: gpgpu-system-contract-golden-engine, visibility: test_only, consumers: [runtime, validation]}
+  base_c: {owner: gpgpu-system-contract-golden-engine, visibility: test_only, consumers: [runtime, validation]}
+  memory_dump_range: {owner: gpgpu-simulation-performance-attribution-engine, visibility: test_only, consumers: [validation]}
+  finish_delay_cycles: {owner: gpgpu-incremental-rtl-binding-engine, visibility: test_only, consumers: [rtl, validation]}
 on_missing_owner: CONFIG_OWNER_MISSING

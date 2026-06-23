@@ -1,0 +1,17 @@
+schema: contract_semantics_report_ir
+version: v5
+type: object
+required:
+  - verdict
+  - system_contract_ir_hash
+  - golden_contract_model_hash
+  - executable_semantics_coverage
+  - failed_contract_paths
+  - forbidden_independent_truth_check
+properties:
+  verdict: enum
+  system_contract_ir_hash: string
+  golden_contract_model_hash: string
+  executable_semantics_coverage: map
+  failed_contract_paths: list
+  forbidden_independent_truth_check: map

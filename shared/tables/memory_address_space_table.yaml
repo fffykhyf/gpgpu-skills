@@ -1,7 +1,0 @@
-table: memory_address_space_table
-version: v4
-spaces:
-  global: {coalesced: true, ordered_by: fence, faultable: true}
-  shared: {coalesced: false, banked: true, faultable: false}
-  local: {coalesced: false, per_thread: true, faultable: true}
-  constant: {coalesced: true, read_only: true, faultable: true}

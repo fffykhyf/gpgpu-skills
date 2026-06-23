@@ -1,0 +1,18 @@
+cases:
+  - case_id: simulation_perf_builds_memory_imbalance_graph
+    input_artifacts:
+      - shared/examples/self_correcting_minimal_simt/expected_golden_contract_model.yaml
+      - shared/examples/self_correcting_minimal_simt/expected_incremental_rtl_map.yaml
+    expected_outputs:
+      - NORMALIZED_TRACE_IR
+      - PERF_ATTRIBUTION_GRAPH
+      - ROOT_CAUSE_REPORT
+    expected_failure_mode: null
+    required_evidence:
+      - cycle_window
+      - warp
+      - memory_request
+      - rtl_pipeline_stage
+      - contract_rule
+    forbidden_outputs:
+      - ARCH_REWRITE_PLAN

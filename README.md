@@ -1,41 +1,58 @@
 # GPGPU Skills
 
-This repository defines an IR-centered GPGPU design compiler flow.
+This repository now defines a self-correcting GPGPU design system.
 
 ## Goals
 
-1. Reproduce a GPGPU from a complete spec.
-2. Design a GPGPU from intent through candidate synthesis and closure.
-3. Prevent hidden defaults, unstable outputs, and uncontrolled model inference.
-4. Provide a runnable vertical-slice proof path for CUDA-like kernel -> program image -> RTL simulation -> memory dump -> golden check.
+1. Generate candidate GPGPU architectures from intent and constraints.
+2. Freeze one system contract and derive executable golden semantics.
+3. Build RTL incrementally module by module with interface checks.
+4. Normalize execution traces and build causal performance attribution.
+5. Produce architecture, contract, RTL, or test-evidence rewrite plans.
 
-## Top-Level Skills
+## Current Top-Level Skills
 
-1. gpgpu-front-end
-2. gpgpu-architecture-synthesizer
-3. gpgpu-spec-lock
-4. gpgpu-canonical-state-engine
-5. gpgpu-artifact-contract-engine
-6. gpgpu-runtime-validator
-7. gpgpu-memory-subsystem
-8. gpgpu-implementation-validator
-9. gpgpu-closure-refinement-engine
+1. `gpgpu-architecture-generator`
+2. `gpgpu-system-contract-golden-engine`
+3. `gpgpu-incremental-rtl-binding-engine`
+4. `gpgpu-simulation-performance-attribution-engine`
+5. `gpgpu-architecture-rewrite-loop-controller`
 
 ## Flow
 
-Intent -> Candidate -> Spec -> State -> Contract -> Validation -> Closure
+```text
+Architecture Generator
+  -> System Contract + Golden Semantics Engine
+  -> Incremental RTL Binding Engine
+  -> Simulation + Performance Attribution Engine
+  -> Architecture Rewrite Loop Controller
+  -> back to Architecture Generator / Contract / RTL Binding
+```
 
-Vertical-slice prototype path: CUDA-like Python kernel -> frontend -> assembler -> program.hex -> RTL simulation -> memory dump -> Python golden check.
+## Core Outputs
+
+- `ARCH_IR`
+- `MICRO_CONSTRAINT_ESTIMATE_IR`
+- `SYSTEM_CONTRACT_IR`
+- `GOLDEN_CONTRACT_MODEL`
+- `INCREMENTAL_RTL_MAP`
+- `PERF_ATTRIBUTION_GRAPH`
+- `ARCH_REWRITE_PLAN`
+
+## Legacy Migration
+
+The former 9-stage top-level GPGPU skills and the old `legacy/` skill archive have been deleted from the active skill namespace. Their useful constraints were migrated into the current owner skills as `legacy_*_constraints.md` references. New work must use the five current top-level skills; old truth, validation, memory, RTL, and closure behavior must not reappear as separate top-level skills.
 
 ## Shared Assets
 
-- schemas
-- tables
-- examples
-- tests
-- flow
-- references
+Only v5 assets are retained under `shared/`; old top-level examples, old IR references, v4-only schemas, v4-only tables, and v4 test/example directories are deleted and guarded by the validator.
 
-## Legacy
+- `shared/schemas/` defines IR and report contracts.
+- `shared/tables/` defines deterministic decision tables.
+- `shared/examples/self_correcting_minimal_simt/` demonstrates the closed loop.
+- `shared/tests/` contains regression cases and the asset validator.
+- `shared/flow/` describes the active design flow.
 
-The former 13 top-level GPGPU skills are preserved under `legacy/`. Their capabilities are retained as subpasses inside the 9 v4 top-level skills.
+## Fail-Closed Principle
+
+Missing schema, missing table row, hidden default, unsupported enum, forbidden provenance, unmapped contract path, interface mismatch, missing causal evidence, and unowned rewrite triggers must reject or emit `INSUFFICIENT_SKILL_ASSET`. The flow must not fill gaps with model guesses.

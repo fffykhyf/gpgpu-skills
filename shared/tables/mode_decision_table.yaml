@@ -1,22 +1,22 @@
 table: mode_decision_table
-version: v4
+version: v5
 decisions:
   - match: complete_spec
     mode: REPRODUCE
-    next_skill: gpgpu-spec-lock
+    next_skill: gpgpu-system-contract-golden-engine
   - match: vague_design_goal
     mode: DESIGN
-    next_skill: gpgpu-architecture-synthesizer
-    requires_subpass: Design Intent Lock
+    next_skill: gpgpu-architecture-generator
+    requires_subpass: Design Intent Lock inside Architecture Generator
   - match: vertical_slice_prototype_goal
     mode: DESIGN
     prototype_kind: VERTICAL_SLICE_PROTOTYPE
-    next_skill: gpgpu-architecture-synthesizer
+    next_skill: gpgpu-architecture-generator
     required_targets: [compile_kernel_to_program_image, rtl_sim_smoke_test, memory_dump_golden_check]
   - match: patch_against_locked_ir
     mode: PATCH_REQUEST
-    next_skill: gpgpu-closure-refinement-engine
+    next_skill: gpgpu-architecture-rewrite-loop-controller
   - match: trace_or_divergence
     mode: TRACE_DEBUG
-    next_skill: gpgpu-closure-refinement-engine
+    next_skill: gpgpu-simulation-performance-attribution-engine
 forbidden_outputs: [warp_size, sm_count, cache_policy, scheduler_policy, isa_encoding, memory_hierarchy, register_file_size, rtl_pipeline]

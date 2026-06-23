@@ -1,0 +1,22 @@
+version: v5
+interface_fields:
+  required:
+    - signal_width
+    - direction
+    - valid_ready_or_req_resp
+    - latency_min
+    - latency_max
+    - reset_value
+    - backpressure_rule
+    - trace_tap
+checks:
+  signal_width:
+    failure_mode: SIGNAL_WIDTH_MISMATCH
+  valid_ready_or_req_resp:
+    failure_mode: INTERFACE_PROTOCOL_MISMATCH
+  latency_range:
+    failure_mode: LATENCY_INCOMPATIBLE
+  pipeline_boundary:
+    failure_mode: PIPELINE_BOUNDARY_FAIL
+  backpressure_rule:
+    failure_mode: BACKPRESSURE_DROP_OR_DUPLICATE

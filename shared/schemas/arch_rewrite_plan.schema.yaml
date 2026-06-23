@@ -1,0 +1,21 @@
+schema: arch_rewrite_plan
+version: v5
+type: object
+required:
+  - rewrite_id
+  - trigger_root_cause
+  - patch_type
+  - patch_targets
+  - owner_module
+  - expected_impact
+  - required_revalidation_gates
+  - regression_risks
+properties:
+  rewrite_id: string
+  trigger_root_cause: string
+  patch_type: enum
+  patch_targets: list
+  owner_module: string
+  expected_impact: map
+  required_revalidation_gates: list
+  regression_risks: list

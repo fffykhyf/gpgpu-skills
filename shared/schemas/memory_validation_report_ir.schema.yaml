@@ -1,4 +1,0 @@
-schema: MEMORY_VALIDATION_REPORT_IR
-version: v4
-required: [schema_version, verdict, consumed_ir_hash, produced_ir_hash, memory_trace, memory_ordering_report, memory_rtl_interface_report, failed_fields]
-verdict_values: [PASS, REJECT, REFINE_REQUIRED, INSUFFICIENT_EVIDENCE]

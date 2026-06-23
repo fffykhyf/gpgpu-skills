@@ -1,0 +1,17 @@
+schema: sim_perf_attribution_report_ir
+version: v5
+type: object
+required:
+  - verdict
+  - normalized_trace_hash
+  - perf_attribution_graph_hash
+  - root_cause_report_hash
+  - failed_fields
+  - downstream_contract
+properties:
+  verdict: enum
+  normalized_trace_hash: string
+  perf_attribution_graph_hash: string
+  root_cause_report_hash: string
+  failed_fields: list
+  downstream_contract: map

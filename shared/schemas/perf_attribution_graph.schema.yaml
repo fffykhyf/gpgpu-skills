@@ -1,0 +1,21 @@
+schema: perf_attribution_graph
+version: v5
+type: object
+required:
+  - graph_id
+  - trace_window
+  - nodes
+  - edges
+  - contract_path_index
+  - rtl_module_path_index
+  - bottleneck_summary
+  - evidence_hashes
+properties:
+  graph_id: string
+  trace_window: map
+  nodes: list
+  edges: list
+  contract_path_index: map
+  rtl_module_path_index: map
+  bottleneck_summary: map
+  evidence_hashes: list

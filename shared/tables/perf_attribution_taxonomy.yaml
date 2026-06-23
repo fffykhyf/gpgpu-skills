@@ -1,0 +1,26 @@
+version: v5
+node_classes:
+  - cycle_window
+  - warp
+  - instruction
+  - scoreboard_dependency
+  - memory_request
+  - cache_event
+  - bank_conflict
+  - rtl_pipeline_stage
+  - contract_rule
+  - bottleneck_category
+edge_classes:
+  - caused_by
+  - blocked_by
+  - waits_for
+  - violates
+  - maps_to
+  - amplified_by
+required_chain:
+  - cycle_window
+  - warp
+  - memory_request
+  - rtl_pipeline_stage
+  - contract_rule
+failure_mode: PERF_CAUSAL_CHAIN_MISSING

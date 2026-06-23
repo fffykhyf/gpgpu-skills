@@ -1,0 +1,17 @@
+schema: arch_generation_report_ir
+version: v5
+type: object
+required:
+  - verdict
+  - design_intent_hash
+  - arch_ir_hash
+  - micro_constraint_estimate_hash
+  - failed_fields
+  - downstream_contract
+properties:
+  verdict: enum
+  design_intent_hash: string
+  arch_ir_hash: string
+  micro_constraint_estimate_hash: string
+  failed_fields: list
+  downstream_contract: map

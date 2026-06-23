@@ -1,5 +1,0 @@
-interface:
-  display_name: "GPGPU Causal Trace Analyzer"
-  short_description: "Map performance deltas to GPU_STATE causes."
-  default_prompt: "Use $gpgpu-causal-trace-analyzer to map performance deltas to GPU_STATE transition causes."
-

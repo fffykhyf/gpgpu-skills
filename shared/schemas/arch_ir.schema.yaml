@@ -1,0 +1,21 @@
+schema: arch_ir
+version: v5
+type: object
+required:
+  - candidate_id
+  - design_intent_ref
+  - graph_nodes
+  - graph_edges
+  - constraint_proof
+  - provenance
+  - rejected_alternatives
+  - unresolved_risks
+properties:
+  candidate_id: string
+  design_intent_ref: string
+  graph_nodes: list
+  graph_edges: list
+  constraint_proof: map
+  provenance: map
+  rejected_alternatives: list
+  unresolved_risks: list

@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""Validate the GPGPU skill v4 repository contract."""
+"""Validate the GPGPU skill v5 self-correcting design-system contract."""
 
 from pathlib import Path
 from typing import Dict, List
@@ -8,6 +8,14 @@ from typing import Dict, List
 ROOT = Path(__file__).resolve().parents[2]
 
 TOP_LEVEL_SKILLS = [
+    "gpgpu-architecture-generator",
+    "gpgpu-system-contract-golden-engine",
+    "gpgpu-incremental-rtl-binding-engine",
+    "gpgpu-simulation-performance-attribution-engine",
+    "gpgpu-architecture-rewrite-loop-controller",
+]
+
+REMOVED_TOP_LEVEL_SKILLS = [
     "gpgpu-front-end",
     "gpgpu-architecture-synthesizer",
     "gpgpu-spec-lock",
@@ -19,17 +27,32 @@ TOP_LEVEL_SKILLS = [
     "gpgpu-closure-refinement-engine",
 ]
 
-LEGACY_SKILLS = [
-    "gpgpu-mode-controller",
-    "gpgpu-design-intent-lock",
-    "gpgpu-deterministic-transform-engine",
-    "gpgpu-config",
-    "gpgpu-runtime",
-    "gpgpu-memory-path",
-    "gpgpu-rtl-simt-core",
-    "gpgpu-golden-sim",
-    "gpgpu-synthesis-closure-engine",
-    "gpgpu-causal-trace-analyzer",
+REMOVED_LEGACY_SKILLS = [
+    "legacy/gpgpu-mode-controller",
+    "legacy/gpgpu-design-intent-lock",
+    "legacy/gpgpu-deterministic-transform-engine",
+    "legacy/gpgpu-config",
+    "legacy/gpgpu-runtime",
+    "legacy/gpgpu-memory-path",
+    "legacy/gpgpu-rtl-simt-core",
+    "legacy/gpgpu-golden-sim",
+    "legacy/gpgpu-synthesis-closure-engine",
+    "legacy/gpgpu-causal-trace-analyzer",
+]
+
+REMOVED_FILES = [
+    "shared/tools/generate_v4_assets.py",
+]
+
+REMOVED_DIRS = [
+    "examples",
+    "references",
+    "shared/tools",
+]
+
+ACTIVE_STALE_REFERENCE_ROOTS = [
+    "shared/tables",
+    "shared/references",
 ]
 
 SKILL_SECTIONS = [
@@ -47,87 +70,81 @@ SKILL_SECTIONS = [
     "## Concrete Assets Required",
 ]
 
-SCHEMAS = [
+NEW_SCHEMAS = [
     "mode_selection_ir.schema.yaml",
     "design_intent_ir.schema.yaml",
-    "arch_candidate_ir.schema.yaml",
-    "synthesized_spec_draft.schema.yaml",
-    "spec_ir.schema.yaml",
-    "gpu_state_ir.schema.yaml",
-    "rtl_mapping_ir.schema.yaml",
-    "sim_behavior_ir.schema.yaml",
-    "runtime_contract_ir.schema.yaml",
-    "software_stack_contract_ir.schema.yaml",
-    "program_image_contract_ir.schema.yaml",
-    "test_app_contract_ir.schema.yaml",
-    "memory_model_ir.schema.yaml",
-    "config_binding_ir.schema.yaml",
-    "memory_subsystem_ir.schema.yaml",
-    "validation_plan_ir.schema.yaml",
-    "runtime_validation_report_ir.schema.yaml",
-    "memory_validation_report_ir.schema.yaml",
-    "implementation_validation_report_ir.schema.yaml",
-    "first_divergence_report_ir.schema.yaml",
-    "synthesis_acceptance_report_ir.schema.yaml",
-    "refinement_request_ir.schema.yaml",
+    "arch_ir.schema.yaml",
+    "micro_constraint_estimate_ir.schema.yaml",
+    "arch_generation_report_ir.schema.yaml",
+    "system_contract_ir.schema.yaml",
+    "golden_contract_model.schema.yaml",
+    "contract_semantics_report_ir.schema.yaml",
+    "incremental_rtl_map.schema.yaml",
+    "module_interface_report_ir.schema.yaml",
+    "rtl_partial_sim_report_ir.schema.yaml",
+    "normalized_trace_ir.schema.yaml",
+    "perf_attribution_graph.schema.yaml",
+    "root_cause_report_ir.schema.yaml",
+    "sim_perf_attribution_report_ir.schema.yaml",
+    "arch_rewrite_plan.schema.yaml",
+    "rewrite_decision_report_ir.schema.yaml",
+    "regression_tracking_report_ir.schema.yaml",
 ]
 
-TABLES = [
+NEW_TABLES = [
     "enum_table.yaml",
     "provenance_table.yaml",
     "mode_decision_table.yaml",
     "architecture_preset_library.yaml",
-    "minimal_vertical_slice_preset.yaml",
     "hard_constraint_table.yaml",
     "quality_target_table.yaml",
     "requirement_owner_table.yaml",
-    "spec_required_field_table.yaml",
-    "source_of_truth_generation_table.yaml",
-    "cross_artifact_consistency_table.yaml",
-    "software_stack_contract_table.yaml",
-    "end_to_end_smoke_test_table.yaml",
-    "vertical_slice_validation_table.yaml",
-    "initial_state_construction_table.yaml",
-    "state_transition_rule_table.yaml",
-    "state_invariant_table.yaml",
-    "artifact_mapping_table.yaml",
+    "micro_constraint_estimator_table.yaml",
     "config_ownership_table.yaml",
-    "state_to_rtl_mapping.yaml",
-    "state_to_sim_mapping.yaml",
-    "state_to_runtime_mapping.yaml",
-    "state_to_memory_mapping.yaml",
-    "runtime_smoke_test_table.yaml",
-    "memory_address_space_table.yaml",
-    "coalescing_rule_table.yaml",
-    "shared_memory_bank_table.yaml",
-    "memory_ordering_table.yaml",
-    "memory_scoreboard_wakeup_table.yaml",
-    "rtl_validation_gate_table.yaml",
-    "golden_sim_trace_field_table.yaml",
-    "first_divergence_taxonomy.yaml",
-    "closure_gate_table.yaml",
-    "verdict_decision_table.yaml",
-    "failure_taxonomy_table.yaml",
-    "vibe_failure_taxonomy_table.yaml",
-    "repair_routing_table.yaml",
+    "contract_semantics_binding_table.yaml",
+    "golden_model_coverage_table.yaml",
+    "source_of_truth_generation_table.yaml",
+    "rtl_module_catalog.yaml",
+    "module_interface_contract_table.yaml",
+    "rtl_partial_sim_gate_table.yaml",
+    "trace_normalization_table.yaml",
+    "perf_attribution_taxonomy.yaml",
+    "root_cause_taxonomy.yaml",
+    "rewrite_trigger_table.yaml",
+    "patch_taxonomy_table.yaml",
+    "revalidation_routing_table.yaml",
 ]
 
 TEST_DIRS = [
-    "front_end",
-    "architecture_synthesizer",
-    "spec_lock",
-    "state_engine",
-    "artifact_contract",
-    "runtime_validator",
-    "memory_subsystem",
-    "implementation_validator",
-    "closure_refinement",
+    "architecture_generator",
+    "system_contract_golden_engine",
+    "incremental_rtl_binding_engine",
+    "simulation_performance_attribution_engine",
+    "architecture_rewrite_loop_controller",
 ]
 
-EXAMPLE_DIRS = [
-    "reproduce_minimal_simt",
-    "design_minimal_teaching_gpgpu",
-    "vibe_minimal_vertical_slice",
+SHARED_DIRS = [
+    "examples",
+    "flow",
+    "references",
+    "schemas",
+    "tables",
+    "tests",
+]
+
+SHARED_EXAMPLE_DIRS = [
+    "self_correcting_minimal_simt",
+]
+
+EXAMPLE_FILES = [
+    "input_request.md",
+    "expected_arch_ir.yaml",
+    "expected_micro_constraint_estimate.yaml",
+    "expected_system_contract_ir.yaml",
+    "expected_golden_contract_model.yaml",
+    "expected_incremental_rtl_map.yaml",
+    "expected_perf_attribution_graph.yaml",
+    "expected_arch_rewrite_plan.yaml",
 ]
 
 REFERENCE_LESSONS = [
@@ -140,98 +157,108 @@ REFERENCE_LESSONS = [
     "reference_lesson_index.yaml",
 ]
 
-VIBE_EXAMPLE_FILES = [
-    "input_request.md",
-    "expected_design_intent_ir.yaml",
-    "expected_arch_candidate_ir.yaml",
-    "expected_spec_ir.yaml",
-    "expected_gpu_state_ir.yaml",
-    "expected_artifact_contract_report.yaml",
-    "expected_runtime_contract_ir.yaml",
-    "expected_memory_subsystem_ir.yaml",
-    "expected_validation_plan_ir.yaml",
-    "expected_closure_report.yaml",
-]
-
-VIBE_REQUIRED_TEXT: Dict[str, List[str]] = {
-    "gpgpu-front-end/SKILL.md": [
-        "VERTICAL_SLICE_PROTOTYPE",
-        "compile_kernel_to_program_image",
+TOP_LEVEL_REQUIRED_TEXT: Dict[str, List[str]] = {
+    "gpgpu-architecture-generator/SKILL.md": [
+        "MICRO_CONSTRAINT_ESTIMATE_IR",
+        "ARCH_IR is a candidate graph",
+        "must not emit system contract truth",
     ],
-    "gpgpu-architecture-synthesizer/SKILL.md": [
-        "MINIMAL_VERTICAL_SLICE_GPGPU",
-        "shared/tables/minimal_vertical_slice_preset.yaml",
+    "gpgpu-system-contract-golden-engine/SKILL.md": [
+        "GOLDEN_CONTRACT_MODEL",
+        "executable reference semantics",
+        "must not define independent ISA",
     ],
-    "gpgpu-spec-lock/SKILL.md": [
-        "isa_source_of_truth",
-        "shared/tables/source_of_truth_generation_table.yaml",
+    "gpgpu-incremental-rtl-binding-engine/SKILL.md": [
+        "INCREMENTAL_RTL_MAP",
+        "module by module",
+        "Interface Contract Checker",
+        "RTL Partial Simulator",
     ],
-    "gpgpu-canonical-state-engine/SKILL.md": [
-        "pc_table",
-        "simt_stack_state",
-        "memory_stall_state",
+    "gpgpu-simulation-performance-attribution-engine/SKILL.md": [
+        "PERF_ATTRIBUTION_GRAPH",
+        "cycle",
+        "contract path",
+        "RTL module",
     ],
-    "gpgpu-artifact-contract-engine/SKILL.md": [
-        "cross_artifact_consistency_gate",
-        "declared_test_coverage_gate",
-    ],
-    "gpgpu-runtime-validator/SKILL.md": [
-        "frontend_subset_contract",
-        "program_image_contract",
-        "golden_output_contract",
-    ],
-    "gpgpu-memory-subsystem/SKILL.md": [
-        "memory_request_lifecycle",
-        "duplicate_request_prevention",
-    ],
-    "gpgpu-implementation-validator/SKILL.md": [
-        "app_compile_smoke",
-        "memory_dump_compare",
-    ],
-    "gpgpu-closure-refinement-engine/SKILL.md": [
-        "DOC_ARTIFACT_DRIFT",
-        "DECLARED_TEST_NOT_RUN",
-        "MAGIC_CONSTANT_UNBOUND",
-    ],
-    "shared/schemas/spec_ir.schema.yaml": ["isa_source_of_truth"],
-    "shared/schemas/gpu_state_ir.schema.yaml": [
-        "pc_table",
-        "exec_mask_table",
-        "simt_stack_state",
-        "pipeline_registers",
-        "memory_stall_state",
-    ],
-    "shared/schemas/runtime_contract_ir.schema.yaml": [
-        "software_stack_contract",
-        "program_image_contract",
-        "test_app_contract",
-    ],
-    "shared/schemas/memory_subsystem_ir.schema.yaml": [
-        "memory_request_lifecycle",
-        "duplicate_request_prevention",
-    ],
-    "shared/schemas/validation_plan_ir.schema.yaml": [
-        "declared_test_coverage_gate",
-        "vertical_slice_tests",
-    ],
-    "shared/tables/architecture_preset_library.yaml": [
-        "MINIMAL_VERTICAL_SLICE_GPGPU",
-    ],
-    "shared/tables/closure_gate_table.yaml": [
-        "declared_test_coverage_gate",
-        "cross_artifact_consistency_gate",
-    ],
-    "shared/tables/failure_taxonomy_table.yaml": [
-        "DOC_ARTIFACT_DRIFT",
-        "APP_COMPILE_FAIL",
-        "FRONTEND_RUNTIME_MAPPING_MISMATCH",
+    "gpgpu-architecture-rewrite-loop-controller/SKILL.md": [
+        "ARCH_REWRITE_PLAN",
+        "Architecture Patch",
+        "Contract Patch",
+        "RTL Patch",
     ],
 }
+
+MIGRATED_REQUIRED_TEXT: Dict[str, List[str]] = {
+    "gpgpu-architecture-generator/legacy_request_and_candidate_constraints.md": [
+        "gpgpu-front-end",
+        "gpgpu-architecture-synthesizer",
+        "DESIGN_INTENT_IR",
+        "ARCH_IR",
+        "MICRO_CONSTRAINT_ESTIMATE_IR",
+    ],
+    "gpgpu-system-contract-golden-engine/legacy_spec_state_truth_constraints.md": [
+        "gpgpu-spec-lock",
+        "gpgpu-canonical-state-engine",
+        "SYSTEM_CONTRACT_IR",
+        "GOLDEN_CONTRACT_MODEL",
+        "pc_table",
+    ],
+    "gpgpu-incremental-rtl-binding-engine/legacy_binding_and_module_constraints.md": [
+        "gpgpu-artifact-contract-engine",
+        "gpgpu-memory-subsystem",
+        "INCREMENTAL_RTL_MAP",
+        "load/store queue",
+        "Interface Contract Checker",
+    ],
+    "gpgpu-simulation-performance-attribution-engine/legacy_validation_and_trace_constraints.md": [
+        "gpgpu-runtime-validator",
+        "gpgpu-implementation-validator",
+        "NORMALIZED_TRACE_IR",
+        "PERF_ATTRIBUTION_GRAPH",
+        "first divergence",
+    ],
+    "gpgpu-architecture-rewrite-loop-controller/legacy_closure_repair_constraints.md": [
+        "gpgpu-closure-refinement-engine",
+        "ARCH_REWRITE_PLAN",
+        "Architecture Patch",
+        "Contract Patch",
+        "RTL Patch",
+    ],
+}
+
+REFERENCE_FILES = [
+    "gpgpu-architecture-generator/legacy_request_and_candidate_constraints.md",
+    "gpgpu-system-contract-golden-engine/execution_semantics.md",
+    "gpgpu-system-contract-golden-engine/memory_semantics.md",
+    "gpgpu-system-contract-golden-engine/launch_semantics.md",
+    "gpgpu-system-contract-golden-engine/golden_model_contract.md",
+    "gpgpu-system-contract-golden-engine/legacy_spec_state_truth_constraints.md",
+    "gpgpu-incremental-rtl-binding-engine/module_builder.md",
+    "gpgpu-incremental-rtl-binding-engine/interface_contract_checker.md",
+    "gpgpu-incremental-rtl-binding-engine/rtl_partial_simulator.md",
+    "gpgpu-incremental-rtl-binding-engine/module_catalog.md",
+    "gpgpu-incremental-rtl-binding-engine/legacy_binding_and_module_constraints.md",
+    "gpgpu-simulation-performance-attribution-engine/trace_normalizer.md",
+    "gpgpu-simulation-performance-attribution-engine/bottleneck_graph_builder.md",
+    "gpgpu-simulation-performance-attribution-engine/root_cause_engine.md",
+    "gpgpu-simulation-performance-attribution-engine/legacy_validation_and_trace_constraints.md",
+    "gpgpu-architecture-rewrite-loop-controller/rewrite_trigger.md",
+    "gpgpu-architecture-rewrite-loop-controller/patch_taxonomy.md",
+    "gpgpu-architecture-rewrite-loop-controller/regression_tracking.md",
+    "gpgpu-architecture-rewrite-loop-controller/revalidation_routing.md",
+    "gpgpu-architecture-rewrite-loop-controller/legacy_closure_repair_constraints.md",
+]
 
 
 def require(path: Path, failures: List[str]) -> None:
     if not path.exists():
         failures.append(f"missing: {path.relative_to(ROOT)}")
+
+
+def require_nonempty(path: Path, failures: List[str]) -> None:
+    require(path, failures)
+    if path.exists() and not path.read_text(encoding="utf-8").strip():
+        failures.append(f"empty: {path.relative_to(ROOT)}")
 
 
 def require_text(path: Path, needles: List[str], failures: List[str]) -> None:
@@ -244,6 +271,26 @@ def require_text(path: Path, needles: List[str], failures: List[str]) -> None:
             failures.append(f"missing text {needle!r} in {path.relative_to(ROOT)}")
 
 
+def require_exact_file_names(path: Path, allowed_names: List[str], failures: List[str]) -> None:
+    require(path, failures)
+    if not path.exists():
+        return
+    allowed = set(allowed_names)
+    actual = {child.name for child in path.iterdir() if child.is_file()}
+    for name in sorted(actual - allowed):
+        failures.append(f"unexpected file in {path.relative_to(ROOT)}: {name}")
+
+
+def require_exact_dir_names(path: Path, allowed_names: List[str], failures: List[str]) -> None:
+    require(path, failures)
+    if not path.exists():
+        return
+    allowed = set(allowed_names)
+    actual = {child.name for child in path.iterdir() if child.is_dir()}
+    for name in sorted(actual - allowed):
+        failures.append(f"unexpected directory in {path.relative_to(ROOT)}: {name}")
+
+
 def main() -> int:
     failures: List[str] = []
 
@@ -252,37 +299,58 @@ def main() -> int:
         require(skill_dir, failures)
         require_text(skill_dir / "SKILL.md", SKILL_SECTIONS, failures)
 
-    for skill in LEGACY_SKILLS:
-        require(ROOT / "legacy" / skill / "SKILL.md", failures)
+    for skill in REMOVED_TOP_LEVEL_SKILLS:
         if (ROOT / skill).exists():
-            failures.append(f"legacy skill still top-level: {skill}")
+            failures.append(f"removed top-level skill still present: {skill}")
 
-    for schema in SCHEMAS:
-        require(ROOT / "shared" / "schemas" / schema, failures)
+    for skill in REMOVED_LEGACY_SKILLS:
+        if (ROOT / skill).exists():
+            failures.append(f"removed legacy skill still present: {skill}")
 
-    for table in TABLES:
-        require(ROOT / "shared" / "tables" / table, failures)
+    for rel_path in REMOVED_FILES:
+        if (ROOT / rel_path).exists():
+            failures.append(f"removed v4 asset generator still present: {rel_path}")
+
+    for rel_path in REMOVED_DIRS:
+        if (ROOT / rel_path).exists():
+            failures.append(f"removed legacy asset directory still present: {rel_path}")
+
+    for rel_root in ACTIVE_STALE_REFERENCE_ROOTS:
+        scan_root = ROOT / rel_root
+        if not scan_root.exists():
+            continue
+        for path in scan_root.rglob("*"):
+            if not path.is_file():
+                continue
+            text = path.read_text(encoding="utf-8")
+            for old_skill in REMOVED_TOP_LEVEL_SKILLS:
+                if old_skill in text:
+                    failures.append(
+                        "stale active old-skill reference "
+                        f"{old_skill!r} in {path.relative_to(ROOT)}"
+                    )
+
+    for schema in NEW_SCHEMAS:
+        require_text(ROOT / "shared" / "schemas" / schema, ["required:"], failures)
+
+    for table in NEW_TABLES:
+        require_nonempty(ROOT / "shared" / "tables" / table, failures)
+
+    require_exact_dir_names(ROOT / "shared", SHARED_DIRS, failures)
+    require_exact_file_names(ROOT / "shared" / "schemas", NEW_SCHEMAS, failures)
+    require_exact_file_names(ROOT / "shared" / "tables", NEW_TABLES, failures)
+    require_exact_dir_names(ROOT / "shared" / "tests", TEST_DIRS, failures)
+    require_exact_dir_names(ROOT / "shared" / "examples", SHARED_EXAMPLE_DIRS, failures)
 
     for test_dir in TEST_DIRS:
-        path = ROOT / "shared" / "tests" / test_dir
-        require(path, failures)
-        if path.exists() and not list(path.iterdir()):
-            failures.append(f"empty test directory: {path.relative_to(ROOT)}")
+        path = ROOT / "shared" / "tests" / test_dir / "cases.yaml"
+        require_text(path, ["case_id:", "expected_outputs:", "required_evidence:"], failures)
 
-    for example_dir in EXAMPLE_DIRS:
-        path = ROOT / "shared" / "examples" / example_dir
-        require(path, failures)
-        if path.exists() and not list(path.iterdir()):
-            failures.append(f"empty example directory: {path.relative_to(ROOT)}")
+    for filename in EXAMPLE_FILES:
+        require_nonempty(ROOT / "shared" / "examples" / "self_correcting_minimal_simt" / filename, failures)
 
-    for filename in VIBE_EXAMPLE_FILES:
-        require(ROOT / "shared" / "examples" / "vibe_minimal_vertical_slice" / filename, failures)
-
-    require_text(
-        ROOT / "shared" / "flow" / "gpgpu_design_flow.md",
-        ["## Reproduce Path", "## Design From Intent Path", "## Vertical Slice Prototype Path"],
-        failures,
-    )
+    for rel_path in REFERENCE_FILES:
+        require_nonempty(ROOT / rel_path, failures)
 
     for lesson in REFERENCE_LESSONS:
         require(ROOT / "shared" / "references" / lesson, failures)
@@ -290,23 +358,53 @@ def main() -> int:
     require_text(
         ROOT / "README.md",
         [
-            "# GPGPU Skills",
-            "Intent -> Candidate -> Spec -> State -> Contract -> Validation -> Closure",
-            "Vertical-slice prototype path",
+            "self-correcting GPGPU design system",
+            "GOLDEN_CONTRACT_MODEL",
+            "INCREMENTAL_RTL_MAP",
+            "PERF_ATTRIBUTION_GRAPH",
+            "ARCH_REWRITE_PLAN",
+            "former 9-stage top-level GPGPU skills and the old `legacy/` skill archive have been deleted",
         ],
         failures,
     )
 
-    for rel_path, needles in VIBE_REQUIRED_TEXT.items():
+    require_text(
+        ROOT / "shared" / "flow" / "gpgpu_design_flow.md",
+        [
+            "Architecture Generator",
+            "System Contract + Golden Semantics Engine",
+            "Incremental RTL Binding Engine",
+            "Simulation + Performance Attribution Engine",
+            "Architecture Rewrite Loop Controller",
+            "Legacy v4 top-level skills and the old `legacy/` skill archive are not active wrappers",
+        ],
+        failures,
+    )
+
+    require_text(
+        ROOT / "skill_5stage_compression_plan.zh.md",
+        [
+            "Executable Golden Model",
+            "INCREMENTAL_RTL_MAP",
+            "PERF_ATTRIBUTION_GRAPH",
+            "ARCH_REWRITE_PLAN",
+        ],
+        failures,
+    )
+
+    for rel_path, needles in TOP_LEVEL_REQUIRED_TEXT.items():
+        require_text(ROOT / rel_path, needles, failures)
+
+    for rel_path, needles in MIGRATED_REQUIRED_TEXT.items():
         require_text(ROOT / rel_path, needles, failures)
 
     if failures:
-        print("GPGPU skill v4 asset contract failed:")
+        print("GPGPU skill v5 self-correcting asset contract failed:")
         for failure in failures:
             print(f"- {failure}")
         return 1
 
-    print("GPGPU skill v4 asset contract passed")
+    print("GPGPU skill v5 self-correcting asset contract passed")
     return 0
 
 

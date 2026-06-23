@@ -1,50 +1,44 @@
-# Skill Summary: GPGPU Skills v4
+# Skill Summary: GPGPU Skills v5
 
-`skill/` now defines a 9-pass GPGPU design compiler flow:
+`skill/` now defines a self-correcting GPGPU design system:
 
 ```text
-User Request / Spec
-  -> Front-End
-  -> Architecture Candidate
-  -> Spec Lock
-  -> Canonical State
-  -> Artifact Contract
-  -> Runtime / Memory / Implementation Validation
-  -> Closure / Refinement
+Architecture Generator
+  -> System Contract + Golden Semantics Engine
+  -> Incremental RTL Binding Engine
+  -> Simulation + Performance Attribution Engine
+  -> Architecture Rewrite Loop Controller
+  -> back to Architecture Generator / Contract / RTL Binding
 ```
 
 ## Top-Level Skills
 
 | Skill | Responsibility |
 |---|---|
-| `gpgpu-front-end` | mode selection and design intent lock |
-| `gpgpu-architecture-synthesizer` | DESIGN_INTENT_IR to ARCH_CANDIDATE_IR and SYNTHESIZED_SPEC_DRAFT |
-| `gpgpu-spec-lock` | complete spec or draft to stable SPEC_IR |
-| `gpgpu-canonical-state-engine` | SPEC_IR to GPU_STATE_IR |
-| `gpgpu-artifact-contract-engine` | deterministic artifact mapping and config binding |
-| `gpgpu-runtime-validator` | host/runtime/launch ABI validation |
-| `gpgpu-memory-subsystem` | memory subsystem and RTL-facing memory path validation |
-| `gpgpu-implementation-validator` | RTL and golden sim validation plus first divergence |
-| `gpgpu-closure-refinement-engine` | acceptance, failure attribution, and refinement request generation |
+| `gpgpu-architecture-generator` | Intent intake, candidate `ARCH_IR`, and `MICRO_CONSTRAINT_ESTIMATE_IR` |
+| `gpgpu-system-contract-golden-engine` | `SYSTEM_CONTRACT_IR` and executable `GOLDEN_CONTRACT_MODEL` |
+| `gpgpu-incremental-rtl-binding-engine` | Module-by-module `INCREMENTAL_RTL_MAP`, interfaces, and partial simulation |
+| `gpgpu-simulation-performance-attribution-engine` | Trace normalization, `PERF_ATTRIBUTION_GRAPH`, and root cause evidence |
+| `gpgpu-architecture-rewrite-loop-controller` | `ARCH_REWRITE_PLAN`, patch routing, and regression tracking |
 
-## Legacy Mapping
+## Legacy Migration Mapping
 
-| v4 skill | v3 source |
+The old v4 top-level skills are no longer active. Their useful constraints were migrated into the v5 owner skills:
+
+| Removed v4 skill | Migrated owner |
 |---|---|
-| `gpgpu-front-end` | `gpgpu-mode-controller` + `gpgpu-design-intent-lock` |
-| `gpgpu-architecture-synthesizer` | retained |
-| `gpgpu-spec-lock` | retained |
-| `gpgpu-canonical-state-engine` | retained |
-| `gpgpu-artifact-contract-engine` | `gpgpu-deterministic-transform-engine` + `gpgpu-config` |
-| `gpgpu-runtime-validator` | `gpgpu-runtime` |
-| `gpgpu-memory-subsystem` | `gpgpu-memory-path` |
-| `gpgpu-implementation-validator` | `gpgpu-rtl-simt-core` + `gpgpu-golden-sim` |
-| `gpgpu-closure-refinement-engine` | `gpgpu-synthesis-closure-engine` + `gpgpu-causal-trace-analyzer` |
+| `gpgpu-front-end` | `gpgpu-architecture-generator` |
+| `gpgpu-architecture-synthesizer` | `gpgpu-architecture-generator` |
+| `gpgpu-spec-lock` | `gpgpu-system-contract-golden-engine` |
+| `gpgpu-canonical-state-engine` | `gpgpu-system-contract-golden-engine` |
+| `gpgpu-artifact-contract-engine` | `gpgpu-system-contract-golden-engine` + `gpgpu-incremental-rtl-binding-engine` |
+| `gpgpu-runtime-validator` | `gpgpu-system-contract-golden-engine` + `gpgpu-simulation-performance-attribution-engine` |
+| `gpgpu-memory-subsystem` | `gpgpu-system-contract-golden-engine` + `gpgpu-incremental-rtl-binding-engine` + `gpgpu-simulation-performance-attribution-engine` |
+| `gpgpu-implementation-validator` | `gpgpu-incremental-rtl-binding-engine` + `gpgpu-simulation-performance-attribution-engine` |
+| `gpgpu-closure-refinement-engine` | `gpgpu-architecture-rewrite-loop-controller` |
 
-## Shared Assets
+## Core Rule
 
-`shared/schemas/` defines IR contracts. `shared/tables/` defines decisions and mappings. `shared/examples/` contains end-to-end expected outputs, including `vibe_minimal_vertical_slice`. `shared/tests/` contains per-skill regression cases plus `validate_v4_assets.py`. `shared/references/` converts project references into lesson/rule/evidence entries.
+Contracts are executable, RTL binding is incremental, performance attribution is causal, and closure produces rewrite plans instead of only reports.
 
-## Fail-Closed Principle
-
-Missing schema, missing table rows, hidden defaults, unknown enums, forbidden provenance, and unmapped state fields must emit a reject verdict or `INSUFFICIENT_SKILL_ASSET`. The flow must not fill gaps with model guesses.
+`shared/` is intentionally minimal: it keeps only v5 schemas, tables, tests, references, flow docs, and the `self_correcting_minimal_simt` example required by the current skills.

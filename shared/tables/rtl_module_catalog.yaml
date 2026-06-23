@@ -1,0 +1,32 @@
+version: v5
+modules:
+  sm_core:
+    required_contract_paths: [architecture_model.sm, execution_model.dispatch]
+    required_interfaces: [warp_scheduler, decode_execute_pipeline, csr_runtime_interface]
+  warp_scheduler:
+    required_contract_paths: [execution_model.scheduler]
+    required_interfaces: [scoreboard, decode_execute_pipeline]
+  decode_execute_pipeline:
+    required_contract_paths: [execution_model.pipeline, source_of_truth_map.isa]
+    required_interfaces: [register_file, scoreboard, load_store_queue]
+  register_file:
+    required_contract_paths: [state_model.registers]
+    required_interfaces: [decode_execute_pipeline]
+  scoreboard:
+    required_contract_paths: [execution_model.scoreboard]
+    required_interfaces: [warp_scheduler, load_store_queue, decode_execute_pipeline]
+  load_store_queue:
+    required_contract_paths: [memory_model.request_lifecycle]
+    required_interfaces: [scoreboard, shared_memory, cache_global_interface]
+  shared_memory:
+    required_contract_paths: [memory_model.shared_memory]
+    required_interfaces: [load_store_queue]
+  cache_global_interface:
+    required_contract_paths: [memory_model.global_memory]
+    required_interfaces: [load_store_queue, interconnect]
+  interconnect:
+    required_contract_paths: [architecture_model.interconnect]
+    required_interfaces: [cache_global_interface, csr_runtime_interface]
+  csr_runtime_interface:
+    required_contract_paths: [launch_model.csr_runtime_interface]
+    required_interfaces: [sm_core, interconnect]

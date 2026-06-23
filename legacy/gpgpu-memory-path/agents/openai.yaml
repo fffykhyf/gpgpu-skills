@@ -1,4 +1,0 @@
-interface:
-  display_name: "GPGPU Memory Path"
-  short_description: "Execute GPU_STATE memory behavior and traces."
-  default_prompt: "Use $gpgpu-memory-path to execute GPU_STATE memory behavior and emit memory traces."

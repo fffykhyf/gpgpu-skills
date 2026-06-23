@@ -1,0 +1,131 @@
+---
+name: gpgpu-system-contract-golden-engine
+description: Use when candidate ARCH_IR or compatible v4 spec/state artifacts must become SYSTEM_CONTRACT_IR and executable GOLDEN_CONTRACT_MODEL reference semantics for execution, memory, launch, and config behavior.
+---
+
+# GPGPU System Contract Golden Engine
+
+## Role
+
+This skill freezes the system contract and derives executable reference semantics from that contract. It is the only semantic truth-definition layer in the self-correcting GPGPU design system.
+
+## Position in Flow
+
+Upstream:
+- `gpgpu-architecture-generator`
+- migrated legacy truth constraints captured in `legacy_spec_state_truth_constraints.md`
+
+Downstream:
+- `gpgpu-incremental-rtl-binding-engine`
+- `gpgpu-simulation-performance-attribution-engine`
+
+## Input IR
+
+Consumes:
+- `ARCH_IR`
+- `DESIGN_INTENT_IR`
+- `MICRO_CONSTRAINT_ESTIMATE_IR`
+- optional complete human spec
+- enum table
+- provenance table
+- contract semantics binding table
+
+## Output IR
+
+Produces:
+- `SYSTEM_CONTRACT_IR`
+- `GOLDEN_CONTRACT_MODEL`
+- `CONTRACT_SEMANTICS_REPORT`
+
+## Owned Decisions
+
+This skill owns:
+- architecture semantic freeze
+- execution model definition
+- state model definition
+- memory model definition
+- launch model definition
+- config contract definition
+- source-of-truth ownership
+- executable reference semantics derivation
+- golden model coverage checking
+
+## Forbidden Actions
+
+This skill must not:
+- create RTL module structure
+- create performance attribution
+- create architecture rewrite patches
+- let `GOLDEN_CONTRACT_MODEL` define independent ISA, memory, launch, scheduler, or config truth
+- accept hidden defaults or duplicate truth owners
+
+## Required Tables
+
+This skill must use:
+- `shared/tables/system_truth_ownership_table.yaml` if present during migration
+- `shared/tables/config_ownership_table.yaml`
+- `shared/tables/contract_semantics_binding_table.yaml`
+- `shared/tables/golden_model_coverage_table.yaml`
+- `shared/tables/source_of_truth_generation_table.yaml`
+- `shared/tables/provenance_table.yaml`
+- `shared/tables/enum_table.yaml`
+
+## Required Schemas
+
+This skill must validate:
+- `shared/schemas/system_contract_ir.schema.yaml`
+- `shared/schemas/golden_contract_model.schema.yaml`
+- `shared/schemas/contract_semantics_report_ir.schema.yaml`
+
+## Required Invariants
+
+The output must satisfy:
+- `SYSTEM_CONTRACT_IR` is the only semantic truth source.
+- `GOLDEN_CONTRACT_MODEL` is executable reference semantics derived from `SYSTEM_CONTRACT_IR`.
+- `GOLDEN_CONTRACT_MODEL` must not define independent ISA, memory, launch, scheduler, or config truth.
+- Every executable semantics function maps to a contract path.
+- Execution, memory, launch, and config semantics have coverage evidence.
+- Unmapped contract paths fail closed.
+
+## Failure Modes
+
+This skill must emit:
+- `INSUFFICIENT_CONTRACT`
+- `HIDDEN_DEFAULT_REJECT`
+- `DUPLICATE_TRUTH_OWNER`
+- `FORBIDDEN_GOLDEN_TRUTH`
+- `CONTRACT_PATH_UNMAPPED`
+- `GOLDEN_MODEL_COVERAGE_FAIL`
+- `INSUFFICIENT_SKILL_ASSET`
+
+## Report Schema
+
+The report must include:
+- verdict
+- arch_ir_hash
+- system_contract_ir_hash
+- golden_contract_model_hash
+- executable_semantics_coverage
+- failed_contract_paths
+- forbidden_independent_truth_check
+- downstream_contract
+
+## Concrete Assets Required
+
+This skill is incomplete unless the following exist:
+- `execution_semantics.md`
+- `memory_semantics.md`
+- `launch_semantics.md`
+- `golden_model_contract.md`
+- `legacy_spec_state_truth_constraints.md`
+- `shared/schemas/system_contract_ir.schema.yaml`
+- `shared/schemas/golden_contract_model.schema.yaml`
+- `shared/schemas/contract_semantics_report_ir.schema.yaml`
+- `shared/tables/contract_semantics_binding_table.yaml`
+- `shared/tables/golden_model_coverage_table.yaml`
+- `shared/tables/config_ownership_table.yaml`
+- `shared/tests/system_contract_golden_engine/cases.yaml`
+- `shared/examples/self_correcting_minimal_simt/expected_system_contract_ir.yaml`
+- `shared/examples/self_correcting_minimal_simt/expected_golden_contract_model.yaml`
+
+When a required schema, table, example, or test is missing, emit `INSUFFICIENT_SKILL_ASSET` rather than inventing behavior.

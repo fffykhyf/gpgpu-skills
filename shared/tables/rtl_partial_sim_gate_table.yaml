@@ -1,0 +1,17 @@
+version: v5
+required_outputs:
+  - local_trace_hash
+  - local_scoreboard_result
+  - interface_transaction_result
+  - golden_slice_compare_result
+  - verdict
+gates:
+  local_scoreboard_result:
+    pass_value: PASS
+    failure_mode: PARTIAL_SIM_FAIL
+  interface_transaction_result:
+    pass_value: PASS
+    failure_mode: INTERFACE_PROTOCOL_MISMATCH
+  golden_slice_compare_result:
+    pass_value: PASS
+    failure_mode: GOLDEN_SLICE_MISMATCH

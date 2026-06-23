@@ -1,8 +1,8 @@
 table: source_of_truth_generation_table
-version: v4
+version: v5
 generation_rules:
   isa.opcodes:
-    source: SPEC_IR.isa.opcodes
+    source: SYSTEM_CONTRACT_IR.isa.opcodes
     derived_artifacts:
       - rtl/defines.svh
       - tools/isa.py
@@ -11,7 +11,7 @@ generation_rules:
       - docs/isa.md
     gate: byte_or_semantic_equivalence_required
   hardware_threads:
-    source: SPEC_IR.thread_block_grid_model
+    source: SYSTEM_CONTRACT_IR.launch_model.thread_block_grid_model
     derived_artifacts:
       - compiler total_threads
       - runtime gridDim calculation

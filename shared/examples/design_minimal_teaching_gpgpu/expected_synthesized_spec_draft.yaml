@@ -1,6 +1,0 @@
-schema_version: v4
-draft_id: minimal-teaching-draft-001
-source_candidate_id: minimal-teaching-candidate-001
-completeness_claim: COMPLETE_FOR_SPEC_LOCK
-unresolved_fields: []
-provenance: [USER_CONSTRAINT, DESIGN_PRESET, SOLVER_DERIVED]

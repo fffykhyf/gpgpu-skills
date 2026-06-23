@@ -1,5 +1,0 @@
-interface:
-  display_name: "GPGPU Architecture Synthesizer"
-  short_description: "Create bounded GPGPU architecture candidates from DESIGN_INTENT_IR."
-  default_prompt: "Use $gpgpu-architecture-synthesizer to synthesize a candidate architecture from locked GPGPU design intent."
-

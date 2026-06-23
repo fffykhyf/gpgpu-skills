@@ -1,4 +1,0 @@
-interface:
-  display_name: "GPGPU RTL SIMT Core"
-  short_description: "Execute pure SIMT hardware from GPU_STATE."
-  default_prompt: "Use $gpgpu-rtl-simt-core to execute pure SIMT hardware from GPU_STATE and emit hardware traces."

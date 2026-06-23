@@ -1,4 +1,0 @@
-schema: SIM_BEHAVIOR_IR
-version: v4
-required: [schema_version, source_state_hash, transition_semantics, trace_fields, deterministic_replay_contract]
-failure_rules: {isa_redefinition: GOLDEN_SIM_REDEFINES_ISA}

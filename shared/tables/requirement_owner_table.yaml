@@ -1,14 +1,14 @@
 table: requirement_owner_table
-version: v4
+version: v5
 owners:
-  simt_execution: gpgpu-architecture-synthesizer
-  launch_abi: gpgpu-spec-lock
-  canonical_state: gpgpu-canonical-state-engine
-  artifact_mapping: gpgpu-artifact-contract-engine
-  runtime_launch: gpgpu-runtime-validator
-  memory_ordering: gpgpu-memory-subsystem
-  rtl_trace: gpgpu-implementation-validator
-  closure_verdict: gpgpu-closure-refinement-engine
-  source_of_truth_generation: gpgpu-spec-lock
-  software_stack_contract: gpgpu-runtime-validator
-  vertical_slice_validation: gpgpu-implementation-validator
+  simt_execution: gpgpu-system-contract-golden-engine
+  launch_abi: gpgpu-system-contract-golden-engine
+  canonical_state: gpgpu-system-contract-golden-engine
+  artifact_mapping: gpgpu-incremental-rtl-binding-engine
+  runtime_launch: gpgpu-system-contract-golden-engine
+  memory_ordering: gpgpu-system-contract-golden-engine
+  rtl_trace: gpgpu-simulation-performance-attribution-engine
+  closure_verdict: gpgpu-architecture-rewrite-loop-controller
+  source_of_truth_generation: gpgpu-system-contract-golden-engine
+  software_stack_contract: gpgpu-simulation-performance-attribution-engine
+  vertical_slice_validation: gpgpu-simulation-performance-attribution-engine

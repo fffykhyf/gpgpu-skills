@@ -1,5 +1,0 @@
-schema_version: v4
-verdict: ACCEPT
-consumed_ir_hash: expected-stable-state-hash
-failed_fields: []
-missing_assets: []

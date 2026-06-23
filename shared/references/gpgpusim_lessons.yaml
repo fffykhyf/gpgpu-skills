@@ -2,12 +2,12 @@ lessons:
   - lesson_id: GPGPUSIM_TRACE_001
     source_project: GPGPU-Sim
     applies_to:
-      - gpgpu-canonical-state-engine
-      - gpgpu-implementation-validator
+      - gpgpu-system-contract-golden-engine
+      - gpgpu-simulation-performance-attribution-engine
     topic: golden_trace
     principle: "Golden simulator traces are evidence and must not redefine ISA or state semantics."
     do:
-      - "Bind behavior through SPEC_IR, GPU_STATE_IR, and explicit contract tables."
+      - "Bind behavior through SYSTEM_CONTRACT_IR, GOLDEN_CONTRACT_MODEL, and explicit contract tables."
     do_not:
       - "Let a downstream implementation invent behavior not visible to validation."
     evidence_anchor:

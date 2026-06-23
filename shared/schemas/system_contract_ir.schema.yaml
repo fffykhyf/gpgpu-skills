@@ -1,0 +1,27 @@
+schema: system_contract_ir
+version: v5
+type: object
+required:
+  - system_id
+  - arch_ir_hash
+  - architecture_model
+  - execution_model
+  - state_model
+  - memory_model
+  - launch_model
+  - config_contract
+  - source_of_truth_map
+  - provenance
+  - canonical_hash
+properties:
+  system_id: string
+  arch_ir_hash: string
+  architecture_model: map
+  execution_model: map
+  state_model: map
+  memory_model: map
+  launch_model: map
+  config_contract: map
+  source_of_truth_map: map
+  provenance: map
+  canonical_hash: string

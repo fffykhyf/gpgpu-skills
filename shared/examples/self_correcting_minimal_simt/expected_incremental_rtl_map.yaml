@@ -1,0 +1,35 @@
+system_contract_ir_hash: hash_system_contract_minimal_simt
+golden_contract_model_hash: hash_golden_contract_minimal_simt
+modules:
+  - module_id: load_store_queue
+    consumed_contract_paths:
+      - memory_model.request_lifecycle
+      - memory_model.coalescing
+    provided_signals:
+      - lsq_req_valid
+      - lsq_req_addr
+      - lsq_resp_ready
+    required_signals:
+      - cache_req_ready
+      - cache_resp_valid
+    latency_contract:
+      latency_min: 1
+      latency_max: 8
+    local_trace_schema: lsq_trace_v1
+    local_simulation_evidence:
+      verdict: PASS_WITH_BACKPRESSURE
+      local_trace_hash: hash_lsq_partial_trace
+module_interfaces:
+  load_store_queue_to_cache_global_interface:
+    valid_ready_or_req_resp: valid_ready
+    backpressure_rule: hold_request_until_ready
+consumed_contract_paths:
+  load_store_queue:
+    - memory_model.request_lifecycle
+provided_signal_paths:
+  load_store_queue:
+    - rtl.load_store_queue.lsq_req_valid
+local_trace_schemas:
+  load_store_queue: lsq_trace_v1
+unresolved_binding_risks:
+  - lsq_backpressure_can_reduce_warp_occupancy

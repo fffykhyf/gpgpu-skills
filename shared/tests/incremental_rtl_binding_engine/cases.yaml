@@ -1,0 +1,17 @@
+cases:
+  - case_id: incremental_rtl_detects_lsq_backpressure
+    input_artifacts:
+      - shared/examples/self_correcting_minimal_simt/expected_system_contract_ir.yaml
+      - shared/examples/self_correcting_minimal_simt/expected_golden_contract_model.yaml
+    expected_outputs:
+      - INCREMENTAL_RTL_MAP
+      - MODULE_INTERFACE_REPORT
+      - RTL_PARTIAL_SIM_REPORT
+    expected_failure_mode: null
+    required_evidence:
+      - local_trace_hash
+      - interface_transaction_result
+      - golden_slice_compare_result
+    forbidden_outputs:
+      - PERF_ATTRIBUTION_GRAPH
+      - ARCH_REWRITE_PLAN

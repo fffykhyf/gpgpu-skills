@@ -1,4 +1,0 @@
-schema: VALIDATION_PLAN_IR
-version: v4
-required: [schema_version, runtime_tests, memory_tests, implementation_tests, vertical_slice_tests, closure_gates, declared_test_coverage_gate, trace_requirements]
-failure_rules: {missing_required_test: VALIDATION_PLAN_INCOMPLETE, declared_test_not_run: DECLARED_TEST_NOT_RUN}

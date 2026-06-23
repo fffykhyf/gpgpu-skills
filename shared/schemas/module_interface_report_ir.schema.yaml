@@ -1,0 +1,19 @@
+schema: module_interface_report_ir
+version: v5
+type: object
+required:
+  - verdict
+  - incremental_rtl_map_hash
+  - signal_consistency
+  - handshake_correctness
+  - latency_compatibility
+  - pipeline_boundary_correctness
+  - failed_interfaces
+properties:
+  verdict: enum
+  incremental_rtl_map_hash: string
+  signal_consistency: map
+  handshake_correctness: map
+  latency_compatibility: map
+  pipeline_boundary_correctness: map
+  failed_interfaces: list

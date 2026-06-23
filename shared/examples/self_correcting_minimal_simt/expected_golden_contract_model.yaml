@@ -1,0 +1,25 @@
+system_contract_ir_hash: hash_system_contract_minimal_simt
+execution_semantics_functions:
+  - select_warp
+  - update_active_mask
+  - apply_scoreboard_dependency
+memory_semantics_functions:
+  - address_space_resolve
+  - coalesce
+  - byte_enable
+  - request_lifecycle_step
+launch_semantics_functions:
+  - abi_decode
+  - grid_block_thread_map
+  - kernel_entry_resolve
+  - completion_or_fault_observe
+config_semantics_functions:
+  - classify_config_visibility
+contract_path_coverage:
+  execution_model: covered
+  memory_model: covered
+  launch_model: covered
+forbidden_independent_truth_check:
+  independent_isa: absent
+  independent_memory_ordering: absent
+  independent_launch_abi: absent

@@ -1,0 +1,14 @@
+version: v5
+patch_classes:
+  ARCHITECTURE_PATCH:
+    target_owner: gpgpu-architecture-generator
+    examples: [warp_size_change, sm_partition_change, issue_width_change, memory_hierarchy_change]
+  CONTRACT_PATCH:
+    target_owner: gpgpu-system-contract-golden-engine
+    examples: [scheduling_rule_change, memory_ordering_change, launch_abi_change, scoreboard_semantic_change]
+  RTL_PATCH:
+    target_owner: gpgpu-incremental-rtl-binding-engine
+    examples: [pipeline_relayout, scoreboard_redesign, lsq_replay_policy_change, interface_latency_adjustment]
+  TEST_EVIDENCE_PATCH:
+    target_owner: gpgpu-simulation-performance-attribution-engine
+    examples: [trace_tap_addition, missing_evidence_collection, attribution_rerun]

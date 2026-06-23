@@ -1,0 +1,129 @@
+---
+name: gpgpu-incremental-rtl-binding-engine
+description: Use when SYSTEM_CONTRACT_IR and GOLDEN_CONTRACT_MODEL must be bound module by module into INCREMENTAL_RTL_MAP with interface contract checking and RTL partial simulation evidence.
+---
+
+# GPGPU Incremental RTL Binding Engine
+
+## Role
+
+This skill lowers the system contract into modular RTL bindings. It replaces global RTL-map generation with module-by-module assembly, interface checking, and partial simulation gates.
+
+## Position in Flow
+
+Upstream:
+- `gpgpu-system-contract-golden-engine`
+
+Downstream:
+- `gpgpu-simulation-performance-attribution-engine`
+- `gpgpu-architecture-rewrite-loop-controller`
+
+## Input IR
+
+Consumes:
+- `SYSTEM_CONTRACT_IR`
+- `GOLDEN_CONTRACT_MODEL`
+- module catalog
+- module interface contract table
+- RTL partial simulation gate table
+- target platform constraints
+
+## Output IR
+
+Produces:
+- `INCREMENTAL_RTL_MAP`
+- `MODULE_INTERFACE_REPORT`
+- `RTL_PARTIAL_SIM_REPORT`
+
+## Owned Decisions
+
+This skill owns:
+- module-by-module RTL binding
+- Interface Contract Checker
+- RTL Partial Simulator
+- module interface declaration
+- signal consistency checking
+- handshake protocol checking
+- latency compatibility checking
+- pipeline boundary checking
+- partial simulation gate generation
+- local trace schema binding
+
+## Forbidden Actions
+
+This skill must not:
+- redefine system contract semantics
+- create golden semantics
+- create performance attribution
+- produce architecture rewrite patches
+- silently join incompatible module interfaces
+- allow global RTL binding without module evidence
+
+## Required Tables
+
+This skill must use:
+- `shared/tables/rtl_module_catalog.yaml`
+- `shared/tables/module_interface_contract_table.yaml`
+- `shared/tables/rtl_partial_sim_gate_table.yaml`
+- `shared/tables/contract_semantics_binding_table.yaml`
+
+## Required Schemas
+
+This skill must validate:
+- `shared/schemas/system_contract_ir.schema.yaml`
+- `shared/schemas/golden_contract_model.schema.yaml`
+- `shared/schemas/incremental_rtl_map.schema.yaml`
+- `shared/schemas/module_interface_report_ir.schema.yaml`
+- `shared/schemas/rtl_partial_sim_report_ir.schema.yaml`
+
+## Required Invariants
+
+The output must satisfy:
+- `INCREMENTAL_RTL_MAP` binds modules one by one.
+- Every module must declare consumed contract paths, provided signals, required signals, latency contract, local trace schema, and partial simulation evidence.
+- Every module references `SYSTEM_CONTRACT_IR` paths.
+- Interface mismatch prevents full-system simulation.
+- Partial simulation compares local behavior against a `GOLDEN_CONTRACT_MODEL` slice.
+
+## Failure Modes
+
+This skill must emit:
+- `MODULE_BINDING_MISSING`
+- `INTERFACE_PROTOCOL_MISMATCH`
+- `LATENCY_INCOMPATIBLE`
+- `PIPELINE_BOUNDARY_FAIL`
+- `PARTIAL_SIM_FAIL`
+- `CONTRACT_PATH_UNBOUND`
+- `INSUFFICIENT_SKILL_ASSET`
+
+## Report Schema
+
+The report must include:
+- verdict
+- system_contract_ir_hash
+- golden_contract_model_hash
+- incremental_rtl_map_hash
+- module_results
+- interface_results
+- partial_sim_results
+- unresolved_binding_risks
+- downstream_contract
+
+## Concrete Assets Required
+
+This skill is incomplete unless the following exist:
+- `module_builder.md`
+- `interface_contract_checker.md`
+- `rtl_partial_simulator.md`
+- `module_catalog.md`
+- `legacy_binding_and_module_constraints.md`
+- `shared/schemas/incremental_rtl_map.schema.yaml`
+- `shared/schemas/module_interface_report_ir.schema.yaml`
+- `shared/schemas/rtl_partial_sim_report_ir.schema.yaml`
+- `shared/tables/rtl_module_catalog.yaml`
+- `shared/tables/module_interface_contract_table.yaml`
+- `shared/tables/rtl_partial_sim_gate_table.yaml`
+- `shared/tests/incremental_rtl_binding_engine/cases.yaml`
+- `shared/examples/self_correcting_minimal_simt/expected_incremental_rtl_map.yaml`
+
+When a required schema, table, example, or test is missing, emit `INSUFFICIENT_SKILL_ASSET` rather than inventing behavior.

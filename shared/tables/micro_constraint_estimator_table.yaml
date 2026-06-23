@@ -1,0 +1,18 @@
+version: v5
+estimators:
+  area_estimate:
+    inputs: [sm_count, warp_slots, register_file_size, shared_memory_size, cache_size]
+    output: area_estimate
+    failure_mode: UNREALIZABLE_MICRO_CONSTRAINT
+  memory_pressure_estimate:
+    inputs: [workload_profile, memory_hierarchy, warp_occupancy_bound]
+    output: memory_pressure_estimate
+    failure_mode: MEMORY_PRESSURE_UNBOUNDED
+  warp_occupancy_bound:
+    inputs: [register_file_size, shared_memory_size, max_warps_per_sm]
+    output: warp_occupancy_bound
+    failure_mode: OCCUPANCY_BOUND_FAIL
+  minimum_bandwidth_need:
+    inputs: [load_store_mix, coalescing_policy, target_throughput]
+    output: minimum_bandwidth_need
+    failure_mode: BANDWIDTH_CONSTRAINT_FAIL

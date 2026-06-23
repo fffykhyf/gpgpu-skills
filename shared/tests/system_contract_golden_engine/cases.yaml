@@ -1,0 +1,18 @@
+cases:
+  - case_id: system_contract_derives_executable_golden_model
+    input_artifacts:
+      - shared/examples/self_correcting_minimal_simt/expected_arch_ir.yaml
+      - shared/examples/self_correcting_minimal_simt/expected_micro_constraint_estimate.yaml
+    expected_outputs:
+      - SYSTEM_CONTRACT_IR
+      - GOLDEN_CONTRACT_MODEL
+      - CONTRACT_SEMANTICS_REPORT
+    expected_failure_mode: null
+    required_evidence:
+      - execution_semantics_functions
+      - memory_semantics_functions
+      - launch_semantics_functions
+      - forbidden_independent_truth_check
+    forbidden_outputs:
+      - INCREMENTAL_RTL_MAP
+      - PERF_ATTRIBUTION_GRAPH

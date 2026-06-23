@@ -1,0 +1,17 @@
+schema: normalized_trace_ir
+version: v5
+type: object
+required:
+  - trace_id
+  - events
+  - event_dictionary
+  - event_to_contract_path_map
+  - event_to_rtl_module_map
+  - timestamp_normalization_report
+properties:
+  trace_id: string
+  events: list
+  event_dictionary: map
+  event_to_contract_path_map: map
+  event_to_rtl_module_map: map
+  timestamp_normalization_report: map

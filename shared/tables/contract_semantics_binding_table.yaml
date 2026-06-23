@@ -1,0 +1,22 @@
+version: v5
+bindings:
+  - contract_path: execution_model.scheduler
+    semantics_function: select_warp
+    required_inputs: [ready_warps, scheduler_cursor, scoreboard_state]
+    outputs: [selected_warp]
+  - contract_path: execution_model.simt.active_mask_rule
+    semantics_function: update_active_mask
+    required_inputs: [exec_mask, branch_result]
+    outputs: [next_exec_mask]
+  - contract_path: memory_model.coalescing
+    semantics_function: coalesce
+    required_inputs: [lane_mask, addresses, access_size]
+    outputs: [memory_transactions]
+  - contract_path: memory_model.ordering
+    semantics_function: fence_order
+    required_inputs: [memory_events, fence_scope]
+    outputs: [ordered_events]
+  - contract_path: launch_model.abi
+    semantics_function: abi_decode
+    required_inputs: [argument_bytes, abi_layout]
+    outputs: [decoded_arguments]

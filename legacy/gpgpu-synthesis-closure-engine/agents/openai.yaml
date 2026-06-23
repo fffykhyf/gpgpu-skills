@@ -1,5 +1,0 @@
-interface:
-  display_name: "GPGPU Synthesis Closure Engine"
-  short_description: "Accept, reject, refine, or mark GPGPU candidates insufficient."
-  default_prompt: "Use $gpgpu-synthesis-closure-engine to close a synthesized GPGPU candidate against validation reports."
-

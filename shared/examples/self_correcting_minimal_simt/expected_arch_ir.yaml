@@ -1,0 +1,28 @@
+candidate_id: minimal_simt_self_correcting
+design_intent_ref: design_intent_minimal_teaching_simt
+graph_nodes:
+  - sm_core
+  - warp_scheduler
+  - decode_execute_pipeline
+  - register_file
+  - scoreboard
+  - load_store_queue
+  - shared_memory
+  - cache_global_interface
+graph_edges:
+  - from: warp_scheduler
+    to: decode_execute_pipeline
+  - from: decode_execute_pipeline
+    to: load_store_queue
+  - from: load_store_queue
+    to: cache_global_interface
+constraint_proof:
+  hard_constraints_passed: true
+  rejected_unbounded_memory_design: true
+provenance:
+  preset: MINIMAL_VERTICAL_SLICE_GPGPU
+  source: PRESET_DEFAULT
+rejected_alternatives:
+  - multi_sm_design
+unresolved_risks:
+  - lsq_backpressure_under_coalesced_loads

@@ -1,0 +1,20 @@
+version: v5
+routes:
+  ARCHITECTURE_PATCH:
+    required_modules:
+      - gpgpu-architecture-generator
+      - gpgpu-system-contract-golden-engine
+      - gpgpu-incremental-rtl-binding-engine
+      - gpgpu-simulation-performance-attribution-engine
+  CONTRACT_PATCH:
+    required_modules:
+      - gpgpu-system-contract-golden-engine
+      - gpgpu-incremental-rtl-binding-engine
+      - gpgpu-simulation-performance-attribution-engine
+  RTL_PATCH:
+    required_modules:
+      - gpgpu-incremental-rtl-binding-engine
+      - gpgpu-simulation-performance-attribution-engine
+  TEST_EVIDENCE_PATCH:
+    required_modules:
+      - gpgpu-simulation-performance-attribution-engine

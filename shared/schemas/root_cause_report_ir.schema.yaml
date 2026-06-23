@@ -1,0 +1,19 @@
+schema: root_cause_report_ir
+version: v5
+type: object
+required:
+  - root_cause_class
+  - minimal_trace_window
+  - contract_paths
+  - rtl_module_paths
+  - evidence_hashes
+  - confidence
+  - rewrite_candidate
+properties:
+  root_cause_class: enum
+  minimal_trace_window: map
+  contract_paths: list
+  rtl_module_paths: list
+  evidence_hashes: list
+  confidence: number
+  rewrite_candidate: map

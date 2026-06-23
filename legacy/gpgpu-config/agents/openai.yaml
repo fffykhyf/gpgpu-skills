@@ -1,4 +1,0 @@
-interface:
-  display_name: "GPGPU Config"
-  short_description: "Validate locked config defaults against GPU_STATE."
-  default_prompt: "Use $gpgpu-config to validate locked config defaults against GPU_STATE."

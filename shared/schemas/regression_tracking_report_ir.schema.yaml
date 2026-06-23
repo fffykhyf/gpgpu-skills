@@ -1,0 +1,17 @@
+schema: regression_tracking_report_ir
+version: v5
+type: object
+required:
+  - failure_signature
+  - previous_verdict
+  - repaired_by
+  - reappeared_in_run
+  - blocked_module
+  - next_required_evidence
+properties:
+  failure_signature: string
+  previous_verdict: string
+  repaired_by: string
+  reappeared_in_run: boolean
+  blocked_module: string
+  next_required_evidence: list

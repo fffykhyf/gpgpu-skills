@@ -1,0 +1,14 @@
+version: v5
+coverage_gates:
+  execution_semantics:
+    required_functions: [select_warp, update_active_mask, resolve_divergence, apply_scoreboard_dependency]
+    failure_mode: GOLDEN_MODEL_COVERAGE_FAIL
+  memory_semantics:
+    required_functions: [address_space_resolve, coalesce, byte_enable, fence_order, atomic_apply, request_lifecycle_step]
+    failure_mode: GOLDEN_MODEL_COVERAGE_FAIL
+  launch_semantics:
+    required_functions: [abi_decode, grid_block_thread_map, kernel_entry_resolve, completion_or_fault_observe]
+    failure_mode: GOLDEN_MODEL_COVERAGE_FAIL
+  forbidden_independent_truth:
+    forbidden_fields: [isa_definition, memory_ordering_override, launch_abi_override, scheduler_override]
+    failure_mode: FORBIDDEN_GOLDEN_TRUTH

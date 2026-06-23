@@ -1,4 +1,0 @@
-schema: FIRST_DIVERGENCE_REPORT_IR
-version: v4
-required: [schema_version, divergence_id, trace_a, trace_b, first_event_index, affected_state_field, transition_rule, taxonomy, evidence]
-failure_rules: {unclassified: FIRST_DIVERGENCE_UNCLASSIFIED}

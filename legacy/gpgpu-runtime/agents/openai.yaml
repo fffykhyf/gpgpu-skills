@@ -1,4 +1,0 @@
-interface:
-  display_name: "GPGPU Runtime"
-  short_description: "Interpret GPU_STATE launch semantics into traces."
-  default_prompt: "Use $gpgpu-runtime to interpret GPU_STATE launch semantics into an execution trace."

@@ -1,7 +1,0 @@
-schema_version: v4
-verdict: PASS
-cross_artifact_consistency_gate: pass
-declared_test_coverage_gate: pass
-config_ownership: {total_threads: bound, block_dim: bound, base_data_addr: bound, base_c: bound, memory_dump_range: bound}
-failed_fields: []
-missing_assets: []

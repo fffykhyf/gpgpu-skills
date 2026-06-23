@@ -1,0 +1,21 @@
+version: v5
+event_fields:
+  required:
+    - event_id
+    - cycle
+    - warp_id
+    - instruction_id
+    - contract_path
+    - rtl_module_path
+    - event_type
+    - dependencies
+    - evidence_source
+sources:
+  rtl_trace:
+    requires_module_path: true
+  golden_contract_trace:
+    requires_golden_contract_model_hash: true
+  runtime_launch_trace:
+    requires_launch_contract_path: true
+  memory_trace:
+    requires_memory_contract_path: true

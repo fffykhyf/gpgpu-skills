@@ -2,12 +2,12 @@ lessons:
   - lesson_id: VORTEX_WARP_SCHED_001
     source_project: Vortex
     applies_to:
-      - gpgpu-canonical-state-engine
-      - gpgpu-implementation-validator
+      - gpgpu-system-contract-golden-engine
+      - gpgpu-simulation-performance-attribution-engine
     topic: warp_scheduler
     principle: "Warp scheduling policy must be represented as architectural state or explicit implementation policy."
     do:
-      - "Bind behavior through SPEC_IR, GPU_STATE_IR, and explicit contract tables."
+      - "Bind behavior through SYSTEM_CONTRACT_IR, GOLDEN_CONTRACT_MODEL, and explicit contract tables."
     do_not:
       - "Let a downstream implementation invent behavior not visible to validation."
     evidence_anchor:

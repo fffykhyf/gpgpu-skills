@@ -1,4 +1,0 @@
-schema: MEMORY_MODEL_IR
-version: v4
-required: [schema_version, address_spaces, coalescing_policy, ordering_policy, shared_memory_banks, cache_global_interface, atomic_contract, fence_contract, fault_contract]
-failure_rules: {unsupported_space: MEMORY_ADDRESS_SPACE_UNSUPPORTED}

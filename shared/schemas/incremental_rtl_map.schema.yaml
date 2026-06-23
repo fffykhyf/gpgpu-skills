@@ -1,0 +1,21 @@
+schema: incremental_rtl_map
+version: v5
+type: object
+required:
+  - system_contract_ir_hash
+  - golden_contract_model_hash
+  - modules
+  - module_interfaces
+  - consumed_contract_paths
+  - provided_signal_paths
+  - local_trace_schemas
+  - unresolved_binding_risks
+properties:
+  system_contract_ir_hash: string
+  golden_contract_model_hash: string
+  modules: list
+  module_interfaces: map
+  consumed_contract_paths: map
+  provided_signal_paths: map
+  local_trace_schemas: map
+  unresolved_binding_risks: list

@@ -1,0 +1,16 @@
+rewrite_id: rewrite_memory_imbalance_lsq_001
+trigger_root_cause: MEMORY_IMBALANCE
+patch_type: RTL_PATCH
+patch_targets:
+  - load_store_queue.replay_policy
+  - load_store_queue.queue_depth
+owner_module: gpgpu-incremental-rtl-binding-engine
+expected_impact:
+  reduce_warp_stall_cycles: true
+  preserve_system_contract: true
+required_revalidation_gates:
+  - incremental_rtl_binding_engine
+  - simulation_performance_attribution_engine
+regression_risks:
+  - interface_latency_change
+  - duplicate_memory_request

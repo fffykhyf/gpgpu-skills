@@ -2,12 +2,12 @@ lessons:
   - lesson_id: ROCKET_CONFIG_001
     source_project: Rocket Chip
     applies_to:
-      - gpgpu-canonical-state-engine
-      - gpgpu-implementation-validator
+      - gpgpu-system-contract-golden-engine
+      - gpgpu-incremental-rtl-binding-engine
     topic: config_binding
     principle: "Generator configuration needs explicit ownership and downstream consumer binding."
     do:
-      - "Bind behavior through SPEC_IR, GPU_STATE_IR, and explicit contract tables."
+      - "Bind behavior through SYSTEM_CONTRACT_IR, GOLDEN_CONTRACT_MODEL, and explicit contract tables."
     do_not:
       - "Let a downstream implementation invent behavior not visible to validation."
     evidence_anchor:

@@ -1,64 +1,88 @@
 # GPGPU Design Flow
 
-This flow is an IR-centered compiler pipeline. Skills are passes. Schemas define accepted IR. Tables define decisions. Examples and tests define regression behavior.
+This flow is a self-correcting GPGPU design system. Skills are modules. Schemas define accepted IR. Tables define decisions. Examples and tests define regression behavior.
 
-## Reproduce Path
-
-Input: complete `spec.md`.
+## Active Flow
 
 ```text
-gpgpu-front-end
-  -> MODE_SELECTION_IR: REPRODUCE
-gpgpu-spec-lock
-  -> SPEC_IR
-gpgpu-canonical-state-engine
-  -> GPU_STATE_IR
-gpgpu-artifact-contract-engine
-  -> RTL_MAPPING_IR / SIM_BEHAVIOR_IR / RUNTIME_CONTRACT_IR / MEMORY_MODEL_IR / CONFIG_BINDING_IR / VALIDATION_PLAN_IR
-gpgpu-runtime-validator
-gpgpu-memory-subsystem
-gpgpu-implementation-validator
-  -> validation reports
-gpgpu-closure-refinement-engine
-  -> ACCEPT / REJECT / REFINE_REQUIRED / INSUFFICIENT_EVIDENCE
+Architecture Generator
+  -> System Contract + Golden Semantics Engine
+  -> Incremental RTL Binding Engine
+  -> Simulation + Performance Attribution Engine
+  -> Architecture Rewrite Loop Controller
+  -> back to Architecture Generator / Contract / RTL Binding
 ```
 
-Stability requirement: the same input spec must produce the same SPEC_IR hash, GPU_STATE_IR hash, artifact mapping report, and closure verdict.
+## Module 1: Architecture Generator
 
-## Design From Intent Path
+Input: user intent, optional spec, optional trace, patch request, presets, constraints, and reference evidence.
 
-Input: design goal.
+Output:
 
-```text
-gpgpu-front-end
-  -> MODE_SELECTION_IR: DESIGN
-  -> DESIGN_INTENT_IR
-gpgpu-architecture-synthesizer
-  -> ARCH_CANDIDATE_IR
-  -> SYNTHESIZED_SPEC_DRAFT
-gpgpu-spec-lock
-  -> SPEC_IR
-```
+- `DESIGN_INTENT_IR`
+- `ARCH_IR`
+- `MICRO_CONSTRAINT_ESTIMATE_IR`
 
-After SPEC_IR, the path rejoins the reproduce path. The synthesizer must not skip spec-lock.
+This module estimates area, memory pressure, warp occupancy, register pressure, shared-memory pressure, bandwidth need, and unrealizable risks before contract freeze.
 
-## Vertical Slice Prototype Path
+## Module 2: System Contract + Golden Semantics Engine
 
-Input: a request to run a minimal GPU demo end to end.
+Input: `ARCH_IR` and micro-constraint estimates.
 
-```text
-CUDA-like Python kernel
-  -> frontend_subset_contract
-  -> assembler_contract
-  -> program.hex / PROGRAM_IMAGE_CONTRACT_IR
-  -> RTL sim smoke
-  -> memory dump
-  -> golden_output_contract
-  -> closure
-```
+Output:
 
-This path uses `MINIMAL_VERTICAL_SLICE_GPGPU`, `software_stack_contract_table.yaml`, `end_to_end_smoke_test_table.yaml`, and `vertical_slice_validation_table.yaml`. It must still pass `SPEC_IR -> GPU_STATE_IR -> artifact contract -> validation closure`; the runnable demo is evidence, not a second source of truth.
+- `SYSTEM_CONTRACT_IR`
+- `GOLDEN_CONTRACT_MODEL`
+- `CONTRACT_SEMANTICS_REPORT`
+
+`SYSTEM_CONTRACT_IR` is the only semantic truth source. `GOLDEN_CONTRACT_MODEL` is executable reference semantics derived from it, not a second simulator or second ISA source.
+
+## Module 3: Incremental RTL Binding Engine
+
+Input: `SYSTEM_CONTRACT_IR`, `GOLDEN_CONTRACT_MODEL`, module catalog, and interface tables.
+
+Output:
+
+- `INCREMENTAL_RTL_MAP`
+- `MODULE_INTERFACE_REPORT`
+- `RTL_PARTIAL_SIM_REPORT`
+
+RTL is assembled module by module. Each module declares consumed contract paths, provided signals, required signals, latency contract, local trace schema, and partial simulation evidence.
+
+## Module 4: Simulation + Performance Attribution Engine
+
+Input: runtime, memory, RTL, waveform-derived, module partial-sim, and golden contract traces.
+
+Output:
+
+- `NORMALIZED_TRACE_IR`
+- `PERF_ATTRIBUTION_GRAPH`
+- `ROOT_CAUSE_REPORT`
+
+The attribution graph must connect cycle, warp, memory, contract path, and RTL module evidence. A performance conclusion without that causal chain is insufficient evidence.
+
+## Module 5: Architecture Rewrite Loop Controller
+
+Input: `PERF_ATTRIBUTION_GRAPH`, `ROOT_CAUSE_REPORT`, `ARCH_IR`, `SYSTEM_CONTRACT_IR`, `GOLDEN_CONTRACT_MODEL`, `INCREMENTAL_RTL_MAP`, and regression history.
+
+Output:
+
+- `ARCH_REWRITE_PLAN`
+- `REWRITE_DECISION_REPORT`
+- `REGRESSION_TRACKING_REPORT`
+
+The controller may propose Architecture Patch, Contract Patch, RTL Patch, or Test Evidence Patch. It must not directly mutate IR. Every patch routes to the owning module and triggers revalidation.
+
+## Legacy Migration Path
+
+Legacy v4 top-level skills and the old `legacy/` skill archive are not active wrappers. They were deleted after their useful constraints were migrated into the current owner modules:
+
+- `gpgpu-front-end` and `gpgpu-architecture-synthesizer` constraints live in `gpgpu-architecture-generator/legacy_request_and_candidate_constraints.md`.
+- `gpgpu-spec-lock` and `gpgpu-canonical-state-engine` constraints live in `gpgpu-system-contract-golden-engine/legacy_spec_state_truth_constraints.md`.
+- `gpgpu-artifact-contract-engine`, structural memory-path, runtime interface, and implementation binding constraints live in `gpgpu-incremental-rtl-binding-engine/legacy_binding_and_module_constraints.md`.
+- `gpgpu-runtime-validator`, memory validation, and implementation trace constraints live in `gpgpu-simulation-performance-attribution-engine/legacy_validation_and_trace_constraints.md`.
+- `gpgpu-closure-refinement-engine` constraints live in `gpgpu-architecture-rewrite-loop-controller/legacy_closure_repair_constraints.md`.
 
 ## Fail Closed Policy
 
-Missing schema, missing table row, hidden default, unsupported enum, forbidden provenance, and unmapped state fields must reject or emit `INSUFFICIENT_SKILL_ASSET`. They must not be repaired by model inference.
+Missing schema, missing table row, hidden default, unsupported enum, forbidden provenance, unmapped contract paths, interface mismatches, missing causal evidence, and unowned rewrite triggers must reject or emit `INSUFFICIENT_SKILL_ASSET`.

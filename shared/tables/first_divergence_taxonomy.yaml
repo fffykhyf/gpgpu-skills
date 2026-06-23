@@ -1,8 +1,0 @@
-table: first_divergence_taxonomy
-version: v4
-classes:
-  ACTIVE_MASK_DIVERGENCE: {affected_state_field: warp_state.active_mask, owner: gpgpu-implementation-validator}
-  PC_DIVERGENCE: {affected_state_field: pc_state.per_warp_pc, owner: gpgpu-implementation-validator}
-  SCOREBOARD_DIVERGENCE: {affected_state_field: scoreboard_state, owner: gpgpu-implementation-validator}
-  MEMORY_TAG_DIVERGENCE: {affected_state_field: memory_request_state.request_tags, owner: gpgpu-memory-subsystem}
-  ABI_DIVERGENCE: {affected_state_field: launch_state, owner: gpgpu-runtime-validator}

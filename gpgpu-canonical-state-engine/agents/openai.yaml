@@ -1,5 +1,0 @@
-interface:
-  display_name: "GPGPU Canonical State Engine"
-  short_description: "Convert locked SPEC_IR into deterministic GPU_STATE."
-  default_prompt: "Use $gpgpu-canonical-state-engine to convert locked SPEC_IR into deterministic GPU_STATE."
-

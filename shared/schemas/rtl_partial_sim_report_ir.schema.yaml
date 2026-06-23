@@ -1,0 +1,17 @@
+schema: rtl_partial_sim_report_ir
+version: v5
+type: object
+required:
+  - verdict
+  - module_results
+  - local_trace_hashes
+  - local_scoreboard_results
+  - interface_transaction_results
+  - golden_slice_compare_results
+properties:
+  verdict: enum
+  module_results: map
+  local_trace_hashes: map
+  local_scoreboard_results: map
+  interface_transaction_results: map
+  golden_slice_compare_results: map

@@ -1,0 +1,26 @@
+system_id: minimal_simt_contract
+arch_ir_hash: hash_arch_minimal_simt
+architecture_model:
+  sm_count: 1
+  max_warps_per_sm: 4
+execution_model:
+  scheduler: round_robin_ready_warp
+  simt:
+    active_mask_rule: lane_mask_from_predicate
+state_model:
+  pc_table: present
+  scoreboard: present
+memory_model:
+  coalescing: contiguous_lane_coalescing
+  ordering: per_warp_program_order
+  request_lifecycle: issue_stall_response_retire
+launch_model:
+  abi: flat_argument_buffer
+  grid_block_thread_mapping: cuda_like_1d
+config_contract:
+  hw_sw_abi: [warp_size, grid_dim, block_dim]
+source_of_truth_map:
+  isa: SYSTEM_CONTRACT_IR.execution_model
+provenance:
+  all_fields: allowed
+canonical_hash: hash_system_contract_minimal_simt

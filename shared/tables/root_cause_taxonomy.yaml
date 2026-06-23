@@ -1,0 +1,23 @@
+version: v5
+root_causes:
+  CONTRACT_VIOLATION:
+    requires: [contract_paths, evidence_hashes]
+    rewrite_candidate: CONTRACT_PATCH
+  RTL_STRUCTURAL_ISSUE:
+    requires: [rtl_module_paths, evidence_hashes]
+    rewrite_candidate: RTL_PATCH
+  MEMORY_IMBALANCE:
+    requires: [memory_request, contract_paths, rtl_module_paths]
+    rewrite_candidate: ARCHITECTURE_PATCH
+  SCHEDULING_INEFFICIENCY:
+    requires: [warp, scoreboard_dependency, contract_paths]
+    rewrite_candidate: ARCHITECTURE_PATCH
+  INTERFACE_PROTOCOL_MISMATCH:
+    requires: [rtl_module_paths, interface_transaction]
+    rewrite_candidate: RTL_PATCH
+  GOLDEN_MODEL_MISMATCH:
+    requires: [golden_contract_model_hash, contract_paths]
+    rewrite_candidate: CONTRACT_PATCH
+  INSUFFICIENT_TRACE_EVIDENCE:
+    requires: [missing_evidence]
+    rewrite_candidate: TEST_EVIDENCE_PATCH

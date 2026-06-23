@@ -1,0 +1,19 @@
+schema: micro_constraint_estimate_ir
+version: v5
+type: object
+required:
+  - area_estimate
+  - memory_pressure_estimate
+  - warp_occupancy_bound
+  - register_pressure_bound
+  - shared_memory_pressure_bound
+  - minimum_bandwidth_need
+  - known_unrealizable_risks
+properties:
+  area_estimate: map
+  memory_pressure_estimate: map
+  warp_occupancy_bound: map
+  register_pressure_bound: map
+  shared_memory_pressure_bound: map
+  minimum_bandwidth_need: map
+  known_unrealizable_risks: list
