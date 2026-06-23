@@ -54,6 +54,16 @@ This skill owns:
 - hard-constraint prefiltering
 - candidate risk reporting
 
+## Preset Selection Rules
+
+Apply deterministic preset rules before free-form candidate synthesis:
+
+1. If `validation_target` or `prototype_credibility_target` contains all of `compile_kernel_to_program_image`, `rtl_sim_smoke_test`, and `memory_dump_golden_check`, prefer `MINIMAL_VERTICAL_SLICE_GPGPU`.
+2. If the user target is teaching only and there is no runtime, frontend, or vertical-slice requirement, prefer `MINIMAL_SIMT_CORE`.
+3. If the workload needs memory latency hiding or `max_warps_per_sm > 1`, prefer `MULTI_WARP_SINGLE_SM` unless rule 1 already selected the vertical-slice preset.
+
+When multiple rules match, use the first applicable rule in `shared/tables/architecture_preset_library.yaml`, record the selected rule, and list lower-priority matching presets in `rejected_alternatives`. If the selected preset fails a hard constraint, emit the failure instead of guessing a replacement.
+
 ## Forbidden Actions
 
 This skill must not:
@@ -90,6 +100,7 @@ This skill must validate:
 
 The output must satisfy:
 - `ARCH_IR is a candidate graph`
+- Every `ARCH_IR.graph_nodes` entry is a structured graph node with `node_id`, `node_type`, `owned_state`, `input_ports`, `output_ports`, `required_contract_paths`, and `scaling_parameters`.
 - `MICRO_CONSTRAINT_ESTIMATE_IR is a feasibility estimate`
 - This skill must not emit system contract truth, golden semantics, RTL bindings, performance attribution, or rewrite patches.
 - Every intent requirement has an owner or explicit non-goal.

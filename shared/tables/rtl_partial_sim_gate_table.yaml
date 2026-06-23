@@ -4,7 +4,86 @@ required_outputs:
   - local_scoreboard_result
   - interface_transaction_result
   - golden_slice_compare_result
+  - timing_feedback_result
   - verdict
+module_partial_sim_cases:
+  scoreboard:
+    - case_id: raw_dependency_stall
+      purpose: RAW dependency stall
+      required_trace_fields: [warp_id, src_reg, dst_reg, dependency_stall]
+      golden_slice: execution_model.scoreboard
+    - case_id: writeback_wakeup
+      purpose: writeback wakeup
+      required_trace_fields: [warp_id, dst_reg, writeback_event, wakeup_event]
+      golden_slice: state_model.scoreboard_state
+    - case_id: multiple_warp_independence
+      purpose: multiple warp independence
+      required_trace_fields: [warp_id, dependency_bits, selected_warp]
+      golden_slice: state_model.scoreboard_state
+  warp_scheduler:
+    - case_id: round_robin_fairness
+      purpose: round-robin fairness
+      required_trace_fields: [ready_warp_mask, scheduler_cursor, selected_warp]
+      golden_slice: execution_model.scheduler
+    - case_id: skip_stalled_warp
+      purpose: skip stalled warp
+      required_trace_fields: [ready_warp_mask, dependency_stall, selected_warp]
+      golden_slice: execution_model.scheduler
+    - case_id: no_ready_warp_idle
+      purpose: no ready warp idle
+      required_trace_fields: [ready_warp_mask, issue_valid]
+      golden_slice: state_model.warp_state
+  load_store_queue:
+    - case_id: ready_low_payload_stable
+      purpose: ready low payload stable
+      required_trace_fields: [valid, ready, payload_before, payload_after]
+      golden_slice: interface_semantics_model.payload_stability
+    - case_id: tag_unique
+      purpose: tag unique
+      required_trace_fields: [request_tag, outstanding_tags, response_tag]
+      golden_slice: interface_semantics_model.tag_uniqueness
+    - case_id: response_wakeup
+      purpose: response wakeup
+      required_trace_fields: [response_tag, warp_id, wakeup_event]
+      golden_slice: memory_model.request_lifecycle
+    - case_id: fault_propagation
+      purpose: fault propagation
+      required_trace_fields: [fault_response, fault_code, trap_or_poison]
+      golden_slice: memory_model.fault_behavior
+  shared_memory_bank_unit:
+    - case_id: bank_conflict_stall
+      purpose: bank conflict stall
+      required_trace_fields: [bank_id, lane_mask, bank_conflict, stall]
+      golden_slice: memory_model.request_lifecycle
+    - case_id: lane_mask_byte_enable
+      purpose: lane mask byte enable
+      required_trace_fields: [lane_mask, access_size, byte_enable]
+      golden_slice: memory_model.coalescing
+    - case_id: aligned_misaligned_behavior
+      purpose: aligned/misaligned behavior
+      required_trace_fields: [address, alignment, response_or_fault]
+      golden_slice: memory_model.fault_behavior
+  csr_runtime_interface:
+    - case_id: start
+      purpose: start
+      required_trace_fields: [start_bit, doorbell_write, launch_state]
+      golden_slice: launch_model.abi
+    - case_id: done
+      purpose: done
+      required_trace_fields: [done_bit, completion_status]
+      golden_slice: launch_model.completion_fault_observation
+    - case_id: fault
+      purpose: fault
+      required_trace_fields: [fault_bit, fault_code]
+      golden_slice: launch_model.completion_fault_observation
+    - case_id: kernel_entry
+      purpose: kernel entry
+      required_trace_fields: [kernel_entry, entry_pc]
+      golden_slice: launch_model.kernel_entry
+    - case_id: arg_base
+      purpose: arg base
+      required_trace_fields: [arg_base, decoded_arguments]
+      golden_slice: launch_model.abi
 gates:
   local_scoreboard_result:
     pass_value: PASS
@@ -15,3 +94,15 @@ gates:
   golden_slice_compare_result:
     pass_value: PASS
     failure_mode: GOLDEN_SLICE_MISMATCH
+  timing_feedback_result:
+    required_checks:
+      - local_timing_risk
+      - critical_signal_paths
+      - estimated_register_count
+      - estimated_sram_macro_need
+      - fanout_risk
+      - combinational_ready_loop_check
+    failure_mode: TIMING_FEEDBACK_MISSING
+  no_combinational_ready_loop:
+    pass_value: true
+    failure_mode: COMBINATIONAL_READY_LOOP

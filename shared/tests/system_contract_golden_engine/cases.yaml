@@ -9,9 +9,14 @@ cases:
       - CONTRACT_SEMANTICS_REPORT
     expected_failure_mode: null
     required_evidence:
+      - isa_model
+      - structured_state_model
       - execution_semantics_functions
       - memory_semantics_functions
       - launch_semantics_functions
+      - interface_semantics_functions
+      - feature_gate_coverage
+      - reject_atomic_or_trap_when_atomic_disabled
       - forbidden_independent_truth_check
     forbidden_outputs:
       - INCREMENTAL_RTL_MAP

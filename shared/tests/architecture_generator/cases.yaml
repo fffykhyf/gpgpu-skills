@@ -9,8 +9,11 @@ cases:
     expected_failure_mode: null
     required_evidence:
       - area_estimate
+      - deterministic_area_rule
       - memory_pressure_estimate
       - warp_occupancy_bound
+      - preset_rule_MINIMAL_VERTICAL_SLICE_GPGPU
+      - arch_graph_node_required_contract_paths
     forbidden_outputs:
       - SYSTEM_CONTRACT_IR
       - GOLDEN_CONTRACT_MODEL

@@ -198,14 +198,14 @@ MIGRATED_REQUIRED_TEXT: Dict[str, List[str]] = {
         "ARCH_IR",
         "MICRO_CONSTRAINT_ESTIMATE_IR",
     ],
-    "gpgpu-system-contract-golden-engine/legacy_spec_state_truth_constraints.md": [
+    "gpgpu-system-contract-golden-engine/contract_truth_and_state_model.md": [
         "gpgpu-spec-lock",
         "gpgpu-canonical-state-engine",
         "SYSTEM_CONTRACT_IR",
         "GOLDEN_CONTRACT_MODEL",
         "pc_table",
     ],
-    "gpgpu-incremental-rtl-binding-engine/legacy_binding_and_module_constraints.md": [
+    "gpgpu-incremental-rtl-binding-engine/module_binding_rules.md": [
         "gpgpu-artifact-contract-engine",
         "gpgpu-memory-subsystem",
         "INCREMENTAL_RTL_MAP",
@@ -230,16 +230,13 @@ MIGRATED_REQUIRED_TEXT: Dict[str, List[str]] = {
 
 REFERENCE_FILES = [
     "gpgpu-architecture-generator/legacy_request_and_candidate_constraints.md",
-    "gpgpu-system-contract-golden-engine/execution_semantics.md",
-    "gpgpu-system-contract-golden-engine/memory_semantics.md",
-    "gpgpu-system-contract-golden-engine/launch_semantics.md",
-    "gpgpu-system-contract-golden-engine/golden_model_contract.md",
-    "gpgpu-system-contract-golden-engine/legacy_spec_state_truth_constraints.md",
-    "gpgpu-incremental-rtl-binding-engine/module_builder.md",
-    "gpgpu-incremental-rtl-binding-engine/interface_contract_checker.md",
-    "gpgpu-incremental-rtl-binding-engine/rtl_partial_simulator.md",
-    "gpgpu-incremental-rtl-binding-engine/module_catalog.md",
-    "gpgpu-incremental-rtl-binding-engine/legacy_binding_and_module_constraints.md",
+    "gpgpu-system-contract-golden-engine/contract_truth_and_state_model.md",
+    "gpgpu-system-contract-golden-engine/executable_semantics_rules.md",
+    "gpgpu-system-contract-golden-engine/golden_model_coverage_and_report.md",
+    "gpgpu-incremental-rtl-binding-engine/module_binding_rules.md",
+    "gpgpu-incremental-rtl-binding-engine/interface_binding_and_checker.md",
+    "gpgpu-incremental-rtl-binding-engine/partial_simulation_gates.md",
+    "gpgpu-incremental-rtl-binding-engine/rtl_module_catalog.md",
     "gpgpu-simulation-performance-attribution-engine/trace_normalizer.md",
     "gpgpu-simulation-performance-attribution-engine/bottleneck_graph_builder.md",
     "gpgpu-simulation-performance-attribution-engine/root_cause_engine.md",

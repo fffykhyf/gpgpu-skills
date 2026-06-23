@@ -5,10 +5,12 @@ required:
   - system_id
   - arch_ir_hash
   - architecture_model
+  - isa_model
   - execution_model
   - state_model
   - memory_model
   - launch_model
+  - interface_semantics_model
   - config_contract
   - source_of_truth_map
   - provenance
@@ -17,10 +19,82 @@ properties:
   system_id: string
   arch_ir_hash: string
   architecture_model: map
+  isa_model:
+    type: object
+    required:
+      - opcodes
+      - instruction_encodings
+      - decode_classes
+      - operand_fields
+      - unsupported_instruction_behavior
+    properties:
+      opcodes: map
+      instruction_encodings: map
+      decode_classes: map
+      operand_fields: map
+      unsupported_instruction_behavior: string
   execution_model: map
-  state_model: map
-  memory_model: map
+  state_model:
+    type: object
+    required:
+      - pc_table
+      - exec_mask_table
+      - warp_state
+      - scheduler_state
+      - register_file_state
+      - scoreboard_state
+      - simt_stack_state
+      - pipeline_visible_state
+      - memory_stall_state
+      - csr_state
+      - launch_state
+      - completion_fault_state
+    properties:
+      pc_table: map
+      exec_mask_table: map
+      warp_state: map
+      scheduler_state: map
+      register_file_state: map
+      scoreboard_state: map
+      simt_stack_state: map
+      pipeline_visible_state: map
+      memory_stall_state: map
+      csr_state: map
+      launch_state: map
+      completion_fault_state: map
+  memory_model:
+    type: object
+    required:
+      - address_spaces
+      - coalescing
+      - ordering
+      - fence
+      - atomic
+      - request_lifecycle
+      - fault_behavior
+    properties:
+      address_spaces: map
+      coalescing: map
+      ordering: map
+      fence: map
+      atomic: map
+      request_lifecycle: map
+      fault_behavior: map
   launch_model: map
+  interface_semantics_model:
+    type: object
+    required:
+      - request_acceptance
+      - payload_stability
+      - tag_uniqueness
+      - response_ordering
+      - fault_response
+    properties:
+      request_acceptance: map
+      payload_stability: map
+      tag_uniqueness: map
+      response_ordering: map
+      fault_response: map
   config_contract: map
   source_of_truth_map: map
   provenance: map

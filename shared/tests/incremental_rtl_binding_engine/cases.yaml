@@ -9,9 +9,15 @@ cases:
       - RTL_PARTIAL_SIM_REPORT
     expected_failure_mode: null
     required_evidence:
+      - interface_binding_ir
+      - module_binding_template
+      - memory_path_decomposition
       - local_trace_hash
       - interface_transaction_result
       - golden_slice_compare_result
+      - module_specific_partial_sim_cases
+      - local_timing_risk
+      - no_combinational_ready_loop
     forbidden_outputs:
       - PERF_ATTRIBUTION_GRAPH
       - ARCH_REWRITE_PLAN

@@ -44,13 +44,13 @@
 
 ## 旧 skill 迁移状态
 
-旧顶层 skills 和旧 `legacy/` skills 不再保留为可调用入口。它们有用的约束已经迁移到当前五个 skill 的 `legacy_*_constraints.md` 文件中：
+旧顶层 skills 和旧 `legacy/` skills 不再保留为可调用入口。它们有用的约束已经迁移到当前五个 skill 的核心约束文件中：
 
 | 旧来源 | 当前承接位置 |
 |---|---|
 | front-end / architecture synthesizer / mode controller / design intent lock | `gpgpu-architecture-generator/legacy_request_and_candidate_constraints.md` |
-| spec lock / canonical state / config truth / golden sim truth | `gpgpu-system-contract-golden-engine/legacy_spec_state_truth_constraints.md` |
-| artifact contract / memory path structure / deterministic transform / RTL module gates | `gpgpu-incremental-rtl-binding-engine/legacy_binding_and_module_constraints.md` |
+| spec lock / canonical state / config truth / golden sim truth | `gpgpu-system-contract-golden-engine/contract_truth_and_state_model.md` |
+| artifact contract / memory path structure / deterministic transform / RTL module gates | `gpgpu-incremental-rtl-binding-engine/module_binding_rules.md` |
 | runtime validator / memory validation / implementation validator / causal trace analyzer | `gpgpu-simulation-performance-attribution-engine/legacy_validation_and_trace_constraints.md` |
 | closure refinement / synthesis closure / repair routing | `gpgpu-architecture-rewrite-loop-controller/legacy_closure_repair_constraints.md` |
 
@@ -68,4 +68,3 @@ python3 shared/tests/validate_v4_assets.py
 - 旧顶层 skill、旧 `legacy/`、旧 `examples/`、旧 `references/` 和旧 v4 generator 是否回流。
 - `shared/` 是否只保留 v5 允许的 schemas、tables、tests、examples、references 和 flow。
 - 所有文件是否都在 `file_descriptions.zh.md` 中有中文内容说明和具体例子。
-

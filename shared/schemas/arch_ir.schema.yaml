@@ -13,9 +13,44 @@ required:
 properties:
   candidate_id: string
   design_intent_ref: string
-  graph_nodes: list
-  graph_edges: list
+  graph_nodes:
+    type: list
+    item_schema: ARCH_GRAPH_NODE
+  graph_edges:
+    type: list
+    item_schema: ARCH_GRAPH_EDGE
   constraint_proof: map
   provenance: map
   rejected_alternatives: list
   unresolved_risks: list
+definitions:
+  ARCH_GRAPH_NODE:
+    type: object
+    required:
+      - node_id
+      - node_type
+      - owned_state
+      - input_ports
+      - output_ports
+      - required_contract_paths
+      - scaling_parameters
+    properties:
+      node_id: string
+      node_type: string
+      owned_state: list
+      input_ports: list
+      output_ports: list
+      required_contract_paths: list
+      scaling_parameters: list
+    rule: graph_nodes must be structured maps, not bare string module names.
+  ARCH_GRAPH_EDGE:
+    type: object
+    required:
+      - from
+      - to
+    properties:
+      from: string
+      from_port: string
+      to: string
+      to_port: string
+      edge_type: string

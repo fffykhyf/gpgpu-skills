@@ -8,6 +8,9 @@ required:
   - handshake_correctness
   - latency_compatibility
   - pipeline_boundary_correctness
+  - payload_stability
+  - tag_uniqueness
+  - combinational_ready_loop_check
   - failed_interfaces
 properties:
   verdict: enum
@@ -16,4 +19,7 @@ properties:
   handshake_correctness: map
   latency_compatibility: map
   pipeline_boundary_correctness: map
+  payload_stability: map
+  tag_uniqueness: map
+  combinational_ready_loop_check: map
   failed_interfaces: list

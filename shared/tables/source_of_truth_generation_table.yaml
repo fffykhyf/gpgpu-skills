@@ -1,8 +1,8 @@
 table: source_of_truth_generation_table
 version: v5
 generation_rules:
-  isa.opcodes:
-    source: SYSTEM_CONTRACT_IR.isa.opcodes
+  isa_model.opcodes:
+    source: SYSTEM_CONTRACT_IR.isa_model.opcodes
     derived_artifacts:
       - rtl/defines.svh
       - tools/isa.py

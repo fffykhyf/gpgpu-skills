@@ -32,6 +32,7 @@ Consumes:
 
 Produces:
 - `INCREMENTAL_RTL_MAP`
+- `INTERFACE_BINDING_IR`
 - `MODULE_INTERFACE_REPORT`
 - `RTL_PARTIAL_SIM_REPORT`
 
@@ -39,13 +40,17 @@ Produces:
 
 This skill owns:
 - module-by-module RTL binding
+- module binding template selection
 - Interface Contract Checker
 - RTL Partial Simulator
 - module interface declaration
+- structured interface binding IR
 - signal consistency checking
 - handshake protocol checking
+- no-combinational-ready-loop checking
 - latency compatibility checking
 - pipeline boundary checking
+- local timing and synthesis feedback hooks
 - partial simulation gate generation
 - local trace schema binding
 
@@ -80,9 +85,13 @@ This skill must validate:
 
 The output must satisfy:
 - `INCREMENTAL_RTL_MAP` binds modules one by one.
-- Every module must declare consumed contract paths, provided signals, required signals, latency contract, local trace schema, and partial simulation evidence.
+- Every module must reference a `MODULE_BINDING_TEMPLATE`.
+- Every module must declare consumed contract paths, required local state, input/output interfaces, latency contract, local trace schema, partial simulation evidence, and timing feedback.
+- Every interface must be represented as structured `INTERFACE_BINDING_IR`.
 - Every module references `SYSTEM_CONTRACT_IR` paths.
 - Interface mismatch prevents full-system simulation.
+- Valid/ready and request/response interfaces must prove `no_combinational_ready_loop`.
+- Memory path modules must decompose load/store queue, coalescer, shared memory bank unit, L1/global adapter, response router, and fault/completion responsibilities unless an explicit template declares a checked fusion.
 - Partial simulation compares local behavior against a `GOLDEN_CONTRACT_MODEL` slice.
 
 ## Failure Modes
@@ -94,6 +103,11 @@ This skill must emit:
 - `PIPELINE_BOUNDARY_FAIL`
 - `PARTIAL_SIM_FAIL`
 - `CONTRACT_PATH_UNBOUND`
+- `MODULE_TEMPLATE_MISSING`
+- `TAG_REUSE_BEFORE_RESPONSE`
+- `PAYLOAD_STABILITY_FAIL`
+- `COMBINATIONAL_READY_LOOP`
+- `TIMING_FEEDBACK_MISSING`
 - `INSUFFICIENT_SKILL_ASSET`
 
 ## Report Schema
@@ -106,17 +120,17 @@ The report must include:
 - module_results
 - interface_results
 - partial_sim_results
+- timing_feedback_results
 - unresolved_binding_risks
 - downstream_contract
 
 ## Concrete Assets Required
 
 This skill is incomplete unless the following exist:
-- `module_builder.md`
-- `interface_contract_checker.md`
-- `rtl_partial_simulator.md`
-- `module_catalog.md`
-- `legacy_binding_and_module_constraints.md`
+- `module_binding_rules.md`
+- `interface_binding_and_checker.md`
+- `partial_simulation_gates.md`
+- `rtl_module_catalog.md`
 - `shared/schemas/incremental_rtl_map.schema.yaml`
 - `shared/schemas/module_interface_report_ir.schema.yaml`
 - `shared/schemas/rtl_partial_sim_report_ir.schema.yaml`

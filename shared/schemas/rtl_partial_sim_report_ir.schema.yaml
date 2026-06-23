@@ -8,6 +8,8 @@ required:
   - local_scoreboard_results
   - interface_transaction_results
   - golden_slice_compare_results
+  - timing_feedback_results
+  - module_case_results
 properties:
   verdict: enum
   module_results: map
@@ -15,3 +17,5 @@ properties:
   local_scoreboard_results: map
   interface_transaction_results: map
   golden_slice_compare_results: map
+  timing_feedback_results: map
+  module_case_results: map

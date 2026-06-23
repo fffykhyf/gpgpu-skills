@@ -6,16 +6,168 @@ required:
   - golden_contract_model_hash
   - modules
   - module_interfaces
+  - module_binding_templates
   - consumed_contract_paths
   - provided_signal_paths
   - local_trace_schemas
+  - timing_feedback
   - unresolved_binding_risks
 properties:
   system_contract_ir_hash: string
   golden_contract_model_hash: string
-  modules: list
-  module_interfaces: map
+  modules:
+    type: list
+    item_schema: MODULE_BINDING_RECORD
+  module_interfaces:
+    type: list
+    item_schema: INTERFACE_BINDING_IR
+  module_binding_templates: map
   consumed_contract_paths: map
   provided_signal_paths: map
   local_trace_schemas: map
+  timing_feedback: map
   unresolved_binding_risks: list
+definitions:
+  MODULE_BINDING_RECORD:
+    type: object
+    required:
+      - module_id
+      - template_id
+      - module_kind
+      - consumed_contract_paths
+      - required_local_state
+      - input_interfaces
+      - output_interfaces
+      - latency_contract
+      - local_trace_schema
+      - local_simulation_evidence
+      - timing_feedback
+    properties:
+      module_id: string
+      template_id: string
+      module_kind: string
+      consumed_contract_paths: list
+      required_local_state: list
+      input_interfaces: list
+      output_interfaces: list
+      latency_contract: map
+      local_trace_schema: string
+      local_simulation_evidence: map
+      timing_feedback: TIMING_FEEDBACK
+  INTERFACE_BINDING_IR:
+    type: object
+    required:
+      - interface_id
+      - producer_module
+      - consumer_module
+      - protocol
+      - payload
+      - handshake
+      - ordering
+      - latency
+      - reset
+      - trace_tap
+      - adapter
+    properties:
+      interface_id: string
+      producer_module: string
+      consumer_module: string
+      protocol:
+        type: object
+        required: [type]
+        properties:
+          type:
+            type: enum
+            values: [VALID_READY, REQ_RSP_TAGGED, CSR_MMIO, STREAM]
+      payload:
+        type: object
+        required: [fields]
+        properties:
+          fields:
+            type: list
+            item_schema: INTERFACE_PAYLOAD_FIELD
+      handshake:
+        type: object
+        required:
+          - accepted_when
+          - stall_rule
+          - payload_stability_when_stalled
+        properties:
+          accepted_when: string
+          stall_rule: string
+          payload_stability_when_stalled: string
+      ordering:
+        type: object
+        required:
+          - in_order
+          - tag_unique_until_response
+        properties:
+          in_order: bool
+          tag_unique_until_response: bool
+      latency:
+        type: object
+        required:
+          - min
+          - max
+        properties:
+          min: integer
+          max: integer
+      reset:
+        type: object
+        required:
+          - valid_reset
+          - ready_reset
+        properties:
+          valid_reset: integer
+          ready_reset: integer
+      trace_tap:
+        type: object
+        required:
+          - fire_event
+          - payload_fields
+        properties:
+          fire_event: string
+          payload_fields: list
+      adapter:
+        type: object
+        required:
+          - allowed
+          - adapter_module
+        properties:
+          allowed: bool
+          adapter_module: string
+  INTERFACE_PAYLOAD_FIELD:
+    type: object
+    required:
+      - name
+      - width
+      - signedness
+      - semantic_path
+    properties:
+      name: string
+      width: integer
+      signedness: enum
+      semantic_path: string
+  TIMING_FEEDBACK:
+    type: object
+    required:
+      - local_timing_risk
+      - critical_signal_paths
+      - estimated_register_count
+      - estimated_sram_macro_need
+      - fanout_risk
+      - combinational_ready_loop_check
+    properties:
+      local_timing_risk: string
+      critical_signal_paths: list
+      estimated_register_count: integer
+      estimated_sram_macro_need: string
+      fanout_risk: string
+      combinational_ready_loop_check:
+        type: object
+        required:
+          - no_combinational_ready_loop
+          - checked_interfaces
+        properties:
+          no_combinational_ready_loop: bool
+          checked_interfaces: list

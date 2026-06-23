@@ -8,15 +8,89 @@ bindings:
     semantics_function: update_active_mask
     required_inputs: [exec_mask, branch_result]
     outputs: [next_exec_mask]
+  - contract_path: execution_model.simt.divergence_rule
+    semantics_function: resolve_divergence
+    feature_gate: execution_model.features.simt_divergence
+    required_inputs: [exec_mask, branch_result, simt_stack_state]
+    outputs: [next_exec_mask, next_pc, simt_stack_state]
+  - contract_path: execution_model.scoreboard
+    semantics_function: apply_scoreboard_dependency
+    required_inputs: [selected_warp, scoreboard_state]
+    outputs: [issue_allowed, dependency_stall_reason]
+  - contract_path: state_model.pipeline_visible_state
+    semantics_function: commit_pipeline_visible_state
+    feature_gate: execution_model.features.visible_pipeline_commit
+    required_inputs: [pipeline_visible_state, writeback_event]
+    outputs: [committed_state]
   - contract_path: memory_model.coalescing
     semantics_function: coalesce
     required_inputs: [lane_mask, addresses, access_size]
     outputs: [memory_transactions]
+  - contract_path: memory_model.address_spaces
+    semantics_function: address_space_resolve
+    required_inputs: [address, address_space_table]
+    outputs: [resolved_space_or_fault]
+  - contract_path: memory_model.byte_enable
+    semantics_function: byte_enable
+    required_inputs: [lane_mask, access_size, address_alignment]
+    outputs: [byte_enable_mask]
   - contract_path: memory_model.ordering
     semantics_function: fence_order
+    feature_gate: memory_model.fence.enabled
     required_inputs: [memory_events, fence_scope]
     outputs: [ordered_events]
+  - contract_path: memory_model.fence.unsupported_behavior
+    semantics_function: reject_fence_or_trap
+    feature_gate_disabled: memory_model.fence.enabled
+    required_inputs: [instruction, unsupported_reason]
+    outputs: [trap_or_reject_event]
+  - contract_path: memory_model.atomic.apply
+    semantics_function: atomic_apply
+    feature_gate: memory_model.atomic.enabled
+    required_inputs: [atomic_op, address, operands, memory_state]
+    outputs: [atomic_result, memory_state]
+  - contract_path: memory_model.atomic.unsupported_behavior
+    semantics_function: reject_atomic_or_trap
+    feature_gate_disabled: memory_model.atomic.enabled
+    required_inputs: [instruction, unsupported_reason]
+    outputs: [trap_or_reject_event]
+  - contract_path: memory_model.request_lifecycle
+    semantics_function: request_lifecycle_step
+    required_inputs: [memory_request, memory_stall_state, response_event]
+    outputs: [memory_stall_state, retire_or_fault_event]
   - contract_path: launch_model.abi
     semantics_function: abi_decode
     required_inputs: [argument_bytes, abi_layout]
     outputs: [decoded_arguments]
+  - contract_path: launch_model.grid_block_thread_mapping
+    semantics_function: grid_block_thread_map
+    required_inputs: [grid_dim, block_dim, warp_size]
+    outputs: [logical_thread_map]
+  - contract_path: launch_model.kernel_entry
+    semantics_function: kernel_entry_resolve
+    required_inputs: [program_image, entry_symbol]
+    outputs: [entry_pc]
+  - contract_path: launch_model.completion_fault_observation
+    semantics_function: completion_or_fault_observe
+    required_inputs: [completion_state, fault_state]
+    outputs: [runtime_visible_status]
+  - contract_path: interface_semantics_model.request_acceptance
+    semantics_function: request_accept_lifecycle
+    required_inputs: [valid, ready, request_state]
+    outputs: [accepted_request_state]
+  - contract_path: interface_semantics_model.payload_stability
+    semantics_function: payload_stability_when_not_ready
+    required_inputs: [valid, ready, payload_before, payload_after]
+    outputs: [stability_verdict]
+  - contract_path: interface_semantics_model.tag_uniqueness
+    semantics_function: tag_uniqueness_until_response
+    required_inputs: [request_tag, outstanding_tags, response_event]
+    outputs: [tag_verdict]
+  - contract_path: interface_semantics_model.response_ordering
+    semantics_function: response_ordering_by_tag
+    required_inputs: [request_order, response_order, tag]
+    outputs: [ordering_verdict]
+  - contract_path: interface_semantics_model.fault_response
+    semantics_function: fault_response_retirement
+    required_inputs: [fault_response, instruction_state]
+    outputs: [retire_trap_or_poison]

@@ -22,7 +22,7 @@ lessons:
     topic: source_of_truth_and_test_drift
     principle: "Docs, RTL defines, ISA tools, declared tests, and actual runners drift unless SYSTEM_CONTRACT_IR and validation plans own the truth."
     do:
-      - "Generate or check ISA/tool/doc artifacts from SYSTEM_CONTRACT_IR.isa."
+      - "Generate or check ISA/tool/doc artifacts from SYSTEM_CONTRACT_IR.isa_model."
       - "Reject declared tests that do not appear in the runner or cannot compile/generate."
       - "Bind magic constants through SYSTEM_CONTRACT_IR config paths and runtime contracts."
     do_not:

@@ -13,7 +13,7 @@ This skill freezes the system contract and derives executable reference semantic
 
 Upstream:
 - `gpgpu-architecture-generator`
-- migrated legacy truth constraints captured in `legacy_spec_state_truth_constraints.md`
+- migrated truth ownership constraints captured in `contract_truth_and_state_model.md`
 
 Downstream:
 - `gpgpu-incremental-rtl-binding-engine`
@@ -40,11 +40,13 @@ Produces:
 ## Owned Decisions
 
 This skill owns:
+- ISA model definition
 - architecture semantic freeze
 - execution model definition
 - state model definition
 - memory model definition
 - launch model definition
+- system-level interface semantics definition
 - config contract definition
 - source-of-truth ownership
 - executable reference semantics derivation
@@ -56,7 +58,7 @@ This skill must not:
 - create RTL module structure
 - create performance attribution
 - create architecture rewrite patches
-- let `GOLDEN_CONTRACT_MODEL` define independent ISA, memory, launch, scheduler, or config truth
+- let `GOLDEN_CONTRACT_MODEL` define independent ISA, memory, launch, scheduler, config, or interface truth
 - accept hidden defaults or duplicate truth owners
 
 ## Required Tables
@@ -81,10 +83,14 @@ This skill must validate:
 
 The output must satisfy:
 - `SYSTEM_CONTRACT_IR` is the only semantic truth source.
+- `SYSTEM_CONTRACT_IR.isa_model` owns ISA opcode and instruction encoding truth.
+- `SYSTEM_CONTRACT_IR.state_model` is structured with canonical state tables for trace diff.
+- `SYSTEM_CONTRACT_IR.interface_semantics_model` owns request/response lifecycle semantics.
 - `GOLDEN_CONTRACT_MODEL` is executable reference semantics derived from `SYSTEM_CONTRACT_IR`.
-- `GOLDEN_CONTRACT_MODEL` must not define independent ISA, memory, launch, scheduler, or config truth.
+- `GOLDEN_CONTRACT_MODEL` must not define independent ISA, memory, launch, scheduler, config, or interface truth.
 - Every executable semantics function maps to a contract path.
-- Execution, memory, launch, and config semantics have coverage evidence.
+- Execution, memory, launch, config, and interface semantics have coverage evidence.
+- Feature-gated semantics functions are required only when their contract feature is enabled; disabled features must have executable reject/trap behavior or a documented non-executable reason.
 - Unmapped contract paths fail closed.
 
 ## Failure Modes
@@ -96,6 +102,7 @@ This skill must emit:
 - `FORBIDDEN_GOLDEN_TRUTH`
 - `CONTRACT_PATH_UNMAPPED`
 - `GOLDEN_MODEL_COVERAGE_FAIL`
+- `FEATURE_GATE_COVERAGE_FAIL`
 - `INSUFFICIENT_SKILL_ASSET`
 
 ## Report Schema
@@ -106,6 +113,8 @@ The report must include:
 - system_contract_ir_hash
 - golden_contract_model_hash
 - executable_semantics_coverage
+- feature_gate_coverage
+- interface_semantics_coverage
 - failed_contract_paths
 - forbidden_independent_truth_check
 - downstream_contract
@@ -113,11 +122,9 @@ The report must include:
 ## Concrete Assets Required
 
 This skill is incomplete unless the following exist:
-- `execution_semantics.md`
-- `memory_semantics.md`
-- `launch_semantics.md`
-- `golden_model_contract.md`
-- `legacy_spec_state_truth_constraints.md`
+- `contract_truth_and_state_model.md`
+- `executable_semantics_rules.md`
+- `golden_model_coverage_and_report.md`
 - `shared/schemas/system_contract_ir.schema.yaml`
 - `shared/schemas/golden_contract_model.schema.yaml`
 - `shared/schemas/contract_semantics_report_ir.schema.yaml`

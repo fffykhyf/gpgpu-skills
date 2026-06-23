@@ -60,6 +60,27 @@ multiple candidates, but each candidate must expose:
 - unresolved architecture risks
 - downstream contract obligations
 
+Preset selection must be deterministic. Apply the preset rules from
+`shared/tables/architecture_preset_library.yaml` in priority order:
+
+- end-to-end validation targets containing `compile_kernel_to_program_image`,
+  `rtl_sim_smoke_test`, and `memory_dump_golden_check` prefer
+  `MINIMAL_VERTICAL_SLICE_GPGPU`
+- teaching-only targets with no runtime, frontend, or vertical-slice requirement
+  prefer `MINIMAL_SIMT_CORE`
+- workloads that need memory latency hiding, or requests with
+  `max_warps_per_sm > 1`, prefer `MULTI_WARP_SINGLE_SM` unless the vertical-slice
+  rule already matched
+
+Every selected candidate must record the matching preset rule and rejected
+alternatives. Hard-constraint failure must stop selection rather than falling
+back to an unrecorded preset.
+
+`ARCH_IR.graph_nodes` must be graph-structured. Each node must include
+`node_id`, `node_type`, `owned_state`, `input_ports`, `output_ports`,
+`required_contract_paths`, and `scaling_parameters` so later RTL binding can
+derive module boundaries without re-guessing ownership.
+
 Every architecture parameter must have allowed provenance. `MODEL_GUESS`,
 `COMMON_GPU_DEFAULT`, `UNKNOWN`, or unowned table rows are invalid provenance.
 
@@ -76,6 +97,10 @@ must include assumptions and bounds for:
 - shared-memory pressure bound
 - minimum bandwidth need
 - known unrealizable risks
+
+Estimator outputs must be deterministic for the same inputs. At minimum, area
+estimation must use the rule table formulas for register file area, shared
+memory area, cache area, and total area rather than free-text judgment.
 
 These estimates are pre-contract feasibility evidence only. They must not be
 treated as final PPA truth or override later verification evidence.

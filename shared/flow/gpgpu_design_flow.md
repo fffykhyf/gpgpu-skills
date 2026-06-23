@@ -75,11 +75,11 @@ The controller may propose Architecture Patch, Contract Patch, RTL Patch, or Tes
 
 ## Legacy Migration Path
 
-Legacy v4 top-level skills and the old `legacy/` skill archive are not active wrappers. They were deleted after their useful constraints were migrated into the current owner modules:
+Legacy v4 top-level skills and the old `legacy/` skill archive are not active wrappers. They were deleted after their useful constraints were migrated into the current owner modules and core constraint files:
 
 - `gpgpu-front-end` and `gpgpu-architecture-synthesizer` constraints live in `gpgpu-architecture-generator/legacy_request_and_candidate_constraints.md`.
-- `gpgpu-spec-lock` and `gpgpu-canonical-state-engine` constraints live in `gpgpu-system-contract-golden-engine/legacy_spec_state_truth_constraints.md`.
-- `gpgpu-artifact-contract-engine`, structural memory-path, runtime interface, and implementation binding constraints live in `gpgpu-incremental-rtl-binding-engine/legacy_binding_and_module_constraints.md`.
+- `gpgpu-spec-lock` and `gpgpu-canonical-state-engine` constraints live in `gpgpu-system-contract-golden-engine/contract_truth_and_state_model.md`.
+- `gpgpu-artifact-contract-engine`, structural memory-path, runtime interface, and implementation binding constraints live in `gpgpu-incremental-rtl-binding-engine/module_binding_rules.md`.
 - `gpgpu-runtime-validator`, memory validation, and implementation trace constraints live in `gpgpu-simulation-performance-attribution-engine/legacy_validation_and_trace_constraints.md`.
 - `gpgpu-closure-refinement-engine` constraints live in `gpgpu-architecture-rewrite-loop-controller/legacy_closure_repair_constraints.md`.
 

@@ -1,22 +1,68 @@
 version: v5
-interface_fields:
+interface_binding_ir:
   required:
-    - signal_width
-    - direction
-    - valid_ready_or_req_resp
-    - latency_min
-    - latency_max
-    - reset_value
-    - backpressure_rule
+    - interface_id
+    - producer_module
+    - consumer_module
+    - protocol
+    - payload
+    - handshake
+    - ordering
+    - latency
+    - reset
     - trace_tap
+    - adapter
+  protocol_types: [VALID_READY, REQ_RSP_TAGGED, CSR_MMIO, STREAM]
+  payload_field_required:
+    - name
+    - width
+    - signedness
+    - semantic_path
+  handshake_required:
+    - accepted_when
+    - stall_rule
+    - payload_stability_when_stalled
+  ordering_required:
+    - in_order
+    - tag_unique_until_response
+  latency_required:
+    - min
+    - max
+  reset_required:
+    - valid_reset
+    - ready_reset
+  trace_tap_required:
+    - fire_event
+    - payload_fields
+  adapter_required:
+    - allowed
+    - adapter_module
 checks:
   signal_width:
     failure_mode: SIGNAL_WIDTH_MISMATCH
-  valid_ready_or_req_resp:
+  signedness:
+    failure_mode: SIGNAL_SIGNEDNESS_MISMATCH
+  semantic_path:
+    failure_mode: CONTRACT_PATH_UNBOUND
+  protocol_type:
     failure_mode: INTERFACE_PROTOCOL_MISMATCH
+  accepted_when:
+    failure_mode: INTERFACE_PROTOCOL_MISMATCH
+  payload_stability_when_stalled:
+    failure_mode: PAYLOAD_STABILITY_FAIL
+  tag_unique_until_response:
+    failure_mode: TAG_REUSE_BEFORE_RESPONSE
   latency_range:
     failure_mode: LATENCY_INCOMPATIBLE
   pipeline_boundary:
     failure_mode: PIPELINE_BOUNDARY_FAIL
+  no_combinational_ready_loop:
+    failure_mode: COMBINATIONAL_READY_LOOP
   backpressure_rule:
     failure_mode: BACKPRESSURE_DROP_OR_DUPLICATE
+  trace_tap:
+    failure_mode: TRACE_TAP_MISSING
+adapter_rules:
+  explicit_adapter_required: true
+  adapter_must_have_module_template: true
+  silent_protocol_coercion: forbidden

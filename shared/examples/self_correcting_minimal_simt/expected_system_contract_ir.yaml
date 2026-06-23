@@ -3,24 +3,107 @@ arch_ir_hash: hash_arch_minimal_simt
 architecture_model:
   sm_count: 1
   max_warps_per_sm: 4
+isa_model:
+  opcodes:
+    add: RV32I_ADD
+    load_word: RV32I_LW
+    store_word: RV32I_SW
+    branch_equal: RV32I_BEQ
+  instruction_encodings:
+    source: vertical_slice_simt_base
+    width_bits: 32
+  decode_classes:
+    integer_alu: [add]
+    memory: [load_word, store_word]
+    branch: [branch_equal]
+  operand_fields:
+    integer_registers: 32
+    lane_predicate: active_mask
+  unsupported_instruction_behavior: trap_unsupported_instruction
 execution_model:
+  features:
+    simt_divergence: false
+    visible_pipeline_commit: true
   scheduler: round_robin_ready_warp
   simt:
     active_mask_rule: lane_mask_from_predicate
+    divergence_rule: unsupported_in_minimal_contract
+  scoreboard: register_dependency_bits
 state_model:
-  pc_table: present
-  scoreboard: present
+  pc_table:
+    owner: SYSTEM_CONTRACT_IR
+    reset: kernel_entry_pc_per_warp
+  exec_mask_table:
+    owner: SYSTEM_CONTRACT_IR
+    reset: all_lanes_active_for_launched_warp
+  warp_state:
+    states: [idle, ready, running, stalled, completed, faulted]
+  scheduler_state:
+    cursor: round_robin_index
+  register_file_state:
+    integer_registers: per_warp_per_lane
+  scoreboard_state:
+    dependency_bits: per_warp_register
+  simt_stack_state:
+    enabled: false
+    unsupported_reason: minimal_contract_has_no_divergent_branch_workload
+  pipeline_visible_state:
+    commit_rule: writeback_updates_visible_state_in_program_order
+  memory_stall_state:
+    states: [not_stalled, waiting_for_response, faulted]
+  csr_state:
+    launch_visible_csrs: [grid_dim, block_dim, status]
+  launch_state:
+    states: [idle, launched, running]
+  completion_fault_state:
+    states: [completed, faulted]
 memory_model:
-  coalescing: contiguous_lane_coalescing
-  ordering: per_warp_program_order
-  request_lifecycle: issue_stall_response_retire
+  address_spaces:
+    supported: [global]
+    unsupported: [shared, local, constant]
+  coalescing:
+    rule: contiguous_lane_coalescing
+  ordering:
+    rule: per_warp_program_order
+  fence:
+    enabled: false
+    unsupported_behavior: reject_fence_or_trap
+    unsupported_reason: fence_not_in_minimal_vertical_slice_contract
+  atomic:
+    enabled: false
+    unsupported_behavior: reject_atomic_or_trap
+    unsupported_reason: atomics_initially_is_non_goal
+  request_lifecycle:
+    rule: issue_stall_response_retire
+  fault_behavior:
+    invalid_address: trap_and_mark_faulted
 launch_model:
   abi: flat_argument_buffer
   grid_block_thread_mapping: cuda_like_1d
+  kernel_entry: program_image_entry_symbol
+  completion_fault_observation: csr_status_register
+interface_semantics_model:
+  request_acceptance:
+    accepted_when: valid_and_ready
+    eventually_response: true
+  payload_stability:
+    when_ready_zero: payload_must_remain_stable
+  tag_uniqueness:
+    rule: unique_until_response
+  response_ordering:
+    same_tag: preserve_request_order
+  fault_response:
+    can_retire_instruction: false
+    behavior: trap_and_mark_faulted
 config_contract:
   hw_sw_abi: [warp_size, grid_dim, block_dim]
 source_of_truth_map:
-  isa: SYSTEM_CONTRACT_IR.execution_model
+  isa_opcodes: SYSTEM_CONTRACT_IR.isa_model.opcodes
+  execution: SYSTEM_CONTRACT_IR.execution_model
+  state: SYSTEM_CONTRACT_IR.state_model
+  memory: SYSTEM_CONTRACT_IR.memory_model
+  launch: SYSTEM_CONTRACT_IR.launch_model
+  interface: SYSTEM_CONTRACT_IR.interface_semantics_model
 provenance:
   all_fields: allowed
 canonical_hash: hash_system_contract_minimal_simt

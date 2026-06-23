@@ -70,35 +70,29 @@
 
 具体例子：在实现 load/store queue 时，该 skill 要求声明 consumed contract paths、provided signals、latency contract、local trace schema，并用 golden slice 做局部仿真对比。
 
-### `gpgpu-incremental-rtl-binding-engine/interface_contract_checker.md`
+### `gpgpu-incremental-rtl-binding-engine/interface_binding_and_checker.md`
 
-内容说明：该文件说明接口合同检查器要检查信号一致性、握手协议、latency compatibility、pipeline boundary 和 reset/stall/backpressure 传播。它是防止模块拼接后才暴露接口错误的约束文档。
+内容说明：该文件定义结构化 `INTERFACE_BINDING_IR`，并说明接口合同检查器要检查 payload 字段、握手协议、tag ordering、latency、reset、trace tap、adapter 和 no combinational ready loop。它是防止模块拼接后才暴露接口错误的约束文档。
 
-具体例子：如果 LSQ 输出 `mem_req_valid` 但 cache interface 要求 `req_valid` 且 tag width 不同，checker 必须报告 `INTERFACE_PROTOCOL_MISMATCH` 或 width mismatch。
+具体例子：如果 LSQ 到 coalescer 的 `REQ_RSP_TAGGED` interface 在 response 前复用 tag，checker 必须报告 `TAG_REUSE_BEFORE_RESPONSE`；如果 ready 形成组合环，必须报告 `COMBINATIONAL_READY_LOOP`。
 
-### `gpgpu-incremental-rtl-binding-engine/legacy_binding_and_module_constraints.md`
+### `gpgpu-incremental-rtl-binding-engine/module_binding_rules.md`
 
-内容说明：该文件迁移旧 artifact-contract、memory-subsystem、runtime hardware interface、deterministic transform 和 RTL SIMT core 中有价值的绑定规则。它把这些旧规则归并到 v5 的增量 RTL 绑定层。
+内容说明：该文件定义 deterministic module binding、`MODULE_BINDING_TEMPLATE` 要求、memory path structural rules、timing/synthesis feedback hook 和 fail-closed 规则。它把旧 artifact-contract、memory-subsystem、runtime interface 和 RTL SIMT core 中有价值的绑定规则归并到当前增量 RTL 绑定层。
 
-具体例子：旧系统中“每个 generated artifact 必须携带 state hash”的思想，在这里迁移为每个 RTL module binding 必须携带 source contract hash 和 golden model hash。
+具体例子：`load_store_queue` module 必须引用 `lsq_template`，声明 consumed contract paths、required local state、input/output interfaces、partial sim cases、timing feedback，并证明没有 combinational ready loop。
 
-### `gpgpu-incremental-rtl-binding-engine/module_builder.md`
+### `gpgpu-incremental-rtl-binding-engine/partial_simulation_gates.md`
 
-内容说明：该文件定义 module-by-module RTL builder 的行为，说明每个模块需要声明 module contract、local state binding、input/output interface、local trace 和 partial simulation evidence。
+内容说明：该文件定义每个 RTL module 进入 full-system simulation 前必须通过的 partial simulation gate，包括 required inputs、required outputs、模块级具体用例和失败证据格式。
 
-具体例子：构建 warp scheduler module 时，需要声明它消费 scheduler policy contract path，输出 selected warp id，并记录 scoreboard stall 的 local trace。
+具体例子：scoreboard partial sim 必须覆盖 RAW dependency stall、writeback wakeup 和 multiple warp independence；LSQ partial sim 必须覆盖 ready-low payload stability、tag unique、response wakeup 和 fault propagation。
 
-### `gpgpu-incremental-rtl-binding-engine/module_catalog.md`
+### `gpgpu-incremental-rtl-binding-engine/rtl_module_catalog.md`
 
-内容说明：该文件列出 v5 RTL binding 需要考虑的模块目录，例如 SM core、warp scheduler、execute pipeline、register file、scoreboard、LSQ、shared memory、cache/global interface、CSR runtime interface 等。
+内容说明：该文件列出 v5 RTL binding 需要考虑的模块目录和 memory path 分解，例如 SM core、warp scheduler、execute pipeline、register file、scoreboard、SIMT stack、LSQ、coalescer、shared memory bank unit、L1/global adapter、memory response router、fault/completion unit 和 CSR runtime interface。
 
-具体例子：一个 minimal SIMT 设计可以只实例化 SM core、warp scheduler、integer pipeline、register file、scoreboard 和 global memory interface，并显式标记 shared memory 为 non-goal。
-
-### `gpgpu-incremental-rtl-binding-engine/rtl_partial_simulator.md`
-
-内容说明：该文件说明每个 RTL module 在进入 full-system simulation 前要先做局部仿真，并与对应的 `GOLDEN_CONTRACT_MODEL` slice 对齐。它要求输出 local trace、scoreboard check 和 mismatch report。
-
-具体例子：对 scoreboard module，partial sim 应输入 register dependency 序列，检查 ready bit 和 wakeup event 是否与 golden dependency rule 一致。
+具体例子：memory path 不应只建一个 cache/global interface，而应拆出 `coalescer`、`l1_cache_or_global_adapter`、`memory_response_router` 和 `fault_completion_unit`，除非模板显式允许融合并保留检查证据。
 
 ### `gpgpu-simulation-performance-attribution-engine/SKILL.md`
 
@@ -136,35 +130,23 @@
 
 具体例子：当 `ARCH_IR` 选择 `ROUND_ROBIN` scheduler 时，该 skill 要把调度规则写进 `SYSTEM_CONTRACT_IR`，再生成可执行的 scheduler reference function。
 
-### `gpgpu-system-contract-golden-engine/execution_semantics.md`
+### `gpgpu-system-contract-golden-engine/contract_truth_and_state_model.md`
 
-内容说明：该文件描述 execution contract 如何 lowering 成可执行语义，包括 warp scheduling、active mask update、divergence/reconvergence、scoreboard dependency 和 commit rule。
+内容说明：该文件定义 `SYSTEM_CONTRACT_IR` 的唯一 truth ownership、contract freeze algorithm、结构化 canonical state model、source-of-truth map、config class semantics、artifact truth hygiene 和系统级 interface semantics model。
 
-具体例子：对于分支发散，golden execution semantics 应根据 active mask 和 reconvergence rule 计算下一步执行 lane，而不是让 RTL validator 自己猜测。
+具体例子：`state_model` 必须显式包含 `pc_table`、`exec_mask_table`、`scoreboard_state`、`pipeline_visible_state`、`memory_stall_state` 等字段；`interface_semantics_model` 必须定义 accepted request 是否 eventually response、payload 是否 stable、tag 是否 unique until response。
 
-### `gpgpu-system-contract-golden-engine/golden_model_contract.md`
+### `gpgpu-system-contract-golden-engine/executable_semantics_rules.md`
 
-内容说明：该文件定义 `GOLDEN_CONTRACT_MODEL` 的边界：它只能执行 `SYSTEM_CONTRACT_IR` 中冻结的语义，不能成为第二套 ISA、memory 或 scheduler truth。
+内容说明：该文件合并 execution、memory、launch、config 和 interface semantics 规则，统一描述 semantics function record format、feature-gated required functions 和 fail-closed rules。
 
-具体例子：golden model 可以实现 `coalesce(load_requests)` reference function，但该函数必须引用 memory contract path，不能自行选择新的 coalescing policy。
+具体例子：当 `memory_model.atomic.enabled = false` 时，golden model 应实现 `reject_atomic_or_trap` 并记录 unsupported reason；只有 atomic feature 开启时才要求 `atomic_apply`。
 
-### `gpgpu-system-contract-golden-engine/launch_semantics.md`
+### `gpgpu-system-contract-golden-engine/golden_model_coverage_and_report.md`
 
-内容说明：该文件描述 launch contract 的可执行语义，包括 ABI decode、grid/block/thread mapping、kernel entry、CSR-visible launch state、completion 和 fault observation。
+内容说明：该文件定义 `GOLDEN_CONTRACT_MODEL` 的边界、禁止 independent truth 的检查、contract path coverage、feature-gated coverage、报告字段和失败模式。
 
-具体例子：host 写 doorbell 后，launch semantics 应确定 blockDim、gridDim、entry PC 和 thread id mapping，并把 completion event 写入可观察状态。
-
-### `gpgpu-system-contract-golden-engine/legacy_spec_state_truth_constraints.md`
-
-内容说明：该文件迁移旧 spec-lock、canonical-state-engine、artifact truth、runtime launch truth、memory truth、config 和 golden sim 中仍有价值的 truth 规则。它强调所有 truth definition 只能落在 `SYSTEM_CONTRACT_IR` 中。
-
-具体例子：旧 canonical state 中的 `pc_table`、`exec_mask_table`、scoreboard state 会迁移为 system contract 的 state model，而不是保留一个单独的 state engine skill。
-
-### `gpgpu-system-contract-golden-engine/memory_semantics.md`
-
-内容说明：该文件描述 memory contract 如何变成可执行 reference semantics，包括 address-space resolver、coalescing、byte enable、ordering、fence、atomic 和 request lifecycle。
-
-具体例子：对一次 warp load，memory semantics 应根据 lane mask 和 access size 计算 byte enable 与 coalesced request，而不是等 RTL trace 之后再定义行为。
+具体例子：`simt_divergence` 关闭时 coverage 不要求 `resolve_divergence`；`visible_pipeline_commit` 开启时 coverage 必须包含 `commit_pipeline_visible_state`。
 
 ### `reader/SKILL.md`
 
@@ -318,9 +300,9 @@
 
 ### `shared/schemas/arch_ir.schema.yaml`
 
-内容说明：该 schema 定义候选 `ARCH_IR` 的结构，包括设计身份、compute topology、execution model、memory hierarchy、launch ABI、config contract 和 provenance。它是架构候选图的结构合同。
+内容说明：该 schema 定义候选 `ARCH_IR` 的图结构，包括 candidate identity、结构化 `graph_nodes`、`graph_edges`、constraint proof 和 provenance。每个 graph node 必须显式给出 node type、owned state、input/output ports、required contract paths 和 scaling parameters，避免 RTL binding 阶段重新猜模块边界。
 
-具体例子：`ARCH_IR.compute_topology.warp_size` 可以是 8，但该值仍是候选架构参数，不是最终 semantic truth。
+具体例子：`load_store_queue` node 应声明自己拥有 pending memory op state，输入 `memory_op`/`memory_response`，输出 `memory_request`/`lsq_backpressure`，并指向 `memory_model.request_lifecycle` 合同路径。
 
 ### `shared/schemas/arch_rewrite_plan.schema.yaml`
 
@@ -330,9 +312,9 @@
 
 ### `shared/schemas/contract_semantics_report_ir.schema.yaml`
 
-内容说明：该 schema 定义 contract semantics report，用来记录 `SYSTEM_CONTRACT_IR` 到 `GOLDEN_CONTRACT_MODEL` 的覆盖、失败路径和禁止独立 truth 检查。它验证合同语义可执行。
+内容说明：该 schema 定义 contract semantics report，用来记录 `SYSTEM_CONTRACT_IR` 到 `GOLDEN_CONTRACT_MODEL` 的覆盖、feature gate coverage、失败路径和禁止独立 truth 检查。它验证合同语义可执行。
 
-具体例子：如果 memory ordering path 没有对应 reference function，报告应记录 `CONTRACT_PATH_UNMAPPED`。
+具体例子：如果 atomic feature 关闭但 golden model 既没有 `reject_atomic_or_trap` 也没有 unsupported reason，报告应记录 feature gate coverage failure。
 
 ### `shared/schemas/design_intent_ir.schema.yaml`
 
@@ -342,15 +324,15 @@
 
 ### `shared/schemas/golden_contract_model.schema.yaml`
 
-内容说明：该 schema 定义 `GOLDEN_CONTRACT_MODEL` 的结构，要求 executable semantics function 映射到 contract path，并携带 contract hash 和 coverage。它防止 golden model 变成第二套真值。
+内容说明：该 schema 定义 `GOLDEN_CONTRACT_MODEL` 的结构，要求 execution、memory、launch、config 和 interface executable semantics function 映射到 contract path，并携带 contract hash、contract path coverage 和 feature gate coverage。它防止 golden model 变成第二套真值。
 
-具体例子：`coalescing_reference` 函数必须声明它来自 `SYSTEM_CONTRACT_IR.memory_model.coalescing_rule`。
+具体例子：`coalesce` 函数必须声明它来自 `SYSTEM_CONTRACT_IR.memory_model.coalescing`；`request_accept_lifecycle` 必须来自 `SYSTEM_CONTRACT_IR.interface_semantics_model.request_acceptance`。
 
 ### `shared/schemas/incremental_rtl_map.schema.yaml`
 
-内容说明：该 schema 定义 `INCREMENTAL_RTL_MAP`，描述 module-by-module RTL binding 的模块、接口、latency contract、local trace schema 和 partial sim evidence。它替代旧的全局 RTL map。
+内容说明：该 schema 定义 `INCREMENTAL_RTL_MAP`，描述 module-by-module RTL binding 的模块、结构化 `INTERFACE_BINDING_IR`、module binding templates、latency contract、local trace schema、partial sim evidence 和 timing feedback。它替代旧的全局 RTL map。
 
-具体例子：`scoreboard` module 条目必须声明 consumed contract paths 和 provided wakeup signal。
+具体例子：`scoreboard` module 条目必须声明 `scoreboard_template`、consumed contract paths、required local state、input/output interfaces、partial sim cases 和 `combinational_ready_loop_check`。
 
 ### `shared/schemas/micro_constraint_estimate_ir.schema.yaml`
 
@@ -366,9 +348,9 @@
 
 ### `shared/schemas/module_interface_report_ir.schema.yaml`
 
-内容说明：该 schema 定义 module interface report，用于记录信号、握手、latency、pipeline boundary 和 reset/backpressure 检查结果。它是 Incremental RTL Binding 的接口质量证据。
+内容说明：该 schema 定义 module interface report，用于记录信号、握手、latency、pipeline boundary、payload stability、tag uniqueness 和 combinational ready loop 检查结果。它是 Incremental RTL Binding 的接口质量证据。
 
-具体例子：如果 `req_ready` 没有在 stall 时传播，该 report 应标记 interface protocol failure。
+具体例子：如果 `req_ready` 参与组合环，report 应记录 `COMBINATIONAL_READY_LOOP`；如果 stalled payload 改变，应记录 `PAYLOAD_STABILITY_FAIL`。
 
 ### `shared/schemas/normalized_trace_ir.schema.yaml`
 
@@ -402,9 +384,9 @@
 
 ### `shared/schemas/rtl_partial_sim_report_ir.schema.yaml`
 
-内容说明：该 schema 定义 RTL partial simulation report，记录单模块局部仿真输入、输出、golden slice 对比和 mismatch。它让 RTL module 在整机仿真前先过局部门槛。
+内容说明：该 schema 定义 RTL partial simulation report，记录单模块局部仿真输入、输出、golden slice 对比、模块级 case 结果和 timing feedback。它让 RTL module 在整机仿真前先过局部门槛。
 
-具体例子：对 LSQ 模块，partial sim report 应包含 request tag、load/store ordering 和 wakeup event 的对比结果。
+具体例子：对 LSQ 模块，partial sim report 应包含 ready-low payload stable、tag unique、response wakeup、fault propagation 和 no combinational ready loop 的结果。
 
 ### `shared/schemas/sim_perf_attribution_report_ir.schema.yaml`
 
@@ -414,15 +396,15 @@
 
 ### `shared/schemas/system_contract_ir.schema.yaml`
 
-内容说明：该 schema 定义 `SYSTEM_CONTRACT_IR`，也就是唯一语义真值层，覆盖 execution model、state model、memory model、launch model 和 config contract。它是 Golden Semantics、RTL Binding 和 Verification 的共同基础。
+内容说明：该 schema 定义 `SYSTEM_CONTRACT_IR`，也就是唯一语义真值层，覆盖 architecture model、`isa_model`、execution model、结构化 state model、memory model、launch model、interface semantics model 和 config contract。它是 Golden Semantics、RTL Binding 和 Verification 的共同基础。
 
-具体例子：warp active mask、PC state、memory ordering 和 launch ABI 都应在此冻结，而不是分散在 validator 或 RTL 文件中。
+具体例子：ISA opcode truth 应在 `isa_model.opcodes` 中冻结；request accepted 后是否 eventually response 应在 `interface_semantics_model.request_acceptance` 中冻结，而不是分散在 validator 或 RTL 文件中。
 
 ### `shared/tables/architecture_preset_library.yaml`
 
-内容说明：该表定义 Architecture Generator 可选的架构 preset，例如 minimal SIMT、multi-warp single SM 和 vertical slice GPGPU。它为候选架构提供可追踪起点。
+内容说明：该表定义 Architecture Generator 可选的架构 preset，以及确定性的 preset selection rules，例如 minimal SIMT、multi-warp single SM 和 vertical slice GPGPU。它为候选架构提供可追踪起点，并记录何时优先选择某个 preset。
 
-具体例子：用户要求“教学用最小 GPU”时，generator 可以选择 `MINIMAL_SIMT_CORE` 作为候选 preset。
+具体例子：当 validation target 同时包含 program image 编译、RTL smoke test 和 memory dump golden check 时，generator 应优先选择 `MINIMAL_VERTICAL_SLICE_GPGPU`；只有教学且无 runtime/frontend 要求时才选择 `MINIMAL_SIMT_CORE`。
 
 ### `shared/tables/config_ownership_table.yaml`
 
@@ -432,9 +414,9 @@
 
 ### `shared/tables/contract_semantics_binding_table.yaml`
 
-内容说明：该表把 `SYSTEM_CONTRACT_IR` 路径绑定到 executable semantics function，例如 scheduler、divergence、coalescing、ABI decode。它确保每个可执行函数都有合同来源。
+内容说明：该表把 `SYSTEM_CONTRACT_IR` 路径绑定到 executable semantics function，例如 scheduler、divergence、coalescing、ABI decode、atomic reject/trap 和 interface lifecycle。它确保每个可执行函数都有合同来源。
 
-具体例子：`memory_model.coalescing` 可以绑定到 `coalescing_reference_function`。
+具体例子：`memory_model.atomic.unsupported_behavior` 可以绑定到 `reject_atomic_or_trap`；`interface_semantics_model.tag_uniqueness` 可以绑定到 `tag_uniqueness_until_response`。
 
 ### `shared/tables/enum_table.yaml`
 
@@ -444,9 +426,9 @@
 
 ### `shared/tables/golden_model_coverage_table.yaml`
 
-内容说明：该表定义 golden model 必须覆盖的 contract semantics 路径和 coverage gate。它用于判断 `GOLDEN_CONTRACT_MODEL` 是否完整执行合同。
+内容说明：该表定义 golden model 必须覆盖的 contract semantics 路径、feature-gated coverage gate 和 forbidden independent truth gate。它用于判断 `GOLDEN_CONTRACT_MODEL` 是否完整执行合同。
 
-具体例子：如果 launch ABI decode 没有 golden function，对应 coverage gate 应失败。
+具体例子：如果 `execution_model.features.simt_divergence` 关闭，则不强制要求 `resolve_divergence`；如果 `memory_model.atomic.enabled` 关闭，则要求 `reject_atomic_or_trap` 和 unsupported reason。
 
 ### `shared/tables/hard_constraint_table.yaml`
 
@@ -456,9 +438,9 @@
 
 ### `shared/tables/micro_constraint_estimator_table.yaml`
 
-内容说明：该表定义 micro-constraint estimator 使用的估计规则，例如 area、memory pressure、occupancy、register pressure 和 bandwidth bound。它让 feasibility estimate 可重复。
+内容说明：该表定义 micro-constraint estimator 使用的确定性估计规则，例如 area、memory pressure、occupancy 和 bandwidth bound。每个 estimator 应记录 inputs、output、formula/rule 和 failure mode，使同一组输入得到稳定的 feasibility estimate。
 
-具体例子：如果 `max_warps_per_sm` 增加，估计器可以据此提高 register pressure bound。
+具体例子：area estimate 使用 register file、shared memory、cache 和 pipeline 的 relative area terms；如果 `max_warps_per_sm` 增加，register file area term 会按公式增加。
 
 ### `shared/tables/mode_decision_table.yaml`
 
@@ -468,9 +450,9 @@
 
 ### `shared/tables/module_interface_contract_table.yaml`
 
-内容说明：该表定义 RTL module interface 的信号、握手、latency 和 pipeline boundary 规则。它为 Interface Contract Checker 提供检查依据。
+内容说明：该表定义 `INTERFACE_BINDING_IR` 的必需字段、protocol types、payload field、handshake、ordering、latency、reset、trace tap、adapter 和 checker failure modes。它为 Interface Contract Checker 提供检查依据。
 
-具体例子：cache/global interface 可以要求 req/resp tag width 一致，且 response latency 在声明范围内。
+具体例子：`REQ_RSP_TAGGED` interface 必须声明 tag 在 response 前唯一，payload stalled 时必须 stable，且不能形成 combinational ready loop。
 
 ### `shared/tables/patch_taxonomy_table.yaml`
 
@@ -522,21 +504,21 @@
 
 ### `shared/tables/rtl_module_catalog.yaml`
 
-内容说明：该表定义可绑定的 RTL module 列表及其角色，包括 SM core、warp scheduler、pipeline、register file、scoreboard、LSQ、shared memory 和 cache/global interface。它是 module builder 的目录。
+内容说明：该表定义可绑定的 RTL module 列表、memory path 分解和 `MODULE_BINDING_TEMPLATE`。它是 module binding rules 的机器可读目录。
 
-具体例子：minimal SIMT 设计可以启用 `warp_scheduler` 和 `scoreboard`，同时将 tensor unit 标为 absent。
+具体例子：`lsq_template` 必须列出 required contract paths、required local state、input/output interfaces、partial sim cases、trace fields、forbidden hidden state 和 timing checks。
 
 ### `shared/tables/rtl_partial_sim_gate_table.yaml`
 
-内容说明：该表定义每类 RTL module 的 partial simulation gate，包括输入 trace、期望输出、golden slice 和失败条件。它让局部仿真标准化。
+内容说明：该表定义每类 RTL module 的 partial simulation gate 和具体测试用例，包括 scoreboard、warp scheduler、load/store queue、shared memory bank unit 和 CSR runtime interface。它让局部仿真不只是形式化 PASS。
 
-具体例子：scoreboard gate 可以要求 dependency hazard 出现时 issue 被阻塞，wakeup 后恢复。
+具体例子：LSQ gate 必须测试 ready low payload stable、tag unique、response wakeup 和 fault propagation；CSR runtime gate 必须测试 start、done、fault、kernel entry 和 arg base。
 
 ### `shared/tables/source_of_truth_generation_table.yaml`
 
 内容说明：该表定义从 `SYSTEM_CONTRACT_IR` 生成或检查派生 artifact 的规则，并声明 docs、RTL defines、tool opcode table 都不能成为 truth source。它防止 artifact drift。
 
-具体例子：ISA opcode table 必须从 `SYSTEM_CONTRACT_IR.isa.opcodes` 派生，不能由 `tools/isa.py` 单独定义。
+具体例子：ISA opcode table 必须从 `SYSTEM_CONTRACT_IR.isa_model.opcodes` 派生，不能由 `tools/isa.py` 单独定义。
 
 ### `shared/tables/trace_normalization_table.yaml`
 
@@ -591,4 +573,3 @@
 内容说明：这是重写后的中文总览，面向快速阅读者概括当前 v5 skill 系统、五个核心 skill、shared 资产边界、旧 skill 删除状态和验证方式。它比详细计划更短，适合作为日常入口。
 
 具体例子：新 agent 接手任务时，可以先读 `skill_summary.md` 确认当前架构，再按需进入 `file_descriptions.zh.md` 查单个文件用途。
-

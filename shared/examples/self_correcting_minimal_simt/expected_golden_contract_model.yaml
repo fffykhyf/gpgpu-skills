@@ -3,10 +3,13 @@ execution_semantics_functions:
   - select_warp
   - update_active_mask
   - apply_scoreboard_dependency
+  - commit_pipeline_visible_state
 memory_semantics_functions:
   - address_space_resolve
   - coalesce
   - byte_enable
+  - reject_fence_or_trap
+  - reject_atomic_or_trap
   - request_lifecycle_step
 launch_semantics_functions:
   - abi_decode
@@ -15,11 +18,38 @@ launch_semantics_functions:
   - completion_or_fault_observe
 config_semantics_functions:
   - classify_config_visibility
+  - validate_config_owner
+interface_semantics_functions:
+  - request_accept_lifecycle
+  - payload_stability_when_not_ready
+  - tag_uniqueness_until_response
+  - response_ordering_by_tag
+  - fault_response_retirement
 contract_path_coverage:
+  isa_model: covered
   execution_model: covered
+  state_model: covered
   memory_model: covered
   launch_model: covered
+  interface_semantics_model: covered
+feature_gate_coverage:
+  simt_divergence:
+    enabled: false
+    required_function: null
+    documented_reason: minimal_contract_has_no_divergent_branch_workload
+  visible_pipeline_commit:
+    enabled: true
+    required_function: commit_pipeline_visible_state
+  memory_fence:
+    enabled: false
+    required_function: reject_fence_or_trap
+    unsupported_reason: fence_not_in_minimal_vertical_slice_contract
+  memory_atomic:
+    enabled: false
+    required_function: reject_atomic_or_trap
+    unsupported_reason: atomics_initially_is_non_goal
 forbidden_independent_truth_check:
   independent_isa: absent
   independent_memory_ordering: absent
   independent_launch_abi: absent
+  independent_interface_lifecycle: absent

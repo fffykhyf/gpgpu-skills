@@ -1,5 +1,32 @@
 table: architecture_preset_library
 version: v5
+selection_rules:
+  - rule_id: VALIDATION_TARGET_VERTICAL_SLICE
+    priority: 10
+    match:
+      validation_target_contains:
+        - compile_kernel_to_program_image
+        - rtl_sim_smoke_test
+        - memory_dump_golden_check
+    prefer_preset: MINIMAL_VERTICAL_SLICE_GPGPU
+    rationale: End-to-end frontend, program image, RTL smoke, and memory dump validation require a runnable vertical slice.
+  - rule_id: TEACHING_ONLY_NO_RUNTIME_FRONTEND
+    priority: 20
+    match:
+      user_target: teaching_only
+      runtime_requirement: absent
+      frontend_requirement: absent
+      vertical_slice_requirement: absent
+    prefer_preset: MINIMAL_SIMT_CORE
+    rationale: Teaching-only explanations should minimize architecture surface area when no runtime or frontend path is required.
+  - rule_id: MEMORY_LATENCY_HIDING_OR_MULTI_WARP
+    priority: 30
+    match_any:
+      - workload_needs_memory_latency_hiding: true
+      - max_warps_per_sm_gt: 1
+    prefer_preset: MULTI_WARP_SINGLE_SM
+    unless_rule_matched: VALIDATION_TARGET_VERTICAL_SLICE
+    rationale: Memory latency hiding and more than one resident warp require multi-warp scheduling and scoreboard behavior.
 presets:
   - preset_id: MINIMAL_SIMT_CORE
     description: Single SM, single resident warp, teaching-friendly integer SIMT core.

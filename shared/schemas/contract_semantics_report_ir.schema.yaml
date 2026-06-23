@@ -6,6 +6,8 @@ required:
   - system_contract_ir_hash
   - golden_contract_model_hash
   - executable_semantics_coverage
+  - feature_gate_coverage
+  - interface_semantics_coverage
   - failed_contract_paths
   - forbidden_independent_truth_check
 properties:
@@ -13,5 +15,7 @@ properties:
   system_contract_ir_hash: string
   golden_contract_model_hash: string
   executable_semantics_coverage: map
+  feature_gate_coverage: map
+  interface_semantics_coverage: map
   failed_contract_paths: list
   forbidden_independent_truth_check: map

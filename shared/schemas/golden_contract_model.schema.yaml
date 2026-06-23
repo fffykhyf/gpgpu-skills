@@ -7,7 +7,9 @@ required:
   - memory_semantics_functions
   - launch_semantics_functions
   - config_semantics_functions
+  - interface_semantics_functions
   - contract_path_coverage
+  - feature_gate_coverage
   - forbidden_independent_truth_check
 properties:
   system_contract_ir_hash: string
@@ -15,5 +17,7 @@ properties:
   memory_semantics_functions: list
   launch_semantics_functions: list
   config_semantics_functions: list
+  interface_semantics_functions: list
   contract_path_coverage: map
+  feature_gate_coverage: map
   forbidden_independent_truth_check: map

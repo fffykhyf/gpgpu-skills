@@ -251,10 +251,9 @@ CONTRACT_SEMANTICS_REPORT
 
 ### 需要新增 references
 
-- `skill/gpgpu-system-contract-golden-engine/execution_semantics.md`
-- `skill/gpgpu-system-contract-golden-engine/memory_semantics.md`
-- `skill/gpgpu-system-contract-golden-engine/launch_semantics.md`
-- `skill/gpgpu-system-contract-golden-engine/golden_model_contract.md`
+- `skill/gpgpu-system-contract-golden-engine/contract_truth_and_state_model.md`
+- `skill/gpgpu-system-contract-golden-engine/executable_semantics_rules.md`
+- `skill/gpgpu-system-contract-golden-engine/golden_model_coverage_and_report.md`
 
 ## Module 3: Incremental RTL Binding Engine
 
@@ -279,8 +278,11 @@ CONTRACT_SEMANTICS_REPORT
 - `register_file`
 - `scoreboard`
 - `load_store_queue`
-- `shared_memory`
-- `cache_global_interface`
+- `coalescer`
+- `shared_memory_bank_unit`
+- `l1_cache_or_global_adapter`
+- `memory_response_router`
+- `fault_completion_unit`
 - `interconnect`
 - `csr_runtime_interface`
 
@@ -339,10 +341,10 @@ RTL_PARTIAL_SIM_REPORT
 
 ### 需要新增 references
 
-- `skill/gpgpu-incremental-rtl-binding-engine/module_builder.md`
-- `skill/gpgpu-incremental-rtl-binding-engine/interface_contract_checker.md`
-- `skill/gpgpu-incremental-rtl-binding-engine/rtl_partial_simulator.md`
-- `skill/gpgpu-incremental-rtl-binding-engine/module_catalog.md`
+- `skill/gpgpu-incremental-rtl-binding-engine/module_binding_rules.md`
+- `skill/gpgpu-incremental-rtl-binding-engine/interface_binding_and_checker.md`
+- `skill/gpgpu-incremental-rtl-binding-engine/partial_simulation_gates.md`
+- `skill/gpgpu-incremental-rtl-binding-engine/rtl_module_catalog.md`
 
 ## Module 4: Simulation + Performance Attribution Engine
 
@@ -796,10 +798,9 @@ forbidden_outputs:
 
 **Files:**
 
-- Create: `skill/gpgpu-system-contract-golden-engine/execution_semantics.md`
-- Create: `skill/gpgpu-system-contract-golden-engine/memory_semantics.md`
-- Create: `skill/gpgpu-system-contract-golden-engine/launch_semantics.md`
-- Create: `skill/gpgpu-system-contract-golden-engine/golden_model_contract.md`
+- Create: `skill/gpgpu-system-contract-golden-engine/contract_truth_and_state_model.md`
+- Create: `skill/gpgpu-system-contract-golden-engine/executable_semantics_rules.md`
+- Create: `skill/gpgpu-system-contract-golden-engine/golden_model_coverage_and_report.md`
 - Create: `skill/shared/schemas/golden_contract_model.schema.yaml`
 - Create: `skill/shared/tables/contract_semantics_binding_table.yaml`
 - Create: `skill/shared/tables/golden_model_coverage_table.yaml`
@@ -845,10 +846,10 @@ forbidden_outputs:
 
 **Files:**
 
-- Create: `skill/gpgpu-incremental-rtl-binding-engine/module_builder.md`
-- Create: `skill/gpgpu-incremental-rtl-binding-engine/interface_contract_checker.md`
-- Create: `skill/gpgpu-incremental-rtl-binding-engine/rtl_partial_simulator.md`
-- Create: `skill/gpgpu-incremental-rtl-binding-engine/module_catalog.md`
+- Create: `skill/gpgpu-incremental-rtl-binding-engine/module_binding_rules.md`
+- Create: `skill/gpgpu-incremental-rtl-binding-engine/interface_binding_and_checker.md`
+- Create: `skill/gpgpu-incremental-rtl-binding-engine/partial_simulation_gates.md`
+- Create: `skill/gpgpu-incremental-rtl-binding-engine/rtl_module_catalog.md`
 - Create: `skill/shared/schemas/incremental_rtl_map.schema.yaml`
 - Create: `skill/shared/tables/rtl_module_catalog.yaml`
 - Create: `skill/shared/tables/module_interface_contract_table.yaml`
@@ -865,8 +866,11 @@ forbidden_outputs:
   register_file
   scoreboard
   load_store_queue
-  shared_memory
-  cache_global_interface
+  coalescer
+  shared_memory_bank_unit
+  l1_cache_or_global_adapter
+  memory_response_router
+  fault_completion_unit
   interconnect
   csr_runtime_interface
   ```
@@ -1010,8 +1014,8 @@ forbidden_outputs:
 **Files:**
 
 - Create or update: `skill/gpgpu-architecture-generator/legacy_request_and_candidate_constraints.md`
-- Create or update: `skill/gpgpu-system-contract-golden-engine/legacy_spec_state_truth_constraints.md`
-- Create or update: `skill/gpgpu-incremental-rtl-binding-engine/legacy_binding_and_module_constraints.md`
+- Create or update: `skill/gpgpu-system-contract-golden-engine/contract_truth_and_state_model.md`
+- Create or update: `skill/gpgpu-incremental-rtl-binding-engine/module_binding_rules.md`
 - Create or update: `skill/gpgpu-simulation-performance-attribution-engine/legacy_validation_and_trace_constraints.md`
 - Create or update: `skill/gpgpu-architecture-rewrite-loop-controller/legacy_closure_repair_constraints.md`
 - Delete: old top-level `skill/gpgpu-*` directories that are not one of the five v5 skills.

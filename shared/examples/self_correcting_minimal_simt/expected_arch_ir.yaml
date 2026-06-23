@@ -1,28 +1,104 @@
 candidate_id: minimal_simt_self_correcting
 design_intent_ref: design_intent_minimal_teaching_simt
 graph_nodes:
-  - sm_core
-  - warp_scheduler
-  - decode_execute_pipeline
-  - register_file
-  - scoreboard
-  - load_store_queue
-  - shared_memory
-  - cache_global_interface
+  - node_id: sm_core
+    node_type: compute_cluster
+    owned_state: [sm_config_shadow, warp_context_table]
+    input_ports: [launch_config, scheduler_ready, memory_response]
+    output_ports: [scheduler_issue, memory_request, trace_event]
+    required_contract_paths: [architecture_model.sm_count, architecture_model.max_warps_per_sm]
+    scaling_parameters: [sm_count, warp_size, max_warps_per_sm]
+  - node_id: warp_scheduler
+    node_type: scheduler
+    owned_state: [ready_warp_queue, current_warp_id]
+    input_ports: [warp_context_status, hazard_status, issue_feedback]
+    output_ports: [issue_warp, scheduler_trace]
+    required_contract_paths: [execution_model.scheduler, architecture_model.max_warps_per_sm]
+    scaling_parameters: [max_warps_per_sm, issue_width]
+  - node_id: decode_execute_pipeline
+    node_type: pipeline
+    owned_state: [pipeline_registers, active_lane_mask]
+    input_ports: [issue_warp, instruction_word, operand_values]
+    output_ports: [alu_result, memory_op, writeback_event]
+    required_contract_paths: [execution_model.simt, state_model.pc_table]
+    scaling_parameters: [issue_width, pipeline_stage_count, warp_size]
+  - node_id: register_file
+    node_type: state_store
+    owned_state: [integer_registers]
+    input_ports: [read_addresses, writeback_event]
+    output_ports: [operand_values]
+    required_contract_paths: [config_contract.hw_sw_abi]
+    scaling_parameters: [max_warps_per_sm, warp_size, registers_per_thread]
+  - node_id: scoreboard
+    node_type: hazard_tracker
+    owned_state: [pending_register_bits]
+    input_ports: [issue_warp, writeback_event]
+    output_ports: [hazard_status]
+    required_contract_paths: [state_model.scoreboard]
+    scaling_parameters: [max_warps_per_sm, warp_size, registers_per_thread]
+  - node_id: load_store_queue
+    node_type: memory_pipeline
+    owned_state: [pending_memory_ops, memory_response_tags]
+    input_ports: [memory_op, memory_response]
+    output_ports: [memory_request, lsq_backpressure]
+    required_contract_paths: [memory_model.request_lifecycle, memory_model.ordering]
+    scaling_parameters: [max_warps_per_sm, global_interface_bits]
+  - node_id: shared_memory
+    node_type: memory_store
+    owned_state: [shared_memory_bytes]
+    input_ports: [shared_memory_request]
+    output_ports: [shared_memory_response]
+    required_contract_paths: [memory_model.request_lifecycle]
+    scaling_parameters: [shared_memory_bytes_per_sm, shared_memory_banks]
+  - node_id: cache_global_interface
+    node_type: memory_interface
+    owned_state: [cache_tags, memory_request_tags]
+    input_ports: [memory_request]
+    output_ports: [memory_response]
+    required_contract_paths: [memory_model.coalescing, memory_model.ordering]
+    scaling_parameters: [cache_size_bytes_per_sm, global_interface_bits]
 graph_edges:
   - from: warp_scheduler
+    from_port: issue_warp
     to: decode_execute_pipeline
+    to_port: issue_warp
+    edge_type: control_dataflow
+  - from: register_file
+    from_port: operand_values
+    to: decode_execute_pipeline
+    to_port: operand_values
+    edge_type: operand_dataflow
+  - from: scoreboard
+    from_port: hazard_status
+    to: warp_scheduler
+    to_port: hazard_status
+    edge_type: hazard_feedback
   - from: decode_execute_pipeline
+    from_port: memory_op
     to: load_store_queue
+    to_port: memory_op
+    edge_type: memory_request
   - from: load_store_queue
+    from_port: memory_request
     to: cache_global_interface
+    to_port: memory_request
+    edge_type: memory_request
+  - from: cache_global_interface
+    from_port: memory_response
+    to: load_store_queue
+    to_port: memory_response
+    edge_type: memory_response
 constraint_proof:
   hard_constraints_passed: true
   rejected_unbounded_memory_design: true
 provenance:
   preset: MINIMAL_VERTICAL_SLICE_GPGPU
+  preset_selection_rule: VALIDATION_TARGET_VERTICAL_SLICE
   source: PRESET_DEFAULT
 rejected_alternatives:
-  - multi_sm_design
+  - preset: MINIMAL_SIMT_CORE
+    reason: missing frontend_program_image_rtl_memory_dump_vertical_slice
+  - preset: MULTI_WARP_SINGLE_SM
+    reason: lower_priority_than_validation_target_vertical_slice
 unresolved_risks:
   - lsq_backpressure_under_coalesced_loads
