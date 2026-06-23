@@ -1,0 +1,4 @@
+rewrite_id: atomic_fence_barrier_sync_patch
+capability_profile: full_memory_sync_system
+patch_type: SYNC_ATOMIC_PATCH
+required_revalidation_gates: [atomic_same_address_test, fence_visibility_test, barrier_phase_advance, wsync_prior_work_drain]

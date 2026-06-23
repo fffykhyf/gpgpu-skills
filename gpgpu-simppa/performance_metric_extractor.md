@@ -3,21 +3,21 @@
 This component emits `PERFORMANCE_METRIC_IR` in both Failure Attribution Mode
 and Pass Evidence Mode when cycle or ordered event evidence is available.
 
-## Metric Levels
+## Metric Groups
 
-Level 1: correctness-only smoke
+`correctness_smoke`:
 - evidence completeness
 - minimal fingerprint
 - total cycles if available
 
-Level 2: standard validation
+`standard_validation`:
 - basic IPC
 - issue utilization
 - stall breakdown
 - memory latency summaries
 - scheduler readiness summaries
 
-Level 3: performance gate or optimization task
+`performance_gate`:
 - full `PERFORMANCE_METRIC_IR`
 - `PERF_ATTRIBUTION_GRAPH` even when correctness passes
 - architecture rewrite trigger evaluation
@@ -78,6 +78,15 @@ performance_metric_ir:
     - HIGH_BANK_CONFLICT
     - HIGH_INTERFACE_BACKPRESSURE
     - LOW_OCCUPANCY
+
+  metric_groups:
+    - scheduler
+    - pipeline
+    - memory_path
+    - fabric
+    - cache_mshr
+    - dram
+    - sync_atomic
 ```
 
 ## Backend PPA Evidence

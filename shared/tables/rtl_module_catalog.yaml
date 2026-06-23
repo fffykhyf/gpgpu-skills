@@ -29,6 +29,70 @@ modules:
     template: lsq_template
     required_contract_paths: [memory_model.request_lifecycle, memory_model.ordering, state_model.memory_stall_state]
     required_interfaces: [decode_issue_unit, scoreboard, coalescer, memory_response_router, fault_completion_unit]
+  lsu_slice:
+    template: lsu_slice_template
+    required_contract_paths: [memory.lsu_lane_format, memory.nonblocking_memory_tag]
+    required_interfaces: [decode_issue_unit, memory_scheduler, local_memory_bank, l1_global_adapter]
+  memory_scheduler:
+    template: memory_scheduler_template
+    required_contract_paths: [memory.nonblocking_memory_tag, memory.mshr_replay]
+    required_interfaces: [lsu_slice, memory_coalescer, scoreboard, cache_response_router]
+  memory_coalescer:
+    template: memory_coalescer_template
+    required_contract_paths: [memory.coalescer_response_restore, memory.nonblocking_memory_tag]
+    required_interfaces: [memory_scheduler, local_memory_bank, l1_global_adapter, cache_response_router]
+  local_memory_bank:
+    template: local_memory_bank_template
+    required_contract_paths: [memory.local_memory_bank, sync.barrier_phase]
+    required_interfaces: [memory_coalescer, cache_response_router, barrier_unit]
+  l1_cache_bank:
+    template: l1_cache_bank_template
+    required_contract_paths: [memory.l1_cache_or_global_adapter, memory.nonblocking_memory_tag]
+    required_interfaces: [memory_coalescer, cache_response_router, fabric_router]
+  l1_global_adapter:
+    template: l1_global_adapter_template
+    required_contract_paths: [memory.l1_cache_or_global_adapter, fabric.fabric_request_response]
+    required_interfaces: [memory_coalescer, cache_response_router, fabric_router]
+  l2_cache_slice:
+    template: l2_cache_slice_template
+    required_contract_paths: [memory.l2_cache_slice, interconnect.l2_slice_routing]
+    required_interfaces: [fabric_router, l2_mshr, cache_response_router, dram_controller]
+  l2_mshr:
+    template: l2_mshr_template
+    required_contract_paths: [memory.mshr_replay, memory.cache_response_routing]
+    required_interfaces: [l2_cache_slice, dram_controller, cache_response_router]
+  cache_response_router:
+    template: cache_response_router_template
+    required_contract_paths: [memory.cache_response_routing, interconnect.response_demux]
+    required_interfaces: [memory_scheduler, l1_cache_bank, l2_cache_slice, l2_mshr, scoreboard]
+  fabric_router:
+    template: fabric_router_template
+    required_contract_paths: [interconnect.fabric_request_response, interconnect.l2_slice_routing, interconnect.fabric_queue_backpressure]
+    required_interfaces: [l1_global_adapter, l1_cache_bank, l2_cache_slice, atomic_unit, fence_drain_unit]
+  dram_controller:
+    template: dram_controller_template
+    required_contract_paths: [memory.dram_controller, memory.memory_visibility]
+    required_interfaces: [l2_cache_slice, l2_mshr, cache_response_router]
+  atomic_unit:
+    template: atomic_unit_template
+    required_contract_paths: [sync.atomic_serialization, memory.memory_visibility]
+    required_interfaces: [fabric_router, cache_response_router]
+  fence_drain_unit:
+    template: fence_drain_unit_template
+    required_contract_paths: [sync.fence_visibility, memory.memory_visibility]
+    required_interfaces: [fabric_router, memory_scheduler, cache_response_router]
+  barrier_unit:
+    template: barrier_unit_template
+    required_contract_paths: [sync.barrier_phase, memory.local_memory_bank]
+    required_interfaces: [warp_control_unit, memory_scheduler, local_memory_bank]
+  wsync_drain_unit:
+    template: wsync_drain_unit_template
+    required_contract_paths: [sync.wsync_drain, memory.nonblocking_memory_tag]
+    required_interfaces: [warp_control_unit, memory_scheduler, scoreboard]
+  trace_adapter:
+    template: trace_adapter_template
+    required_contract_paths: [trace.normalized_trace_ir, rtl.module_twin_trace]
+    required_interfaces: [all_bound_modules, simppa_trace_ingestion]
   coalescer:
     template: coalescer_template
     required_contract_paths: [memory_model.coalescing, memory_model.address_spaces]
@@ -191,3 +255,147 @@ module_binding_templates:
     required_trace_fields: [cycle, arg_base, arg_buffer_offset, arg_bytes, decoded_argument]
     forbidden_hidden_state: [implicit_argument_default]
     timing_checks: [local_timing_risk, no_combinational_ready_loop]
+  lsu_slice_template:
+    required_contract_paths: [memory.lsu_lane_format, memory.nonblocking_memory_tag]
+    required_local_state: [lane_address_buffer, byte_enable_vector, shifted_store_data_buffer, load_format_state]
+    required_input_interfaces: [decode_issue_unit_to_lsu_slice]
+    required_output_interfaces: [lsu_slice_to_memory_scheduler, lsu_slice_to_local_memory_bank, lsu_slice_to_l1_global_adapter]
+    required_partial_sim_cases: [aligned_load_store, misaligned_byte_enable, shifted_store_data, lane_mask_preserve, load_format_extend]
+    required_trace_fields: [sm_id, warp_id, instruction_uuid, lane_mask, per_lane_addr, byte_enable, store_data_shifted, load_format_rule]
+    forbidden_hidden_state: [implicit_lane_address_rewrite, untraced_byte_enable_default]
+    timing_checks: [lane_fanout_risk, no_combinational_ready_loop]
+  memory_scheduler_template:
+    required_contract_paths: [memory.nonblocking_memory_tag, memory.mshr_replay]
+    required_local_state: [outstanding_tag_table, request_queue, response_queue, replay_queue]
+    required_input_interfaces: [lsu_slice_to_memory_scheduler, cache_response_router_to_memory_scheduler]
+    required_output_interfaces: [memory_scheduler_to_memory_coalescer, memory_scheduler_to_scoreboard]
+    required_partial_sim_cases: [tag_allocate_release, final_eop_release, response_backpressure, tag_reuse_forbidden]
+    required_trace_fields: [sm_id, warp_id, instruction_uuid, request_tag, response_tag, final_eop, queue_occupancy]
+    forbidden_hidden_state: [implicit_tag_allocator, scoreboard_release_without_final_eop]
+    timing_checks: [queue_depth_bound, no_combinational_ready_loop]
+  memory_coalescer_template:
+    required_contract_paths: [memory.coalescer_response_restore, memory.nonblocking_memory_tag]
+    required_local_state: [original_request_table, coalesced_tag_table, per_lane_offset_table]
+    required_input_interfaces: [memory_scheduler_to_memory_coalescer]
+    required_output_interfaces: [memory_coalescer_to_local_memory_bank, memory_coalescer_to_l1_global_adapter, memory_coalescer_to_cache_response_router]
+    required_partial_sim_cases: [same_line_multi_lane_load, mixed_byte_enable_restore, response_shape_restore, tag_reuse_forbidden]
+    required_trace_fields: [original_tag, coalesced_tag, lane_mask, byte_enable, per_lane_offset, restored_lane_data, final_eop]
+    forbidden_hidden_state: [untraced_lane_restore_table, raw_response_scoreboard_release]
+    timing_checks: [merge_table_depth, no_combinational_ready_loop]
+  local_memory_bank_template:
+    required_contract_paths: [memory.local_memory_bank, sync.barrier_phase]
+    required_local_state: [bank_busy_state, local_memory_array, response_hold_register]
+    required_input_interfaces: [memory_coalescer_to_local_memory_bank, barrier_unit_to_local_memory_bank]
+    required_output_interfaces: [local_memory_bank_to_cache_response_router]
+    required_partial_sim_cases: [shared_bank_conflict, same_bank_multi_lane_access, response_hold_under_backpressure, barrier_visibility]
+    required_trace_fields: [sm_id, bank_id, lane_mask, byte_enable, queue_occupancy, barrier_id, visibility_event]
+    forbidden_hidden_state: [silent_bank_conflict_drop, uncontracted_read_during_write_rule]
+    timing_checks: [sram_macro_need, response_hold_no_ready_loop]
+  l1_cache_bank_template:
+    required_contract_paths: [memory.l1_cache_or_global_adapter, memory.nonblocking_memory_tag]
+    required_local_state: [tag_array, data_array, miss_status_table, response_queue]
+    required_input_interfaces: [memory_coalescer_to_l1_cache_bank, fabric_router_to_l1_cache_bank]
+    required_output_interfaces: [l1_cache_bank_to_cache_response_router, l1_cache_bank_to_fabric_router]
+    required_partial_sim_cases: [l1_cache_hit, l1_cache_miss, response_order_policy, write_policy]
+    required_trace_fields: [l1_cache_id, request_tag, response_tag, byte_enable, queue_occupancy, final_eop]
+    forbidden_hidden_state: [uncontracted_cache_policy, hidden_response_reorder]
+    timing_checks: [tag_compare_fanout, no_combinational_ready_loop]
+  l1_global_adapter_template:
+    required_contract_paths: [memory.l1_cache_or_global_adapter, fabric.fabric_request_response]
+    required_local_state: [request_buffer, response_buffer, source_context_table]
+    required_input_interfaces: [memory_coalescer_to_l1_global_adapter, fabric_router_to_l1_global_adapter]
+    required_output_interfaces: [l1_global_adapter_to_fabric_router, l1_global_adapter_to_cache_response_router]
+    required_partial_sim_cases: [direct_global_forward, sm_id_route_preserve, response_restore_context, adapter_backpressure]
+    required_trace_fields: [source_sm_id, request_tag, response_tag, lane_mask, fabric_route_id, queue_occupancy]
+    forbidden_hidden_state: [implicit_source_sm_id, untraced_response_context]
+    timing_checks: [adapter_queue_depth, no_combinational_ready_loop]
+  l2_cache_slice_template:
+    required_contract_paths: [memory.l2_cache_slice, interconnect.l2_slice_routing]
+    required_local_state: [slice_tag_array, slice_data_array, request_queue, response_queue]
+    required_input_interfaces: [fabric_router_to_l2_cache_slice, l2_mshr_to_l2_cache_slice]
+    required_output_interfaces: [l2_cache_slice_to_l2_mshr, l2_cache_slice_to_cache_response_router, l2_cache_slice_to_dram_controller]
+    required_partial_sim_cases: [l2_cache_hit, l2_cache_miss, l2_slice_route, fill_and_replay]
+    required_trace_fields: [l2_slice_id, cache_bank_id, mshr_id, request_tag, response_tag, queue_occupancy]
+    forbidden_hidden_state: [hidden_slice_hash, response_demux_without_source]
+    timing_checks: [bank_arbitration_bound, no_combinational_ready_loop]
+  l2_mshr_template:
+    required_contract_paths: [memory.mshr_replay, memory.cache_response_routing]
+    required_local_state: [mshr_table, replay_queue, fill_context_table, deadlock_guard_state]
+    required_input_interfaces: [l2_cache_slice_to_l2_mshr, dram_controller_to_l2_mshr]
+    required_output_interfaces: [l2_mshr_to_l2_cache_slice, l2_mshr_to_cache_response_router]
+    required_partial_sim_cases: [mshr_allocate, mshr_replay, fill_completion_release, no_deadlock_watchdog]
+    required_trace_fields: [mshr_id, source_sm_id, source_warp_id, request_tag, response_tag, queue_occupancy, final_eop]
+    forbidden_hidden_state: [mshr_reuse_before_release, untraced_replay_context]
+    timing_checks: [mshr_table_depth, no_combinational_ready_loop]
+  cache_response_router_template:
+    required_contract_paths: [memory.cache_response_routing, interconnect.response_demux]
+    required_local_state: [response_demux_table, warp_lane_restore_table, scoreboard_release_queue]
+    required_input_interfaces: [l1_cache_bank_to_cache_response_router, l1_global_adapter_to_cache_response_router, l2_mshr_to_cache_response_router, atomic_unit_to_cache_response_router]
+    required_output_interfaces: [cache_response_router_to_memory_scheduler, cache_response_router_to_scoreboard, cache_response_router_to_fabric_router]
+    required_partial_sim_cases: [response_demux, lane_shape_restore, scoreboard_release_eop_check, response_order_policy]
+    required_trace_fields: [source_sm_id, target_warp_id, target_lane_mask, response_tag, restored_lane_mask, final_eop]
+    forbidden_hidden_state: [scoreboard_release_without_response_restore, hidden_demux_target]
+    timing_checks: [fanout_risk, no_combinational_ready_loop]
+  fabric_router_template:
+    required_contract_paths: [interconnect.fabric_request_response, interconnect.l2_slice_routing, interconnect.fabric_queue_backpressure]
+    required_local_state: [route_table, virtual_channel_queues, backpressure_counters]
+    required_input_interfaces: [l1_global_adapter_to_fabric_router, l1_cache_bank_to_fabric_router, atomic_unit_to_fabric_router, fence_drain_unit_to_fabric_router]
+    required_output_interfaces: [fabric_router_to_l2_cache_slice, fabric_router_to_atomic_unit, fabric_router_to_l1_global_adapter]
+    required_partial_sim_cases: [sm_id_route_preserve, l2_slice_route, virtual_channel_backpressure, response_demux]
+    required_trace_fields: [source_sm_id, request_tag, target_l2_slice_id, fabric_route_id, virtual_channel, queue_occupancy]
+    forbidden_hidden_state: [route_changes_arch_semantics, atomic_load_store_merge]
+    timing_checks: [routing_table_fanout, no_combinational_ready_loop]
+  dram_controller_template:
+    required_contract_paths: [memory.dram_controller, memory.memory_visibility]
+    required_local_state: [dram_bank_state, row_buffer_state, request_queue, response_queue]
+    required_input_interfaces: [l2_cache_slice_to_dram_controller, l2_mshr_to_dram_controller]
+    required_output_interfaces: [dram_controller_to_l2_mshr, dram_controller_to_cache_response_router]
+    required_partial_sim_cases: [dram_schedule, dram_bank_conflict, dram_response_order, visibility_event]
+    required_trace_fields: [dram_channel_id, dram_bank_id, dram_row_id, request_tag, response_tag, arbitration_wait_cycles]
+    forbidden_hidden_state: [untraced_reorder, hidden_bank_conflict_policy]
+    timing_checks: [queue_depth_bound, no_combinational_ready_loop]
+  atomic_unit_template:
+    required_contract_paths: [sync.atomic_serialization, memory.memory_visibility]
+    required_local_state: [serialization_queue, atomic_context_table]
+    required_input_interfaces: [fabric_router_to_atomic_unit]
+    required_output_interfaces: [atomic_unit_to_cache_response_router, atomic_unit_to_fabric_router]
+    required_partial_sim_cases: [atomic_same_address_test, atomic_response_to_warp, visibility_event_test]
+    required_trace_fields: [serialization_point, serialization_sequence, source_sm_id, target_warp_id, response_tag, visibility_event]
+    forbidden_hidden_state: [atomic_coalesced_with_load_store, hidden_serialization_order]
+    timing_checks: [serialization_queue_depth, no_combinational_ready_loop]
+  fence_drain_unit_template:
+    required_contract_paths: [sync.fence_visibility, memory.memory_visibility]
+    required_local_state: [drain_tracker, pre_fence_write_set, completion_state]
+    required_input_interfaces: [memory_scheduler_to_fence_drain_unit, fabric_router_to_fence_drain_unit]
+    required_output_interfaces: [fence_drain_unit_to_fabric_router, fence_drain_unit_to_scoreboard]
+    required_partial_sim_cases: [fence_visibility_test, memory_visibility_order_test, fence_scope_test]
+    required_trace_fields: [fence_scope, visibility_event, queue_occupancy, drain_begin_event, drain_end_event]
+    forbidden_hidden_state: [fence_as_barrier, completion_before_visibility]
+    timing_checks: [drain_tracker_depth, no_combinational_ready_loop]
+  barrier_unit_template:
+    required_contract_paths: [sync.barrier_phase, memory.local_memory_bank]
+    required_local_state: [arrival_bitmap, release_bitmap, barrier_phase_table, lsu_drain_tracker]
+    required_input_interfaces: [warp_control_unit_to_barrier_unit, local_memory_bank_to_barrier_unit]
+    required_output_interfaces: [barrier_unit_to_warp_control_unit, barrier_unit_to_local_memory_bank]
+    required_partial_sim_cases: [barrier_arrive, barrier_release, barrier_phase_advance, barrier_lsu_drain]
+    required_trace_fields: [barrier_id, barrier_phase, arrival_bitmap, release_bitmap, queue_occupancy]
+    forbidden_hidden_state: [barrier_as_fence_without_contract, release_without_required_lsu_drain]
+    timing_checks: [bitmap_fanout, no_combinational_ready_loop]
+  wsync_drain_unit_template:
+    required_contract_paths: [sync.wsync_drain, memory.nonblocking_memory_tag]
+    required_local_state: [prior_work_counter, pending_memory_counter, pending_long_latency_counter, release_state]
+    required_input_interfaces: [warp_control_unit_to_wsync_drain_unit, memory_scheduler_to_wsync_drain_unit]
+    required_output_interfaces: [wsync_drain_unit_to_warp_control_unit, wsync_drain_unit_to_scoreboard]
+    required_partial_sim_cases: [wsync_drain_begin, wsync_drain_end, prior_work_drain, release_after_drain]
+    required_trace_fields: [sm_id, warp_id, pending_memory_ops, pending_long_latency_ops, release_event]
+    forbidden_hidden_state: [wsync_as_scoreboard_hazard, release_before_prior_work_drain]
+    timing_checks: [counter_width_bound, no_combinational_ready_loop]
+  trace_adapter_template:
+    required_contract_paths: [trace.normalized_trace_ir, rtl.module_twin_trace]
+    required_local_state: [event_encoder_state, source_hash_accumulator]
+    required_input_interfaces: [all_bound_modules_to_trace_adapter]
+    required_output_interfaces: [trace_adapter_to_simppa_trace_ingestion]
+    required_partial_sim_cases: [trace_field_presence, event_order_stability, module_twin_event_match]
+    required_trace_fields: [event_id, event_type, contract_path, rtl_module_path, evidence_hash]
+    forbidden_hidden_state: [dropped_required_trace_field, generated_event_without_contract_path]
+    timing_checks: [trace_tap_isolation, no_functional_ready_loop]

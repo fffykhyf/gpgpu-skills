@@ -13,26 +13,28 @@ This skill freezes the system contract and derives executable reference semantic
 
 Upstream:
 - `gpgpu-arch`
+- `gpgpu-interconnect`
+- `gpgpu-memory`
+- `gpgpu-atomic-sync`
 - migrated truth ownership constraints captured in `contract_truth_and_state_model.md`
 
 Downstream:
 - `gpgpu-runtime`
 - `gpgpu-rtl`
-- `gpgpu-interconnect`
-- `gpgpu-memory`
-- `gpgpu-atomic-sync`
 - `gpgpu-simppa`
 
 ## Input IR
 
 Consumes:
 - `ARCH_IR`
+- `CONTRACT_FRAGMENT_IR`
 - `DESIGN_INTENT_IR`
 - `MICRO_CONSTRAINT_ESTIMATE_IR`
 - optional complete human spec
 - enum table
 - provenance table
 - contract semantics binding table
+- `shared/references/vortex_memory_sync_lessons.yaml`
 
 ## Output IR
 
@@ -71,6 +73,12 @@ This skill owns:
 - EXEC-mask evolution engine
 - SM-parallel execution model
 - memory bundle semantic execution
+- contract fragment freeze
+- module twin model derivation
+
+Required reference lessons:
+- `VORTEX_BARRIER_WSYNC_DRAIN`
+- `VORTEX_SIMX_RTL_TWIN`
 
 ## Human and AI Output Policy
 

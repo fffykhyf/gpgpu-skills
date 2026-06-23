@@ -1,0 +1,4 @@
+system_contract_ir_hash: hash_single_sm_warp_pipeline
+capability_profile: single_sm_warp_pipeline
+execution_semantics_functions: [select_warp, apply_scoreboard_dependency, execute_divergence]
+memory_semantics_functions: [execute_lsu_lane_format]

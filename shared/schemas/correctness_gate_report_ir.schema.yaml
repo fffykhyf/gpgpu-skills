@@ -4,13 +4,13 @@ type: object
 required:
   - verdict
   - selected_mode
-  - comparison_level
+  - comparison_scope
   - mismatch_summary
   - evidence_completeness
 properties:
   verdict: enum
   selected_mode: enum
-  comparison_level: list
+  comparison_scope: list
   mismatch_summary: map
   evidence_completeness: map
   fail_reason: string

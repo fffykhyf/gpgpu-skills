@@ -1,4 +1,5 @@
 system_contract_ir_hash: hash_system_contract_minimal_simt
+capability_profile: toolchain_runtime_vertical_slice
 execution_semantics_functions:
   - select_warp
   - update_active_mask

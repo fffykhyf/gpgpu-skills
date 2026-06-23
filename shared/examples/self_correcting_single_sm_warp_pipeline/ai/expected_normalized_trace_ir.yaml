@@ -1,0 +1,3 @@
+trace_id: single_sm_warp_pipeline_trace
+event_types: [lsu_lane_format, warp_issue, commit]
+events: []

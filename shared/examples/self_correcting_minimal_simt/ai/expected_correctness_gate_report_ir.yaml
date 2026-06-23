@@ -1,6 +1,6 @@
 verdict: CORRECTNESS_PASS
 selected_mode: PASS_EVIDENCE_MODE
-comparison_level:
+comparison_scope:
   - final_memory_dump
   - architectural_trace
 mismatch_summary:

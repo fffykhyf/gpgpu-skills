@@ -1,0 +1,6 @@
+system_id: multi_sm_memory_path_system
+capability_profile: multi_sm_memory_path
+contract_fragments: [multi_sm_memory_path_fragment]
+memory_model:
+  coalescing: response_restore_required
+  scoreboard_release: final_eop

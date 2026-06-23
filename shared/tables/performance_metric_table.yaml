@@ -1,5 +1,5 @@
 version: v5
-levels:
+metric_groups:
   correctness_only_smoke:
     required_metrics: [total_cycles]
     graph_required: false

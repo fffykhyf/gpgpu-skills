@@ -7,7 +7,7 @@ description: Use when SM memory requests must be routed through NoC, L1/L2 fabri
 
 ## Role
 
-This skill defines the L4 interconnect contract between SM-local memory
+This skill defines the `full_memory_sync_system` interconnect contract between SM-local memory
 front-ends and the shared memory hierarchy. It owns NoC routing, SM-to-L2
 mapping, request queues, fabric arbitration, and congestion evidence.
 
@@ -15,11 +15,11 @@ mapping, request queues, fabric arbitration, and congestion evidence.
 
 Upstream:
 - `gpgpu-arch`
-- `gpgpu-golden`
 - `gpgpu-runtime`
 - `gpgpu-rtl`
 
 Downstream:
+- `gpgpu-golden`
 - `gpgpu-memory`
 - `gpgpu-atomic-sync`
 - `gpgpu-simppa`
@@ -29,15 +29,17 @@ Downstream:
 
 Consumes:
 - `ARCH_IR`
-- `SYSTEM_CONTRACT_IR`
+- `CAPABILITY_PROFILE_IR`
 - `INCREMENTAL_RTL_MAP`
 - `MEMORY_BUNDLE`
 - per-SM trace partitions
 - memory hierarchy constraints
+- `shared/references/vortex_memory_sync_lessons.yaml`
 
 ## Output IR
 
 Produces:
+- `CONTRACT_FRAGMENT_IR`
 - `NOC_ROUTING_CONTRACT`
 - `SM_TO_MEMORY_FABRIC_IR`
 - `FABRIC_CONTENTION_REPORT`
@@ -64,6 +66,10 @@ This skill owns:
 - L2 cache slicing policy handoff
 - source SM ID preservation
 - fabric trace event schema
+
+Required reference lessons:
+- `VORTEX_CACHE_MSHR_RESPONSE_ROUTE`
+- `VORTEX_SIMX_RTL_TWIN`
 
 ## Human and AI Output Policy
 

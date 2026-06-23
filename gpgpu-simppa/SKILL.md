@@ -68,6 +68,7 @@ Consumes:
 - `program_image_trace`
 - `loader_trace`
 - `toolchain_smoke_trace`
+- `shared/references/vortex_memory_sync_lessons.yaml`
 
 ## Output IR
 
@@ -117,6 +118,15 @@ This skill owns:
 - warp EXEC-mask diff
 - divergence path diff
 - memory fabric contention attribution
+
+Required reference lessons:
+- `VORTEX_LSU_LANE_FORMAT`
+- `VORTEX_NONBLOCKING_MEMORY_TAG`
+- `VORTEX_COALESCER_RESPONSE_RESTORE`
+- `VORTEX_CACHE_MSHR_RESPONSE_ROUTE`
+- `VORTEX_MSHR_DEADLOCK_GUARD`
+- `VORTEX_BARRIER_WSYNC_DRAIN`
+- `VORTEX_SIMX_RTL_TWIN`
 
 ## Human and AI Output Policy
 
@@ -212,7 +222,7 @@ The output must satisfy:
 - `PERF_ATTRIBUTION_GRAPH` must connect cycle or order window, SM and warp,
   bottleneck/event evidence, contract path, and RTL module evidence when it is
   used for root cause or performance rewrite decisions.
-- L3/L4 trace comparison must include SM-level trace partitioning, EXEC mask diff, warp state diff, and divergence path diff.
+- Advanced memory-path and synchronization trace comparison must include SM-level trace partitioning, EXEC mask diff, warp state diff, divergence path diff, memory/fabric/cache/DRAM events, and atomic/fence/barrier/WSYNC events.
 - Simulator-only gates are insufficient for FPGA-facing changes.
 - Runtime launch tests must be separate from kernel functional tests.
 - Synthesis/PPA evidence must be artifact-bundle based, not log-only.

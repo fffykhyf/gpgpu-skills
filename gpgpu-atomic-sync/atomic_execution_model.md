@@ -51,7 +51,7 @@ Atomic trace events must include:
 
 ## Acceptance
 
-L4 atomic support passes only if:
+`full_memory_sync_system` atomic support passes only if:
 - atomic ordering defined
 - serialization point is explicit
 - per-SM and global ordering are distinguishable

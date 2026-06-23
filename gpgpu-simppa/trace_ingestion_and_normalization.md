@@ -39,14 +39,16 @@ Each event in `NORMALIZED_TRACE_IR.events` should use this field vocabulary:
 event:
   event_id: string
   event_source: rtl_trace | golden_trace | waveform_trace | memory_trace | runtime_trace | assembler_trace | disassembler_trace | program_image_trace | loader_trace | toolchain_smoke_trace
-  event_type: fetch | decode | issue | execute | writeback | commit | branch | divergence | barrier | scoreboard_stall | memory_request | memory_response | csr_write | runtime_start | runtime_done | assembler_encode | disassembler_decode | program_image_load | loader_init | fault
+  event_type: fetch | decode | issue | execute | writeback | commit | branch | divergence | barrier | scoreboard_stall | memory_request | memory_response | lsu_lane_format | memory_tag_allocate | memory_tag_release | coalescer_merge | coalescer_restore | l1_cache_hit | l1_cache_miss | l2_slice_route | l2_cache_hit | l2_cache_miss | mshr_allocate | mshr_replay | dram_schedule | dram_bank_conflict | atomic_serialize | atomic_visibility | fence_drain_begin | fence_drain_end | barrier_arrive | barrier_release | wsync_drain_begin | wsync_drain_end | csr_write | runtime_start | runtime_done | assembler_encode | disassembler_decode | program_image_load | loader_init | fault
   timestamp_kind: cycle | step_id | order_key
   cycle: optional integer
   step_id: optional integer
   order_key: optional string
 
   block_id: optional integer
+  sm_id: optional integer
   warp_id: optional integer
+  instruction_uuid: optional string
   lane_id: optional integer
   thread_id: optional integer
   lane_mask: optional string
@@ -75,6 +77,30 @@ event:
   byte_enable: optional string
   request_tag: optional string
   response_tag: optional string
+  original_tag: optional string
+  coalesced_tag: optional string
+  per_lane_offset: optional map
+  restored_lane_mask: optional string
+  final_eop: optional bool
+  l1_cache_id: optional string
+  l2_slice_id: optional string
+  cache_bank_id: optional string
+  mshr_id: optional string
+  fabric_route_id: optional string
+  virtual_channel: optional string
+  dram_channel_id: optional string
+  dram_bank_id: optional string
+  dram_row_id: optional string
+  queue_occupancy: optional integer
+  arbitration_wait_cycles: optional integer
+  serialization_point: optional string
+  serialization_sequence: optional integer
+  fence_scope: optional string
+  visibility_event: optional string
+  barrier_id: optional string
+  barrier_phase: optional string
+  arrival_bitmap: optional string
+  release_bitmap: optional string
   memory_latency: optional integer
   fault_code: optional string
 
@@ -120,12 +146,39 @@ minimum_trusted_trace_fields:
     - byte_enable_or_byte_select
     - dst_data
   memory:
+    - instruction_uuid
     - request_tag
     - response_tag
+    - original_tag
+    - coalesced_tag
     - address
     - byte_enable
+    - per_lane_offset
     - data
     - lane_mask
+    - restored_lane_mask
+    - final_eop
+  fabric_cache_dram:
+    - l1_cache_id
+    - l2_slice_id
+    - cache_bank_id
+    - mshr_id
+    - fabric_route_id
+    - virtual_channel
+    - dram_channel_id
+    - dram_bank_id
+    - dram_row_id
+    - queue_occupancy
+    - arbitration_wait_cycles
+  sync_atomic:
+    - serialization_point
+    - serialization_sequence
+    - fence_scope
+    - visibility_event
+    - barrier_id
+    - barrier_phase
+    - arrival_bitmap
+    - release_bitmap
   scheduler:
     - ready
     - stalled
@@ -143,6 +196,12 @@ If trace lacks `byte_enable`, packet/EOP identity, or request/response tags,
 it cannot high-confidence localize register-file, scoreboard, coalescer, cache
 replay, or response-restore failures. Emit `PASS_WITH_INSUFFICIENT_EVIDENCE`
 or `TRACE_FIELD_MISSING` rather than a strong pass.
+
+Memory/fabric/synchronization traces must retain Vortex-derived identities:
+original and coalesced tags, source SM, warp/lane shape, L2 slice route, MSHR
+ID, queue occupancy, atomic serialization point, fence visibility event,
+barrier phase, and WSYNC drain release. Dropping these fields makes the event
+usable for performance summaries only, not for high-confidence root cause.
 
 ## Source Rules
 

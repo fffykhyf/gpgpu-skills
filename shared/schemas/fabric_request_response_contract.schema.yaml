@@ -1,0 +1,9 @@
+schema: fabric_request_response_contract
+version: v5
+type: object
+required: [fabric_request, fabric_response]
+properties:
+  fabric_request: map
+  fabric_response: map
+required_request_fields: [source_sm_id, source_warp_id, source_lane_mask, request_tag, traffic_class, address, target_l2_slice_id, route_id, virtual_channel, ordering_scope]
+required_response_fields: [source_request_tag, response_tag, source_sm_id, target_warp_id, target_lane_mask, final_eop, response_payload]

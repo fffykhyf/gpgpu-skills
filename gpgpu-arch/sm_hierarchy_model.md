@@ -1,6 +1,7 @@
 # SM Hierarchy Model
 
-This file defines the architecture hierarchy for the L3 SM-centric upgrade.
+This file defines the architecture hierarchy for the SM-centric capability
+profiles.
 `SM` is the canonical execution island in GPGPU skills.
 
 ## Hierarchy
@@ -124,9 +125,10 @@ Use:
 - `SM issue model`
 - typed decode/issue/memory bundle contracts
 
-## L3 Acceptance
+## Capability Acceptance
 
-A generated `ARCH_IR` reaches L3 only if:
+A generated `ARCH_IR` reaches `single_sm_warp_pipeline` or
+`multi_sm_memory_path` only if:
 - it declares SM as the top execution island
 - warp state includes explicit EXEC lifecycle
 - LDS is local to SM and separately tagged from global memory

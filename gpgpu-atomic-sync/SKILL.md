@@ -7,34 +7,39 @@ description: Use when atomic operations, warp/SM/grid barriers, memory fences, o
 
 ## Role
 
-This skill owns L4 atomic, barrier, and fence consistency semantics. It defines
+This skill owns `full_memory_sync_system` atomic, barrier, fence, and WSYNC
+consistency semantics. It defines
 serialization points, ordering scopes, and hierarchical synchronization behavior
 without redefining instruction encoding or cache implementation details.
 
 ## Position in Flow
 
 Upstream:
-- `gpgpu-golden`
+- `gpgpu-arch`
 - `gpgpu-interconnect`
 - `gpgpu-memory`
 - `gpgpu-rtl`
 
 Downstream:
+- `gpgpu-golden`
 - `gpgpu-simppa`
 - `gpgpu-loop`
 
 ## Input IR
 
 Consumes:
-- `SYSTEM_CONTRACT_IR`
+- `ARCH_IR`
+- `CAPABILITY_PROFILE_IR`
 - `SM_TO_MEMORY_FABRIC_IR`
 - `CACHE_COHERENCE_MODEL`
 - memory and atomic traces
 - barrier and fence traces
+- `shared/references/vortex_memory_sync_lessons.yaml`
 
 ## Output IR
 
 Produces:
+- `CONTRACT_FRAGMENT_IR`
 - `ATOMIC_EXECUTION_MODEL`
 - `BARRIER_FENCE_CONTRACT`
 - `SYNC_CONSISTENCY_REPORT`
@@ -59,6 +64,10 @@ This skill owns:
 - grid barrier semantics
 - fence ordering semantics
 - synchronization trace classification
+
+Required reference lessons:
+- `VORTEX_BARRIER_WSYNC_DRAIN`
+- `VORTEX_SIMX_RTL_TWIN`
 
 ## Human and AI Output Policy
 

@@ -1,0 +1,4 @@
+system_contract_ir_hash: hash_toolchain_runtime_vertical_slice
+capability_profile: toolchain_runtime_vertical_slice
+launch_semantics_functions: [abi_decode, kernel_entry_resolve]
+program_image_semantics_functions: [parse_program_image, execute_program_image]

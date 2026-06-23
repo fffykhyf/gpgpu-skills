@@ -1,0 +1,8 @@
+system_contract_ir_hash: hash_multi_sm_memory_path
+capability_profile: multi_sm_memory_path
+memory_semantics_functions:
+  - execute_lsu_lane_format
+  - allocate_memory_tag
+  - coalesce_lane_requests
+  - restore_coalesced_response
+  - complete_memory_response

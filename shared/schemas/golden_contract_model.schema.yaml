@@ -3,6 +3,7 @@ version: v5
 type: object
 required:
   - system_contract_ir_hash
+  - capability_profile
   - execution_semantics_functions
   - memory_semantics_functions
   - launch_semantics_functions
@@ -14,6 +15,7 @@ required:
   - forbidden_independent_truth_check
 properties:
   system_contract_ir_hash: string
+  capability_profile: string
   execution_semantics_functions: list
   memory_semantics_functions: list
   launch_semantics_functions: list

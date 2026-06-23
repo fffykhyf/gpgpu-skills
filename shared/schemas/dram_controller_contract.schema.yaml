@@ -1,0 +1,12 @@
+schema: dram_controller_contract
+version: v5
+type: object
+required: [dram_channel_id, dram_bank_id, dram_row_id, request_tag, schedule_policy, response_order_policy, bank_conflict_policy]
+properties:
+  dram_channel_id: integer
+  dram_bank_id: integer
+  dram_row_id: integer
+  request_tag: string
+  schedule_policy: string
+  response_order_policy: string
+  bank_conflict_policy: string

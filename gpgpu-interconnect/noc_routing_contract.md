@@ -1,6 +1,6 @@
 # NoC Routing Contract
 
-This contract defines L4 routing between SMs, L2 slices, and memory-system
+This contract defines `full_memory_sync_system` routing between SMs, L2 slices, and memory-system
 targets.
 
 ## Required Routing State

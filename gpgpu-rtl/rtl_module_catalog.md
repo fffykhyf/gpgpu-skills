@@ -40,12 +40,33 @@ self-correcting SIMT GPGPU. The machine-readable catalog lives in
 | `lds_bank_unit` | Bind LDS bank selection and bank conflict stalls. |
 | `l1_cache_or_global_adapter` | Bind cache/global request-response behavior and global fallback. |
 | `memory_response_router` | Bind response tags, wakeup routing, and replay/fault routing. |
+| `cache_response_router` | Bind response demux, warp/lane restore, final-EOP scoreboard release, and cache/MSHR response routing. |
 | `fault_completion_unit` | Bind completion, trap, poison, and runtime-visible fault reporting. |
+| `fabric_router` | Bind SM source identity, L2 slice routing, virtual channels, ordering scope, and queue backpressure. |
 | `interconnect` | Bind module-to-module transport or memory fabric adapter. |
+| `l2_cache_slice` | Bind slice/bank lookup, miss allocation, fill/replay handoff, and response demux target. |
+| `l2_mshr` | Bind miss context retention, fill completion, replay order, release, and deadlock guard. |
+| `dram_controller` | Bind DRAM channel/bank/row scheduling, conflict attribution, and response order. |
+| `atomic_unit` | Bind atomic serialization point, old/new value visibility, and response routing. |
+| `fence_drain_unit` | Bind scope-specific visibility drain and completion after required visibility. |
+| `barrier_unit` | Bind barrier arrival, phase, LSU drain requirement, and release bitmap. |
+| `wsync_drain_unit` | Bind prior-work drain, pending operation counters, and release after drain. |
 | `trace_adapter` | Bind module-local trace taps into `NORMALIZED_TRACE_IR` fields. |
 
 Every catalog entry must have contract paths, interface definitions, required
 local state, required trace fields, partial simulation gates, and timing checks.
+The machine-readable template must use these exact keys:
+
+```yaml
+required_contract_paths:
+required_local_state:
+required_input_interfaces:
+required_output_interfaces:
+required_partial_sim_cases:
+required_trace_fields:
+forbidden_hidden_state:
+timing_checks:
+```
 
 ## Forbidden Shortcuts
 
@@ -53,6 +74,11 @@ local state, required trace fields, partial simulation gates, and timing checks.
   explicitly declares that fusion and still exposes coalescing trace fields.
 - Do not merge fault reporting into a memory adapter without a
   `fault_completion_unit` equivalent.
+- Do not release scoreboard entries from raw memory responses before
+  response-shape restoration and final EOP.
+- Do not hide fabric route, L2 slice, MSHR, DRAM bank, atomic serialization,
+  fence visibility, barrier phase, or WSYNC drain state outside traceable
+  module-local state.
 - Do not use full-system simulation as evidence for missing module partial sim.
 - Do not define interface semantics here; consume
   `SYSTEM_CONTRACT_IR.interface_semantics_model` and emit

@@ -1,0 +1,4 @@
+rewrite_id: multi_sm_coalescer_restore_patch
+capability_profile: multi_sm_memory_path
+patch_type: MEMORY_PATH_PATCH
+required_revalidation_gates: [coalescer_restore_test, rtl_golden_trace_diff, scoreboard_release_eop_check]

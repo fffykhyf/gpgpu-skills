@@ -7,18 +7,19 @@ description: Use when DRAM controller behavior, L2/cache hierarchy, cache cohere
 
 ## Role
 
-This skill owns the L4 memory-system contract after requests leave the
+This skill owns the `full_memory_sync_system` memory-system contract after requests leave the
 interconnect fabric. It defines DRAM scheduling, cache write policy, coherence,
 visibility, and memory hierarchy evidence.
 
 ## Position in Flow
 
 Upstream:
+- `gpgpu-arch`
 - `gpgpu-interconnect`
-- `gpgpu-golden`
 - `gpgpu-rtl`
 
 Downstream:
+- `gpgpu-golden`
 - `gpgpu-atomic-sync`
 - `gpgpu-simppa`
 - `gpgpu-loop`
@@ -26,15 +27,18 @@ Downstream:
 ## Input IR
 
 Consumes:
-- `SYSTEM_CONTRACT_IR`
+- `ARCH_IR`
+- `CAPABILITY_PROFILE_IR`
 - `SM_TO_MEMORY_FABRIC_IR`
 - memory request traces
 - L2/DRAM traces
 - coherence requirements
+- `shared/references/vortex_memory_sync_lessons.yaml`
 
 ## Output IR
 
 Produces:
+- `CONTRACT_FRAGMENT_IR`
 - `DRAM_CONTROLLER_CONTRACT`
 - `CACHE_COHERENCE_MODEL`
 - `MEMORY_VISIBILITY_REPORT`
@@ -60,6 +64,14 @@ This skill owns:
 - atomic visibility rules handoff
 - cache line state model
 - memory visibility evidence
+
+Required reference lessons:
+- `VORTEX_LSU_LANE_FORMAT`
+- `VORTEX_NONBLOCKING_MEMORY_TAG`
+- `VORTEX_COALESCER_RESPONSE_RESTORE`
+- `VORTEX_CACHE_MSHR_RESPONSE_ROUTE`
+- `VORTEX_MSHR_DEADLOCK_GUARD`
+- `VORTEX_LOCAL_MEMORY_BANK`
 
 ## Human and AI Output Policy
 

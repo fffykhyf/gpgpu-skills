@@ -50,7 +50,7 @@ Every fabric trace event must include:
 
 ## Acceptance
 
-L4 interconnect passes only if:
+`full_memory_sync_system` interconnect passes only if:
 - explicit NoC routing exists
 - each request has a source SM
 - merged requests preserve visibility and response routing

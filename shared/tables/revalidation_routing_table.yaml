@@ -13,6 +13,62 @@ routes:
       - gpgpu-runtime
       - gpgpu-rtl
       - gpgpu-simppa
+  MEMORY_PATH_PATCH:
+    required_modules:
+      - gpgpu-memory
+      - gpgpu-golden
+      - gpgpu-rtl
+      - gpgpu-simppa
+    required_gates:
+      - lsu_lane_format_test
+      - memory_tag_lifetime_test
+      - coalescer_restore_test
+      - mshr_replay_test
+      - cache_response_routing_test
+      - rtl_golden_trace_diff
+  FABRIC_PATCH:
+    required_modules:
+      - gpgpu-interconnect
+      - gpgpu-golden
+      - gpgpu-rtl
+      - gpgpu-simppa
+    required_gates:
+      - fabric_request_response_test
+      - l2_slice_route_test
+      - response_demux_test
+      - fabric_queue_backpressure_test
+      - multi_sm_trace_partition_test
+  SYNC_ATOMIC_PATCH:
+    required_modules:
+      - gpgpu-atomic-sync
+      - gpgpu-golden
+      - gpgpu-rtl
+      - gpgpu-simppa
+    required_gates:
+      - atomic_same_address_test
+      - visibility_event_test
+      - fence_visibility_test
+      - barrier_phase_test
+      - wsync_drain_test
+      - rtl_golden_trace_diff
+  GOLDEN_SEMANTICS_PATCH:
+    required_modules:
+      - gpgpu-golden
+      - gpgpu-simppa
+    required_gates:
+      - contract_fragment_freeze_check
+      - executable_semantics_check
+      - golden_image_execution
+      - module_twin_trace_diff
+  RTL_BINDING_PATCH:
+    required_modules:
+      - gpgpu-rtl
+      - gpgpu-simppa
+    required_gates:
+      - interface_binding_check
+      - module_partial_sim
+      - trace_adapter_field_check
+      - rtl_golden_trace_diff
   GOLDEN_MODEL_PATCH:
     required_modules:
       - gpgpu-golden
@@ -84,6 +140,46 @@ root_cause_to_patch_route:
     patch_type: RTL_PATCH
     target_skill: gpgpu-rtl
     revalidation: [module_partial_sim, memory_response_restore, rtl_golden_trace_diff, memory_dump_compare]
+  MEMORY_PATH_ROOT_CAUSE:
+    patch_type: MEMORY_PATH_PATCH
+    target_skill: gpgpu-memory
+    revalidation: [lsu_lane_format_test, memory_tag_lifetime_test, coalescer_restore_test, rtl_golden_trace_diff]
+  FABRIC_ROOT_CAUSE:
+    patch_type: FABRIC_PATCH
+    target_skill: gpgpu-interconnect
+    revalidation: [fabric_request_response_test, l2_slice_route_test, response_demux_test, multi_sm_trace_partition_test]
+  CACHE_MSHR_ROOT_CAUSE:
+    patch_type: MEMORY_PATH_PATCH
+    target_skill: gpgpu-memory
+    revalidation: [mshr_replay_test, cache_response_routing_test, no_deadlock_watchdog, rtl_golden_trace_diff]
+  DRAM_ROOT_CAUSE:
+    patch_type: MEMORY_PATH_PATCH
+    target_skill: gpgpu-memory
+    revalidation: [dram_schedule_test, dram_bank_conflict_test, memory_visibility_order_test, rtl_golden_trace_diff]
+  SYNC_ATOMIC_ROOT_CAUSE:
+    patch_type: SYNC_ATOMIC_PATCH
+    target_skill: gpgpu-atomic-sync
+    revalidation: [atomic_same_address_test, fence_visibility_test, barrier_phase_test, wsync_drain_test, rtl_golden_trace_diff]
+  COALESCER_RESPONSE_SHAPE_MISMATCH:
+    patch_type: MEMORY_PATH_PATCH
+    target_skill: gpgpu-memory
+    revalidation: [coalescer_restore_test, rtl_golden_trace_diff, scoreboard_release_eop_check]
+  L2_SLICE_ROUTE_MISMATCH:
+    patch_type: FABRIC_PATCH
+    target_skill: gpgpu-interconnect
+    revalidation: [l2_slice_route_test, response_demux_test, multi_sm_trace_partition_test]
+  MSHR_REPLAY_MISMATCH:
+    patch_type: MEMORY_PATH_PATCH
+    target_skill: gpgpu-memory
+    revalidation: [mshr_replay_test, cache_response_routing_test, no_deadlock_watchdog]
+  ATOMIC_SERIALIZATION_MISMATCH:
+    patch_type: SYNC_ATOMIC_PATCH
+    target_skill: gpgpu-atomic-sync
+    revalidation: [atomic_same_address_test, visibility_event_test, rtl_golden_trace_diff]
+  FENCE_DRAIN_INCOMPLETE:
+    patch_type: SYNC_ATOMIC_PATCH
+    target_skill: gpgpu-atomic-sync
+    revalidation: [fence_visibility_test, memory_visibility_order_test]
   PERFORMANCE_ARCH_ROOT_CAUSE:
     patch_type: ARCHITECTURE_PATCH
     target_skill: gpgpu-arch

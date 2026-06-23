@@ -33,6 +33,7 @@ Consumes:
 - `runtime_launch_binding_table`
 - `loader_contract_table`
 - `toolchain_validation_gate_table`
+- `shared/references/vortex_memory_sync_lessons.yaml`
 
 ## Output IR
 
@@ -78,6 +79,10 @@ This skill owns:
 - loader contract validation
 - golden program-image execution smoke validation
 - source-of-truth hash and semantic equivalence checks
+
+Required reference lessons:
+- `VORTEX_LSU_LANE_FORMAT`
+- `VORTEX_COALESCER_RESPONSE_RESTORE`
 
 ## Human and AI Output Policy
 

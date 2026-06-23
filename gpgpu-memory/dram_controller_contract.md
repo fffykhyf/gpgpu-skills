@@ -1,6 +1,6 @@
 # DRAM Controller Contract
 
-This contract defines L4 DRAM behavior visible to GPGPU correctness and
+This contract defines `full_memory_sync_system` DRAM behavior visible to GPGPU correctness and
 performance attribution.
 
 ## Memory Request Ordering
@@ -52,7 +52,7 @@ Required DRAM trace fields:
 
 ## Acceptance
 
-L4 DRAM passes only if:
+`full_memory_sync_system` DRAM passes only if:
 - DRAM controller contract defined
 - memory request ordering is explicit
 - bank-level parallelism model is present

@@ -1,4 +1,5 @@
 rewrite_id: rewrite_memory_replay_lsq_001
+capability_profile: toolchain_runtime_vertical_slice
 trigger_root_cause: MEMORY_SYSTEM_ROOT_CAUSE
 trigger_root_cause_subclass: MEMORY_REPLAY_OVERHEAD
 patch_type: RTL_PATCH

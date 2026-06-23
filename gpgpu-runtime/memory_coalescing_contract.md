@@ -1,7 +1,7 @@
 # Memory Coalescing Contract
 
 This file defines the runtime/toolchain-visible memory coalescing contract for
-L3. It is inspired by MIAOW's explicit LSU/address/memory-space observability,
+`multi_sm_memory_path`. It is inspired by MIAOW's explicit LSU/address/memory-space observability,
 but upgrades the contract to decode-time memory bundle formation and rule-based
 coalescing.
 

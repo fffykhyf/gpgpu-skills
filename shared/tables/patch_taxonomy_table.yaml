@@ -6,6 +6,26 @@ patch_classes:
   CONTRACT_PATCH:
     target_owner: gpgpu-golden
     examples: [scheduling_rule_change, memory_ordering_change, launch_abi_change, scoreboard_semantic_change]
+  MEMORY_PATH_PATCH:
+    owner: gpgpu-memory
+    target_owner: gpgpu-memory
+    examples: [lsu_lane_format_fix, nonblocking_tag_lifetime_fix, coalescer_response_restore_fix, memory_visibility_rule_fix]
+  FABRIC_PATCH:
+    owner: gpgpu-interconnect
+    target_owner: gpgpu-interconnect
+    examples: [l2_slice_route_fix, response_demux_fix, virtual_channel_backpressure_fix, ordering_scope_route_fix]
+  SYNC_ATOMIC_PATCH:
+    owner: gpgpu-atomic-sync
+    target_owner: gpgpu-atomic-sync
+    examples: [atomic_serialization_fix, fence_visibility_drain_fix, barrier_phase_fix, wsync_prior_work_drain_fix]
+  GOLDEN_SEMANTICS_PATCH:
+    owner: gpgpu-golden
+    target_owner: gpgpu-golden
+    examples: [system_contract_freeze_fix, executable_memory_semantics_fix, sync_atomic_semantics_fix, module_twin_trace_fix]
+  RTL_BINDING_PATCH:
+    owner: gpgpu-rtl
+    target_owner: gpgpu-rtl
+    examples: [module_contract_binding_fix, trace_adapter_binding_fix, interface_checker_binding_fix, partial_sim_gate_fix]
   GOLDEN_MODEL_PATCH:
     target_owner: gpgpu-golden
     examples: [golden_decode_fix, executable_semantics_fix, coverage_gap_fix]

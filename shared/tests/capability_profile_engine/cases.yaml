@@ -1,0 +1,19 @@
+cases:
+  - case_id: select_multi_sm_memory_path_profile
+    input:
+      user_request: multi SM coalescer and shared memory path
+    expected_outputs:
+      capability_profile: multi_sm_memory_path
+      preset_id: MULTI_SM_MEMORY_PATH
+    required_evidence:
+      - capability_profile_ir
+      - selected_preset
+      - rejected_alternatives
+  - case_id: reject_numeric_development_level
+    input:
+      user_request: avoid numeric GPU development-stage labels
+    expected_outputs:
+      forbidden_terms_absent: true
+    required_evidence:
+      - active_docs_scan
+      - capability_profile_ir

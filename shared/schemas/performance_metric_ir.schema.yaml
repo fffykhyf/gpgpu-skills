@@ -12,6 +12,7 @@ required:
   - stall_breakdown
   - memory_metrics
   - scheduler_metrics
+  - metric_groups
   - backend_perf_evidence
   - warning_flags
   - performance_metric_hash
@@ -28,6 +29,14 @@ properties:
   stall_breakdown: map
   memory_metrics: map
   scheduler_metrics: map
+  metric_groups:
+    - scheduler
+    - pipeline
+    - memory_path
+    - fabric
+    - cache_mshr
+    - dram
+    - sync_atomic
   backend_perf_evidence: map
   warning_flags: list
   performance_metric_hash: string

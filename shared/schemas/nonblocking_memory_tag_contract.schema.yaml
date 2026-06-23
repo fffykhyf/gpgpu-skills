@@ -1,0 +1,9 @@
+schema: nonblocking_memory_tag_contract
+version: v5
+type: object
+required: [allocated_on, released_on, tag_payload]
+properties:
+  allocated_on: string
+  released_on: string
+  tag_payload: list
+  forbidden_release_events: list

@@ -4,9 +4,9 @@ This contract defines cross-SM cache and memory visibility.
 
 ## Cache Policy
 
-writeback vs write-through policy must be explicit for each cache level:
-- L1
-- L2
+writeback vs write-through policy must be explicit for each cache hierarchy tier:
+- private L1 cache
+- shared L2 cache
 - write-combining buffer if present
 - uncached path if present
 

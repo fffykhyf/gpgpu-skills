@@ -1,0 +1,4 @@
+rewrite_id: single_sm_lsu_patch
+capability_profile: single_sm_warp_pipeline
+patch_type: MEMORY_PATH_PATCH
+required_revalidation_gates: [lsu_lane_format_test, rtl_golden_trace_diff]

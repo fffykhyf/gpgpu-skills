@@ -1,0 +1,5 @@
+fragment_id: runtime_vertical_slice_fragment
+owner_skill: gpgpu-runtime
+capability_profile: toolchain_runtime_vertical_slice
+contract_paths: [launch_model.abi, program_image_format]
+provenance: {source: example}

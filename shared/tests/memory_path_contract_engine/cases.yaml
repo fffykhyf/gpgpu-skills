@@ -1,0 +1,25 @@
+cases:
+  - case_id: coalescer_restore_requires_final_eop
+    input:
+      capability_profile: multi_sm_memory_path
+      memory_events: [lsu_lane_format, coalescer_merge, coalescer_restore]
+    expected_outputs:
+      contract_fragment_ir: memory.coalescer_response_restore
+      root_cause_on_failure: COALESCER_RESPONSE_SHAPE_MISMATCH
+    required_evidence:
+      - original_tag
+      - coalesced_tag
+      - restored_lane_mask
+      - final_eop
+  - case_id: mshr_replay_deadlock_guard
+    input:
+      capability_profile: full_memory_sync_system
+      cache_events: [mshr_allocate, mshr_replay]
+    expected_outputs:
+      contract_fragment_ir: memory.mshr_replay_contract
+      required_guard: mshr_deadlock_guard
+    required_evidence:
+      - mshr_id
+      - request_queue_occupancy
+      - response_queue_occupancy
+      - replay_queue_blocked

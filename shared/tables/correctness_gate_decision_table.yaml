@@ -18,7 +18,7 @@ decision_order:
   - condition: all_observable_outputs_match
     verdict: CORRECTNESS_PASS
     selected_mode: PASS_EVIDENCE_MODE
-comparison_levels:
+comparison_scope:
   - final_memory
   - architectural_state
   - completion_fault

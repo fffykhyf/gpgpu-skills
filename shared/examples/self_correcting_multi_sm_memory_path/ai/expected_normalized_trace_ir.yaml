@@ -1,0 +1,4 @@
+trace_id: multi_sm_memory_path_trace
+event_types: [lsu_lane_format, memory_tag_allocate, coalescer_merge, coalescer_restore, memory_tag_release]
+trace_fields: [sm_id, warp_id, lane_mask, instruction_uuid, original_tag, coalesced_tag, byte_enable, per_lane_offset, restored_lane_mask, final_eop]
+events: []

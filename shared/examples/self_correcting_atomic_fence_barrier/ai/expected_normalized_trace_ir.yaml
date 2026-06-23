@@ -1,0 +1,4 @@
+trace_id: atomic_fence_barrier_trace
+event_types: [atomic_serialize, atomic_visibility, fence_drain_begin, fence_drain_end, barrier_arrive, barrier_release, wsync_drain_begin, wsync_drain_end]
+trace_fields: [serialization_point, serialization_sequence, fence_scope, visibility_event, barrier_id, barrier_phase, arrival_bitmap, release_bitmap, prior_work_count]
+events: []

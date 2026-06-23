@@ -1,0 +1,4 @@
+system_id: single_sm_warp_pipeline_system
+capability_profile: single_sm_warp_pipeline
+contract_fragments: [single_sm_warp_pipeline_fragment]
+architecture_model: {sm_count: 1, warp_count: multiple}

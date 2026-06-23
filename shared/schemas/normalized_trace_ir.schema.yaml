@@ -48,6 +48,7 @@ event_schema:
     - pc
     - next_pc
     - instruction_id
+    - instruction_uuid
     - opcode
     - encoded_instruction
     - decoded_instruction
@@ -68,7 +69,29 @@ event_schema:
     - request_tag
     - response_tag
     - original_tag
+    - coalesced_tag
     - per_lane_offset
+    - restored_lane_mask
+    - final_eop
+    - l1_cache_id
+    - l2_slice_id
+    - cache_bank_id
+    - mshr_id
+    - fabric_route_id
+    - virtual_channel
+    - dram_channel_id
+    - dram_bank_id
+    - dram_row_id
+    - queue_occupancy
+    - arbitration_wait_cycles
+    - serialization_point
+    - serialization_sequence
+    - fence_scope
+    - visibility_event
+    - barrier_id
+    - barrier_phase
+    - arrival_bitmap
+    - release_bitmap
     - memory_latency
     - fault_code
     - csr_addr
@@ -91,3 +114,26 @@ timestamp_kinds:
   - cycle
   - step_id
   - order_key
+event_types:
+  - lsu_lane_format
+  - memory_tag_allocate
+  - memory_tag_release
+  - coalescer_merge
+  - coalescer_restore
+  - l1_cache_hit
+  - l1_cache_miss
+  - l2_slice_route
+  - l2_cache_hit
+  - l2_cache_miss
+  - mshr_allocate
+  - mshr_replay
+  - dram_schedule
+  - dram_bank_conflict
+  - atomic_serialize
+  - atomic_visibility
+  - fence_drain_begin
+  - fence_drain_end
+  - barrier_arrive
+  - barrier_release
+  - wsync_drain_begin
+  - wsync_drain_end

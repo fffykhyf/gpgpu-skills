@@ -24,7 +24,7 @@ golden and RTL outcomes, decides the run mode, and emits
 correctness_gate_report:
   verdict: CORRECTNESS_PASS | CORRECTNESS_FAIL | PASS_WITH_INSUFFICIENT_EVIDENCE | PASS_WITH_TRACE_DIVERGENCE_WARNING
   selected_mode: PASS_EVIDENCE_MODE | FAILURE_ATTRIBUTION_MODE
-  comparison_level:
+  comparison_scope:
     - final_memory
     - architectural_state
     - completion_fault

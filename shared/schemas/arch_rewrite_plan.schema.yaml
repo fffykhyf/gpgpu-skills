@@ -3,6 +3,7 @@ version: v5
 type: object
 required:
   - rewrite_id
+  - capability_profile
   - trigger_root_cause
   - trigger_root_cause_subclass
   - patch_type
@@ -14,6 +15,7 @@ required:
   - rejected_alternatives
 properties:
   rewrite_id: string
+  capability_profile: string
   trigger_root_cause: string
   trigger_root_cause_subclass: string
   patch_type: enum

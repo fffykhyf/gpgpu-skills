@@ -1,0 +1,10 @@
+schema: capability_profile_ir
+version: v5
+type: object
+required: [name, enabled_subsystems, preset_id, provenance]
+properties:
+  name: enum
+  enabled_subsystems: list
+  preset_id: string
+  provenance: map
+allowed_names: [minimal_simt_core, single_sm_warp_pipeline, toolchain_runtime_vertical_slice, multi_sm_memory_path, full_memory_sync_system]

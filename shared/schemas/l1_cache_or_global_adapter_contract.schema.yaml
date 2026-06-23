@@ -1,0 +1,13 @@
+schema: l1_cache_or_global_adapter_contract
+version: v5
+type: object
+required: [mode, hit_policy, miss_policy, mshr_required, write_policy, response_order_policy, visibility_boundary]
+properties:
+  mode: enum
+  hit_policy: string
+  miss_policy: string
+  mshr_required: bool
+  write_policy: string
+  response_order_policy: string
+  visibility_boundary: string
+allowed_modes: [direct_global_adapter, private_l1_cache]

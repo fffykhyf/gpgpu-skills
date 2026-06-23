@@ -1,0 +1,4 @@
+trace_id: full_memory_sync_system_trace
+event_types: [l2_slice_route, l2_cache_miss, mshr_allocate, mshr_replay, dram_schedule, dram_bank_conflict]
+trace_fields: [sm_id, request_tag, l2_slice_id, cache_bank_id, mshr_id, fabric_route_id, virtual_channel, dram_channel_id, dram_bank_id, dram_row_id, queue_occupancy]
+events: []

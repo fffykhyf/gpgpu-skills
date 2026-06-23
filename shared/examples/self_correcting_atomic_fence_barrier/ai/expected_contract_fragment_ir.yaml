@@ -1,0 +1,9 @@
+fragment_id: atomic_fence_barrier_fragment
+owner_skill: gpgpu-atomic-sync
+capability_profile: full_memory_sync_system
+contract_paths:
+  - atomic_sync.atomic_serialization
+  - atomic_sync.fence_visibility
+  - atomic_sync.barrier_phase
+  - atomic_sync.wsync_drain
+provenance: {source: example}

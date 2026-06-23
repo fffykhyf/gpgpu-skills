@@ -1,0 +1,13 @@
+schema: atomic_execution_model
+version: v5
+type: object
+required: [operation, address, serialization_point, serialization_sequence, old_value, new_value, visibility_event, response_to_warp]
+properties:
+  operation: string
+  address: integer
+  serialization_point: string
+  serialization_sequence: integer
+  old_value: string
+  new_value: string
+  visibility_event: string
+  response_to_warp: map

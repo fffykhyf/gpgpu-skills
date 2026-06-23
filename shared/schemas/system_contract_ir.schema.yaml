@@ -3,6 +3,7 @@ version: v5
 type: object
 required:
   - system_id
+  - capability_profile
   - arch_ir_hash
   - architecture_model
   - isa_model
@@ -17,7 +18,9 @@ required:
   - canonical_hash
 properties:
   system_id: string
+  capability_profile: string
   arch_ir_hash: string
+  contract_fragments: list
   architecture_model: map
   isa_model:
     type: object

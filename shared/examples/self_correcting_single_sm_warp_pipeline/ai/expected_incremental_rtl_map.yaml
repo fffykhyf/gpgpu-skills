@@ -1,0 +1,3 @@
+capability_profile: single_sm_warp_pipeline
+modules: [warp_scheduler, scoreboard, lsu_slice, trace_adapter]
+required_partial_sim_cases: [scoreboard_release, branch_divergence, lsu_lane_format]

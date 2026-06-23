@@ -1,0 +1,9 @@
+fragment_id: multi_sm_memory_path_fragment
+owner_skill: gpgpu-memory
+capability_profile: multi_sm_memory_path
+contract_paths:
+  - memory.lsu_lane_format
+  - memory.nonblocking_memory_tag
+  - memory.coalescer_response_restore
+  - memory.local_memory_bank
+provenance: {source: example}

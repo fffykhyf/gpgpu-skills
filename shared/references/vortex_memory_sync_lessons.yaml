@@ -1,0 +1,109 @@
+reference: vortex_memory_sync_lessons
+version: v5
+lessons:
+  VORTEX_LSU_LANE_FORMAT:
+    applies_to: [gpgpu-runtime, gpgpu-memory, gpgpu-rtl, gpgpu-simppa]
+    source_vortex_mechanism: VX_lsu_slice per-lane address, byte enable, shifted store data, and load formatting.
+    principle: LSU correctness starts at lane-shaped request formation and ends at lane-shaped response formatting.
+    required_schema_fields: [sm_id, warp_id, instruction_uuid, lane_mask, per_lane_addr, aligned_addr, access_size, byte_enable, store_data_shifted, memory_space, load_format_rule]
+    required_trace_events: [lsu_lane_format]
+    required_rtl_modules: [lsu_slice]
+    required_tests: [lsu_lane_alignment, byte_enable_shifted_store, load_format_restore]
+    evidence_anchor:
+      - ref_submodule/vortex/hw/rtl/core/VX_lsu_slice.sv:62-108
+      - ref_submodule/vortex/hw/rtl/core/VX_lsu_slice.sv:174-246
+      - ref_submodule/vortex/hw/rtl/core/VX_lsu_slice.sv:347-439
+      - ref/skillref/vortex-reader-reports/memory-coalescer-cache.md:50-53
+  VORTEX_NONBLOCKING_MEMORY_TAG:
+    applies_to: [gpgpu-memory, gpgpu-rtl, gpgpu-simppa]
+    source_vortex_mechanism: VX_mem_scheduler and VX_index_buffer allocate read tags and release them on final core-visible response EOP.
+    principle: Nonblocking memory tags are explicit allocated resources, not raw response matches.
+    required_schema_fields: [allocated_on, released_on, sm_id, warp_id, instruction_uuid, original_lane_mask, byte_enable_vector, scoreboard_destination, response_restore_context]
+    required_trace_events: [memory_tag_allocate, memory_tag_release]
+    required_rtl_modules: [memory_scheduler]
+    required_tests: [tag_unique_until_final_eop, scoreboard_release_after_final_eop, tag_reuse_forbidden]
+    evidence_anchor:
+      - ref_submodule/vortex/hw/rtl/libs/VX_mem_scheduler.sv:161-218
+      - ref_submodule/vortex/hw/rtl/libs/VX_mem_scheduler.sv:418-532
+      - ref_submodule/vortex/hw/rtl/libs/VX_index_buffer.sv:17
+      - ref/skillref/vortex-reader-reports/memory-coalescer-cache.md:54-57
+  VORTEX_COALESCER_RESPONSE_RESTORE:
+    applies_to: [gpgpu-memory, gpgpu-rtl, gpgpu-simppa]
+    source_vortex_mechanism: VX_mem_coalescer merges same-line requests and restores lane-shaped responses using stored masks and offsets.
+    principle: Coalescer correctness is request merge correctness plus response restore correctness.
+    required_schema_fields: [original_tag, coalesced_tag, lane_mask, per_lane_addr, per_lane_offset, byte_enable, merged_byte_enable, restored_lane_mask, restored_lane_data, final_eop]
+    required_trace_events: [coalescer_merge, coalescer_restore]
+    required_rtl_modules: [memory_coalescer]
+    required_tests: [same_line_multi_lane_load, mixed_byte_enable_restore, response_shape_restore]
+    evidence_anchor:
+      - ref_submodule/vortex/hw/rtl/libs/VX_mem_coalescer.sv:122-186
+      - ref_submodule/vortex/hw/rtl/libs/VX_mem_coalescer.sv:248-332
+      - ref_submodule/vortex/sim/simx/mem/mem_coalescer.cpp:46-230
+      - ref/skillref/vortex-reader-reports/memory-coalescer-cache.md:58-61
+  VORTEX_CACHE_MSHR_RESPONSE_ROUTE:
+    applies_to: [gpgpu-memory, gpgpu-interconnect, gpgpu-rtl]
+    source_vortex_mechanism: VX_cache_bank and VX_cache_mshr use MSHR IDs and wrapper bank-arbiter tag bits to route fills back to the original bank and replay waiters.
+    principle: Cache response routing must preserve source context from miss allocation through fill, replay, and demux.
+    required_schema_fields: [l2_slice_id, bank_id, cache_tag, mshr_id, source_sm_id, source_warp_id, source_request_tag, response_demux_target]
+    required_trace_events: [l2_slice_route, mshr_allocate, mshr_replay]
+    required_rtl_modules: [l2_cache_slice, l2_mshr, cache_response_router]
+    required_tests: [mshr_replay_test, cache_response_routing_test, response_demux_test]
+    evidence_anchor:
+      - ref_submodule/vortex/hw/rtl/cache/VX_cache_bank.sv:310-318
+      - ref_submodule/vortex/hw/rtl/cache/VX_cache_bank.sv:866-892
+      - ref_submodule/vortex/hw/rtl/cache/VX_cache.sv:506-580
+      - ref_submodule/vortex/hw/rtl/cache/VX_cache_mshr.sv:171-183
+      - ref/skillref/vortex-reader-reports/memory-coalescer-cache.md:62-65
+  VORTEX_MSHR_DEADLOCK_GUARD:
+    applies_to: [gpgpu-memory, gpgpu-simppa]
+    source_vortex_mechanism: VX_cache_bank gates new requests with mshr_alm_full, mreq_queue_alm_full, response queue pressure, and writeback egress readiness.
+    principle: Deadlock avoidance is a contract with observable queue pressure, not only an implementation debug assertion.
+    required_schema_fields: [mshr_almost_full, memory_request_queue_almost_full, response_queue_almost_full, writeback_egress_blocked, replay_queue_blocked]
+    required_trace_events: [mshr_allocate, mshr_replay]
+    required_rtl_modules: [l2_mshr, cache_response_router]
+    required_tests: [no_deadlock_watchdog, mshr_almost_full_backpressure, writeback_egress_blocked]
+    evidence_anchor:
+      - ref_submodule/vortex/hw/rtl/cache/VX_cache_bank.sv:279-308
+      - ref_submodule/vortex/hw/rtl/cache/VX_cache_bank.sv:575-593
+      - ref_submodule/vortex/hw/rtl/cache/VX_cache_bank.sv:875-905
+      - ref/skillref/vortex-reader-reports/memory-coalescer-cache.md:66-69
+  VORTEX_LOCAL_MEMORY_BANK:
+    applies_to: [gpgpu-memory, gpgpu-rtl]
+    source_vortex_mechanism: VX_local_mem models bank conflicts, read-during-write stalls, and held response data under backpressure.
+    principle: Shared/local memory must define bank mapping, conflict policy, response hold, and barrier visibility.
+    required_schema_fields: [sm_id, bank_count, bank_mapping_function, conflict_policy, read_during_write_policy, response_hold_register, backpressure_behavior, barrier_visibility_rule]
+    required_trace_events: [lsu_lane_format, barrier_arrive]
+    required_rtl_modules: [local_memory_bank]
+    required_tests: [shared_memory_bank_conflict, same_bank_multi_lane_access, response_hold_under_backpressure]
+    evidence_anchor:
+      - ref_submodule/vortex/hw/rtl/mem/VX_local_mem.sv:71-426
+      - ref_submodule/vortex/sim/simx/mem/local_mem.cpp:64-114
+      - ref/skillref/vortex-reader-reports/memory-coalescer-cache.md:94-97
+  VORTEX_BARRIER_WSYNC_DRAIN:
+    applies_to: [gpgpu-atomic-sync, gpgpu-golden, gpgpu-simppa]
+    source_vortex_mechanism: VX_bar_unit and VX_wctl_unit distinguish barrier phase release from WSYNC prior-work drain.
+    principle: Barrier, fence, and WSYNC are separate synchronization contracts; WSYNC is not a scoreboard wakeup.
+    required_schema_fields: [barrier_id, barrier_phase, arrival_bitmap, release_bitmap, lsu_drain_required, prior_work_count, pending_memory_ops, release_event]
+    required_trace_events: [barrier_arrive, barrier_release, wsync_drain_begin, wsync_drain_end]
+    required_rtl_modules: [barrier_unit, wsync_drain_unit]
+    required_tests: [barrier_phase_advance, wsync_prior_work_drain, sync_not_scoreboard_wakeup]
+    evidence_anchor:
+      - ref_submodule/vortex/hw/rtl/core/VX_bar_unit.sv:75-176
+      - ref_submodule/vortex/hw/rtl/core/VX_wctl_unit.sv:181-257
+      - ref_submodule/vortex/sim/simx/barrier_unit.cpp:43-167
+      - ref_submodule/vortex/sim/simx/sfu_unit.cpp:159-203
+      - ref/skillref/vortex-reader-reports/simx-rtl-consistency.md:80-85
+  VORTEX_SIMX_RTL_TWIN:
+    applies_to: [gpgpu-golden, gpgpu-rtl, gpgpu-simppa, gpgpu-loop]
+    source_vortex_mechanism: SimX mirrors RTL modules and is used for first-divergence debugging with matching trace dumps.
+    principle: Golden module twins should be derived from frozen contracts and compared against RTL at module boundaries.
+    required_schema_fields: [rtl_module_path, contract_path, instruction_uuid, sm_id, warp_id, lane_mask, request_tag, response_tag, evidence_hash]
+    required_trace_events: [lsu_lane_format, coalescer_merge, coalescer_restore, mshr_replay, barrier_release]
+    required_rtl_modules: [trace_adapter, lsu_slice, memory_coalescer, l2_mshr, barrier_unit]
+    required_tests: [rtl_golden_trace_diff, first_divergence_module_boundary, simx_style_twin_trace]
+    evidence_anchor:
+      - ref_submodule/vortex/docs/designs/simx_simulator_architecture.md:17-29
+      - ref_submodule/vortex/docs/debugging.md:76-93
+      - ref_submodule/vortex/sim/simx/core.cpp:281-287
+      - ref_submodule/vortex/hw/rtl/core/VX_core.sv:194-258
+      - ref/skillref/vortex-reader-reports/simx-rtl-consistency.md:32-45

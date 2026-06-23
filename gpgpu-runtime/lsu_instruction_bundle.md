@@ -71,7 +71,7 @@ Required checks:
 - access type matches instruction class
 - memory space is explicit
 - LDS base is present for LDS/DS operations
-- atomics and fences are routed to L4 contracts when enabled
+- atomics and fences are routed to `full_memory_sync_system` contracts when enabled
 
 ## Patch Routing
 

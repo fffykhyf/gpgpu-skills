@@ -15,6 +15,11 @@ Top-level classes:
 - `RTL_FUNCTIONAL_ROOT_CAUSE`
 - `RTL_INTERFACE_ROOT_CAUSE`
 - `MEMORY_SYSTEM_ROOT_CAUSE`
+- `MEMORY_PATH_ROOT_CAUSE`
+- `FABRIC_ROOT_CAUSE`
+- `CACHE_MSHR_ROOT_CAUSE`
+- `DRAM_ROOT_CAUSE`
+- `SYNC_ATOMIC_ROOT_CAUSE`
 - `SCHEDULER_ROOT_CAUSE`
 - `PERFORMANCE_ARCH_ROOT_CAUSE`
 - `TEST_EVIDENCE_ROOT_CAUSE`
@@ -71,6 +76,33 @@ MEMORY_SYSTEM_ROOT_CAUSE:
   - BANK_CONFLICT_OVERHEAD
   - MEMORY_REPLAY_OVERHEAD
 
+MEMORY_PATH_ROOT_CAUSE:
+  - LSU_LANE_FORMAT_MISMATCH
+  - MEMORY_TAG_REUSE_BEFORE_EOP
+  - COALESCER_RESPONSE_SHAPE_MISMATCH
+  - BYTE_ENABLE_RESTORE_MISMATCH
+
+FABRIC_ROOT_CAUSE:
+  - L2_SLICE_ROUTE_MISMATCH
+  - RESPONSE_DEMUX_MISMATCH
+  - FABRIC_QUEUE_BACKPRESSURE_MISSING
+
+CACHE_MSHR_ROOT_CAUSE:
+  - MSHR_REPLAY_MISMATCH
+  - CACHE_RESPONSE_ROUTING_MISMATCH
+  - MSHR_DEADLOCK_GUARD_MISSING
+
+DRAM_ROOT_CAUSE:
+  - DRAM_ORDERING_MISMATCH
+  - DRAM_BANK_CONFLICT_MODEL_MISMATCH
+  - DRAM_RESPONSE_ORDER_MISMATCH
+
+SYNC_ATOMIC_ROOT_CAUSE:
+  - ATOMIC_SERIALIZATION_MISMATCH
+  - FENCE_DRAIN_INCOMPLETE
+  - BARRIER_PHASE_MISMATCH
+  - WSYNC_DRAIN_MISMATCH
+
 SCHEDULER_ROOT_CAUSE:
   - LOW_ELIGIBLE_WARP_RATE
   - SCOREBOARD_WAKEUP_DELAY
@@ -123,9 +155,16 @@ root_cause_report:
   mask, predicate, register writeback, branch, or barrier state.
 - Prefer RTL interface root cause when valid/ready, payload stability, response
   tag, ordering, or backpressure contract evidence fails.
-- Prefer memory-system root cause when coalescer response restoration, cache
-  replay order, MSHR almost-full gating, or final-response scoreboard wakeup
-  evidence fails.
+- Prefer memory-path root cause when LSU lane format, nonblocking tag lifetime,
+  coalescer restore, or byte-enable restoration evidence fails.
+- Prefer fabric root cause when SM source identity, L2 slice route, response
+  demux, virtual-channel, ordering-scope, or queue backpressure evidence fails.
+- Prefer cache/MSHR root cause when replay order, response routing, MSHR
+  almost-full gating, fill completion, or no-deadlock evidence fails.
+- Prefer DRAM root cause when channel/bank/row scheduling, bank conflict, or
+  response order evidence fails after cache/MSHR routing is correct.
+- Prefer sync/atomic root cause when atomic serialization, fence visibility,
+  barrier phase, or WSYNC prior-work drain evidence fails.
 - Prefer performance architecture root cause only when correctness passes or
   correctness failure is unrelated and the bottleneck graph is complete.
 - If multiple causes cannot be ranked from evidence, emit

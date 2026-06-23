@@ -11,8 +11,9 @@ a SM-centric warp execution contract model.
 4. Build RTL incrementally module by module with interface checks.
 5. Normalize execution traces and build causal performance attribution.
 6. Produce architecture, contract, toolchain, RTL, or test-evidence rewrite plans.
-7. Extend L3/L4 contracts for SM, warp, memory hierarchy, interconnect,
-   coherence, atomic, and fence behavior.
+7. Extend capability profiles for SM, warp, memory hierarchy, interconnect,
+   coherence, atomic, and fence behavior without using numeric development
+   stage labels that conflict with L1 cache or L2 cache terminology.
 
 ## Current Top-Level Skills
 
@@ -30,28 +31,40 @@ a SM-centric warp execution contract model.
 
 ```text
 Architecture Generator
+  -> Interconnect Contract Fragment Engine
+  -> Memory Contract Fragment Engine
+  -> Atomic and Synchronization Contract Fragment Engine
   -> System Contract + Golden Semantics Engine
   -> Toolchain + Runtime Artifact Engine
   -> Incremental RTL Binding Engine
-  -> Interconnect Contract Engine
-  -> Memory System Contract Engine
-  -> Atomic and Synchronization Contract Engine
   -> Simulation + Performance Attribution Engine
   -> Architecture Rewrite Loop Controller
   -> back to Architecture Generator / Contract / Toolchain / RTL Binding / Memory
 ```
 
-## L3/L4 Upgrade Target
+## Capability Profiles
 
-L3: SM + warp + coalescer + LDS + multi-SM routing.
+The architecture generator selects a `capability_profile` instead of a numeric
+development stage:
 
-L4: NoC + DRAM + coherence + atomic + fence consistency.
+- `minimal_simt_core`: minimal SIMT core for basic warp instructions.
+- `single_sm_warp_pipeline`: one SM, multiple warps, scoreboard, divergence,
+  and LSU base path.
+- `toolchain_runtime_vertical_slice`: assembler, disassembler, runtime, loader,
+  RTL smoke, and golden dump vertical closure.
+- `multi_sm_memory_path`: multiple SMs, shared memory/LDS, coalescer, L1 cache
+  or direct global adapter, response restore, and SM_ID routing.
+- `full_memory_sync_system`: fabric, L2 cache slice, MSHR, DRAM, atomic, fence,
+  barrier, and memory visibility semantics.
 
 The canonical execution island is `SM`. A SM owns the warp pool, exec
 context table, LDS, LSU front-end, SIMD lanes, and SM issue model. Warp
 state includes explicit EXEC mask lifecycle, branch divergence, and
 reconvergence behavior. Memory instructions are formed as decode-time
 `MEMORY_BUNDLE` artifacts before LSU/coalescer issue.
+
+Only hardware caches use the names `L1 cache` and `L2 cache`; capability
+profiles never use `L1` or `L2` as development-stage names.
 
 ## Core Outputs
 
@@ -70,6 +83,7 @@ reconvergence behavior. Memory instructions are formed as decode-time
 - `ARCH_REWRITE_PLAN`
 - `NOC_ROUTING_CONTRACT`
 - `SM_TO_MEMORY_FABRIC_IR`
+- `CONTRACT_FRAGMENT_IR`
 - `DRAM_CONTROLLER_CONTRACT`
 - `CACHE_COHERENCE_MODEL`
 - `ATOMIC_EXECUTION_MODEL`

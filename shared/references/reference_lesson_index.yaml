@@ -1,5 +1,6 @@
 lesson_files:
   - vortex_lessons.yaml
+  - vortex_memory_sync_lessons.yaml
   - miaow_lessons.yaml
   - gpgpusim_lessons.yaml
   - rocket_lessons.yaml

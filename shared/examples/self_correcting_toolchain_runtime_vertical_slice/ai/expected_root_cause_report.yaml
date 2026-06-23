@@ -1,0 +1,3 @@
+root_cause_class: RUNTIME_LAUNCH_ROOT_CAUSE
+root_cause_subclass: KERNEL_ENTRY_MISMATCH
+evidence: example

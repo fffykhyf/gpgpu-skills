@@ -1,0 +1,9 @@
+system_contract_ir_hash: hash_full_memory_sync_system
+capability_profile: full_memory_sync_system
+memory_semantics_functions:
+  - route_request_to_l2_slice
+  - l1_lookup_or_forward
+  - l2_lookup_or_allocate_mshr
+  - l2_fill_and_replay
+  - schedule_dram_bank
+  - apply_memory_visibility_event

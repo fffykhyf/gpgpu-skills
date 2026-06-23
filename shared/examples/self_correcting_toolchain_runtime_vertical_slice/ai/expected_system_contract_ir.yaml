@@ -1,0 +1,4 @@
+system_id: toolchain_runtime_vertical_slice_system
+capability_profile: toolchain_runtime_vertical_slice
+contract_fragments: [runtime_vertical_slice_fragment]
+launch_model: {abi: flat_argument_buffer}

@@ -1,5 +1,10 @@
 system_id: minimal_simt_contract
+capability_profile: toolchain_runtime_vertical_slice
 arch_ir_hash: hash_arch_minimal_simt
+contract_fragments:
+  - fragment_id: runtime_vertical_memory_fragment
+    owner_skill: gpgpu-memory
+    capability_profile: toolchain_runtime_vertical_slice
 architecture_model:
   sm_count: 1
   warp_slots_per_sm: 4

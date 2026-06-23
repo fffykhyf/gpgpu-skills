@@ -114,9 +114,11 @@ Required fields:
 - selected path order
 - reconvergence PC
 
-The generator may choose a simple single-path branch-pending model for L2/L3
-bring-up, but L3/L4 contracts must describe whether a full reconvergence stack
-is present. If there is no stack, the missing capability must be explicit.
+The generator may choose a simple single-path branch-pending model for
+`minimal_simt_core` or `single_sm_warp_pipeline` bring-up, but
+`multi_sm_memory_path` and `full_memory_sync_system` contracts must describe
+whether a full reconvergence stack is present. If there is no stack, the
+missing capability must be explicit.
 
 ## Reconvergence stack
 

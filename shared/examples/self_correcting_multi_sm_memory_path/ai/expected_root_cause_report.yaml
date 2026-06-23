@@ -1,0 +1,3 @@
+root_cause_class: MEMORY_PATH_ROOT_CAUSE
+root_cause_subclass: COALESCER_RESPONSE_SHAPE_MISMATCH
+evidence: [original_tag, coalesced_tag, restored_lane_mask, final_eop]

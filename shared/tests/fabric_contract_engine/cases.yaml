@@ -1,0 +1,23 @@
+cases:
+  - case_id: l2_slice_route_preserves_source_sm
+    input:
+      capability_profile: full_memory_sync_system
+      fabric_events: [l2_slice_route]
+    expected_outputs:
+      contract_fragment_ir: interconnect.fabric_request_response
+      root_cause_on_failure: L2_SLICE_ROUTE_MISMATCH
+    required_evidence:
+      - source_sm_id
+      - request_tag
+      - target_l2_slice_id
+      - route_id
+  - case_id: response_demux_restores_warp_lane_shape
+    input:
+      fabric_events: [response_demux]
+    expected_outputs:
+      root_cause_on_failure: RESPONSE_DEMUX_MISMATCH
+    required_evidence:
+      - source_request_tag
+      - target_warp_id
+      - target_lane_mask
+      - final_eop

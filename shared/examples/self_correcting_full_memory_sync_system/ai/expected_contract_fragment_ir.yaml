@@ -1,0 +1,10 @@
+fragment_id: full_memory_sync_system_fragment
+owner_skill: gpgpu-interconnect
+capability_profile: full_memory_sync_system
+contract_paths:
+  - interconnect.fabric_request_response
+  - interconnect.l2_slice_routing
+  - memory.l2_cache_slice
+  - memory.mshr_replay
+  - memory.memory_visibility
+provenance: {source: example}

@@ -34,6 +34,7 @@ Consumes:
 - target platform constraints
 - `warp_exec_model.md`
 - `sm_instance_layout.md`
+- `shared/references/vortex_memory_sync_lessons.yaml`
 
 ## Output IR
 
@@ -75,6 +76,15 @@ This skill owns:
 - warp execution model binding
 - EXEC-mask driven SIMD gating checks
 - SM_ID routing checks
+
+Required reference lessons:
+- `VORTEX_LSU_LANE_FORMAT`
+- `VORTEX_NONBLOCKING_MEMORY_TAG`
+- `VORTEX_COALESCER_RESPONSE_RESTORE`
+- `VORTEX_CACHE_MSHR_RESPONSE_ROUTE`
+- `VORTEX_LOCAL_MEMORY_BANK`
+- `VORTEX_BARRIER_WSYNC_DRAIN`
+- `VORTEX_SIMX_RTL_TWIN`
 
 ## Human and AI Output Policy
 
@@ -143,8 +153,8 @@ The output must satisfy:
 - Interface mismatch prevents full-system simulation.
 - Valid/ready and request/response interfaces must prove `no_combinational_ready_loop`.
 - Memory path modules must decompose load/store queue, coalescer, shared memory bank unit, L1/global adapter, response router, and fault/completion responsibilities unless an explicit template declares a checked fusion.
-- L3/L4 bindings must consume `sm_instance_layout.md` and `warp_exec_model.md`.
-- L3/L4 bindings must use warp scheduler + SM issue model instead of warp scheduler, SM scheduler, or generic execution pipeline as the top execution contract.
+- Multi-SM memory-path and full memory-system bindings must consume `sm_instance_layout.md` and `warp_exec_model.md`.
+- Multi-SM memory-path and full memory-system bindings must use warp scheduler + SM issue model instead of warp scheduler, SM scheduler, or generic execution pipeline as the top execution contract.
 - Every cross-SM request, response, trace event, and performance event must preserve SM_ID routing.
 - No RTL module may share execution state across SMs except through declared memory, atomic, barrier, or fabric contracts.
 - Partial simulation compares local behavior against a `GOLDEN_CONTRACT_MODEL` slice.

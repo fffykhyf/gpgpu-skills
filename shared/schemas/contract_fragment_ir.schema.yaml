@@ -1,0 +1,13 @@
+schema: contract_fragment_ir
+version: v5
+type: object
+required: [fragment_id, owner_skill, capability_profile, contract_paths, provenance]
+properties:
+  fragment_id: string
+  owner_skill: enum
+  capability_profile: string
+  contract_paths: list
+  required_trace_events: list
+  required_tests: list
+  provenance: map
+owner_skills: [gpgpu-interconnect, gpgpu-memory, gpgpu-atomic-sync]

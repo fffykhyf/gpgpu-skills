@@ -1,5 +1,6 @@
 candidate_id: minimal_simt_self_correcting
 design_intent_ref: design_intent_minimal_teaching_simt
+capability_profile: toolchain_runtime_vertical_slice
 graph_nodes:
   - node_id: sm_top
     node_type: compute_cluster
@@ -131,13 +132,13 @@ verification_profile:
   synthesis_required_if_backend_fpga: true
   ppa_required_if_performance_target: true
 provenance:
-  preset: MINIMAL_VERTICAL_SLICE_GPGPU
+  preset: TOOLCHAIN_RUNTIME_VERTICAL_SLICE
   preset_selection_rule: VALIDATION_TARGET_VERTICAL_SLICE
   source: PRESET_DEFAULT
 rejected_alternatives:
-  - preset: MINIMAL_WARP_SM
+  - preset: MINIMAL_SIMT_CORE
     reason: missing frontend_program_image_rtl_memory_dump_vertical_slice
-  - preset: MULTI_SM_WARP_GPGPU
+  - preset: MULTI_SM_MEMORY_PATH
     reason: lower_priority_than_validation_target_vertical_slice
 unresolved_risks:
   - lsq_backpressure_under_coalesced_loads

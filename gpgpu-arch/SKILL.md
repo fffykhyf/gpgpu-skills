@@ -18,8 +18,10 @@ Upstream:
 - optional reference evidence from `reader`
 
 Downstream:
+- `gpgpu-interconnect` for fabric contract fragments when interconnect is enabled
+- `gpgpu-memory` for memory-path contract fragments when memory hierarchy is enabled
+- `gpgpu-atomic-sync` for atomic, fence, barrier, and WSYNC fragments when synchronization is enabled
 - `gpgpu-golden`
-- `gpgpu-interconnect` when L4 multi-SM fabric is in scope
 
 ## Input IR
 
@@ -40,6 +42,7 @@ Produces:
 - `MODE_SELECTION_IR`
 - `DESIGN_INTENT_IR`
 - `ARCH_IR`
+- `CAPABILITY_PROFILE_IR`
 - `MICRO_CONSTRAINT_ESTIMATE_IR`
 - `ARCH_GENERATION_REPORT`
 
@@ -72,7 +75,7 @@ This skill owns:
 - scoreboard reserve/release policy
 - memory coalescer placement and response-shape restoration
 - verification backend matrix selection
-- L3/L4 scope classification
+- capability profile selection
 
 ## Preset Selection Rules
 
@@ -80,9 +83,16 @@ Apply deterministic preset rules before free-form candidate synthesis:
 
 1. If `validation_target` or `prototype_credibility_target` contains all of `compile_kernel_to_program_image`, `rtl_sim_smoke_test`, and `memory_dump_golden_check`, prefer `MINIMAL_VERTICAL_SLICE_GPGPU`.
 2. If the user target is teaching only and there is no runtime, frontend, or vertical-slice requirement, prefer `MINIMAL_WARP_SM_TEACHING`.
-3. If the request targets L3 or L4, prefer `MINIMAL_WARP_SM` or
-   `MULTI_SM_WARP_GPGPU` before legacy-compatible presets.
-4. If the workload needs memory latency hiding or `warp_slots_per_sm > 1`,
+3. If the request targets `minimal_simt_core`, prefer `MINIMAL_SIMT_CORE`.
+4. If the request targets `single_sm_warp_pipeline`, prefer
+   `SINGLE_SM_WARP_PIPELINE`.
+5. If the request targets `toolchain_runtime_vertical_slice`, prefer
+   `TOOLCHAIN_RUNTIME_VERTICAL_SLICE`.
+6. If the request targets `multi_sm_memory_path`, prefer
+   `MULTI_SM_MEMORY_PATH`.
+7. If the request targets `full_memory_sync_system`, prefer
+   `FULL_MEMORY_SYNC_SYSTEM`.
+8. If the workload needs memory latency hiding or `warp_slots_per_sm > 1`,
    prefer a multi-warp SM preset unless rule 1 already selected the
    vertical-slice preset.
 
@@ -140,6 +150,7 @@ This skill must validate:
 - `shared/schemas/human_report_manifest_ir.schema.yaml`
 - `shared/schemas/artifact_visibility_ir.schema.yaml`
 - `shared/schemas/design_intent_ir.schema.yaml`
+- `shared/schemas/capability_profile_ir.schema.yaml`
 - `shared/schemas/arch_ir.schema.yaml`
 - `shared/schemas/micro_constraint_estimate_ir.schema.yaml`
 - `shared/schemas/arch_generation_report_ir.schema.yaml`
@@ -150,8 +161,10 @@ The output must satisfy:
 - `ARCH_IR is a candidate graph`
 - Every `ARCH_IR.graph_nodes` entry is a structured graph node with `node_id`, `node_type`, `owned_state`, `input_ports`, `output_ports`, `required_contract_paths`, and `scaling_parameters`.
 - `MICRO_CONSTRAINT_ESTIMATE_IR is a feasibility estimate`
-- L3/L4 candidates declare SM as the canonical execution island.
-- L3/L4 candidates use warp scheduler + SM issue model instead of a generic execution pipeline as the top execution contract.
+- `ARCH_IR` must contain `capability_profile`.
+- `capability_profile` must be one of `minimal_simt_core`, `single_sm_warp_pipeline`, `toolchain_runtime_vertical_slice`, `multi_sm_memory_path`, or `full_memory_sync_system`.
+- Multi-SM memory-path and full memory-system candidates declare SM as the canonical execution island.
+- Multi-SM memory-path and full memory-system candidates use warp scheduler + SM issue model instead of a generic execution pipeline as the top execution contract.
 - Warp state must include EXEC mask lifecycle, divergence, and reconvergence status when control flow is in scope.
 - Memory-capable candidates must include decode-time `MEMORY_BUNDLE`, rule-based coalescer, LDS, LSU front-end, and SM_ID routing hooks.
 - Every `ARCH_IR` candidate must include `verification_profile` with simulator, RTL simulation, module-unit, runtime-launch, synthesis-if-FPGA, and PPA-if-performance requirements.
@@ -177,6 +190,7 @@ The report must include:
 - verdict
 - request_hash
 - selected_mode
+- capability_profile
 - design_intent_hash
 - arch_ir_hash
 - micro_constraint_estimate_hash
@@ -189,6 +203,7 @@ The report must include:
 
 This skill is incomplete unless the following exist:
 - `legacy_request_and_candidate_constraints.md`
+- `capability_profile_and_preset.md`
 - `warp_state_contract.md`
 - `sm_hierarchy_model.md`
 - `shared/tables/output_mode_table.yaml`

@@ -22,9 +22,9 @@ Memory-specific chains may still use:
 ```text
 warp_stall
   -> scoreboard_dependency
-  -> memory_request
-  -> cache_miss / bank_conflict / ordering_wait
-  -> rtl_pipeline_stage
+  -> lsu_lane_format / memory_tag_allocate / coalescer_merge
+  -> l1_cache_hit_or_miss / l2_slice_route / mshr_replay / dram_bank_conflict
+  -> rtl_memory_or_fabric_module
   -> contract_rule
 ```
 
@@ -46,9 +46,18 @@ warp_stall
 - `branch_divergence`
 - `memory_request`
 - `memory_response`
+- `lsu_lane_format`
+- `memory_tag`
 - `cache_event`
+- `l2_slice_route`
+- `mshr_replay`
+- `dram_schedule`
 - `bank_conflict`
 - `coalescing_event`
+- `atomic_serialization`
+- `fence_visibility`
+- `barrier_phase`
+- `wsync_drain`
 - `interface_backpressure`
 - `rtl_pipeline_stage`
 - `toolchain_artifact`
@@ -82,6 +91,11 @@ The builder is template-driven. Supported templates:
 - `interface_backpressure_template`
 - `toolchain_mismatch_template`
 - `runtime_launch_mismatch_template`
+- `coalescer_restore_mismatch_template`
+- `l2_slice_route_mismatch_template`
+- `mshr_replay_mismatch_template`
+- `atomic_serialization_mismatch_template`
+- `fence_drain_incomplete_template`
 
 Example:
 

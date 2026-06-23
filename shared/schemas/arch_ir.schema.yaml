@@ -4,6 +4,7 @@ type: object
 required:
   - candidate_id
   - design_intent_ref
+  - capability_profile
   - graph_nodes
   - graph_edges
   - constraint_proof
@@ -14,6 +15,7 @@ required:
 properties:
   candidate_id: string
   design_intent_ref: string
+  capability_profile: string
   graph_nodes:
     type: list
     item_schema: ARCH_GRAPH_NODE

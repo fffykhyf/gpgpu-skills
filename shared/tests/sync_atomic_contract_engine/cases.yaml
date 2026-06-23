@@ -1,0 +1,22 @@
+cases:
+  - case_id: atomic_same_address_serialization
+    input:
+      capability_profile: full_memory_sync_system
+      sync_events: [atomic_serialize, atomic_visibility]
+    expected_outputs:
+      contract_fragment_ir: atomic_sync.atomic_serialization
+      root_cause_on_failure: ATOMIC_SERIALIZATION_MISMATCH
+    required_evidence:
+      - serialization_point
+      - serialization_sequence
+      - visibility_event
+  - case_id: wsync_prior_work_drain_not_scoreboard_wakeup
+    input:
+      sync_events: [wsync_drain_begin, wsync_drain_end]
+    expected_outputs:
+      root_cause_on_failure: WSYNC_DRAIN_MISMATCH
+    required_evidence:
+      - prior_work_count
+      - pending_memory_ops
+      - drain_end
+      - release_event

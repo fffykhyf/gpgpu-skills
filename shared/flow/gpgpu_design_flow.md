@@ -46,20 +46,30 @@ and `shared/tables/output_mode_table.yaml`.
 
 ```text
 Architecture Generator
+  -> Interconnect Contract Fragment Engine
+  -> Memory Contract Fragment Engine
+  -> Atomic and Synchronization Contract Fragment Engine
   -> System Contract + Golden Semantics Engine
   -> Toolchain + Runtime Artifact Engine
   -> Incremental RTL Binding Engine
-  -> Interconnect Contract Engine
-  -> Memory System Contract Engine
-  -> Atomic and Synchronization Contract Engine
   -> Simulation + Performance Attribution Engine
   -> Architecture Rewrite Loop Controller
   -> back to Architecture Generator / Contract / Toolchain / RTL Binding / Memory
 ```
 
-## L3 contract layer
+## Capability Profile Layer
 
-SM is the canonical execution island. L3 contracts add:
+The architecture generator writes `capability_profile`, not a numeric
+development-stage name. The active profiles are:
+
+- `minimal_simt_core`
+- `single_sm_warp_pipeline`
+- `toolchain_runtime_vertical_slice`
+- `multi_sm_memory_path`
+- `full_memory_sync_system`
+
+SM is the canonical execution island. The `single_sm_warp_pipeline` and
+`multi_sm_memory_path capability` profiles require:
 
 - `warp_state_contract.md`: warp lifecycle, EXEC mask evolution,
   branch divergence model, and reconvergence stack.
@@ -72,17 +82,19 @@ SM is the canonical execution island. L3 contracts add:
 - `multi_sm_trace_model.md`: SM-level trace partitioning and memory ordering per
   SM.
 
-## L4 system memory and synchronization layer
+## Contract Fragment Layer
 
-L4 contracts add:
+Interconnect, memory, and atomic/synchronization skills emit
+`contract_fragment_ir` before `gpgpu-golden` freezes `SYSTEM_CONTRACT_IR`.
+The `full_memory_sync_system capability` adds:
 
 - `gpgpu-interconnect`: explicit NoC routing, SM-to-L2 routing, request queues,
-  request merging across SM, and congestion evidence.
+  response demux, route IDs, virtual channels, and congestion evidence.
 - `gpgpu-memory`: DRAM controller contract, bank-level parallelism model,
-  writeback/write-through policy, and cross-SM coherence.
+  L1 cache or direct global adapter, L2 cache slice, MSHR replay,
+  writeback/write-through policy, and cross-SM visibility.
 - `gpgpu-atomic-sync`: atomic serialization point, per-SM atomic ordering,
-  global atomic consistency, hierarchical barriers, and fence ordering
-  semantics.
+  fence visibility, barrier phases, and WSYNC prior-work drain semantics.
 
 ## Module 1: Architecture Generator
 
@@ -97,9 +109,23 @@ Output:
 
 This module estimates area, memory pressure, warp occupancy, register pressure, LDS pressure, bandwidth need, and unrealizable risks before contract freeze.
 
-## Module 2: System Contract + Golden Semantics Engine
+## Module 2: Contract Fragment Engines
 
-Input: `ARCH_IR` and micro-constraint estimates.
+Input: `ARCH_IR`, `capability_profile`, and owner-specific reference lessons.
+
+Output:
+
+- `CONTRACT_FRAGMENT_IR` from `gpgpu-interconnect`
+- `CONTRACT_FRAGMENT_IR` from `gpgpu-memory`
+- `CONTRACT_FRAGMENT_IR` from `gpgpu-atomic-sync`
+
+The fragment engines own fabric, memory-path, cache, DRAM, atomic, fence,
+barrier, and WSYNC contract fragments. They must not define a second system
+truth source.
+
+## Module 3: System Contract + Golden Semantics Engine
+
+Input: `ARCH_IR`, micro-constraint estimates, and all contract fragments.
 
 Output:
 
@@ -108,9 +134,12 @@ Output:
 - `CONTRACT_SEMANTICS_REPORT`
 - Human report: `CONTRACT_FREEZE_SUMMARY.zh.md`
 
-`SYSTEM_CONTRACT_IR` is the only semantic truth source. `GOLDEN_CONTRACT_MODEL` is executable reference semantics derived from it, not a second simulator or second ISA source.
+`SYSTEM_CONTRACT_IR` is the only semantic truth source. `GOLDEN_CONTRACT_MODEL`
+is executable reference semantics derived from it, not a second simulator or
+second ISA source. Golden freeze consumes contract fragments and derives module
+twin traces from the frozen system contract only.
 
-## Module 3: Toolchain + Runtime Artifact Engine
+## Module 4: Toolchain + Runtime Artifact Engine
 
 Input: `SYSTEM_CONTRACT_IR` and `GOLDEN_CONTRACT_MODEL`.
 
@@ -127,7 +156,7 @@ Output:
 
 This module derives assembler, disassembler, ISA table, program image, runtime launch, and loader artifacts from `SYSTEM_CONTRACT_IR`. It must not define independent ISA, ABI, program image, loader, or runtime truth.
 
-## Module 4: Incremental RTL Binding Engine
+## Module 5: Incremental RTL Binding Engine
 
 Input: `SYSTEM_CONTRACT_IR`, `GOLDEN_CONTRACT_MODEL`, `TOOLCHAIN_ARTIFACT_IR`, `PROGRAM_IMAGE_IR`, `RUNTIME_LAUNCH_IR`, `LOADER_CONTRACT_IR`, module catalog, and interface tables.
 
@@ -140,7 +169,7 @@ Output:
 
 RTL is assembled module by module. Each module declares consumed contract paths, provided signals, required signals, latency contract, local trace schema, and partial simulation evidence.
 
-## Module 5: Simulation + Performance Attribution Engine
+## Module 6: Simulation + Performance Attribution Engine
 
 Input: assembler, disassembler, program-image, loader, runtime-launch, memory,
 RTL, waveform-derived, module partial-sim, and golden program-image execution
@@ -170,7 +199,7 @@ the first deterministic divergence before producing root cause and rewrite
 routing. Performance conclusions must connect cycle, SM, warp, bottleneck evidence,
 contract path, and RTL module or toolchain artifact evidence.
 
-## Module 6: Architecture Rewrite Loop Controller
+## Module 7: Architecture Rewrite Loop Controller
 
 Input: `PERF_ATTRIBUTION_GRAPH`, `ROOT_CAUSE_REPORT`, `ARCH_IR`, `SYSTEM_CONTRACT_IR`, `GOLDEN_CONTRACT_MODEL`, `TOOLCHAIN_ARTIFACT_IR`, `INCREMENTAL_RTL_MAP`, and regression history.
 

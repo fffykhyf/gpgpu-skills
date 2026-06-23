@@ -1,0 +1,5 @@
+fragment_id: minimal_simt_core_fragment
+owner_skill: gpgpu-arch
+capability_profile: minimal_simt_core
+contract_paths: [architecture_model.simt_core]
+provenance: {source: example}

@@ -1,0 +1,12 @@
+schema: memory_visibility_contract
+version: v5
+type: object
+required: [visibility_event, visibility_scope, affected_memory_spaces, producer_event, consumer_event, ordering_scope, required_drain_events]
+properties:
+  visibility_event: string
+  visibility_scope: enum
+  affected_memory_spaces: list
+  producer_event: string
+  consumer_event: string
+  ordering_scope: string
+  required_drain_events: list

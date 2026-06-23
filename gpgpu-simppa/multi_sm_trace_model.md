@@ -1,7 +1,7 @@
 # Multi-SM Trace Model
 
-This file defines trace partitioning for L3 multi-SM evidence and prepares the
-system for L4 memory fabric attribution.
+This file defines trace partitioning for `multi_sm_memory_path` evidence and
+prepares the system for `full_memory_sync_system` memory fabric attribution.
 
 ## SM-level trace partitioning
 
@@ -49,11 +49,11 @@ release, atomic, or barrier constraints.
 multi-SM independence is the default rule:
 - local warp scheduling in SM A does not constrain local scheduling in SM B
 - local LDS effects are visible only inside the owner SM
-- global-memory visibility follows L4 memory/coherence contracts
+- global-memory visibility follows `full_memory_sync_system` memory/coherence contracts
 
 ## Attribution Buckets
 
-L3/L4 attribution must distinguish:
+Advanced memory-path and synchronization attribution must distinguish:
 - coalescing stall
 - LDS stall
 - inter-SM contention
