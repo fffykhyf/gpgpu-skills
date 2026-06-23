@@ -1,0 +1,589 @@
+table: rewrite_rules
+version: compact-v1
+merged_sections:
+  - source_file: rewrite_trigger_table.yaml
+    content: |
+      version: v5
+      triggers:
+        CONTRACT_ROOT_CAUSE:
+          patch_options: [CONTRACT_PATCH]
+        GOLDEN_MODEL_ROOT_CAUSE:
+          patch_options: [GOLDEN_MODEL_PATCH, CONTRACT_PATCH]
+        TOOLCHAIN_ROOT_CAUSE:
+          patch_options: [TOOLCHAIN_PATCH]
+        RUNTIME_LAUNCH_ROOT_CAUSE:
+          patch_options: [RUNTIME_PATCH]
+        RTL_FUNCTIONAL_ROOT_CAUSE:
+          patch_options: [RTL_PATCH]
+        RTL_INTERFACE_ROOT_CAUSE:
+          patch_options: [RTL_PATCH]
+        MEMORY_SYSTEM_ROOT_CAUSE:
+          patch_options: [RTL_PATCH, ARCHITECTURE_PATCH]
+        MEMORY_PATH_ROOT_CAUSE:
+          patch_options: [MEMORY_PATH_PATCH]
+        FABRIC_ROOT_CAUSE:
+          patch_options: [FABRIC_PATCH]
+        CACHE_MSHR_ROOT_CAUSE:
+          patch_options: [MEMORY_PATH_PATCH]
+        DRAM_ROOT_CAUSE:
+          patch_options: [MEMORY_PATH_PATCH]
+        SYNC_ATOMIC_ROOT_CAUSE:
+          patch_options: [SYNC_ATOMIC_PATCH]
+        SCHEDULER_ROOT_CAUSE:
+          patch_options: [RTL_PATCH, ARCHITECTURE_PATCH]
+        PERFORMANCE_ARCH_ROOT_CAUSE:
+          patch_options: [ARCHITECTURE_PATCH]
+        COUNTER_SCHEMA_ROOT_CAUSE:
+          patch_options: [COUNTER_SCHEMA_PATCH, TEST_EVIDENCE_PATCH]
+        CONFIG_DRIFT_ROOT_CAUSE:
+          patch_options: [SIMULATOR_ARTIFACT_REMOVAL_PATCH, CONTRACT_PATCH, ARCHITECTURE_PATCH]
+        ATTRIBUTION_VALIDITY_ROOT_CAUSE:
+          patch_options: [TEST_EVIDENCE_PATCH, COUNTER_SCHEMA_PATCH]
+        SIMULATOR_ARTIFACT_ROOT_CAUSE:
+          patch_options: [SIMULATOR_ARTIFACT_REMOVAL_PATCH]
+        TEST_EVIDENCE_ROOT_CAUSE:
+          patch_options: [TEST_EVIDENCE_PATCH, PASS_EVIDENCE_PATCH]
+        INSUFFICIENT_TRACE_EVIDENCE:
+          patch_options: [TEST_EVIDENCE_PATCH]
+        ROOT_CAUSE_AMBIGUOUS:
+          patch_options: [TEST_EVIDENCE_PATCH]
+      required_evidence:
+        failure_mode:
+          - CORRECTNESS_GATE_REPORT
+          - FIRST_DIVERGENCE_REPORT
+          - PERF_ATTRIBUTION_GRAPH
+          - ROOT_CAUSE_REPORT
+        pass_mode:
+          - CORRECTNESS_GATE_REPORT
+          - PASS_EVIDENCE_REPORT
+          - TRACE_COVERAGE_REPORT
+          - PERFORMANCE_METRIC_IR
+          - REGRESSION_FINGERPRINT
+      rewrite_blockers:
+        - missing_owner_skill
+        - missing_revalidation_route
+        - ambiguous_root_cause_without_evidence_patch
+        - architecture_patch_without_alternative_rejection
+        - performance_arch_root_cause_without_counter_evidence
+        - root_cause_without_symptom_and_exclusion_counter
+        - simulator_private_parameter_in_hardware_contract
+        - stable_counter_without_producer
+  - source_file: patch_taxonomy_table.yaml
+    content: |
+      version: v5
+      patch_classes:
+        ARCHITECTURE_PATCH:
+          target_owner: gpgpu-architecture
+          examples: [warp_size_change, sm_partition_change, issue_width_change, memory_hierarchy_change]
+        CONTRACT_PATCH:
+          target_owner: gpgpu-contract
+          examples: [scheduling_rule_change, memory_ordering_change, launch_abi_change, scoreboard_semantic_change]
+        MEMORY_PATH_PATCH:
+          owner: gpgpu-contract/packs/memory_path
+          target_owner: gpgpu-contract/packs/memory_path
+          examples: [lsu_lane_format_fix, nonblocking_tag_lifetime_fix, coalescer_response_restore_fix, memory_visibility_rule_fix]
+        FABRIC_PATCH:
+          owner: gpgpu-contract/packs/interconnect
+          target_owner: gpgpu-contract/packs/interconnect
+          examples: [l2_slice_route_fix, response_demux_fix, virtual_channel_backpressure_fix, ordering_scope_route_fix]
+        SYNC_ATOMIC_PATCH:
+          owner: gpgpu-contract/packs/atomic_sync
+          target_owner: gpgpu-contract/packs/atomic_sync
+          examples: [atomic_serialization_fix, fence_visibility_drain_fix, barrier_phase_fix, wsync_prior_work_drain_fix]
+        GOLDEN_SEMANTICS_PATCH:
+          owner: gpgpu-contract
+          target_owner: gpgpu-contract
+          examples: [system_contract_freeze_fix, executable_memory_semantics_fix, sync_atomic_semantics_fix, module_twin_trace_fix]
+        RTL_BINDING_PATCH:
+          owner: gpgpu-rtl
+          target_owner: gpgpu-rtl
+          examples: [module_contract_binding_fix, trace_adapter_binding_fix, interface_checker_binding_fix, partial_sim_gate_fix]
+        GOLDEN_MODEL_PATCH:
+          target_owner: gpgpu-contract
+          examples: [golden_decode_fix, executable_semantics_fix, coverage_gap_fix]
+        TOOLCHAIN_PATCH:
+          target_owner: gpgpu-toolchain-runtime
+          examples: [assembler_encoding_fix, disassembler_roundtrip_fix, instruction_encoding_fix, program_image_layout_fix, loader_contract_binding_fix]
+        RUNTIME_PATCH:
+          target_owner: gpgpu-toolchain-runtime
+          examples: [runtime_arg_buffer_fix, kernel_launch_sequence_fix, csr_launch_sequence_fix, completion_fault_observation_fix]
+        RUNTIME_ABI_PATCH:
+          target_owner: gpgpu-toolchain-runtime
+          examples: [launch_descriptor_contract_fix, argument_layout_contract_fix, compatibility_profile_mapping_fix]
+        RTL_PATCH:
+          target_owner: gpgpu-rtl
+          examples: [pipeline_relayout, scoreboard_redesign, lsq_replay_policy_change, interface_latency_adjustment]
+        MEMORY_PATCH:
+          target_owner: gpgpu-contract/packs/memory_path
+          examples: [warp_memory_transaction_fix, coalescer_contract_fix, cache_reservation_fail_fix, memory_return_path_fix]
+        INTERCONNECT_PATCH:
+          target_owner: gpgpu-contract/packs/interconnect
+          examples: [noc_packet_contract_fix, icnt_backpressure_contract_fix, l2_queue_boundary_fix, return_path_fix]
+        ATOMIC_SYNC_PATCH:
+          target_owner: gpgpu-contract/packs/atomic_sync
+          examples: [atomic_operation_contract_fix, fence_visibility_contract_fix, cta_barrier_contract_fix]
+        COUNTER_SCHEMA_PATCH:
+          target_owner: gpgpu-validation
+          examples: [counter_manifest_fix, producer_audit_fix, stall_reason_matrix_fix]
+        SIMULATOR_ARTIFACT_REMOVAL_PATCH:
+          target_owner: gpgpu-architecture
+          examples: [remove_fixed_latency_truth, remove_cuda_stream_abi_truth, remove_booksim_config_truth, remove_parser_only_counter_gate]
+        TEST_EVIDENCE_PATCH:
+          target_owner: gpgpu-validation
+          examples: [trace_tap_addition, missing_evidence_collection, attribution_rerun]
+        PASS_EVIDENCE_PATCH:
+          target_owner: gpgpu-validation
+          examples: [coverage_collection_fix, regression_fingerprint_stabilization, pass_trace_completeness_fix]
+  - source_file: revalidation_routing_table.yaml
+    content: |
+      version: v5
+      routes:
+        ARCHITECTURE_PATCH:
+          required_modules:
+            - gpgpu-architecture
+            - gpgpu-contract
+            - gpgpu-toolchain-runtime
+            - gpgpu-rtl
+            - gpgpu-validation
+        CONTRACT_PATCH:
+          required_modules:
+            - gpgpu-contract
+            - gpgpu-toolchain-runtime
+            - gpgpu-rtl
+            - gpgpu-validation
+        MEMORY_PATH_PATCH:
+          required_modules:
+            - gpgpu-contract/packs/memory_path
+            - gpgpu-contract
+            - gpgpu-rtl
+            - gpgpu-validation
+          required_gates:
+            - lsu_lane_format_test
+            - memory_tag_lifetime_test
+            - coalescer_restore_test
+            - mshr_replay_test
+            - cache_response_routing_test
+            - rtl_golden_trace_diff
+        FABRIC_PATCH:
+          required_modules:
+            - gpgpu-contract/packs/interconnect
+            - gpgpu-contract
+            - gpgpu-rtl
+            - gpgpu-validation
+          required_gates:
+            - fabric_request_response_test
+            - l2_slice_route_test
+            - response_demux_test
+            - fabric_queue_backpressure_test
+            - multi_sm_trace_partition_test
+        SYNC_ATOMIC_PATCH:
+          required_modules:
+            - gpgpu-contract/packs/atomic_sync
+            - gpgpu-contract
+            - gpgpu-rtl
+            - gpgpu-validation
+          required_gates:
+            - atomic_same_address_test
+            - visibility_event_test
+            - fence_visibility_test
+            - barrier_phase_test
+            - wsync_drain_test
+            - rtl_golden_trace_diff
+        GOLDEN_SEMANTICS_PATCH:
+          required_modules:
+            - gpgpu-contract
+            - gpgpu-validation
+          required_gates:
+            - contract_fragment_freeze_check
+            - executable_semantics_check
+            - golden_image_execution
+            - module_twin_trace_diff
+        RTL_BINDING_PATCH:
+          required_modules:
+            - gpgpu-rtl
+            - gpgpu-validation
+          required_gates:
+            - interface_binding_check
+            - module_partial_sim
+            - trace_adapter_field_check
+            - rtl_golden_trace_diff
+        GOLDEN_MODEL_PATCH:
+          required_modules:
+            - gpgpu-contract
+            - gpgpu-toolchain-runtime
+            - gpgpu-validation
+          required_gates:
+            - executable_semantics_check
+            - golden_image_execution
+            - rtl_golden_trace_diff
+        TOOLCHAIN_PATCH:
+          required_modules:
+            - gpgpu-toolchain-runtime
+            - gpgpu-rtl
+            - gpgpu-validation
+          required_gates:
+            - regenerate_TOOLCHAIN_ARTIFACT_IR
+            - assembler_smoke
+            - disassembler_roundtrip
+            - program_image_smoke
+            - loader_contract_smoke
+            - golden_image_execution
+            - rtl_image_load_smoke
+            - trace_diff
+        RUNTIME_PATCH:
+          required_modules:
+            - gpgpu-toolchain-runtime
+            - gpgpu-rtl
+            - gpgpu-validation
+          required_gates:
+            - runtime_arg_encoding
+            - csr_launch_sequence
+            - completion_fault_observation
+            - rtl_golden_trace_diff
+        RUNTIME_ABI_PATCH:
+          required_modules:
+            - gpgpu-toolchain-runtime
+            - gpgpu-contract
+            - gpgpu-validation
+          required_gates:
+            - launch_descriptor_roundtrip
+            - argument_layout_roundtrip
+            - compatibility_profile_check
+            - golden_image_execution
+        RTL_PATCH:
+          required_modules:
+            - gpgpu-rtl
+            - gpgpu-validation
+          required_gates:
+            - module_partial_sim
+            - rtl_golden_trace_diff
+            - memory_dump_compare
+        MEMORY_PATCH:
+          required_modules:
+            - gpgpu-contract/packs/memory_path
+            - gpgpu-rtl
+            - gpgpu-validation
+          required_gates:
+            - warp_memory_transaction_trace
+            - coalescer_output_trace
+            - cache_status_matrix
+            - memory_lifecycle_trace
+        INTERCONNECT_PATCH:
+          required_modules:
+            - gpgpu-contract/packs/interconnect
+            - gpgpu-rtl
+            - gpgpu-validation
+          required_gates:
+            - noc_packet_trace
+            - icnt_backpressure_trace
+            - queue_boundary_report
+        ATOMIC_SYNC_PATCH:
+          required_modules:
+            - gpgpu-contract/packs/atomic_sync
+            - gpgpu-contract
+            - gpgpu-rtl
+            - gpgpu-validation
+          required_gates:
+            - atomic_operation_contract
+            - fence_visibility_test
+            - cta_barrier_release_test
+            - rtl_golden_trace_diff
+        COUNTER_SCHEMA_PATCH:
+          required_modules:
+            - gpgpu-validation
+          required_gates:
+            - counter_manifest_validation
+            - counter_producer_audit
+            - stall_reason_matrix_validation
+        SIMULATOR_ARTIFACT_REMOVAL_PATCH:
+          required_modules:
+            - gpgpu-architecture
+            - gpgpu-contract
+            - gpgpu-rtl
+            - gpgpu-validation
+          required_gates:
+            - config_classification_check
+            - simulator_artifact_rejection_report
+            - contract_diff_check
+        TEST_EVIDENCE_PATCH:
+          required_modules:
+            - gpgpu-validation
+          required_gates:
+            - trace_completeness_check
+            - coverage_check
+        PASS_EVIDENCE_PATCH:
+          required_modules:
+            - gpgpu-validation
+          required_gates:
+            - pass_evidence_report
+            - regression_fingerprint
+            - coverage_check
+      root_cause_to_patch_route:
+        TOOLCHAIN_ROOT_CAUSE:
+          patch_type: TOOLCHAIN_PATCH
+          target_skill: gpgpu-toolchain-runtime
+          revalidation: [assembler_smoke, disassembler_roundtrip, program_image_smoke, loader_contract_smoke, rtl_first_fetch_decode, golden_image_execution, rtl_golden_trace_diff]
+        RUNTIME_LAUNCH_ROOT_CAUSE:
+          patch_type: RUNTIME_PATCH
+          target_skill: gpgpu-toolchain-runtime
+          revalidation: [runtime_arg_encoding, csr_launch_sequence, completion_fault_observation, rtl_golden_trace_diff]
+        COUNTER_SCHEMA_ROOT_CAUSE:
+          patch_type: COUNTER_SCHEMA_PATCH
+          target_skill: gpgpu-validation
+          revalidation: [counter_manifest_validation, counter_producer_audit, stall_reason_matrix_validation]
+        CONFIG_DRIFT_ROOT_CAUSE:
+          patch_type: SIMULATOR_ARTIFACT_REMOVAL_PATCH
+          target_skill: gpgpu-architecture
+          revalidation: [config_classification_check, simulator_artifact_rejection_report, contract_diff_check]
+        ATTRIBUTION_VALIDITY_ROOT_CAUSE:
+          patch_type: TEST_EVIDENCE_PATCH
+          target_skill: gpgpu-validation
+          revalidation: [perf_attribution_graph, counter_producer_audit, trace_completeness_check]
+        SIMULATOR_ARTIFACT_ROOT_CAUSE:
+          patch_type: SIMULATOR_ARTIFACT_REMOVAL_PATCH
+          target_skill: gpgpu-architecture
+          revalidation: [simulator_artifact_rejection_report, config_classification_check, rtl_contract_check]
+        RTL_FUNCTIONAL_ROOT_CAUSE:
+          patch_type: RTL_PATCH
+          target_skill: gpgpu-rtl
+          revalidation: [module_partial_sim, rtl_golden_trace_diff, memory_dump_compare]
+        MEMORY_SYSTEM_ROOT_CAUSE:
+          patch_type: RTL_PATCH
+          target_skill: gpgpu-rtl
+          revalidation: [module_partial_sim, memory_response_restore, rtl_golden_trace_diff, memory_dump_compare]
+        MEMORY_PATH_ROOT_CAUSE:
+          patch_type: MEMORY_PATH_PATCH
+          target_skill: gpgpu-contract/packs/memory_path
+          revalidation: [lsu_lane_format_test, memory_tag_lifetime_test, coalescer_restore_test, rtl_golden_trace_diff]
+        FABRIC_ROOT_CAUSE:
+          patch_type: FABRIC_PATCH
+          target_skill: gpgpu-contract/packs/interconnect
+          revalidation: [fabric_request_response_test, l2_slice_route_test, response_demux_test, multi_sm_trace_partition_test]
+        CACHE_MSHR_ROOT_CAUSE:
+          patch_type: MEMORY_PATH_PATCH
+          target_skill: gpgpu-contract/packs/memory_path
+          revalidation: [mshr_replay_test, cache_response_routing_test, no_deadlock_watchdog, rtl_golden_trace_diff]
+        DRAM_ROOT_CAUSE:
+          patch_type: MEMORY_PATH_PATCH
+          target_skill: gpgpu-contract/packs/memory_path
+          revalidation: [dram_schedule_test, dram_bank_conflict_test, memory_visibility_order_test, rtl_golden_trace_diff]
+        SYNC_ATOMIC_ROOT_CAUSE:
+          patch_type: SYNC_ATOMIC_PATCH
+          target_skill: gpgpu-contract/packs/atomic_sync
+          revalidation: [atomic_same_address_test, fence_visibility_test, barrier_phase_test, wsync_drain_test, rtl_golden_trace_diff]
+        COALESCER_RESPONSE_SHAPE_MISMATCH:
+          patch_type: MEMORY_PATH_PATCH
+          target_skill: gpgpu-contract/packs/memory_path
+          revalidation: [coalescer_restore_test, rtl_golden_trace_diff, scoreboard_release_eop_check]
+        L2_SLICE_ROUTE_MISMATCH:
+          patch_type: FABRIC_PATCH
+          target_skill: gpgpu-contract/packs/interconnect
+          revalidation: [l2_slice_route_test, response_demux_test, multi_sm_trace_partition_test]
+        MSHR_REPLAY_MISMATCH:
+          patch_type: MEMORY_PATH_PATCH
+          target_skill: gpgpu-contract/packs/memory_path
+          revalidation: [mshr_replay_test, cache_response_routing_test, no_deadlock_watchdog]
+        ATOMIC_SERIALIZATION_MISMATCH:
+          patch_type: SYNC_ATOMIC_PATCH
+          target_skill: gpgpu-contract/packs/atomic_sync
+          revalidation: [atomic_same_address_test, visibility_event_test, rtl_golden_trace_diff]
+        FENCE_DRAIN_INCOMPLETE:
+          patch_type: SYNC_ATOMIC_PATCH
+          target_skill: gpgpu-contract/packs/atomic_sync
+          revalidation: [fence_visibility_test, memory_visibility_order_test]
+        PERFORMANCE_ARCH_ROOT_CAUSE:
+          patch_type: ARCHITECTURE_PATCH
+          target_skill: gpgpu-architecture
+          revalidation: [arch_constraint_check, performance_metric_extract, perf_attribution_graph, alternative_patch_rejection, ppa_estimate_if_available]
+        TEST_EVIDENCE_ROOT_CAUSE:
+          patch_type: TEST_EVIDENCE_PATCH
+          target_skill: gpgpu-validation
+          revalidation: [trace_completeness_check, coverage_check]
+  - source_file: root_cause_taxonomy.yaml
+    content: |
+      version: v5
+      root_causes:
+        CONTRACT_ROOT_CAUSE:
+          subclasses:
+            - CONTRACT_STATE_RULE_MISMATCH
+            - CONTRACT_MEMORY_RULE_MISMATCH
+            - CONTRACT_LAUNCH_RULE_MISMATCH
+          requires: [contract_paths, evidence_hashes]
+          rewrite_candidate: CONTRACT_PATCH
+        GOLDEN_MODEL_ROOT_CAUSE:
+          subclasses:
+            - GOLDEN_EXECUTION_MISMATCH
+            - GOLDEN_DECODE_MISMATCH
+            - GOLDEN_COVERAGE_GAP
+          requires: [golden_model_hash, contract_paths]
+          rewrite_candidate: GOLDEN_MODEL_PATCH
+        TOOLCHAIN_ROOT_CAUSE:
+          subclasses:
+            - ASM_PARSE_FAIL
+            - ASM_ENCODE_MISMATCH
+            - DISASM_ROUNDTRIP_MISMATCH
+            - PROGRAM_IMAGE_LAYOUT_MISMATCH
+            - ENTRY_SYMBOL_RESOLVE_MISMATCH
+            - LOADER_CONTRACT_MISMATCH
+          requires: [toolchain_artifact_paths, contract_paths, evidence_hashes]
+          rewrite_candidate: TOOLCHAIN_PATCH
+        RUNTIME_LAUNCH_ROOT_CAUSE:
+          subclasses:
+            - ARG_BUFFER_ENCODING_MISMATCH
+            - GRID_DIM_MISMATCH
+            - BLOCK_DIM_MISMATCH
+            - KERNEL_ENTRY_MISMATCH
+            - CSR_START_SEQUENCE_MISMATCH
+            - COMPLETION_OBSERVATION_MISMATCH
+          requires: [toolchain_artifact_paths, contract_paths, evidence_hashes]
+          rewrite_candidate: RUNTIME_PATCH
+        RTL_FUNCTIONAL_ROOT_CAUSE:
+          subclasses:
+            - PC_UPDATE_MISMATCH
+            - DECODE_MISMATCH
+            - ACTIVE_MASK_MISMATCH
+            - PREDICATE_MASK_MISMATCH
+            - REGISTER_WRITEBACK_MISMATCH
+            - BRANCH_DIVERGENCE_MISMATCH
+            - BARRIER_STATE_MISMATCH
+          requires: [rtl_module_paths, contract_paths, evidence_hashes]
+          rewrite_candidate: RTL_PATCH
+        RTL_INTERFACE_ROOT_CAUSE:
+          subclasses:
+            - VALID_READY_PROTOCOL_MISMATCH
+            - PAYLOAD_STABILITY_VIOLATION
+            - RESPONSE_TAG_MISMATCH
+            - REQUEST_RESPONSE_ORDER_MISMATCH
+            - BACKPRESSURE_DEADLOCK
+          requires: [rtl_module_paths, contract_paths, evidence_hashes]
+          rewrite_candidate: RTL_PATCH
+        MEMORY_SYSTEM_ROOT_CAUSE:
+          subclasses:
+            - COALESCING_MISMATCH
+            - COALESCER_RESPONSE_SHAPE_MISMATCH
+            - COALESCER_TAG_RESTORE_MISMATCH
+            - CACHE_REPLAY_ORDER_MISMATCH
+            - MSHR_DEADLOCK_GUARD_MISSING
+            - SCOREBOARD_WAKEUP_BEFORE_FINAL_RESPONSE
+            - BYTE_ENABLE_MISMATCH
+            - LANE_MASK_MISMATCH
+            - LSQ_ORDERING_MISMATCH
+            - DUPLICATE_REQUEST
+            - RESPONSE_ROUTING_MISMATCH
+            - BANK_CONFLICT_OVERHEAD
+            - MEMORY_REPLAY_OVERHEAD
+          requires: [memory_request, request_tag, response_tag, contract_paths, rtl_module_paths]
+          rewrite_candidate: RTL_PATCH
+        MEMORY_PATH_ROOT_CAUSE:
+          subclasses:
+            - LSU_LANE_FORMAT_MISMATCH
+            - MEMORY_TAG_REUSE_BEFORE_EOP
+            - COALESCER_RESPONSE_SHAPE_MISMATCH
+            - BYTE_ENABLE_RESTORE_MISMATCH
+          requires: [lsu_lane_request, memory_tag, coalescer_restore, contract_paths, rtl_module_paths]
+          rewrite_candidate: MEMORY_PATH_PATCH
+        FABRIC_ROOT_CAUSE:
+          subclasses:
+            - L2_SLICE_ROUTE_MISMATCH
+            - RESPONSE_DEMUX_MISMATCH
+            - FABRIC_QUEUE_BACKPRESSURE_MISSING
+          requires: [fabric_request, fabric_response, route_id, queue_occupancy, contract_paths, rtl_module_paths]
+          rewrite_candidate: FABRIC_PATCH
+        CACHE_MSHR_ROOT_CAUSE:
+          subclasses:
+            - MSHR_REPLAY_MISMATCH
+            - CACHE_RESPONSE_ROUTING_MISMATCH
+            - MSHR_DEADLOCK_GUARD_MISSING
+          requires: [l2_cache_slice, mshr_id, replay_event, response_demux_target, contract_paths, rtl_module_paths]
+          rewrite_candidate: MEMORY_PATH_PATCH
+        DRAM_ROOT_CAUSE:
+          subclasses:
+            - DRAM_ORDERING_MISMATCH
+            - DRAM_BANK_CONFLICT_MODEL_MISMATCH
+            - DRAM_RESPONSE_ORDER_MISMATCH
+          requires: [dram_schedule, dram_bank_id, ordering_scope, response_tag, contract_paths, rtl_module_paths]
+          rewrite_candidate: MEMORY_PATH_PATCH
+        SYNC_ATOMIC_ROOT_CAUSE:
+          subclasses:
+            - ATOMIC_SERIALIZATION_MISMATCH
+            - FENCE_DRAIN_INCOMPLETE
+            - BARRIER_PHASE_MISMATCH
+            - WSYNC_DRAIN_MISMATCH
+          requires: [serialization_point, visibility_event, barrier_phase, wsync_drain, contract_paths, rtl_module_paths]
+          rewrite_candidate: SYNC_ATOMIC_PATCH
+        SCHEDULER_ROOT_CAUSE:
+          subclasses:
+            - LOW_ELIGIBLE_WARP_RATE
+            - SCOREBOARD_WAKEUP_DELAY
+            - UNFAIR_WARP_SELECTION
+            - READY_WARP_NOT_ISSUED
+            - EXCESSIVE_BARRIER_WAIT
+          requires: [warp, scheduler_state, contract_paths, rtl_module_paths]
+          rewrite_candidate: RTL_PATCH
+        PERFORMANCE_ARCH_ROOT_CAUSE:
+          subclasses:
+            - LOW_OCCUPANCY
+            - PIPELINE_IMBALANCE
+            - REGISTER_FILE_PORT_PRESSURE
+            - MEMORY_BANDWIDTH_SATURATION
+            - ISSUE_WIDTH_UNDERUTILIZATION
+            - EXCESSIVE_DIVERGENCE_OVERHEAD
+          requires: [performance_metric_ref, perf_attribution_graph_ref, contract_paths, rtl_module_paths, bottleneck_cycle_window, counter_evidence, alternative_patch_rejection]
+          rewrite_candidate: ARCHITECTURE_PATCH
+        COUNTER_SCHEMA_ROOT_CAUSE:
+          subclasses:
+            - COUNTER_PRODUCER_MISSING
+            - PARSER_ONLY_COUNTER_USED_AS_STABLE
+            - DEFINED_ONLY_COUNTER_USED_AS_STABLE
+            - COUNTER_SAMPLE_WINDOW_AMBIGUOUS
+          requires: [counter_manifest_ref, producer_audit_ref, affected_counters]
+          rewrite_candidate: COUNTER_SCHEMA_PATCH
+        CONFIG_DRIFT_ROOT_CAUSE:
+          subclasses:
+            - SIMULATOR_PRIVATE_PARAMETER_IN_HARDWARE_CONTRACT
+            - CUDA_PTX_FIELD_IN_NATIVE_ABI
+            - FIXED_LATENCY_COPIED_AS_RTL_TRUTH
+            - TESTED_CONFIG_QUEUE_DEPTH_COPIED_AS_DEFAULT
+          requires: [config_classification_ref, contract_paths, rejected_parameter]
+          rewrite_candidate: SIMULATOR_ARTIFACT_REMOVAL_PATCH
+        ATTRIBUTION_VALIDITY_ROOT_CAUSE:
+          subclasses:
+            - ROOT_CAUSE_MISSING_SYMPTOM_COUNTER
+            - ROOT_CAUSE_MISSING_EXCLUSION_COUNTER
+            - ROOT_CAUSE_MISSING_QUEUE_OWNER
+            - POWER_USED_AS_PRIMARY_EVIDENCE
+          requires: [perf_attribution_graph_ref, missing_evidence]
+          rewrite_candidate: TEST_EVIDENCE_PATCH
+        SIMULATOR_ARTIFACT_ROOT_CAUSE:
+          subclasses:
+            - CPP_QUEUE_COPIED_TO_RTL
+            - BOOKSIM_CONFIG_COPIED_TO_FABRIC_TRUTH
+            - ACCELWATTCH_OBJECT_COPIED_TO_RTL
+            - CUDA_STREAM_STACK_COPIED_TO_ABI
+            - PTX_OPCODE_LATENCY_COPIED_TO_PIPELINE
+          requires: [artifact_path, provenance_path, removal_target]
+          rewrite_candidate: SIMULATOR_ARTIFACT_REMOVAL_PATCH
+        TEST_EVIDENCE_ROOT_CAUSE:
+          subclasses:
+            - MISSING_GOLDEN_TRACE
+            - MISSING_RTL_TRACE
+            - HASH_MISMATCH
+            - INSUFFICIENT_COVERAGE
+            - AMBIGUOUS_TRACE_ORDERING
+          requires: [missing_evidence]
+          rewrite_candidate: TEST_EVIDENCE_PATCH
+        INSUFFICIENT_TRACE_EVIDENCE:
+          subclasses:
+            - INSUFFICIENT_TRACE_DETAIL
+          requires: [missing_evidence]
+          rewrite_candidate: TEST_EVIDENCE_PATCH
+        ROOT_CAUSE_AMBIGUOUS:
+          subclasses:
+            - MULTIPLE_UNRANKED_CAUSES
+          requires: [ambiguous_evidence]
+          rewrite_candidate: TEST_EVIDENCE_PATCH
+source_files:
+  - rewrite_trigger_table.yaml
+  - patch_taxonomy_table.yaml
+  - revalidation_routing_table.yaml
+  - root_cause_taxonomy.yaml

@@ -1,8 +1,0 @@
-system_id: atomic_fence_barrier_system
-capability_profile: full_memory_sync_system
-contract_fragments: [atomic_fence_barrier_fragment]
-synchronization_model:
-  atomic: serialized
-  fence: visibility_drain
-  barrier: phase_release
-  wsync: prior_work_drain

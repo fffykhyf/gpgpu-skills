@@ -1,0 +1,5 @@
+table: reference_lesson_map
+version: compact-v1
+merged_sections:
+source_files:
+  - reference_lesson_index.yaml

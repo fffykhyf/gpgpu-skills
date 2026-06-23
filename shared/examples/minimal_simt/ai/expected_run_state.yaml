@@ -1,0 +1,24 @@
+run_id: minimal_simt
+mode: FAST_ITERATION
+active_skills:
+  - gpgpu-architecture
+  - gpgpu-contract
+  - gpgpu-toolchain-runtime
+  - gpgpu-rtl
+  - gpgpu-validation
+touched_artifacts:
+  - DESIGN_INTENT
+  - ARCH candidate
+  - SYSTEM_CONTRACT compact
+  - GOLDEN model link
+  - RTL map link
+  - PASS_EVIDENCE compact
+current_truth:
+  architecture: ARCH_IR link
+  contract: SYSTEM_CONTRACT_IR link
+  golden_model: GOLDEN_CONTRACT_MODEL link
+  toolchain: TOOLCHAIN_ARTIFACT_IR link
+  rtl_map: INCREMENTAL_RTL_MAP link
+  validation: PASS_EVIDENCE_REPORT link
+gates: []
+open_issues: []

@@ -1,0 +1,41 @@
+---
+name: gpgpu-validation
+description: Use when validating golden, toolchain, and RTL agreement; collecting compact pass evidence; debugging first divergence or root cause; or performing GPGPU performance, PPA, stall, energy, and bottleneck analysis.
+---
+
+# gpgpu-validation
+
+## Role
+
+Validate golden/toolchain/RTL agreement and performance evidence.
+
+## Loading Policy
+
+- Default mode loads only `validation_core.md`.
+- Load `debug_attribution_pack.md` only when correctness fails or the user requests debug/regression.
+- Load `performance_pack.md` only when the user requests performance/PPA/stall/energy/bottleneck analysis.
+
+## Default Outputs
+
+- `PASS_EVIDENCE_REPORT` compact
+- `REGRESSION_FINGERPRINT`
+- `RUN_STATE.yaml` delta
+
+## Failure-Only Outputs
+
+- `FIRST_DIVERGENCE_REPORT`
+- `MISMATCH_PACKAGE`
+- `ROOT_CAUSE_REPORT`
+- `DEBUG_SUMMARY.zh.md`
+
+## Performance-Only Outputs
+
+- `PERFORMANCE_METRIC_IR`
+- `PERF_ATTRIBUTION_GRAPH`
+- `STALL_REASON_MATRIX`
+- `MEMORY_ATTRIBUTION_MATRIX`
+- `POWER_ENERGY_PROVENANCE`
+
+## Boundaries
+
+Do not generate full root-cause reports when golden and RTL match. Generate minimal pass evidence and regression fingerprint by default.

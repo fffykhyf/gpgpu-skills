@@ -1,123 +1,33 @@
-# GPGPU Skills
+# Compact GPGPU Skill System
 
-This repository now defines a self-correcting GPGPU design system built around
-a SM-centric warp execution contract model.
+## Active Skills
+1. gpgpu-architecture
+2. gpgpu-contract
+3. gpgpu-toolchain-runtime
+4. gpgpu-rtl
+5. gpgpu-validation
+6. gpgpu-loop
 
-## Goals
+## Optional Contract Packs
+- memory_path
+- interconnect
+- atomic_sync
 
-1. Generate candidate GPGPU architectures from intent and constraints.
-2. Freeze one system contract and derive executable golden semantics.
-3. Derive toolchain, program image, runtime launch, and loader artifacts from the contract.
-4. Build RTL incrementally module by module with interface checks.
-5. Normalize execution traces and build causal performance attribution.
-6. Produce architecture, contract, toolchain, RTL, or test-evidence rewrite plans.
-7. Extend capability profiles for SM, warp, memory hierarchy, interconnect,
-   coherence, atomic, and fence behavior without using numeric development
-   stage labels that conflict with L1 cache or L2 cache terminology.
+## Default Artifact Policy
+Default iteration emits only:
+- ITERATION_SUMMARY.zh.md
+- RUN_STATE.yaml
 
-## Current Top-Level Skills
+Expanded artifacts are generated only for:
+- CONTRACT_FREEZE
+- DEBUG_REGRESSION
+- PERF_ANALYSIS
+- RELEASE_CHECK
 
-1. `gpgpu-arch`
-2. `gpgpu-golden`
-3. `gpgpu-runtime`
-4. `gpgpu-rtl`
-5. `gpgpu-simppa`
-6. `gpgpu-loop`
-7. `gpgpu-interconnect`
-8. `gpgpu-memory`
-9. `gpgpu-atomic-sync`
-
-## Flow
-
-```text
-Architecture Generator
-  -> Interconnect Contract Fragment Engine
-  -> Memory Contract Fragment Engine
-  -> Atomic and Synchronization Contract Fragment Engine
-  -> System Contract + Golden Semantics Engine
-  -> Toolchain + Runtime Artifact Engine
-  -> Incremental RTL Binding Engine
-  -> Simulation + Performance Attribution Engine
-  -> Architecture Rewrite Loop Controller
-  -> back to Architecture Generator / Contract / Toolchain / RTL Binding / Memory
-```
-
-## Capability Profiles
-
-The architecture generator selects a `capability_profile` instead of a numeric
-development stage:
-
-- `minimal_simt_core`: minimal SIMT core for basic warp instructions.
-- `single_sm_warp_pipeline`: one SM, multiple warps, scoreboard, divergence,
-  and LSU base path.
-- `toolchain_runtime_vertical_slice`: assembler, disassembler, runtime, loader,
-  RTL smoke, and golden dump vertical closure.
-- `multi_sm_memory_path`: multiple SMs, shared memory/LDS, coalescer, L1 cache
-  or direct global adapter, response restore, and SM_ID routing.
-- `full_memory_sync_system`: fabric, L2 cache slice, MSHR, DRAM, atomic, fence,
-  barrier, and memory visibility semantics.
-
-The canonical execution island is `SM`. A SM owns the warp pool, exec
-context table, LDS, LSU front-end, SIMD lanes, and SM issue model. Warp
-state includes explicit EXEC mask lifecycle, branch divergence, and
-reconvergence behavior. Memory instructions are formed as decode-time
-`MEMORY_BUNDLE` artifacts before LSU/coalescer issue.
-
-Only hardware caches use the names `L1 cache` and `L2 cache`; capability
-profiles never use `L1` or `L2` as development-stage names.
-
-## Core Outputs
-
-- `ARCH_IR`
-- `MICRO_CONSTRAINT_ESTIMATE_IR`
-- `SYSTEM_CONTRACT_IR`
-- `GOLDEN_CONTRACT_MODEL`
-- `TOOLCHAIN_ARTIFACT_IR`
-- `ASSEMBLY_IR`
-- `PROGRAM_IMAGE_IR`
-- `RUNTIME_LAUNCH_IR`
-- `LOADER_CONTRACT_IR`
-- `TOOLCHAIN_SMOKE_REPORT`
-- `INCREMENTAL_RTL_MAP`
-- `PERF_ATTRIBUTION_GRAPH`
-- `ARCH_REWRITE_PLAN`
-- `NOC_ROUTING_CONTRACT`
-- `SM_TO_MEMORY_FABRIC_IR`
-- `CONTRACT_FRAGMENT_IR`
-- `DRAM_CONTROLLER_CONTRACT`
-- `CACHE_COHERENCE_MODEL`
-- `ATOMIC_EXECUTION_MODEL`
-- `BARRIER_FENCE_CONTRACT`
-
-## Artifact Visibility and Language
-
-Human-facing reports are written in Chinese and use `.zh.md`. They are concise,
-conclusion-oriented, and shown by default.
-
-AI-facing artifacts are written in English and use `.yaml`, `.json`, or
-`.en.md`. They contain the complete structured IR, evidence, traces, reports,
-and patch plans, but are not shown to humans by default.
-
-Default output mode is `FAST_ITERATION`. Full IR expansion is opt-in unless
-`CONTRACT_FREEZE` or `DEBUG_REGRESSION` requires exact fields. Every human report
-must cite its source AI artifacts through `ARTIFACT_MANIFEST_IR` so the system
-can keep complete evidence without forcing people to read it every round.
-
-## Legacy Migration
-
-The former 9-stage top-level GPGPU skills and the old `legacy/` skill archive have been deleted from the active skill namespace. Their useful constraints were migrated into the current owner skills as `legacy_*_constraints.md` references. New work must use the current top-level skills; old truth, validation, memory, RTL, and closure behavior must not reappear as unowned wrappers.
-
-## Shared Assets
-
-Only v5 assets are retained under `shared/`; old top-level examples, old IR references, v4-only schemas, v4-only tables, and v4 test/example directories are deleted and guarded by the validator.
-
-- `shared/schemas/` defines IR and report contracts.
-- `shared/tables/` defines deterministic decision tables.
-- `shared/examples/self_correcting_minimal_simt/` demonstrates the closed loop.
-- `shared/templates/` defines Chinese human report templates and English AI report templates.
-- `shared/tests/` contains regression cases and the asset validator.
-- `shared/flow/` describes the active design flow.
-
-## Fail-Closed Principle
-
-Missing schema, missing table row, hidden default, unsupported enum, forbidden provenance, unmapped contract path, interface mismatch, missing causal evidence, and unowned rewrite triggers must reject or emit `INSUFFICIENT_SKILL_ASSET`. The flow must not fill gaps with model guesses.
+## Source of Truth
+SYSTEM_CONTRACT_IR is the semantic truth.
+GOLDEN_CONTRACT_MODEL is derived only from SYSTEM_CONTRACT_IR.
+RTL must bind to contract paths and negotiated interfaces.
+Runtime/toolchain must derive from SYSTEM_CONTRACT_IR.
+Validation compares golden/toolchain/RTL evidence.
+Rewrite loop only routes patches; it does not invent semantics.

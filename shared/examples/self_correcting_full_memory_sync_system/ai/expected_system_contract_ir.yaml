@@ -1,8 +1,0 @@
-system_id: full_memory_sync_system
-capability_profile: full_memory_sync_system
-contract_fragments: [full_memory_sync_system_fragment]
-memory_model:
-  l2_cache_slice: required
-  mshr: required
-  dram_controller: required
-  visibility: explicit_event

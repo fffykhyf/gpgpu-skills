@@ -1,4 +1,0 @@
-rewrite_id: runtime_launch_patch
-capability_profile: toolchain_runtime_vertical_slice
-patch_type: RUNTIME_PATCH
-required_revalidation_gates: [runtime_launch_smoke, loader_contract_test]

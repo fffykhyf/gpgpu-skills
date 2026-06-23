@@ -1,7 +1,0 @@
-candidate_id: minimal_simt_core_example
-capability_profile: minimal_simt_core
-graph_nodes: [{node_id: simt_core, node_type: simt_core}]
-graph_edges: []
-constraint_proof: {hard_constraints_passed: true}
-verification_profile: {simulator_required: true, rtl_sim_required: true}
-provenance: {preset: MINIMAL_SIMT_CORE}

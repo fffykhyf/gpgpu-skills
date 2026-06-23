@@ -1,7 +1,0 @@
-candidate_id: full_memory_sync_system_example
-capability_profile: full_memory_sync_system
-graph_nodes: [{node_id: fabric, node_type: fabric_router}, {node_id: l2_slice, node_type: l2_cache_slice}, {node_id: dram, node_type: dram_controller}]
-graph_edges: [{from: fabric, to: l2_slice, edge_type: l2_slice_route}, {from: l2_slice, to: dram, edge_type: dram_request}]
-constraint_proof: {hard_constraints_passed: true}
-verification_profile: {simulator_required: true, rtl_sim_required: true, ppa_required_if_performance_target: true}
-provenance: {preset: FULL_MEMORY_SYNC_SYSTEM}

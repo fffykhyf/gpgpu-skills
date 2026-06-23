@@ -1,4 +1,0 @@
-rewrite_id: full_memory_mshr_replay_patch
-capability_profile: full_memory_sync_system
-patch_type: MEMORY_PATH_PATCH
-required_revalidation_gates: [mshr_replay_test, cache_response_routing_test, no_deadlock_watchdog]

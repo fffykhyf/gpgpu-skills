@@ -1,0 +1,313 @@
+table: performance_taxonomy
+version: compact-v1
+merged_sections:
+  - source_file: performance_metric_table.yaml
+    content: |
+      version: v5
+      metric_groups:
+        correctness_only_smoke:
+          required_metrics: [total_cycles]
+          graph_required: false
+        standard_validation:
+          required_metrics: [total_cycles, ipc, issue_utilization, stall_breakdown]
+          graph_required: false
+        performance_gate:
+          required_metrics:
+            - total_cycles
+            - active_cycles
+            - issue_cycles
+            - commit_cycles
+            - ipc
+            - warp_eligible_rate
+            - warp_issue_rate
+            - issue_utilization
+            - pipeline_utilization
+            - stall_breakdown
+            - memory_metrics
+            - scheduler_metrics
+            - backend_perf_evidence
+          graph_required: true
+      warning_thresholds:
+        LOW_ISSUE_UTILIZATION: issue_utilization_below_target
+        HIGH_MEMORY_STALL: memory_wait_dominates_stall_breakdown
+        HIGH_BANK_CONFLICT: shared_bank_conflict_rate_above_target
+        HIGH_COALESCING_AMPLIFICATION: coalesced_transaction_count_above_target
+        HIGH_CACHE_RESERVATION_FAIL: cache_reservation_fail_above_target
+        HIGH_MSHR_FAIL: mshr_fail_above_target
+        HIGH_ICNT_REQ_BACKPRESSURE: icnt_req_backpressure_above_target
+        HIGH_ICNT_RETURN_BACKPRESSURE: icnt_return_backpressure_above_target
+        HIGH_L2_QUEUE_FULL: l2_queue_full_above_target
+        HIGH_DRAM_QUEUE_FULL: dram_queue_full_above_target
+        HIGH_INTERFACE_BACKPRESSURE: interface_backpressure_above_target
+        LOW_OCCUPANCY: ready_warp_count_avg_below_target
+        COUNTER_WITHOUT_PRODUCER: stable_counter_missing_producer_path
+        POWER_USED_AS_PRIMARY_EVIDENCE: power_evidence_without_activity_counter_support
+        PPA_CLAIM_WITHOUT_SYNTHESIS_BUNDLE: missing_utilization_timing_or_power_report
+        POWER_CLAIM_WITHOUT_SAIF: missing_switching_activity_evidence
+        FPGA_CLAIM_WITHOUT_BACKEND_RUN: missing_fpga_or_hw_run_log
+        PERF_COUNTER_UNBOUND_TO_CONTRACT: counter_missing_contract_path
+      xiangshan_weighted_sampling:
+        required_artifacts:
+          - PHASE_FEATURE
+          - CHECKPOINT_PACKAGE
+          - WEIGHTED_PERF_REPORT
+          - TOPDOWN_GPGPU_ATTRIBUTION
+        gate_order:
+          - correctness_diff
+          - representative_checkpoint_replay
+          - weighted_attribution
+        topdown_buckets:
+          - frontend_fetch_decode_idle
+          - warp_scheduling_stall
+          - scoreboard_dependency_stall
+          - memory_pipeline_stall
+          - synchronization_stall
+          - tensor_alu_busy
+          - structural_conflict
+  - source_file: bottleneck_template_table.yaml
+    content: |
+      version: v5
+      templates:
+        memory_latency_template:
+          required_nodes: [cycle_window, warp, memory_request, memory_response, rtl_pipeline_stage, contract_rule]
+          dominant_stall_reasons: [memory_wait]
+        shared_bank_conflict_template:
+          required_nodes: [cycle_window, warp, bank_conflict, rtl_pipeline_stage, contract_rule]
+          dominant_stall_reasons: [bank_conflict]
+        scoreboard_dependency_template:
+          required_nodes: [cycle_window, warp, scoreboard_dependency, register_writeback, contract_rule]
+          dominant_stall_reasons: [scoreboard_dependency]
+        scheduler_underutilization_template:
+          required_nodes: [cycle_window, scheduler_state, scoreboard_dependency, rtl_pipeline_stage, contract_rule]
+          dominant_stall_reasons: [no_ready_warp]
+        barrier_synchronization_template:
+          required_nodes: [cycle_window, barrier_state, warp, rtl_pipeline_stage, contract_rule]
+          dominant_stall_reasons: [barrier_wait]
+        branch_divergence_template:
+          required_nodes: [cycle_window, branch_divergence, active_mask_event, contract_rule]
+          dominant_stall_reasons: [divergence_reconvergence]
+        pipeline_imbalance_template:
+          required_nodes: [cycle_window, rtl_pipeline_stage, bottleneck_category, contract_rule]
+          dominant_stall_reasons: [pipeline_busy]
+        interface_backpressure_template:
+          required_nodes: [cycle_window, interface_backpressure, rtl_pipeline_stage, contract_rule]
+          dominant_stall_reasons: [interface_backpressure]
+        toolchain_mismatch_template:
+          required_nodes: [instruction, toolchain_artifact, contract_rule]
+          dominant_stall_reasons: []
+        runtime_launch_mismatch_template:
+          required_nodes: [runtime_launch_event, toolchain_artifact, contract_rule]
+          dominant_stall_reasons: [runtime_wait]
+  - source_file: perf_attribution_taxonomy.yaml
+    content: |
+      version: v5
+      node_classes:
+        - cycle_window
+        - order_window
+        - block
+        - warp
+        - lane
+        - instruction
+        - pc_event
+        - decode_event
+        - active_mask_event
+        - register_writeback
+        - scoreboard_dependency
+        - scheduler_state
+        - barrier_state
+        - branch_divergence
+        - memory_request
+        - warp_memory_transaction
+        - memory_queue_boundary
+        - memory_response
+        - cache_event
+        - cache_reservation_fail
+        - mshr_event
+        - bank_conflict
+        - coalescing_event
+        - interface_backpressure
+        - noc_packet
+        - l2_queue
+        - dram_queue
+        - return_path
+        - scoreboard_release
+        - counter_manifest
+        - producer_audit
+        - power_derivative
+        - rtl_pipeline_stage
+        - toolchain_artifact
+        - runtime_launch_event
+        - contract_rule
+        - bottleneck_category
+      edge_classes:
+        - caused_by
+        - blocked_by
+        - waits_for
+        - violates
+        - maps_to
+        - amplified_by
+        - precedes
+        - depends_on
+        - routes_to
+        - excludes
+        - produced_by
+        - releases
+      required_chain:
+        performance_claim:
+          - cycle_window
+          - warp
+          - bottleneck_category
+          - counter_manifest
+          - rtl_pipeline_stage
+          - contract_rule
+          - memory_queue_boundary
+        toolchain_claim:
+          - instruction
+          - toolchain_artifact
+          - contract_rule
+      failure_mode: PERF_CAUSAL_CHAIN_MISSING
+  - source_file: toolchain_attribution_taxonomy.yaml
+    content: |
+      version: v5
+      failure_points:
+        ASM_PARSE:
+          root_cause_class: TOOLCHAIN_ROOT_CAUSE
+          root_cause_subclass: ASM_PARSE_FAIL
+        ASM_ENCODE:
+          root_cause_class: TOOLCHAIN_ROOT_CAUSE
+          root_cause_subclass: ASM_ENCODE_MISMATCH
+        DISASM_DECODE:
+          root_cause_class: TOOLCHAIN_ROOT_CAUSE
+          root_cause_subclass: DISASM_ROUNDTRIP_MISMATCH
+        ROUNDTRIP:
+          root_cause_class: TOOLCHAIN_ROOT_CAUSE
+          root_cause_subclass: DISASM_ROUNDTRIP_MISMATCH
+        PROGRAM_IMAGE_LAYOUT:
+          root_cause_class: TOOLCHAIN_ROOT_CAUSE
+          root_cause_subclass: PROGRAM_IMAGE_LAYOUT_MISMATCH
+        ENTRY_SYMBOL_RESOLUTION:
+          root_cause_class: TOOLCHAIN_ROOT_CAUSE
+          root_cause_subclass: ENTRY_SYMBOL_RESOLVE_MISMATCH
+        LOADER_INIT:
+          root_cause_class: TOOLCHAIN_ROOT_CAUSE
+          root_cause_subclass: LOADER_CONTRACT_MISMATCH
+        RUNTIME_ARG_ENCODING:
+          root_cause_class: RUNTIME_LAUNCH_ROOT_CAUSE
+          root_cause_subclass: ARG_BUFFER_ENCODING_MISMATCH
+        RTL_FETCH:
+          root_cause_class: RTL_FUNCTIONAL_ROOT_CAUSE
+          root_cause_subclass: PC_UPDATE_MISMATCH
+        RTL_DECODE:
+          root_cause_class: RTL_FUNCTIONAL_ROOT_CAUSE
+          root_cause_subclass: DECODE_MISMATCH
+      checked_chain_fields:
+        - assembly_ir_hash
+        - assembler_output_hash
+        - disassembly_hash
+        - program_image_hash
+        - loader_contract_hash
+        - runtime_launch_hash
+        - rtl_first_fetch_hash
+  - source_file: stall_reason_taxonomy.yaml
+    content: |
+      version: v5
+      stall_reasons:
+        idle_control:
+          root_cause_family: SCHEDULER_ROOT_CAUSE
+        ibuffer_empty:
+          root_cause_family: SCHEDULER_ROOT_CAUSE
+        simt_redirect:
+          root_cause_family: SCHEDULER_ROOT_CAUSE
+        scoreboard_wait:
+          root_cause_family: SCHEDULER_ROOT_CAUSE
+        pipe_unavailable:
+          root_cause_family: PERFORMANCE_ARCH_ROOT_CAUSE
+        membar_wait:
+          root_cause_family: SYNC_ATOMIC_ROOT_CAUSE
+        atomic_wait:
+          root_cause_family: SYNC_ATOMIC_ROOT_CAUSE
+        shared_bank_conflict:
+          root_cause_family: MEMORY_SYSTEM_ROOT_CAUSE
+        coalescing_stall:
+          root_cause_family: MEMORY_SYSTEM_ROOT_CAUSE
+        cache_miss:
+          root_cause_family: CACHE_MSHR_ROOT_CAUSE
+        cache_reservation_fail:
+          root_cause_family: CACHE_MSHR_ROOT_CAUSE
+        mshr_fail:
+          root_cause_family: CACHE_MSHR_ROOT_CAUSE
+        icnt_req_backpressure:
+          root_cause_family: FABRIC_ROOT_CAUSE
+        icnt_return_backpressure:
+          root_cause_family: FABRIC_ROOT_CAUSE
+        l2_queue_full:
+          root_cause_family: MEMORY_SYSTEM_ROOT_CAUSE
+        dram_queue_full:
+          root_cause_family: DRAM_ROOT_CAUSE
+        dram_timing_wait:
+          root_cause_family: DRAM_ROOT_CAUSE
+        return_path_stall:
+          root_cause_family: FABRIC_ROOT_CAUSE
+        scoreboard_release_wait:
+          root_cause_family: SCHEDULER_ROOT_CAUSE
+        scoreboard_dependency:
+          root_cause_family: SCHEDULER_ROOT_CAUSE
+        no_ready_warp:
+          root_cause_family: SCHEDULER_ROOT_CAUSE
+        memory_wait:
+          root_cause_family: MEMORY_SYSTEM_ROOT_CAUSE
+        lsq_full:
+          root_cause_family: MEMORY_SYSTEM_ROOT_CAUSE
+        coalescer_wait:
+          root_cause_family: MEMORY_SYSTEM_ROOT_CAUSE
+        bank_conflict:
+          root_cause_family: MEMORY_SYSTEM_ROOT_CAUSE
+        barrier_wait:
+          root_cause_family: SCHEDULER_ROOT_CAUSE
+        divergence_reconvergence:
+          root_cause_family: PERFORMANCE_ARCH_ROOT_CAUSE
+        register_file_port_conflict:
+          root_cause_family: PERFORMANCE_ARCH_ROOT_CAUSE
+        pipeline_busy:
+          root_cause_family: PERFORMANCE_ARCH_ROOT_CAUSE
+        interface_backpressure:
+          root_cause_family: RTL_INTERFACE_ROOT_CAUSE
+        runtime_wait:
+          root_cause_family: RUNTIME_LAUNCH_ROOT_CAUSE
+        unknown:
+          root_cause_family: INSUFFICIENT_TRACE_EVIDENCE
+  - source_file: stall_reason_taxonomy.md
+    content: |
+      # Stall Reason Taxonomy
+      
+      Stable stall and non-issue reasons for GPGPU skill outputs.
+      
+      | Reason | Owner stage | Root-cause family | Required evidence |
+      |---|---|---|---|
+      | `idle_control` | scheduler | SCHEDULER_ROOT_CAUSE | no eligible warp or control redirect evidence |
+      | `ibuffer_empty` | scheduler/fetch | SCHEDULER_ROOT_CAUSE | warp valid plus empty ibuffer |
+      | `simt_redirect` | SIMT | SCHEDULER_ROOT_CAUSE | SIMT top PC mismatch or redirect event |
+      | `scoreboard_wait` | scoreboard | SCHEDULER_ROOT_CAUSE | collision result and pending destination |
+      | `pipe_unavailable` | execution pipe | PERFORMANCE_ARCH_ROOT_CAUSE | selected pipe full or unavailable |
+      | `barrier_wait` | sync | SYNC_ATOMIC_ROOT_CAUSE | barrier arrival mask and release condition |
+      | `membar_wait` | sync | SYNC_ATOMIC_ROOT_CAUSE | fence scope, drain/visibility condition |
+      | `atomic_wait` | sync | SYNC_ATOMIC_ROOT_CAUSE | atomic completion token or outstanding count |
+      | `shared_bank_conflict` | shared memory | MEMORY_SYSTEM_ROOT_CAUSE | bank mapping and conflict count |
+      | `coalescing_stall` | coalescer | MEMORY_SYSTEM_ROOT_CAUSE | transaction amplification or access queue wait |
+      | `cache_miss` | cache | CACHE_MSHR_ROOT_CAUSE | HIT/MISS/SECTOR_MISS status |
+      | `cache_reservation_fail` | cache/MSHR | CACHE_MSHR_ROOT_CAUSE | reservation fail reason |
+      | `mshr_fail` | MSHR | CACHE_MSHR_ROOT_CAUSE | MSHR allocation or merge failure |
+      | `icnt_req_backpressure` | ICNT request path | FABRIC_ROOT_CAUSE | request `has_buffer` false or push stall |
+      | `icnt_return_backpressure` | ICNT return path | FABRIC_ROOT_CAUSE | return FIFO or memory-to-shader stall |
+      | `l2_queue_full` | L2/subpartition | MEMORY_SYSTEM_ROOT_CAUSE | named L2 queue occupancy |
+      | `dram_queue_full` | DRAM ingress | DRAM_ROOT_CAUSE | L2-to-DRAM or DRAM queue full |
+      | `dram_timing_wait` | DRAM scheduler | DRAM_ROOT_CAUSE | timing blocker or row/bank scheduling evidence |
+      | `return_path_stall` | response path | FABRIC_ROOT_CAUSE | return queue or response FIFO full |
+      | `scoreboard_release_wait` | writeback/release | SCHEDULER_ROOT_CAUSE | response arrived but destination not released |
+source_files:
+  - performance_metric_table.yaml
+  - bottleneck_template_table.yaml
+  - perf_attribution_taxonomy.yaml
+  - toolchain_attribution_taxonomy.yaml
+  - stall_reason_taxonomy.yaml
+  - stall_reason_taxonomy.md

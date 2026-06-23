@@ -1,0 +1,22 @@
+active_design_skills:
+  - gpgpu-architecture
+  - gpgpu-contract
+  - gpgpu-toolchain-runtime
+  - gpgpu-rtl
+  - gpgpu-validation
+  - gpgpu-loop
+
+optional_contract_packs:
+  - memory_path
+  - interconnect
+  - atomic_sync
+
+reader_skill:
+  - reader
+
+inactive_archives:
+  - docs/archive/reference-raw
+  - docs/archive/reference-summaries
+  - docs/archive/schema-archive
+  - docs/archive/table-archive
+  - docs/archive/example-archive

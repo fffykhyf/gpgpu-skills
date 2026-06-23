@@ -1,7 +1,0 @@
-candidate_id: single_sm_warp_pipeline_example
-capability_profile: single_sm_warp_pipeline
-graph_nodes: [{node_id: sm, node_type: sm}, {node_id: scoreboard, node_type: hazard_tracker}]
-graph_edges: []
-constraint_proof: {hard_constraints_passed: true}
-verification_profile: {simulator_required: true, rtl_sim_required: true}
-provenance: {preset: SINGLE_SM_WARP_PIPELINE}

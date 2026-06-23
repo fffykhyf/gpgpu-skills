@@ -1,7 +1,0 @@
-candidate_id: toolchain_runtime_vertical_slice_example
-capability_profile: toolchain_runtime_vertical_slice
-graph_nodes: [{node_id: runtime_launch, node_type: launch_abi}, {node_id: loader, node_type: loader}]
-graph_edges: []
-constraint_proof: {hard_constraints_passed: true}
-verification_profile: {runtime_launch_required: true, rtl_sim_required: true}
-provenance: {preset: TOOLCHAIN_RUNTIME_VERTICAL_SLICE}

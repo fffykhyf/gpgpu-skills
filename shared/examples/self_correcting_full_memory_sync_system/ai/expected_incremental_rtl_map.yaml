@@ -1,3 +1,0 @@
-capability_profile: full_memory_sync_system
-modules: [fabric_router, l2_cache_slice, l2_mshr, cache_response_router, dram_controller, trace_adapter]
-required_partial_sim_cases: [l2_slice_route_test, mshr_replay_test, no_deadlock_watchdog, dram_bank_conflict]

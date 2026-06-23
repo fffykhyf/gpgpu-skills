@@ -1,3 +1,0 @@
-capability_profile: toolchain_runtime_vertical_slice
-modules: [loader, runtime_launch_adapter, simt_core]
-required_partial_sim_cases: [runtime_launch_smoke, memory_dump_compare]

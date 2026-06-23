@@ -1,0 +1,49 @@
+modes:
+  FAST_ITERATION:
+    human_outputs:
+      - ITERATION_SUMMARY.zh.md
+    ai_outputs:
+      - RUN_STATE.yaml
+      - touched_delta_files_only
+    forbidden_by_default:
+      - full_root_cause_report
+      - full_perf_attribution_graph
+      - full_system_contract_dump_unless_changed
+
+  CONTRACT_FREEZE:
+    human_outputs:
+      - CONTRACT_FREEZE_SUMMARY.zh.md
+    ai_outputs:
+      - RUN_STATE.yaml
+      - SYSTEM_CONTRACT_IR.yaml
+      - GOLDEN_CONTRACT_MODEL.yaml
+      - ARTIFACT_MANIFEST.yaml
+
+  DEBUG_REGRESSION:
+    human_outputs:
+      - DEBUG_SUMMARY.zh.md
+      - PATCH_CARD.zh.md
+    ai_outputs:
+      - RUN_STATE.yaml
+      - FIRST_DIVERGENCE_REPORT.yaml
+      - MISMATCH_PACKAGE.yaml
+      - ROOT_CAUSE_REPORT.yaml
+      - REWRITE_DECISION_REPORT.yaml
+
+  PERF_ANALYSIS:
+    human_outputs:
+      - ITERATION_SUMMARY.zh.md
+    ai_outputs:
+      - RUN_STATE.yaml
+      - PERFORMANCE_METRIC_IR.yaml
+      - PERF_ATTRIBUTION_GRAPH.yaml
+      - STALL_REASON_MATRIX.yaml
+
+  RELEASE_CHECK:
+    human_outputs:
+      - REGRESSION_SUMMARY.zh.md
+    ai_outputs:
+      - RUN_STATE.yaml
+      - PASS_EVIDENCE_REPORT.yaml
+      - REGRESSION_FINGERPRINT.yaml
+      - ARTIFACT_MANIFEST.yaml

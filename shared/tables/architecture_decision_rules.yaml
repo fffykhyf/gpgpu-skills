@@ -1,0 +1,330 @@
+table: architecture_decision_rules
+version: compact-v1
+merged_sections:
+  - source_file: architecture_preset_library.yaml
+    content: |
+      table: architecture_preset_library
+      version: v5
+      selection_rules:
+        - rule_id: PROFILE_MINIMAL_SIMT_CORE
+          priority: 5
+          match:
+            capability_profile: minimal_simt_core
+          prefer_preset: MINIMAL_SIMT_CORE
+          rationale: The smallest profile keeps one SM and one warp with a simple global memory path.
+        - rule_id: PROFILE_SINGLE_SM_WARP_PIPELINE
+          priority: 10
+          match:
+            capability_profile: single_sm_warp_pipeline
+          prefer_preset: SINGLE_SM_WARP_PIPELINE
+          rationale: Single-SM pipeline work requires resident multi-warp scheduling, scoreboard, divergence, and LSU hooks.
+        - rule_id: PROFILE_TOOLCHAIN_RUNTIME_VERTICAL_SLICE
+          priority: 15
+          match:
+            capability_profile: toolchain_runtime_vertical_slice
+          prefer_preset: TOOLCHAIN_RUNTIME_VERTICAL_SLICE
+          rationale: End-to-end credibility requires assembler, disassembler, program image, loader, runtime launch, RTL smoke, and golden dump evidence.
+        - rule_id: PROFILE_MULTI_SM_MEMORY_PATH
+          priority: 20
+          match:
+            capability_profile: multi_sm_memory_path
+          prefer_preset: MULTI_SM_MEMORY_PATH
+          rationale: Multi-SM memory work requires SM_ID routing, shared memory/LDS, coalescer, response restore, and L1 cache or global adapter policy.
+        - rule_id: PROFILE_FULL_MEMORY_SYNC_SYSTEM
+          priority: 25
+          match:
+            capability_profile: full_memory_sync_system
+          prefer_preset: FULL_MEMORY_SYNC_SYSTEM
+          rationale: Full memory and synchronization work requires fabric, L2 cache slice, MSHR, DRAM, atomic, fence, barrier, and memory visibility contracts.
+        - rule_id: VALIDATION_TARGET_VERTICAL_SLICE
+          priority: 30
+          match:
+            validation_target_contains:
+              - compile_kernel_to_program_image
+              - rtl_sim_smoke_test
+              - memory_dump_golden_check
+          prefer_preset: TOOLCHAIN_RUNTIME_VERTICAL_SLICE
+          rationale: Toolchain, runtime, RTL smoke, and memory dump validation require a runnable vertical slice.
+        - rule_id: TEACHING_ONLY_NO_RUNTIME_FRONTEND
+          priority: 40
+          match:
+            user_target: teaching_only
+            runtime_requirement: absent
+            frontend_requirement: absent
+            vertical_slice_requirement: absent
+          prefer_preset: MINIMAL_SIMT_CORE
+          rationale: Teaching-only explanations should minimize architecture surface area when no runtime or frontend path is required.
+      presets:
+        - preset_id: MINIMAL_SIMT_CORE
+          capability_profile: minimal_simt_core
+          description: Minimal SIMT core with one SM and one resident warp for basic warp instruction execution.
+          parameters:
+            sm_count: 1
+            warp_count: 1
+            warp_size: 8
+            memory_path: simple_global_memory
+            runtime_required: false
+            enabled_subsystems:
+              - simt_core
+              - warp_scheduler
+              - simple_global_memory
+            isa_profile: RV32I_SIMT_MINIMAL
+            launch_abi: none_or_testbench
+          provenance: DESIGN_PRESET
+        - preset_id: SINGLE_SM_WARP_PIPELINE
+          capability_profile: single_sm_warp_pipeline
+          description: Single SM with multiple resident warps, scoreboard, divergence, and LSU base path.
+          parameters:
+            sm_count: 1
+            warp_count: multiple
+            warp_size: 32
+            warp_slots_per_sm: 4
+            scoreboard: required
+            divergence: required
+            lsu: required
+            enabled_subsystems:
+              - simt_core
+              - warp_scheduler
+              - scoreboard
+              - divergence_unit
+              - lsu
+            memory_hierarchy:
+              mode: direct_global_adapter
+              l1_cache_optional: true
+            isa_profile: WARP_SIMT_BASE
+            launch_abi: SIMPLE_MMIO_DOORBELL_V1
+          provenance: DESIGN_PRESET
+        - preset_id: TOOLCHAIN_RUNTIME_VERTICAL_SLICE
+          capability_profile: toolchain_runtime_vertical_slice
+          description: End-to-end prototype with assembler, disassembler, program image, loader, runtime launch, RTL smoke, and golden dump evidence.
+          parameters:
+            assembler: required
+            disassembler: required
+            program_image: required
+            loader: required
+            runtime_launch: required
+            rtl_smoke: required
+            golden_dump: required
+            sm_count: 1
+            warp_size: 8
+            warp_slots_per_sm: 2
+            enabled_subsystems:
+              - simt_core
+              - assembler
+              - disassembler
+              - program_image
+              - loader
+              - runtime_launch
+              - rtl_smoke
+              - golden_dump
+            isa_profile: VERTICAL_SLICE_SIMT_BASE
+            launch_abi: SIMPLE_MMIO_DOORBELL_V1
+          non_goals: [coherent_cache, full_cuda, virtual_memory, tensor_core, dram_timing_accuracy]
+          provenance: DESIGN_PRESET
+        - preset_id: MULTI_SM_MEMORY_PATH
+          capability_profile: multi_sm_memory_path
+          description: Multi-SM memory path with shared memory/LDS, coalescer, L1 cache or global adapter, response restore, and SM_ID routing.
+          parameters:
+            sm_count: multiple
+            default_sm_count: 4
+            warp_size: 32
+            warp_slots_per_sm: 8
+            shared_memory: required
+            coalescer: required
+            l1_cache_or_global_adapter: required
+            response_restore: required
+            sm_id_routing: required
+            enabled_subsystems:
+              - simt_core
+              - warp_scheduler
+              - scoreboard
+              - divergence_unit
+              - lsu
+              - shared_memory
+              - coalescer
+              - l1_cache_or_global_adapter
+              - response_restore
+              - sm_id_routing
+            memory_hierarchy:
+              l1_cache_or_global_adapter: direct_global_adapter
+              l2_slices: optional
+            isa_profile: WARP_SIMT_MEMORY_PATH
+            launch_abi: SIMPLE_MMIO_DOORBELL_V1
+          provenance: DESIGN_PRESET
+        - preset_id: FULL_MEMORY_SYNC_SYSTEM
+          capability_profile: full_memory_sync_system
+          description: Full memory and synchronization system with fabric, L2 cache slice, MSHR, DRAM, atomic, fence, barrier, and visibility model.
+          parameters:
+            sm_count: multiple
+            default_sm_count: 4
+            warp_size: 32
+            warp_slots_per_sm: 8
+            fabric: required
+            l2_cache_slice: required
+            mshr: required
+            dram_controller: required
+            atomic_unit: required
+            fence_unit: required
+            barrier_unit: required
+            memory_visibility_model: required
+            enabled_subsystems:
+              - simt_core
+              - warp_scheduler
+              - scoreboard
+              - divergence_unit
+              - lsu
+              - shared_memory
+              - coalescer
+              - l1_cache_or_global_adapter
+              - interconnect_fabric
+              - l2_cache_slice
+              - dram_controller
+              - atomic_unit
+              - fence_unit
+              - barrier_unit
+              - memory_visibility_model
+            memory_hierarchy:
+              l1_cache_or_global_adapter: private_l1_cache_or_direct_global_adapter
+              l2_cache_slice: required
+              mshr: required
+              dram_channels: 1
+            synchronization:
+              atomic_unit: required
+              fence_unit: required
+              barrier_unit: required
+              wsync_drain_unit: required
+            isa_profile: WARP_SIMT_FULL_MEMORY_SYNC
+            launch_abi: SIMPLE_MMIO_DOORBELL_V1
+          provenance: DESIGN_PRESET
+      unsupported_presets: [FPGA_SMALL_GPGPU, TENSOR_EXTENDED_GPGPU]
+  - source_file: hard_constraint_table.yaml
+    content: |
+      table: hard_constraint_table
+      version: v4
+      constraints:
+        - id: WARP_WIDTH_MATCHES_ACTIVE_MASK
+          expression: warp_size == active_mask_width
+          on_fail: HARD_CONSTRAINT_FAIL
+        - id: ISSUE_WIDTH_PORT_LIMIT
+          expression: issue_width <= execution_unit_ports
+          on_fail: HARD_CONSTRAINT_FAIL
+        - id: MEMORY_REQUEST_WIDTH_LIMIT
+          expression: memory_request_width_bits <= global_interface_bits
+          on_fail: HARD_CONSTRAINT_FAIL
+        - id: WARP_SIZE_SUPPORTED
+          expression: warp_size in [4, 8, 16, 32]
+          on_fail: HARD_CONSTRAINT_FAIL
+        - id: PRESET_SUPPORTS_REQUIRED_FEATURES
+          expression: required_features subset_of preset.supported_features
+          on_fail: UNSUPPORTED_REQUIREMENT
+  - source_file: quality_target_table.yaml
+    content: |
+      table: quality_target_table
+      version: v4
+      targets:
+        teaching_minimal: {priority: clarity, ppa_weight: low, verification_weight: high}
+        fpga_small: {priority: area, ppa_weight: high, verification_weight: high}
+        research_prototype: {priority: extensibility, ppa_weight: medium, verification_weight: high}
+  - source_file: micro_constraint_estimator_table.yaml
+    content: |
+      version: v5
+      estimators:
+        area_estimate:
+          inputs: [sm_count, warp_slots_per_sm, warp_size, registers_per_thread, integer_width_bits, shared_memory_bytes_per_sm, cache_size_bytes_per_sm, issue_width, pipeline_stage_count]
+          output: area_estimate
+          rule:
+            deterministic: true
+            units: relative_area_units
+            formulas:
+              register_file_area_units: "sm_count * warp_slots_per_sm * warp_size * registers_per_thread * integer_width_bits"
+              shared_memory_area_units: "sm_count * shared_memory_bytes_per_sm"
+              cache_area_units: "sm_count * cache_size_bytes_per_sm"
+              pipeline_area_units: "sm_count * issue_width * pipeline_stage_count"
+              total_area_units: "register_file_area_units + shared_memory_area_units + cache_area_units + pipeline_area_units"
+            classification:
+              small_fpga: "total_area_units <= small_fpga_area_budget_units"
+              area_risk: "total_area_units > small_fpga_area_budget_units"
+          failure_mode: UNREALIZABLE_MICRO_CONSTRAINT
+        memory_pressure_estimate:
+          inputs: [load_store_mix, expected_memory_latency_cycles, coalescing_efficiency, warp_occupancy_bound]
+          output: memory_pressure_estimate
+          rule:
+            deterministic: true
+            formulas:
+              memory_ops_per_instruction: "load_fraction + store_fraction"
+              effective_latency_hiding_warps: "max(1, warp_occupancy_bound.max_resident_warps)"
+              unhidden_memory_pressure_score: "expected_memory_latency_cycles * memory_ops_per_instruction / (effective_latency_hiding_warps * max(coalescing_efficiency, 0.01))"
+            classification:
+              low: "unhidden_memory_pressure_score < 4"
+              medium: "unhidden_memory_pressure_score >= 4 and unhidden_memory_pressure_score < 16"
+              high: "unhidden_memory_pressure_score >= 16"
+          failure_mode: MEMORY_PRESSURE_UNBOUNDED
+        warp_occupancy_bound:
+          inputs: [register_file_entries, registers_per_thread, warp_size, shared_memory_bytes_per_sm, shared_memory_bytes_per_block, warp_slots_per_sm]
+          output: warp_occupancy_bound
+          rule:
+            deterministic: true
+            formulas:
+              register_limited_warps: "floor(register_file_entries / (registers_per_thread * warp_size))"
+              shared_memory_limited_warps: "warp_slots_per_sm if shared_memory_bytes_per_block == 0 else floor(shared_memory_bytes_per_sm / shared_memory_bytes_per_block)"
+              max_resident_warps: "min(warp_slots_per_sm, register_limited_warps, shared_memory_limited_warps)"
+              limiting_resource: "argmin({warp_slots_per_sm, register_limited_warps, shared_memory_limited_warps})"
+          failure_mode: OCCUPANCY_BOUND_FAIL
+        minimum_bandwidth_need:
+          inputs: [load_store_mix, bytes_per_memory_op, target_throughput_ops_per_cycle, coalescing_efficiency]
+          output: minimum_bandwidth_need
+          rule:
+            deterministic: true
+            formulas:
+              memory_ops_per_cycle: "target_throughput_ops_per_cycle * (load_fraction + store_fraction)"
+              bytes_per_cycle: "memory_ops_per_cycle * bytes_per_memory_op / max(coalescing_efficiency, 0.01)"
+          failure_mode: BANDWIDTH_CONSTRAINT_FAIL
+  - source_file: config_ownership_table.yaml
+    content: |
+      table: config_ownership_table
+      version: v5
+      parameters:
+        warp_size: {owner: gpgpu-contract, visibility: hw_sw_abi, consumers: [runtime, rtl, sim, validation]}
+        warp_slots_per_sm: {owner: gpgpu-contract, visibility: hardware_private, consumers: [rtl, sim, validation]}
+        trace_enable: {owner: gpgpu-validation, visibility: debug_only, consumers: [validation]}
+        simulator_seed: {owner: gpgpu-contract, visibility: simulator_private, consumers: [sim]}
+        test_timeout_cycles: {owner: gpgpu-validation, visibility: test_only, consumers: [validation]}
+        total_threads: {owner: gpgpu-contract, visibility: hw_sw_abi, consumers: [runtime, validation]}
+        block_dim: {owner: gpgpu-contract, visibility: hw_sw_abi, consumers: [runtime, validation]}
+        base_data_addr: {owner: gpgpu-contract, visibility: test_only, consumers: [runtime, validation]}
+        base_a: {owner: gpgpu-contract, visibility: test_only, consumers: [runtime, validation]}
+        base_b: {owner: gpgpu-contract, visibility: test_only, consumers: [runtime, validation]}
+        base_c: {owner: gpgpu-contract, visibility: test_only, consumers: [runtime, validation]}
+        memory_dump_range: {owner: gpgpu-validation, visibility: test_only, consumers: [validation]}
+        finish_delay_cycles: {owner: gpgpu-rtl, visibility: test_only, consumers: [rtl, validation]}
+      on_missing_owner: CONFIG_OWNER_MISSING
+  - source_file: requirement_owner_table.yaml
+    content: |
+      table: requirement_owner_table
+      version: v5
+      owners:
+        simt_execution: gpgpu-contract
+        launch_abi: gpgpu-contract
+        canonical_state: gpgpu-contract
+        toolchain_artifacts: gpgpu-toolchain-runtime
+        assembler: gpgpu-toolchain-runtime
+        disassembler: gpgpu-toolchain-runtime
+        program_image: gpgpu-toolchain-runtime
+        runtime_launch_artifact: gpgpu-toolchain-runtime
+        loader_contract: gpgpu-toolchain-runtime
+        artifact_mapping: gpgpu-rtl
+        runtime_launch: gpgpu-toolchain-runtime
+        memory_ordering: gpgpu-contract
+        rtl_trace: gpgpu-validation
+        closure_verdict: gpgpu-loop
+        source_of_truth_generation: gpgpu-contract
+        source_of_truth_derivation_check: gpgpu-toolchain-runtime
+        software_stack_contract: gpgpu-validation
+        vertical_slice_validation: gpgpu-validation
+source_files:
+  - architecture_preset_library.yaml
+  - hard_constraint_table.yaml
+  - quality_target_table.yaml
+  - micro_constraint_estimator_table.yaml
+  - config_ownership_table.yaml
+  - requirement_owner_table.yaml

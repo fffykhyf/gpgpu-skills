@@ -1,7 +1,0 @@
-candidate_id: multi_sm_memory_path_example
-capability_profile: multi_sm_memory_path
-graph_nodes: [{node_id: sm_array, node_type: sm_array}, {node_id: coalescer, node_type: memory_coalescer}]
-graph_edges: [{from: sm_array, to: coalescer, edge_type: memory_request}]
-constraint_proof: {hard_constraints_passed: true}
-verification_profile: {simulator_required: true, rtl_sim_required: true, module_unit_required: true}
-provenance: {preset: MULTI_SM_MEMORY_PATH}

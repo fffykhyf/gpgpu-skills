@@ -1,3 +1,0 @@
-capability_profile: full_memory_sync_system
-modules: [atomic_unit, fence_drain_unit, barrier_unit, wsync_drain_unit, trace_adapter]
-required_partial_sim_cases: [atomic_same_address_test, fence_visibility_test, barrier_phase_advance, wsync_prior_work_drain]

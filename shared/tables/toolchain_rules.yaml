@@ -1,0 +1,200 @@
+table: toolchain_rules
+version: compact-v1
+merged_sections:
+  - source_file: toolchain_artifact_generation_table.yaml
+    content: |
+      table: toolchain_artifact_generation_table
+      version: v5
+      generation_rules:
+        isa_model:
+          source: SYSTEM_CONTRACT_IR.isa_model
+          derived_artifacts:
+            - tools/isa.py
+            - tools/encoding_table.py
+            - tools/assembler.py
+            - tools/disassembler.py
+            - rtl/defines.svh
+            - docs/isa.md
+          gate: hash_and_semantic_equivalence_required
+        launch_model:
+          source: SYSTEM_CONTRACT_IR.launch_model
+          derived_artifacts:
+            - tools/runtime_launch.py
+            - docs/launch_abi.md
+          gate: semantic_equivalence_required
+        program_image_model:
+          source: SYSTEM_CONTRACT_IR.launch_model.program_image_format
+          derived_artifacts:
+            - tools/program_image.py
+            - tools/loader.py
+            - docs/program_image_format.md
+          gate: byte_layout_equivalence_required
+        loader_model:
+          source: SYSTEM_CONTRACT_IR.launch_model.loader_contract
+          derived_artifacts:
+            - tools/loader.py
+            - rtl/program_image_loader_interface.sv
+          gate: semantic_equivalence_required
+  - source_file: assembly_syntax_table.yaml
+    content: |
+      table: assembly_syntax_table
+      version: v5
+      syntax_sources:
+        register_naming: SYSTEM_CONTRACT_IR.isa_model.assembly_syntax.register_naming
+        immediate_formats: SYSTEM_CONTRACT_IR.isa_model.assembly_syntax.immediate_formats
+        label_syntax: SYSTEM_CONTRACT_IR.isa_model.assembly_syntax.label_syntax
+        section_syntax: SYSTEM_CONTRACT_IR.isa_model.assembly_syntax.section_syntax
+        comment_syntax: SYSTEM_CONTRACT_IR.isa_model.assembly_syntax.comment_syntax
+      accepted_source_kinds:
+        - hand_written_asm
+        - lowered_frontend
+      required_sections:
+        - .text
+        - .data
+      optional_sections:
+        - .rodata
+      failure_modes:
+        parse: ASM_PARSE_FAIL
+        unsupported_instruction: UNSUPPORTED_INSTRUCTION_BEHAVIOR_MISMATCH
+  - source_file: instruction_encoding_derivation_table.yaml
+    content: |
+      table: instruction_encoding_derivation_table
+      version: v5
+      sources:
+        opcodes: SYSTEM_CONTRACT_IR.isa_model.opcodes
+        instruction_encodings: SYSTEM_CONTRACT_IR.isa_model.instruction_encodings
+        operand_fields: SYSTEM_CONTRACT_IR.isa_model.operand_fields
+        decode_classes: SYSTEM_CONTRACT_IR.isa_model.decode_classes
+      required_equivalence_hashes:
+        - isa_model_hash
+        - tools_isa_table_hash
+        - assembler_table_hash
+        - disassembler_table_hash
+        - rtl_defines_hash
+      gates:
+        opcode_equivalence:
+          failure_mode: ISA_ENCODING_DRIFT
+        field_layout_equivalence:
+          failure_mode: ISA_ENCODING_DRIFT
+        unsupported_behavior_equivalence:
+          failure_mode: UNSUPPORTED_INSTRUCTION_BEHAVIOR_MISMATCH
+  - source_file: program_image_format_table.yaml
+    content: |
+      table: program_image_format_table
+      version: v5
+      source: SYSTEM_CONTRACT_IR.launch_model.program_image_format
+      segments:
+        text:
+          permissions: rx
+          source_rule: text_segment_rule
+        data:
+          permissions: rw
+          source_rule: data_segment_rule
+        rodata:
+          permissions: r
+          source_rule: data_segment_rule
+      metadata:
+        required_hashes:
+          - isa_model_hash
+          - launch_model_hash
+          - program_image_hash
+      entry_symbol_resolution:
+        source_rule: entry_symbol_rule
+      failure_modes:
+        layout: PROGRAM_IMAGE_LAYOUT_FAIL
+        entry: ENTRY_SYMBOL_RESOLVE_FAIL
+  - source_file: runtime_launch_binding_table.yaml
+    content: |
+      table: runtime_launch_binding_table
+      version: v5
+      source: SYSTEM_CONTRACT_IR.launch_model
+      bindings:
+        launch_abi: launch_model.abi
+        grid_block_thread_mapping: launch_model.grid_block_thread_mapping
+        kernel_entry: launch_model.kernel_entry
+        argument_buffer_layout: launch_model.argument_buffer_layout
+        completion_fault_observation: launch_model.completion_fault_observation
+      csr_write_sequence:
+        - kernel_entry
+        - arg_base
+        - grid_dim
+        - block_dim
+        - start
+      completion_observation:
+        - done_bit
+        - fault_bit
+        - status
+      failure_modes:
+        arg_encoding: RUNTIME_ARG_ENCODING_FAIL
+        entry: ENTRY_SYMBOL_RESOLVE_FAIL
+  - source_file: loader_contract_table.yaml
+    content: |
+      table: loader_contract_table
+      version: v5
+      source: SYSTEM_CONTRACT_IR.launch_model.loader_contract
+      rules:
+        imem_load_rule: launch_model.loader_contract.imem_load_rule
+        dmem_load_rule: launch_model.loader_contract.dmem_load_rule
+        entry_pc_rule: launch_model.loader_contract.entry_pc_rule
+        reset_visibility: launch_model.loader_contract.reset_visibility
+        program_image_format: launch_model.program_image_format
+      rtl_loader_interfaces:
+        - program_image_loader_interface
+        - instruction_memory_init
+        - runtime_arg_buffer_interface
+      failure_modes:
+        loader_contract: LOADER_CONTRACT_FAIL
+        image_layout: PROGRAM_IMAGE_LAYOUT_FAIL
+  - source_file: toolchain_validation_gate_table.yaml
+    content: |
+      table: toolchain_validation_gate_table
+      version: v5
+      gates:
+        isa_table_derivation_smoke:
+          input: SYSTEM_CONTRACT_IR
+          output: TOOLCHAIN_ARTIFACT_IR
+          fail: ISA_TABLE_DERIVATION_FAIL
+        assembler_parse_smoke:
+          input: input_kernel.asm
+          output: ASSEMBLY_IR
+          fail: ASM_PARSE_FAIL
+        assembler_smoke:
+          input: ASSEMBLY_IR
+          output: encoded_bytes
+          fail: ASM_ENCODE_FAIL
+        disassembler_decode_smoke:
+          input: encoded_bytes
+          output: DISASSEMBLY_IR
+          fail: DISASM_DECODE_FAIL
+        disassembler_roundtrip:
+          input: encoded_bytes
+          output: DISASSEMBLY_IR
+          fail: DISASM_ROUNDTRIP_FAIL
+        program_image_smoke:
+          input: encoded_bytes
+          output: PROGRAM_IMAGE_IR
+          fail: PROGRAM_IMAGE_LAYOUT_FAIL
+        entry_symbol_resolve_smoke:
+          input: PROGRAM_IMAGE_IR
+          output: entry_pc
+          fail: ENTRY_SYMBOL_RESOLVE_FAIL
+        runtime_launch_smoke:
+          input: PROGRAM_IMAGE_IR
+          output: RUNTIME_LAUNCH_IR
+          fail: RUNTIME_ARG_ENCODING_FAIL
+        loader_smoke:
+          input: PROGRAM_IMAGE_IR
+          output: LOADER_CONTRACT_IR
+          fail: LOADER_CONTRACT_FAIL
+        golden_image_execution_smoke:
+          input: PROGRAM_IMAGE_IR
+          output: expected_memory_dump
+          fail: GOLDEN_IMAGE_EXECUTION_FAIL
+source_files:
+  - toolchain_artifact_generation_table.yaml
+  - assembly_syntax_table.yaml
+  - instruction_encoding_derivation_table.yaml
+  - program_image_format_table.yaml
+  - runtime_launch_binding_table.yaml
+  - loader_contract_table.yaml
+  - toolchain_validation_gate_table.yaml

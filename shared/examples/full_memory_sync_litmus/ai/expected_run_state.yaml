@@ -1,0 +1,21 @@
+run_id: full_memory_sync_litmus
+mode: DEBUG_REGRESSION
+active_skills:
+  - gpgpu-contract
+  - gpgpu-rtl
+  - gpgpu-validation
+  - gpgpu-loop
+touched_artifacts:
+  - memory_path pack
+  - interconnect pack
+  - atomic_sync pack
+current_truth:
+  architecture: CAPABILITY_PROFILE_IR with memory_path/interconnect/atomic_sync
+  contract: SYSTEM_CONTRACT_IR
+  golden_model: GOLDEN_CONTRACT_MODEL
+  toolchain: PROGRAM_IMAGE_IR
+  rtl_map: INCREMENTAL_RTL_MAP
+  validation: FIRST_DIVERGENCE_REPORT
+gates:
+  - multi-SM shared memory coalescer L1/global adapter L2 slice NoC fabric DRAM atomic fence barrier memory visibility first divergence root cause rewrite route
+open_issues: []

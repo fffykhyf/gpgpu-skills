@@ -1,3 +1,0 @@
-trace_id: minimal_simt_core_trace
-event_types: [warp_issue, commit]
-events: []

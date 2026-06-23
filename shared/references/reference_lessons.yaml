@@ -1,0 +1,760 @@
+- lesson_id: GPGPUSIM_TRACE_001
+  source: gpgpusim
+  applies_to:
+    - gpgpu-architecture
+    - gpgpu-contract
+    - gpgpu-toolchain-runtime
+    - gpgpu-rtl
+    - gpgpu-validation
+    - gpgpu-loop
+  use_for:
+    - Preserve and apply the imported gpgpusim design lesson without copying source-specific microarchitecture blindly.
+  do:
+    - Convert useful evidence into explicit GPGPU contract paths, validation gates, or implementation checks.
+  do_not:
+    - Treat reference implementation behavior as semantic truth unless it is frozen in SYSTEM_CONTRACT_IR.
+  acceptance_gate:
+    - The resulting artifact cites contract paths, provenance, and the mode-gated output policy.
+  source_anchor:
+    - docs/archive/reference-raw/gpgpusim/raw
+- lesson_id: MIAOW_SIMT_CORE_001
+  source: miaow
+  applies_to:
+    - gpgpu-architecture
+    - gpgpu-contract
+    - gpgpu-toolchain-runtime
+    - gpgpu-rtl
+    - gpgpu-validation
+    - gpgpu-loop
+  use_for:
+    - Preserve and apply the imported miaow design lesson without copying source-specific microarchitecture blindly.
+  do:
+    - Convert useful evidence into explicit GPGPU contract paths, validation gates, or implementation checks.
+  do_not:
+    - Treat reference implementation behavior as semantic truth unless it is frozen in SYSTEM_CONTRACT_IR.
+  acceptance_gate:
+    - The resulting artifact cites contract paths, provenance, and the mode-gated output policy.
+  source_anchor:
+    - skill/shared/references/source_summaries/miaow.md
+- lesson_id: REFERENCE_GROUP_ROCKET_GENERATOR
+  source: rocket
+  applies_to:
+    - gpgpu-architecture
+    - gpgpu-contract
+    - gpgpu-toolchain-runtime
+    - gpgpu-rtl
+    - gpgpu-validation
+    - gpgpu-loop
+  use_for:
+    - Preserve and apply the imported rocket design lesson without copying source-specific microarchitecture blindly.
+  do:
+    - Convert useful evidence into explicit GPGPU contract paths, validation gates, or implementation checks.
+  do_not:
+    - Treat reference implementation behavior as semantic truth unless it is frozen in SYSTEM_CONTRACT_IR.
+  acceptance_gate:
+    - The resulting artifact cites contract paths, provenance, and the mode-gated output policy.
+  source_anchor:
+    - docs/archive/reference-raw/rocket/raw
+- lesson_id: REFERENCE_GROUP_XIANGSHAN_DEVELOPMENT_LOOP
+  source: xiangshan
+  applies_to:
+    - gpgpu-architecture
+    - gpgpu-contract
+    - gpgpu-toolchain-runtime
+    - gpgpu-rtl
+    - gpgpu-validation
+    - gpgpu-loop
+  use_for:
+    - Preserve and apply the imported xiangshan design lesson without copying source-specific microarchitecture blindly.
+  do:
+    - Convert useful evidence into explicit GPGPU contract paths, validation gates, or implementation checks.
+  do_not:
+    - Treat reference implementation behavior as semantic truth unless it is frozen in SYSTEM_CONTRACT_IR.
+  acceptance_gate:
+    - The resulting artifact cites contract paths, provenance, and the mode-gated output policy.
+  source_anchor:
+    - docs/archive/reference-raw/xiangshan/raw
+- lesson_id: ROCKET_CONFIG_FRAGMENT_STACK
+  source: rocket
+  applies_to:
+    - gpgpu-architecture
+    - gpgpu-contract
+    - gpgpu-toolchain-runtime
+    - gpgpu-rtl
+    - gpgpu-validation
+    - gpgpu-loop
+  use_for:
+    - Preserve and apply the imported rocket design lesson without copying source-specific microarchitecture blindly.
+  do:
+    - Convert useful evidence into explicit GPGPU contract paths, validation gates, or implementation checks.
+  do_not:
+    - Treat reference implementation behavior as semantic truth unless it is frozen in SYSTEM_CONTRACT_IR.
+  acceptance_gate:
+    - The resulting artifact cites contract paths, provenance, and the mode-gated output policy.
+  source_anchor:
+    - docs/archive/reference-raw/rocket/raw
+- lesson_id: ROCKET_RESOLVED_CONFIG_COLLATERAL
+  source: rocket
+  applies_to:
+    - gpgpu-architecture
+    - gpgpu-contract
+    - gpgpu-toolchain-runtime
+    - gpgpu-rtl
+    - gpgpu-validation
+    - gpgpu-loop
+  use_for:
+    - Preserve and apply the imported rocket design lesson without copying source-specific microarchitecture blindly.
+  do:
+    - Convert useful evidence into explicit GPGPU contract paths, validation gates, or implementation checks.
+  do_not:
+    - Treat reference implementation behavior as semantic truth unless it is frozen in SYSTEM_CONTRACT_IR.
+  acceptance_gate:
+    - The resulting artifact cites contract paths, provenance, and the mode-gated output policy.
+  source_anchor:
+    - docs/archive/reference-raw/rocket/raw
+- lesson_id: ROCKET_SYSTEM_COMPOSITION_ROOT
+  source: rocket
+  applies_to:
+    - gpgpu-architecture
+    - gpgpu-contract
+    - gpgpu-toolchain-runtime
+    - gpgpu-rtl
+    - gpgpu-validation
+    - gpgpu-loop
+  use_for:
+    - Preserve and apply the imported rocket design lesson without copying source-specific microarchitecture blindly.
+  do:
+    - Convert useful evidence into explicit GPGPU contract paths, validation gates, or implementation checks.
+  do_not:
+    - Treat reference implementation behavior as semantic truth unless it is frozen in SYSTEM_CONTRACT_IR.
+  acceptance_gate:
+    - The resulting artifact cites contract paths, provenance, and the mode-gated output policy.
+  source_anchor:
+    - docs/archive/reference-raw/rocket/raw
+- lesson_id: ROCKET_NEGOTIATED_INTERFACE_EDGE
+  source: rocket
+  applies_to:
+    - gpgpu-architecture
+    - gpgpu-contract
+    - gpgpu-toolchain-runtime
+    - gpgpu-rtl
+    - gpgpu-validation
+    - gpgpu-loop
+  use_for:
+    - Preserve and apply the imported rocket design lesson without copying source-specific microarchitecture blindly.
+  do:
+    - Convert useful evidence into explicit GPGPU contract paths, validation gates, or implementation checks.
+  do_not:
+    - Treat reference implementation behavior as semantic truth unless it is frozen in SYSTEM_CONTRACT_IR.
+  acceptance_gate:
+    - The resulting artifact cites contract paths, provenance, and the mode-gated output policy.
+  source_anchor:
+    - docs/archive/reference-raw/rocket/raw
+- lesson_id: ROCKET_INTERFACE_ADAPTER_CONTRACT
+  source: rocket
+  applies_to:
+    - gpgpu-architecture
+    - gpgpu-contract
+    - gpgpu-toolchain-runtime
+    - gpgpu-rtl
+    - gpgpu-validation
+    - gpgpu-loop
+  use_for:
+    - Preserve and apply the imported rocket design lesson without copying source-specific microarchitecture blindly.
+  do:
+    - Convert useful evidence into explicit GPGPU contract paths, validation gates, or implementation checks.
+  do_not:
+    - Treat reference implementation behavior as semantic truth unless it is frozen in SYSTEM_CONTRACT_IR.
+  acceptance_gate:
+    - The resulting artifact cites contract paths, provenance, and the mode-gated output policy.
+  source_anchor:
+    - docs/archive/reference-raw/rocket/raw
+- lesson_id: ROCKET_PROTOCOL_MONITOR_CONTRACT
+  source: rocket
+  applies_to:
+    - gpgpu-architecture
+    - gpgpu-contract
+    - gpgpu-toolchain-runtime
+    - gpgpu-rtl
+    - gpgpu-validation
+    - gpgpu-loop
+  use_for:
+    - Preserve and apply the imported rocket design lesson without copying source-specific microarchitecture blindly.
+  do:
+    - Convert useful evidence into explicit GPGPU contract paths, validation gates, or implementation checks.
+  do_not:
+    - Treat reference implementation behavior as semantic truth unless it is frozen in SYSTEM_CONTRACT_IR.
+  acceptance_gate:
+    - The resulting artifact cites contract paths, provenance, and the mode-gated output policy.
+  source_anchor:
+    - docs/archive/reference-raw/rocket/raw
+- lesson_id: ROCKET_MMIO_REGISTER_MAP
+  source: rocket
+  applies_to:
+    - gpgpu-architecture
+    - gpgpu-contract
+    - gpgpu-toolchain-runtime
+    - gpgpu-rtl
+    - gpgpu-validation
+    - gpgpu-loop
+  use_for:
+    - Preserve and apply the imported rocket design lesson without copying source-specific microarchitecture blindly.
+  do:
+    - Convert useful evidence into explicit GPGPU contract paths, validation gates, or implementation checks.
+  do_not:
+    - Treat reference implementation behavior as semantic truth unless it is frozen in SYSTEM_CONTRACT_IR.
+  acceptance_gate:
+    - The resulting artifact cites contract paths, provenance, and the mode-gated output policy.
+  source_anchor:
+    - docs/archive/reference-raw/rocket/raw
+- lesson_id: ROCKET_DEBUG_COUNTER_CONTRACT
+  source: rocket
+  applies_to:
+    - gpgpu-architecture
+    - gpgpu-contract
+    - gpgpu-toolchain-runtime
+    - gpgpu-rtl
+    - gpgpu-validation
+    - gpgpu-loop
+  use_for:
+    - Preserve and apply the imported rocket design lesson without copying source-specific microarchitecture blindly.
+  do:
+    - Convert useful evidence into explicit GPGPU contract paths, validation gates, or implementation checks.
+  do_not:
+    - Treat reference implementation behavior as semantic truth unless it is frozen in SYSTEM_CONTRACT_IR.
+  acceptance_gate:
+    - The resulting artifact cites contract paths, provenance, and the mode-gated output policy.
+  source_anchor:
+    - docs/archive/reference-raw/rocket/raw
+- lesson_id: ROCKET_HARNESS_CLOSURE_GATE
+  source: rocket
+  applies_to:
+    - gpgpu-architecture
+    - gpgpu-contract
+    - gpgpu-toolchain-runtime
+    - gpgpu-rtl
+    - gpgpu-validation
+    - gpgpu-loop
+  use_for:
+    - Preserve and apply the imported rocket design lesson without copying source-specific microarchitecture blindly.
+  do:
+    - Convert useful evidence into explicit GPGPU contract paths, validation gates, or implementation checks.
+  do_not:
+    - Treat reference implementation behavior as semantic truth unless it is frozen in SYSTEM_CONTRACT_IR.
+  acceptance_gate:
+    - The resulting artifact cites contract paths, provenance, and the mode-gated output policy.
+  source_anchor:
+    - docs/archive/reference-raw/rocket/raw
+- lesson_id: ROCKET_COMPILE_ONLY_DRIFT_GATE
+  source: rocket
+  applies_to:
+    - gpgpu-architecture
+    - gpgpu-contract
+    - gpgpu-toolchain-runtime
+    - gpgpu-rtl
+    - gpgpu-validation
+    - gpgpu-loop
+  use_for:
+    - Preserve and apply the imported rocket design lesson without copying source-specific microarchitecture blindly.
+  do:
+    - Convert useful evidence into explicit GPGPU contract paths, validation gates, or implementation checks.
+  do_not:
+    - Treat reference implementation behavior as semantic truth unless it is frozen in SYSTEM_CONTRACT_IR.
+  acceptance_gate:
+    - The resulting artifact cites contract paths, provenance, and the mode-gated output policy.
+  source_anchor:
+    - docs/archive/reference-raw/rocket/raw
+- lesson_id: VIBE_GPU_VERTICAL_SLICE_001
+  source: vibe_gpu
+  applies_to:
+    - gpgpu-architecture
+    - gpgpu-contract
+    - gpgpu-toolchain-runtime
+    - gpgpu-rtl
+    - gpgpu-validation
+    - gpgpu-loop
+  use_for:
+    - Preserve and apply the imported vibe_gpu design lesson without copying source-specific microarchitecture blindly.
+  do:
+    - Convert useful evidence into explicit GPGPU contract paths, validation gates, or implementation checks.
+  do_not:
+    - Treat reference implementation behavior as semantic truth unless it is frozen in SYSTEM_CONTRACT_IR.
+  acceptance_gate:
+    - The resulting artifact cites contract paths, provenance, and the mode-gated output policy.
+  source_anchor:
+    - skill/shared/references/source_summaries/vibe_gpu.md
+- lesson_id: VIBE_GPU_DRIFT_001
+  source: vibe_gpu
+  applies_to:
+    - gpgpu-architecture
+    - gpgpu-contract
+    - gpgpu-toolchain-runtime
+    - gpgpu-rtl
+    - gpgpu-validation
+    - gpgpu-loop
+  use_for:
+    - Preserve and apply the imported vibe_gpu design lesson without copying source-specific microarchitecture blindly.
+  do:
+    - Convert useful evidence into explicit GPGPU contract paths, validation gates, or implementation checks.
+  do_not:
+    - Treat reference implementation behavior as semantic truth unless it is frozen in SYSTEM_CONTRACT_IR.
+  acceptance_gate:
+    - The resulting artifact cites contract paths, provenance, and the mode-gated output policy.
+  source_anchor:
+    - skill/shared/references/source_summaries/vibe_gpu.md
+- lesson_id: VORTEX_ISA_TRUTH_001
+  source: vortex
+  applies_to:
+    - gpgpu-architecture
+    - gpgpu-contract
+    - gpgpu-toolchain-runtime
+    - gpgpu-rtl
+    - gpgpu-validation
+    - gpgpu-loop
+  use_for:
+    - Preserve and apply the imported vortex design lesson without copying source-specific microarchitecture blindly.
+  do:
+    - Convert useful evidence into explicit GPGPU contract paths, validation gates, or implementation checks.
+  do_not:
+    - Treat reference implementation behavior as semantic truth unless it is frozen in SYSTEM_CONTRACT_IR.
+  acceptance_gate:
+    - The resulting artifact cites contract paths, provenance, and the mode-gated output policy.
+  source_anchor:
+    - skill/shared/references/source_summaries/vortex.md
+- lesson_id: VORTEX_WARP_STATE_002
+  source: vortex
+  applies_to:
+    - gpgpu-architecture
+    - gpgpu-contract
+    - gpgpu-toolchain-runtime
+    - gpgpu-rtl
+    - gpgpu-validation
+    - gpgpu-loop
+  use_for:
+    - Preserve and apply the imported vortex design lesson without copying source-specific microarchitecture blindly.
+  do:
+    - Convert useful evidence into explicit GPGPU contract paths, validation gates, or implementation checks.
+  do_not:
+    - Treat reference implementation behavior as semantic truth unless it is frozen in SYSTEM_CONTRACT_IR.
+  acceptance_gate:
+    - The resulting artifact cites contract paths, provenance, and the mode-gated output policy.
+  source_anchor:
+    - skill/shared/references/source_summaries/vortex.md
+- lesson_id: VORTEX_SCOREBOARD_003
+  source: vortex
+  applies_to:
+    - gpgpu-architecture
+    - gpgpu-contract
+    - gpgpu-toolchain-runtime
+    - gpgpu-rtl
+    - gpgpu-validation
+    - gpgpu-loop
+  use_for:
+    - Preserve and apply the imported vortex design lesson without copying source-specific microarchitecture blindly.
+  do:
+    - Convert useful evidence into explicit GPGPU contract paths, validation gates, or implementation checks.
+  do_not:
+    - Treat reference implementation behavior as semantic truth unless it is frozen in SYSTEM_CONTRACT_IR.
+  acceptance_gate:
+    - The resulting artifact cites contract paths, provenance, and the mode-gated output policy.
+  source_anchor:
+    - skill/shared/references/source_summaries/vortex.md
+- lesson_id: VORTEX_DIVERGENCE_004
+  source: vortex
+  applies_to:
+    - gpgpu-architecture
+    - gpgpu-contract
+    - gpgpu-toolchain-runtime
+    - gpgpu-rtl
+    - gpgpu-validation
+    - gpgpu-loop
+  use_for:
+    - Preserve and apply the imported vortex design lesson without copying source-specific microarchitecture blindly.
+  do:
+    - Convert useful evidence into explicit GPGPU contract paths, validation gates, or implementation checks.
+  do_not:
+    - Treat reference implementation behavior as semantic truth unless it is frozen in SYSTEM_CONTRACT_IR.
+  acceptance_gate:
+    - The resulting artifact cites contract paths, provenance, and the mode-gated output policy.
+  source_anchor:
+    - skill/shared/references/source_summaries/vortex.md
+- lesson_id: VORTEX_RF_TRACE_005
+  source: vortex
+  applies_to:
+    - gpgpu-architecture
+    - gpgpu-contract
+    - gpgpu-toolchain-runtime
+    - gpgpu-rtl
+    - gpgpu-validation
+    - gpgpu-loop
+  use_for:
+    - Preserve and apply the imported vortex design lesson without copying source-specific microarchitecture blindly.
+  do:
+    - Convert useful evidence into explicit GPGPU contract paths, validation gates, or implementation checks.
+  do_not:
+    - Treat reference implementation behavior as semantic truth unless it is frozen in SYSTEM_CONTRACT_IR.
+  acceptance_gate:
+    - The resulting artifact cites contract paths, provenance, and the mode-gated output policy.
+  source_anchor:
+    - skill/shared/references/source_summaries/vortex.md
+- lesson_id: VORTEX_COALESCER_006
+  source: vortex
+  applies_to:
+    - gpgpu-architecture
+    - gpgpu-contract
+    - gpgpu-toolchain-runtime
+    - gpgpu-rtl
+    - gpgpu-validation
+    - gpgpu-loop
+  use_for:
+    - Preserve and apply the imported vortex design lesson without copying source-specific microarchitecture blindly.
+  do:
+    - Convert useful evidence into explicit GPGPU contract paths, validation gates, or implementation checks.
+  do_not:
+    - Treat reference implementation behavior as semantic truth unless it is frozen in SYSTEM_CONTRACT_IR.
+  acceptance_gate:
+    - The resulting artifact cites contract paths, provenance, and the mode-gated output policy.
+  source_anchor:
+    - skill/shared/references/source_summaries/vortex.md
+- lesson_id: VORTEX_LAUNCH_007
+  source: vortex
+  applies_to:
+    - gpgpu-architecture
+    - gpgpu-contract
+    - gpgpu-toolchain-runtime
+    - gpgpu-rtl
+    - gpgpu-validation
+    - gpgpu-loop
+  use_for:
+    - Preserve and apply the imported vortex design lesson without copying source-specific microarchitecture blindly.
+  do:
+    - Convert useful evidence into explicit GPGPU contract paths, validation gates, or implementation checks.
+  do_not:
+    - Treat reference implementation behavior as semantic truth unless it is frozen in SYSTEM_CONTRACT_IR.
+  acceptance_gate:
+    - The resulting artifact cites contract paths, provenance, and the mode-gated output policy.
+  source_anchor:
+    - skill/shared/references/source_summaries/vortex.md
+- lesson_id: VORTEX_SIMX_RTL_008
+  source: vortex
+  applies_to:
+    - gpgpu-architecture
+    - gpgpu-contract
+    - gpgpu-toolchain-runtime
+    - gpgpu-rtl
+    - gpgpu-validation
+    - gpgpu-loop
+  use_for:
+    - Preserve and apply the imported vortex design lesson without copying source-specific microarchitecture blindly.
+  do:
+    - Convert useful evidence into explicit GPGPU contract paths, validation gates, or implementation checks.
+  do_not:
+    - Treat reference implementation behavior as semantic truth unless it is frozen in SYSTEM_CONTRACT_IR.
+  acceptance_gate:
+    - The resulting artifact cites contract paths, provenance, and the mode-gated output policy.
+  source_anchor:
+    - skill/shared/references/source_summaries/vortex.md
+- lesson_id: VORTEX_VERIFICATION_MATRIX_009
+  source: vortex
+  applies_to:
+    - gpgpu-architecture
+    - gpgpu-contract
+    - gpgpu-toolchain-runtime
+    - gpgpu-rtl
+    - gpgpu-validation
+    - gpgpu-loop
+  use_for:
+    - Preserve and apply the imported vortex design lesson without copying source-specific microarchitecture blindly.
+  do:
+    - Convert useful evidence into explicit GPGPU contract paths, validation gates, or implementation checks.
+  do_not:
+    - Treat reference implementation behavior as semantic truth unless it is frozen in SYSTEM_CONTRACT_IR.
+  acceptance_gate:
+    - The resulting artifact cites contract paths, provenance, and the mode-gated output policy.
+  source_anchor:
+    - skill/shared/references/source_summaries/vortex.md
+- lesson_id: VORTEX_PPA_010
+  source: vortex
+  applies_to:
+    - gpgpu-architecture
+    - gpgpu-contract
+    - gpgpu-toolchain-runtime
+    - gpgpu-rtl
+    - gpgpu-validation
+    - gpgpu-loop
+  use_for:
+    - Preserve and apply the imported vortex design lesson without copying source-specific microarchitecture blindly.
+  do:
+    - Convert useful evidence into explicit GPGPU contract paths, validation gates, or implementation checks.
+  do_not:
+    - Treat reference implementation behavior as semantic truth unless it is frozen in SYSTEM_CONTRACT_IR.
+  acceptance_gate:
+    - The resulting artifact cites contract paths, provenance, and the mode-gated output policy.
+  source_anchor:
+    - skill/shared/references/source_summaries/vortex.md
+- lesson_id: VORTEX_LSU_LANE_FORMAT
+  source: vortex
+  applies_to:
+    - gpgpu-architecture
+    - gpgpu-contract
+    - gpgpu-toolchain-runtime
+    - gpgpu-rtl
+    - gpgpu-validation
+    - gpgpu-loop
+  use_for:
+    - Preserve and apply the imported vortex design lesson without copying source-specific microarchitecture blindly.
+  do:
+    - Convert useful evidence into explicit GPGPU contract paths, validation gates, or implementation checks.
+  do_not:
+    - Treat reference implementation behavior as semantic truth unless it is frozen in SYSTEM_CONTRACT_IR.
+  acceptance_gate:
+    - The resulting artifact cites contract paths, provenance, and the mode-gated output policy.
+  source_anchor:
+    - skill/shared/references/source_summaries/vortex.md
+- lesson_id: VORTEX_NONBLOCKING_MEMORY_TAG
+  source: vortex
+  applies_to:
+    - gpgpu-architecture
+    - gpgpu-contract
+    - gpgpu-toolchain-runtime
+    - gpgpu-rtl
+    - gpgpu-validation
+    - gpgpu-loop
+  use_for:
+    - Preserve and apply the imported vortex design lesson without copying source-specific microarchitecture blindly.
+  do:
+    - Convert useful evidence into explicit GPGPU contract paths, validation gates, or implementation checks.
+  do_not:
+    - Treat reference implementation behavior as semantic truth unless it is frozen in SYSTEM_CONTRACT_IR.
+  acceptance_gate:
+    - The resulting artifact cites contract paths, provenance, and the mode-gated output policy.
+  source_anchor:
+    - skill/shared/references/source_summaries/vortex.md
+- lesson_id: VORTEX_COALESCER_RESPONSE_RESTORE
+  source: vortex
+  applies_to:
+    - gpgpu-architecture
+    - gpgpu-contract
+    - gpgpu-toolchain-runtime
+    - gpgpu-rtl
+    - gpgpu-validation
+    - gpgpu-loop
+  use_for:
+    - Preserve and apply the imported vortex design lesson without copying source-specific microarchitecture blindly.
+  do:
+    - Convert useful evidence into explicit GPGPU contract paths, validation gates, or implementation checks.
+  do_not:
+    - Treat reference implementation behavior as semantic truth unless it is frozen in SYSTEM_CONTRACT_IR.
+  acceptance_gate:
+    - The resulting artifact cites contract paths, provenance, and the mode-gated output policy.
+  source_anchor:
+    - skill/shared/references/source_summaries/vortex.md
+- lesson_id: VORTEX_CACHE_MSHR_RESPONSE_ROUTE
+  source: vortex
+  applies_to:
+    - gpgpu-architecture
+    - gpgpu-contract
+    - gpgpu-toolchain-runtime
+    - gpgpu-rtl
+    - gpgpu-validation
+    - gpgpu-loop
+  use_for:
+    - Preserve and apply the imported vortex design lesson without copying source-specific microarchitecture blindly.
+  do:
+    - Convert useful evidence into explicit GPGPU contract paths, validation gates, or implementation checks.
+  do_not:
+    - Treat reference implementation behavior as semantic truth unless it is frozen in SYSTEM_CONTRACT_IR.
+  acceptance_gate:
+    - The resulting artifact cites contract paths, provenance, and the mode-gated output policy.
+  source_anchor:
+    - skill/shared/references/source_summaries/vortex.md
+- lesson_id: VORTEX_MSHR_DEADLOCK_GUARD
+  source: vortex
+  applies_to:
+    - gpgpu-architecture
+    - gpgpu-contract
+    - gpgpu-toolchain-runtime
+    - gpgpu-rtl
+    - gpgpu-validation
+    - gpgpu-loop
+  use_for:
+    - Preserve and apply the imported vortex design lesson without copying source-specific microarchitecture blindly.
+  do:
+    - Convert useful evidence into explicit GPGPU contract paths, validation gates, or implementation checks.
+  do_not:
+    - Treat reference implementation behavior as semantic truth unless it is frozen in SYSTEM_CONTRACT_IR.
+  acceptance_gate:
+    - The resulting artifact cites contract paths, provenance, and the mode-gated output policy.
+  source_anchor:
+    - skill/shared/references/source_summaries/vortex.md
+- lesson_id: VORTEX_LOCAL_MEMORY_BANK
+  source: vortex
+  applies_to:
+    - gpgpu-architecture
+    - gpgpu-contract
+    - gpgpu-toolchain-runtime
+    - gpgpu-rtl
+    - gpgpu-validation
+    - gpgpu-loop
+  use_for:
+    - Preserve and apply the imported vortex design lesson without copying source-specific microarchitecture blindly.
+  do:
+    - Convert useful evidence into explicit GPGPU contract paths, validation gates, or implementation checks.
+  do_not:
+    - Treat reference implementation behavior as semantic truth unless it is frozen in SYSTEM_CONTRACT_IR.
+  acceptance_gate:
+    - The resulting artifact cites contract paths, provenance, and the mode-gated output policy.
+  source_anchor:
+    - skill/shared/references/source_summaries/vortex.md
+- lesson_id: VORTEX_BARRIER_WSYNC_DRAIN
+  source: vortex
+  applies_to:
+    - gpgpu-architecture
+    - gpgpu-contract
+    - gpgpu-toolchain-runtime
+    - gpgpu-rtl
+    - gpgpu-validation
+    - gpgpu-loop
+  use_for:
+    - Preserve and apply the imported vortex design lesson without copying source-specific microarchitecture blindly.
+  do:
+    - Convert useful evidence into explicit GPGPU contract paths, validation gates, or implementation checks.
+  do_not:
+    - Treat reference implementation behavior as semantic truth unless it is frozen in SYSTEM_CONTRACT_IR.
+  acceptance_gate:
+    - The resulting artifact cites contract paths, provenance, and the mode-gated output policy.
+  source_anchor:
+    - skill/shared/references/source_summaries/vortex.md
+- lesson_id: VORTEX_SIMX_RTL_TWIN
+  source: vortex
+  applies_to:
+    - gpgpu-architecture
+    - gpgpu-contract
+    - gpgpu-toolchain-runtime
+    - gpgpu-rtl
+    - gpgpu-validation
+    - gpgpu-loop
+  use_for:
+    - Preserve and apply the imported vortex design lesson without copying source-specific microarchitecture blindly.
+  do:
+    - Convert useful evidence into explicit GPGPU contract paths, validation gates, or implementation checks.
+  do_not:
+    - Treat reference implementation behavior as semantic truth unless it is frozen in SYSTEM_CONTRACT_IR.
+  acceptance_gate:
+    - The resulting artifact cites contract paths, provenance, and the mode-gated output policy.
+  source_anchor:
+    - skill/shared/references/source_summaries/vortex.md
+- lesson_id: XIANGSHAN_GOLDEN_EXECUTABLE_REF
+  source: xiangshan
+  applies_to:
+    - gpgpu-architecture
+    - gpgpu-contract
+    - gpgpu-toolchain-runtime
+    - gpgpu-rtl
+    - gpgpu-validation
+    - gpgpu-loop
+  use_for:
+    - Preserve and apply the imported xiangshan design lesson without copying source-specific microarchitecture blindly.
+  do:
+    - Convert useful evidence into explicit GPGPU contract paths, validation gates, or implementation checks.
+  do_not:
+    - Treat reference implementation behavior as semantic truth unless it is frozen in SYSTEM_CONTRACT_IR.
+  acceptance_gate:
+    - The resulting artifact cites contract paths, provenance, and the mode-gated output policy.
+  source_anchor:
+    - docs/archive/reference-raw/xiangshan/raw
+- lesson_id: XIANGSHAN_BASIC_AND_FULL_DIFF
+  source: xiangshan
+  applies_to:
+    - gpgpu-architecture
+    - gpgpu-contract
+    - gpgpu-toolchain-runtime
+    - gpgpu-rtl
+    - gpgpu-validation
+    - gpgpu-loop
+  use_for:
+    - Preserve and apply the imported xiangshan design lesson without copying source-specific microarchitecture blindly.
+  do:
+    - Convert useful evidence into explicit GPGPU contract paths, validation gates, or implementation checks.
+  do_not:
+    - Treat reference implementation behavior as semantic truth unless it is frozen in SYSTEM_CONTRACT_IR.
+  acceptance_gate:
+    - The resulting artifact cites contract paths, provenance, and the mode-gated output policy.
+  source_anchor:
+    - docs/archive/reference-raw/xiangshan/raw
+- lesson_id: XIANGSHAN_REPLAYABLE_FAILURE_CAPTURE
+  source: xiangshan
+  applies_to:
+    - gpgpu-architecture
+    - gpgpu-contract
+    - gpgpu-toolchain-runtime
+    - gpgpu-rtl
+    - gpgpu-validation
+    - gpgpu-loop
+  use_for:
+    - Preserve and apply the imported xiangshan design lesson without copying source-specific microarchitecture blindly.
+  do:
+    - Convert useful evidence into explicit GPGPU contract paths, validation gates, or implementation checks.
+  do_not:
+    - Treat reference implementation behavior as semantic truth unless it is frozen in SYSTEM_CONTRACT_IR.
+  acceptance_gate:
+    - The resulting artifact cites contract paths, provenance, and the mode-gated output policy.
+  source_anchor:
+    - docs/archive/reference-raw/xiangshan/raw
+- lesson_id: XIANGSHAN_SAFE_RUNTIME_DSE
+  source: xiangshan
+  applies_to:
+    - gpgpu-architecture
+    - gpgpu-contract
+    - gpgpu-toolchain-runtime
+    - gpgpu-rtl
+    - gpgpu-validation
+    - gpgpu-loop
+  use_for:
+    - Preserve and apply the imported xiangshan design lesson without copying source-specific microarchitecture blindly.
+  do:
+    - Convert useful evidence into explicit GPGPU contract paths, validation gates, or implementation checks.
+  do_not:
+    - Treat reference implementation behavior as semantic truth unless it is frozen in SYSTEM_CONTRACT_IR.
+  acceptance_gate:
+    - The resulting artifact cites contract paths, provenance, and the mode-gated output policy.
+  source_anchor:
+    - docs/archive/reference-raw/xiangshan/raw
+- lesson_id: XIANGSHAN_STRUCTURED_TRACE_DB
+  source: xiangshan
+  applies_to:
+    - gpgpu-architecture
+    - gpgpu-contract
+    - gpgpu-toolchain-runtime
+    - gpgpu-rtl
+    - gpgpu-validation
+    - gpgpu-loop
+  use_for:
+    - Preserve and apply the imported xiangshan design lesson without copying source-specific microarchitecture blindly.
+  do:
+    - Convert useful evidence into explicit GPGPU contract paths, validation gates, or implementation checks.
+  do_not:
+    - Treat reference implementation behavior as semantic truth unless it is frozen in SYSTEM_CONTRACT_IR.
+  acceptance_gate:
+    - The resulting artifact cites contract paths, provenance, and the mode-gated output policy.
+  source_anchor:
+    - docs/archive/reference-raw/xiangshan/raw
+- lesson_id: XIANGSHAN_WEIGHTED_PERF_SAMPLING
+  source: xiangshan
+  applies_to:
+    - gpgpu-architecture
+    - gpgpu-contract
+    - gpgpu-toolchain-runtime
+    - gpgpu-rtl
+    - gpgpu-validation
+    - gpgpu-loop
+  use_for:
+    - Preserve and apply the imported xiangshan design lesson without copying source-specific microarchitecture blindly.
+  do:
+    - Convert useful evidence into explicit GPGPU contract paths, validation gates, or implementation checks.
+  do_not:
+    - Treat reference implementation behavior as semantic truth unless it is frozen in SYSTEM_CONTRACT_IR.
+  acceptance_gate:
+    - The resulting artifact cites contract paths, provenance, and the mode-gated output policy.
+  source_anchor:
+    - docs/archive/reference-raw/xiangshan/raw

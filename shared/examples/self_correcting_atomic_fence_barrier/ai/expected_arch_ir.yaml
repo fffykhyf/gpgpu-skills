@@ -1,7 +1,0 @@
-candidate_id: atomic_fence_barrier_example
-capability_profile: full_memory_sync_system
-graph_nodes: [{node_id: atomic_unit, node_type: atomic_unit}, {node_id: fence_drain_unit, node_type: fence_unit}, {node_id: barrier_unit, node_type: barrier_unit}, {node_id: wsync_drain_unit, node_type: wsync_drain_unit}]
-graph_edges: []
-constraint_proof: {hard_constraints_passed: true}
-verification_profile: {simulator_required: true, rtl_sim_required: true}
-provenance: {preset: FULL_MEMORY_SYNC_SYSTEM}

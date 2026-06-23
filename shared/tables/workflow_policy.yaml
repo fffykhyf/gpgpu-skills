@@ -1,0 +1,290 @@
+table: workflow_policy
+version: compact-v1
+merged_sections:
+  - source_file: output_mode_table.yaml
+    content: |
+      table: output_mode_table
+      version: v1
+      default_output_mode: FAST_ITERATION
+      modes:
+        FAST_ITERATION:
+          purpose: Rapid design exploration and early implementation feedback.
+          max_human_visible_reports: 5
+          full_ir_expansion: false
+          debug_expansion: false
+          human_visible:
+            - DESIGN_BRIEF.zh.md
+            - ARCHITECTURE_DECISION.zh.md
+            - IMPLEMENTATION_DASHBOARD.zh.md
+            - VALIDATION_DASHBOARD.zh.md
+          failure_human_visible:
+            - PATCH_CARD.zh.md
+          ai_required:
+            - DESIGN_INTENT_IR
+            - ARCH_IR
+            - MICRO_CONSTRAINT_ESTIMATE_IR
+            - SYSTEM_CONTRACT_IR.compact
+            - INCREMENTAL_RTL_MAP
+            - PASS_EVIDENCE_REPORT
+            - PERFORMANCE_METRIC_IR
+            - REGRESSION_FINGERPRINT
+        CONTRACT_FREEZE:
+          purpose: Human review before freezing ISA, ABI, memory model, launch ABI, and interface semantics.
+          max_human_visible_reports: 4
+          full_ir_expansion: true
+          debug_expansion: false
+          human_visible:
+            - CONTRACT_FREEZE_SUMMARY.zh.md
+            - ARCHITECTURE_DECISION.zh.md
+            - VALIDATION_DASHBOARD.zh.md
+          ai_required:
+            - DESIGN_INTENT_IR
+            - ARCH_IR
+            - MICRO_CONSTRAINT_ESTIMATE_IR
+            - SYSTEM_CONTRACT_IR
+            - GOLDEN_CONTRACT_MODEL
+            - CONTRACT_SEMANTICS_REPORT
+            - TOOLCHAIN_ARTIFACT_IR
+        DEBUG_REGRESSION:
+          purpose: Failure, ambiguous root cause, recurring regression, or insufficient trace evidence investigation.
+          max_human_visible_reports: 4
+          full_ir_expansion: false
+          debug_expansion: true
+          human_visible:
+            - DEBUG_SUMMARY.zh.md
+            - PATCH_CARD.zh.md
+            - REGRESSION_SUMMARY.zh.md
+          ai_required:
+            - NORMALIZED_TRACE_IR
+            - CORRECTNESS_GATE_REPORT
+            - FIRST_DIVERGENCE_REPORT
+            - TRACE_COVERAGE_REPORT
+            - PERF_ATTRIBUTION_GRAPH
+            - ROOT_CAUSE_REPORT
+            - ARCH_REWRITE_PLAN
+            - REWRITE_DECISION_REPORT
+            - REGRESSION_TRACKING_REPORT
+  - source_file: artifact_visibility_table.yaml
+    content: |
+      table: artifact_visibility_table
+      version: v1
+      visibility_classes:
+        HUMAN_REQUIRED:
+          description: Must be shown to the user by default.
+          language: zh-CN
+          default_show_to_human: true
+        HUMAN_OPTIONAL:
+          description: Can be shown if requested or during contract freeze review.
+          language: zh-CN
+          default_show_to_human: false
+        AI_REQUIRED:
+          description: Must be generated for downstream skills, not shown by default.
+          language: en-US
+          default_show_to_human: false
+        DEBUG_ONLY:
+          description: Generated or expanded on failure, ambiguity, or regression.
+          language: en-US
+          default_show_to_human: false
+        INTERNAL_CACHE:
+          description: Stored for hashes, fingerprints, cache keys, and regression tracking.
+          language: en-US
+          default_show_to_human: false
+      artifact_defaults:
+        human_reports:
+          visibility: HUMAN_REQUIRED
+          language: zh-CN
+          filename_suffix: ".zh.md"
+        ai_artifacts:
+          visibility: AI_REQUIRED
+          language: en-US
+          filename_suffixes: [".yaml", ".json", ".en.md"]
+        debug_evidence:
+          visibility: DEBUG_ONLY
+          language: en-US
+          filename_suffixes: [".yaml", ".json", ".en.md"]
+        internal_cache:
+          visibility: INTERNAL_CACHE
+          language: en-US
+          filename_suffixes: [".yaml", ".json"]
+      expansion_triggers:
+        - user_explicit_request
+        - contract_freeze_human_review
+        - root_cause_ambiguous
+        - regression_reappears
+        - downstream_owner_needs_exact_fields
+  - source_file: report_language_policy.yaml
+    content: |
+      table: report_language_policy
+      version: v1
+      human_reports:
+        language: zh-CN
+        filename_suffix: ".zh.md"
+        allowed_content:
+          - Chinese explanation
+          - English technical identifiers
+          - IR names
+          - module names
+          - signal names
+          - opcode names
+        forbidden:
+          - full machine IR dump by default
+          - long trace dump by default
+          - unbounded YAML blocks
+      ai_artifacts:
+        language: en-US
+        filename_suffixes:
+          - ".yaml"
+          - ".json"
+          - ".en.md"
+        allowed_content:
+          - structured IR
+          - schemas
+          - root cause reports
+          - trace events
+          - patch plans
+        forbidden:
+          - Chinese prose in machine-owned fields
+      debug_evidence:
+        default_human_behavior: Show Chinese summary first and retain full English evidence for expansion.
+        expansion_requires:
+          - user_explicit_request
+          - ambiguous_root_cause
+          - recurring_regression
+          - owner_field_debug
+  - source_file: human_report_template_table.yaml
+    content: |
+      table: human_report_template_table
+      version: v1
+      templates:
+        DESIGN_BRIEF:
+          path: shared/templates/human/zh/design_brief.zh.md
+          required_sections: [目标, 非目标, 硬约束, 本轮输出, 当前风险, 下一步]
+          source_ai_artifacts: [DESIGN_INTENT_IR, ARCH_IR, MICRO_CONSTRAINT_ESTIMATE_IR]
+        ARCHITECTURE_DECISION:
+          path: shared/templates/human/zh/architecture_decision.zh.md
+          required_sections: [本轮选择, 选择理由, 被拒绝的方案, 影响范围, 需要确认的问题]
+          source_ai_artifacts: [ARCH_IR, MICRO_CONSTRAINT_ESTIMATE_IR]
+        CONTRACT_FREEZE_SUMMARY:
+          path: shared/templates/human/zh/contract_freeze_summary.zh.md
+          required_sections: [本次冻结的内容, 派生关系, 禁止独立定义的内容, 冻结前检查, 冻结后影响]
+          source_ai_artifacts: [SYSTEM_CONTRACT_IR, GOLDEN_CONTRACT_MODEL, CONTRACT_SEMANTICS_REPORT]
+        IMPLEMENTATION_DASHBOARD:
+          path: shared/templates/human/zh/implementation_dashboard.zh.md
+          required_sections: [总体状态, 模块绑定状态, 接口风险, 局部仿真, 当前阻塞, 下一步]
+          source_ai_artifacts: [INCREMENTAL_RTL_MAP, MODULE_INTERFACE_REPORT, RTL_PARTIAL_SIM_REPORT]
+        VALIDATION_DASHBOARD:
+          path: shared/templates/human/zh/validation_dashboard.zh.md
+          required_sections: [总体状态, 通过证据, 覆盖情况, 性能摘要, 当前阻塞]
+          source_ai_artifacts: [CORRECTNESS_GATE_REPORT, PASS_EVIDENCE_REPORT, PERFORMANCE_METRIC_IR]
+        DEBUG_SUMMARY:
+          path: shared/templates/human/zh/debug_summary.zh.md
+          required_sections: [问题摘要, 首次分歧, 证据摘要, 当前判断, 下一步]
+          source_ai_artifacts: [FIRST_DIVERGENCE_REPORT, ROOT_CAUSE_REPORT, PERF_ATTRIBUTION_GRAPH]
+        PATCH_CARD:
+          path: shared/templates/human/zh/patch_card.zh.md
+          required_sections: [问题摘要, 证据, 判断, 修复计划, 重新验证, 回归风险]
+          source_ai_artifacts: [ROOT_CAUSE_REPORT, ARCH_REWRITE_PLAN, REWRITE_DECISION_REPORT]
+        REGRESSION_SUMMARY:
+          path: shared/templates/human/zh/regression_summary.zh.md
+          required_sections: [回归状态, 历史指纹, 重复失败, 回滚判断, 下一步]
+          source_ai_artifacts: [REGRESSION_FINGERPRINT, REGRESSION_TRACKING_REPORT]
+  - source_file: ai_artifact_retention_table.yaml
+    content: |
+      table: ai_artifact_retention_table
+      version: v1
+      retention_classes:
+        CONTRACT_TRUTH:
+          artifacts: [SYSTEM_CONTRACT_IR, GOLDEN_CONTRACT_MODEL, CONTRACT_SEMANTICS_REPORT]
+          retain_until: contract_version_replaced
+          required_metadata: [content_hash, producer_skill, consumed_by]
+        TOOLCHAIN_DERIVED:
+          artifacts: [TOOLCHAIN_ARTIFACT_IR, ASSEMBLY_IR, PROGRAM_IMAGE_IR, RUNTIME_LAUNCH_IR, LOADER_CONTRACT_IR, TOOLCHAIN_SMOKE_REPORT]
+          retain_until: source_contract_hash_replaced
+          required_metadata: [content_hash, source_contract_hash, producer_skill]
+        RTL_BINDING:
+          artifacts: [INCREMENTAL_RTL_MAP, MODULE_INTERFACE_REPORT, RTL_PARTIAL_SIM_REPORT]
+          retain_until: rtl_binding_superseded
+          required_metadata: [content_hash, producer_skill, consumed_by]
+        DEBUG_EVIDENCE:
+          artifacts: [NORMALIZED_TRACE_IR, FIRST_DIVERGENCE_REPORT, PERF_ATTRIBUTION_GRAPH, ROOT_CAUSE_REPORT]
+          retain_until: regression_fingerprint_superseded
+          required_metadata: [content_hash, trace_window, producer_skill]
+        HUMAN_REPORTS:
+          artifacts: [DESIGN_BRIEF, ARCHITECTURE_DECISION, CONTRACT_FREEZE_SUMMARY, IMPLEMENTATION_DASHBOARD, VALIDATION_DASHBOARD, DEBUG_SUMMARY, PATCH_CARD, REGRESSION_SUMMARY]
+          retain_until: run_summary_superseded
+          required_metadata: [source_ai_artifacts, language, visibility]
+  - source_file: mode_decision_table.yaml
+    content: |
+      table: mode_decision_table
+      version: v5
+      decisions:
+        - match: complete_spec
+          mode: REPRODUCE
+          next_skill: gpgpu-contract
+        - match: vague_design_goal
+          mode: DESIGN
+          next_skill: gpgpu-architecture
+          requires_subpass: Design Intent Lock inside Architecture Generator
+        - match: vertical_slice_prototype_goal
+          mode: DESIGN
+          prototype_kind: VERTICAL_SLICE_PROTOTYPE
+          next_skill: gpgpu-architecture
+          required_targets: [compile_kernel_to_program_image, rtl_sim_smoke_test, memory_dump_golden_check]
+        - match: patch_against_locked_ir
+          mode: PATCH_REQUEST
+          next_skill: gpgpu-loop
+        - match: trace_or_divergence
+          mode: TRACE_DEBUG
+          next_skill: gpgpu-validation
+      forbidden_outputs: [warp_size, sm_count, cache_policy, scheduler_policy, isa_encoding, memory_hierarchy, register_file_size, rtl_pipeline]
+  - source_file: report_generation_table.yaml
+    content: |
+      version: v5
+      modes:
+        FAILURE_ATTRIBUTION_MODE:
+          required_refs:
+            - correctness_gate_report_ref
+            - first_divergence_report_ref
+            - performance_metric_ref
+            - perf_attribution_graph_ref
+            - root_cause_report_ref
+          optional_refs:
+            - toolchain_attribution_report_ref
+            - trace_coverage_report_ref
+        PASS_EVIDENCE_MODE:
+          required_refs:
+            - correctness_gate_report_ref
+            - pass_evidence_report_ref
+            - trace_coverage_report_ref
+            - performance_metric_ref
+            - regression_fingerprint_ref
+          optional_refs:
+            - perf_attribution_graph_ref
+            - toolchain_attribution_report_ref
+      verdicts:
+        correctness:
+          - CORRECTNESS_PASS
+          - CORRECTNESS_FAIL
+          - PASS_WITH_INSUFFICIENT_EVIDENCE
+          - PASS_WITH_PERFORMANCE_WARNING
+        performance:
+          - PERFORMANCE_PASS
+          - PERFORMANCE_WARNING
+          - PERFORMANCE_FAIL
+          - NOT_EVALUATED
+        evidence:
+          - EVIDENCE_COMPLETE
+          - EVIDENCE_INCOMPLETE
+          - EVIDENCE_AMBIGUOUS
+      human_summary_fields:
+        - short_verdict
+        - primary_reason
+        - next_action
+source_files:
+  - output_mode_table.yaml
+  - artifact_visibility_table.yaml
+  - report_language_policy.yaml
+  - human_report_template_table.yaml
+  - ai_artifact_retention_table.yaml
+  - mode_decision_table.yaml
+  - report_generation_table.yaml

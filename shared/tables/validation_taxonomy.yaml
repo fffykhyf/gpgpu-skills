@@ -1,0 +1,302 @@
+table: validation_taxonomy
+version: compact-v1
+merged_sections:
+  - source_file: trace_normalization_table.yaml
+    content: |
+      version: v5
+      event_fields:
+        required:
+          - event_id
+          - event_source
+          - event_type
+          - timestamp_kind
+          - order_key
+          - contract_path
+          - dependencies
+          - evidence_hash
+        optional:
+          - cycle
+          - step_id
+          - block_id
+          - warp_id
+          - lane_id
+          - thread_id
+          - lane_mask
+          - pc
+          - next_pc
+          - instruction_id
+          - opcode
+          - encoded_instruction
+          - decoded_instruction
+          - active_mask
+          - predicate_mask
+          - stall_reason
+          - issue_valid
+          - commit_valid
+          - src_regs
+          - dst_regs
+          - reg_values_before
+          - reg_values_after
+          - memory_space
+          - memory_addr
+          - access_size
+          - byte_enable
+          - request_tag
+          - response_tag
+          - memory_latency
+          - fault_code
+          - csr_addr
+          - csr_value
+          - launch_state
+          - rtl_module_path
+          - toolchain_artifact_path
+      sources:
+        assembler_trace:
+          requires_toolchain_artifact_path: true
+          requires_contract_path: isa_model.instruction_encodings
+        disassembler_trace:
+          requires_toolchain_artifact_path: true
+          requires_contract_path: isa_model.instruction_encodings
+        program_image_trace:
+          requires_toolchain_artifact_path: true
+          requires_contract_path: launch_model.program_image_format
+        loader_trace:
+          requires_toolchain_artifact_path: true
+          requires_contract_path: launch_model.loader_contract
+        toolchain_smoke_trace:
+          requires_toolchain_artifact_path: true
+          requires_contract_path: source_of_truth.toolchain_validation
+        runtime_launch_trace:
+          requires_contract_path: launch_model.runtime_launch
+        rtl_trace:
+          requires_module_path: true
+        waveform_trace:
+          requires_module_path: false
+        golden_contract_trace:
+          requires_golden_contract_model_hash: true
+        module_partial_sim_trace:
+          requires_module_path: true
+        memory_trace:
+          requires_memory_contract_path: true
+      missing_field_failures:
+        toolchain_source: TOOLCHAIN_TRACE_FIELD_MISSING
+        rtl_source: TRACE_FIELD_MISSING
+        golden_source: GOLDEN_TRACE_UNTRUSTED
+        order_missing: TRACE_NORMALIZATION_FAIL
+  - source_file: correctness_gate_decision_table.yaml
+    content: |
+      version: v5
+      decision_order:
+        - condition: final_memory_mismatch
+          verdict: CORRECTNESS_FAIL
+          selected_mode: FAILURE_ATTRIBUTION_MODE
+        - condition: completion_or_fault_mismatch
+          verdict: CORRECTNESS_FAIL
+          selected_mode: FAILURE_ATTRIBUTION_MODE
+        - condition: architectural_state_mismatch
+          verdict: CORRECTNESS_FAIL
+          selected_mode: FAILURE_ATTRIBUTION_MODE
+        - condition: trace_level_architectural_divergence
+          verdict: PASS_WITH_TRACE_DIVERGENCE_WARNING
+          selected_mode: FAILURE_ATTRIBUTION_MODE
+        - condition: evidence_incomplete
+          verdict: PASS_WITH_INSUFFICIENT_EVIDENCE
+          selected_mode: PASS_EVIDENCE_MODE
+        - condition: all_observable_outputs_match
+          verdict: CORRECTNESS_PASS
+          selected_mode: PASS_EVIDENCE_MODE
+      comparison_scope:
+        - final_memory
+        - architectural_state
+        - completion_fault
+        - sampled_trace
+        - instruction_trace
+      required_completeness_checks:
+        - golden_trace_present
+        - rtl_trace_present
+        - program_image_hash_match
+        - contract_hash_match
+        - launch_config_hash_match
+        - initial_memory_hash_match
+  - source_file: trace_source_manifest_table.yaml
+    content: |
+      version: v5
+      sources:
+        rtl_trace:
+          required_for: [FAILURE_ATTRIBUTION_MODE, PASS_EVIDENCE_MODE]
+          hash_field: rtl_trace_hash
+        waveform_trace:
+          required_for: [DETAILED_DEBUG]
+          hash_field: waveform_trace_hash
+        golden_contract_trace:
+          required_for: [FAILURE_ATTRIBUTION_MODE]
+          hash_field: golden_trace_hash
+        module_partial_sim_trace:
+          required_for: [RTL_PATCH_REVALIDATION]
+          hash_field: module_partial_sim_trace_hash
+        memory_trace:
+          required_for: [FAILURE_ATTRIBUTION_MODE, PASS_EVIDENCE_MODE]
+          hash_field: memory_trace_hash
+        runtime_launch_trace:
+          required_for: [PASS_EVIDENCE_MODE, RUNTIME_LAUNCH_ROOT_CAUSE]
+          hash_field: runtime_launch_trace_hash
+        assembler_trace:
+          required_for: [TOOLCHAIN_ROOT_CAUSE]
+          hash_field: assembler_trace_hash
+        disassembler_trace:
+          required_for: [TOOLCHAIN_ROOT_CAUSE]
+          hash_field: disassembler_trace_hash
+        program_image_trace:
+          required_for: [TOOLCHAIN_ROOT_CAUSE, PASS_EVIDENCE_MODE]
+          hash_field: program_image_trace_hash
+        loader_trace:
+          required_for: [TOOLCHAIN_ROOT_CAUSE, RUNTIME_LAUNCH_ROOT_CAUSE]
+          hash_field: loader_trace_hash
+        toolchain_smoke_trace:
+          required_for: [TOOLCHAIN_ROOT_CAUSE]
+          hash_field: toolchain_smoke_trace_hash
+  - source_file: event_type_taxonomy.yaml
+    content: |
+      version: v5
+      event_types:
+        fetch: {class: architectural}
+        decode: {class: architectural}
+        issue: {class: pipeline}
+        execute: {class: pipeline}
+        writeback: {class: architectural}
+        commit: {class: architectural}
+        branch: {class: control_flow}
+        divergence: {class: simt_control}
+        barrier: {class: synchronization}
+        scoreboard_stall: {class: scheduler}
+        memory_request: {class: memory}
+        memory_response: {class: memory}
+        csr_write: {class: runtime}
+        runtime_start: {class: runtime}
+        runtime_done: {class: runtime}
+        assembler_encode: {class: toolchain}
+        disassembler_decode: {class: toolchain}
+        program_image_load: {class: toolchain}
+        loader_init: {class: runtime}
+        fault: {class: architectural}
+      architectural_compare_events:
+        - fetch
+        - decode
+        - writeback
+        - commit
+        - branch
+        - memory_request
+        - memory_response
+        - csr_write
+        - fault
+  - source_file: differential_compare_table.yaml
+    content: |
+      version: v5
+      compare_order:
+        - PC_MISMATCH
+        - NEXT_PC_MISMATCH
+        - DECODE_MISMATCH
+        - ACTIVE_MASK_MISMATCH
+        - PREDICATE_MASK_MISMATCH
+        - REGISTER_WRITEBACK_MISMATCH
+        - MEMORY_ADDRESS_MISMATCH
+        - MEMORY_BYTE_ENABLE_MISMATCH
+        - MEMORY_VALUE_MISMATCH
+        - RESPONSE_TAG_MISMATCH
+        - CSR_MISMATCH
+        - BARRIER_STATE_MISMATCH
+        - FAULT_STATUS_MISMATCH
+        - COMPLETION_STATUS_MISMATCH
+      required_event_fields:
+        PC_MISMATCH: [pc]
+        NEXT_PC_MISMATCH: [next_pc]
+        DECODE_MISMATCH: [decoded_instruction]
+        ACTIVE_MASK_MISMATCH: [active_mask]
+        PREDICATE_MASK_MISMATCH: [predicate_mask]
+        REGISTER_WRITEBACK_MISMATCH: [dst_regs, reg_values_after]
+        MEMORY_ADDRESS_MISMATCH: [memory_addr, access_size]
+        MEMORY_BYTE_ENABLE_MISMATCH: [byte_enable, lane_mask]
+        MEMORY_VALUE_MISMATCH: [memory_addr, reg_values_after]
+        RESPONSE_TAG_MISMATCH: [request_tag, response_tag]
+        CSR_MISMATCH: [csr_addr, csr_value]
+        BARRIER_STATE_MISMATCH: [event_type, dependencies]
+        FAULT_STATUS_MISMATCH: [fault_code]
+        COMPLETION_STATUS_MISMATCH: [event_type]
+      ranking_rule: first_deterministic_architectural_divergence
+  - source_file: pass_evidence_gate_table.yaml
+    content: |
+      version: v5
+      required_pass_checks:
+        pass_strength:
+          strong:
+            - final_state_match
+            - completion_fault_match
+            - trace_schema_complete
+            - first_divergence_diff_clean
+            - required_backend_matrix_passed
+          weak:
+            - final_state_match
+            - trace_missing_key_fields_or_backend_matrix_incomplete
+        evidence_completeness:
+          - system_contract_hash
+          - golden_model_hash
+          - rtl_hash
+          - input_memory_hash
+          - final_memory_hash
+          - completion_status_present
+          - fault_status_present
+        architectural_state_comparison:
+          - final_memory_match
+          - final_pc_match
+          - observable_register_state_match
+          - csr_state_match
+          - fault_status_match
+          - completion_status_match
+        regression_fingerprint:
+          - contract_hash
+          - golden_model_hash
+          - rtl_hash
+          - input_memory_hash
+          - final_memory_hash
+          - trace_summary_hash
+          - performance_metric_hash
+          - coverage_hash
+      warning_map:
+        missing_trace_detail: PASS_WITH_INSUFFICIENT_EVIDENCE
+        uncovered_contract_paths: PASS_WITH_INSUFFICIENT_EVIDENCE
+        performance_below_target: PASS_WITH_PERFORMANCE_WARNING
+        trace_divergence_after_final_match: PASS_WITH_TRACE_DIVERGENCE_WARNING
+  - source_file: minimal_trace_window_table.yaml
+    content: |
+      version: v5
+      correctness_window_rule:
+        pre_events: 8
+        post_events: 8
+        include_last_matching_event: true
+        include_first_mismatching_event: true
+        include_dependency_closure: true
+        include_contract_path: true
+        include_rtl_module_path: true
+        include_toolchain_artifact_path: true
+      performance_window_rule:
+        candidate_windows:
+          - top_stall_contribution_window
+          - sustained_bottleneck_window
+          - queue_saturation_window
+          - periodic_replay_window
+        tie_breakers:
+          - highest_evidence_completeness
+          - earliest_window
+          - strongest_contract_mapping
+          - strongest_rtl_module_mapping
+      ambiguity_failures:
+        - AMBIGUOUS_TRACE_ORDERING
+        - INSUFFICIENT_TRACE_EVIDENCE
+source_files:
+  - trace_normalization_table.yaml
+  - correctness_gate_decision_table.yaml
+  - trace_source_manifest_table.yaml
+  - event_type_taxonomy.yaml
+  - differential_compare_table.yaml
+  - pass_evidence_gate_table.yaml
+  - minimal_trace_window_table.yaml

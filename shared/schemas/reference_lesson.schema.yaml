@@ -1,0 +1,32 @@
+type: object
+required:
+  - lesson_id
+  - source
+  - applies_to
+  - use_for
+  - do
+  - do_not
+  - acceptance_gate
+  - source_anchor
+properties:
+  lesson_id: {type: string}
+  source:
+    enum: [vortex, miaow, gpgpusim, rocket, xiangshan, vibe_gpu]
+  applies_to:
+    type: array
+    items: {type: string}
+  use_for:
+    type: array
+    items: {type: string}
+  do:
+    type: array
+    items: {type: string}
+  do_not:
+    type: array
+    items: {type: string}
+  acceptance_gate:
+    type: array
+    items: {type: string}
+  source_anchor:
+    type: array
+    items: {type: string}

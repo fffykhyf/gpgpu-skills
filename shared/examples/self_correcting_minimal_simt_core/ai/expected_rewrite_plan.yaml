@@ -1,4 +1,0 @@
-rewrite_id: minimal_simt_core_noop
-capability_profile: minimal_simt_core
-patch_type: TEST_EVIDENCE_PATCH
-required_revalidation_gates: [basic_warp_instruction]

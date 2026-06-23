@@ -1,3 +1,0 @@
-capability_profile: minimal_simt_core
-modules: [simt_core, trace_adapter]
-required_partial_sim_cases: [basic_warp_instruction]

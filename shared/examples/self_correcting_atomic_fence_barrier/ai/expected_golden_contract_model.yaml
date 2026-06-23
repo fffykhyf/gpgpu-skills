@@ -1,8 +1,0 @@
-system_contract_ir_hash: hash_atomic_fence_barrier
-capability_profile: full_memory_sync_system
-memory_semantics_functions: [apply_memory_visibility_event]
-execution_semantics_functions:
-  - execute_atomic_serialization
-  - execute_fence_drain
-  - execute_barrier_arrive_wait_release
-  - execute_wsync_drain

@@ -1,4 +1,0 @@
-system_contract_ir_hash: hash_minimal_simt_core
-capability_profile: minimal_simt_core
-execution_semantics_functions: [select_warp, execute_basic_instruction]
-memory_semantics_functions: [simple_global_memory_access]

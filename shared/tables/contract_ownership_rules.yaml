@@ -1,0 +1,237 @@
+table: contract_ownership_rules
+version: compact-v1
+merged_sections:
+  - source_file: contract_semantics_binding_table.yaml
+    content: |
+      version: v5
+      bindings:
+        - contract_path: execution_model.scheduler
+          semantics_function: select_warp
+          required_inputs: [ready_warps, scheduler_cursor, scoreboard_state]
+          outputs: [selected_warp]
+        - contract_path: execution_model.simt.active_mask_rule
+          semantics_function: update_active_mask
+          required_inputs: [exec_mask, branch_result]
+          outputs: [next_exec_mask]
+        - contract_path: execution_model.simt.divergence_rule
+          semantics_function: resolve_divergence
+          feature_gate: execution_model.features.simt_divergence
+          required_inputs: [exec_mask, branch_result, simt_stack_state]
+          outputs: [next_exec_mask, next_pc, simt_stack_state]
+        - contract_path: execution_model.scoreboard
+          semantics_function: apply_scoreboard_dependency
+          required_inputs: [selected_warp, scoreboard_state]
+          outputs: [issue_allowed, dependency_stall_reason]
+        - contract_path: state_model.pipeline_visible_state
+          semantics_function: commit_pipeline_visible_state
+          feature_gate: execution_model.features.visible_pipeline_commit
+          required_inputs: [pipeline_visible_state, writeback_event]
+          outputs: [committed_state]
+        - contract_path: memory_model.coalescing
+          semantics_function: coalesce
+          required_inputs: [lane_mask, addresses, access_size]
+          outputs: [memory_transactions]
+        - contract_path: memory_model.address_spaces
+          semantics_function: address_space_resolve
+          required_inputs: [address, address_space_table]
+          outputs: [resolved_space_or_fault]
+        - contract_path: memory_model.byte_enable
+          semantics_function: byte_enable
+          required_inputs: [lane_mask, access_size, address_alignment]
+          outputs: [byte_enable_mask]
+        - contract_path: memory_model.ordering
+          semantics_function: fence_order
+          feature_gate: memory_model.fence.enabled
+          required_inputs: [memory_events, fence_scope]
+          outputs: [ordered_events]
+        - contract_path: memory_model.fence.unsupported_behavior
+          semantics_function: reject_fence_or_trap
+          feature_gate_disabled: memory_model.fence.enabled
+          required_inputs: [instruction, unsupported_reason]
+          outputs: [trap_or_reject_event]
+        - contract_path: memory_model.atomic.apply
+          semantics_function: atomic_apply
+          feature_gate: memory_model.atomic.enabled
+          required_inputs: [atomic_op, address, operands, memory_state]
+          outputs: [atomic_result, memory_state]
+        - contract_path: memory_model.atomic.unsupported_behavior
+          semantics_function: reject_atomic_or_trap
+          feature_gate_disabled: memory_model.atomic.enabled
+          required_inputs: [instruction, unsupported_reason]
+          outputs: [trap_or_reject_event]
+        - contract_path: memory_model.request_lifecycle
+          semantics_function: request_lifecycle_step
+          required_inputs: [memory_request, memory_stall_state, response_event]
+          outputs: [memory_stall_state, retire_or_fault_event]
+        - contract_path: isa_model.instruction_encodings
+          semantics_function: decode_instruction_bytes
+          required_inputs: [encoded_instruction, instruction_encoding_table]
+          outputs: [decoded_instruction_or_trap]
+        - contract_path: isa_model.assembly_syntax
+          semantics_function: parse_assembly_instruction
+          required_inputs: [assembly_line, assembly_syntax, opcode_table]
+          outputs: [assembly_instruction_or_parse_error]
+        - contract_path: launch_model.abi
+          semantics_function: abi_decode
+          required_inputs: [argument_bytes, abi_layout]
+          outputs: [decoded_arguments]
+        - contract_path: launch_model.grid_block_thread_mapping
+          semantics_function: grid_block_thread_map
+          required_inputs: [grid_dim, block_dim, warp_size]
+          outputs: [logical_thread_map]
+        - contract_path: launch_model.kernel_entry
+          semantics_function: kernel_entry_resolve
+          required_inputs: [program_image, entry_symbol]
+          outputs: [entry_pc]
+        - contract_path: launch_model.program_image_format
+          semantics_function: parse_program_image
+          required_inputs: [program_image_bytes, program_image_format]
+          outputs: [program_image_ir]
+        - contract_path: launch_model.program_image_format
+          semantics_function: fetch_instruction_from_image
+          required_inputs: [program_image_ir, pc]
+          outputs: [encoded_instruction]
+        - contract_path: launch_model.argument_buffer_layout
+          semantics_function: encode_runtime_arguments
+          required_inputs: [kernel_arguments, argument_buffer_layout]
+          outputs: [arg_buffer_bytes]
+        - contract_path: launch_model.loader_contract
+          semantics_function: load_program_image
+          required_inputs: [program_image_ir, loader_contract]
+          outputs: [imem_init, dmem_init, entry_pc]
+        - contract_path: launch_model.completion_fault_observation
+          semantics_function: completion_or_fault_observe
+          required_inputs: [completion_state, fault_state]
+          outputs: [runtime_visible_status]
+        - contract_path: interface_semantics_model.request_acceptance
+          semantics_function: request_accept_lifecycle
+          required_inputs: [valid, ready, request_state]
+          outputs: [accepted_request_state]
+        - contract_path: interface_semantics_model.payload_stability
+          semantics_function: payload_stability_when_not_ready
+          required_inputs: [valid, ready, payload_before, payload_after]
+          outputs: [stability_verdict]
+        - contract_path: interface_semantics_model.tag_uniqueness
+          semantics_function: tag_uniqueness_until_response
+          required_inputs: [request_tag, outstanding_tags, response_event]
+          outputs: [tag_verdict]
+        - contract_path: interface_semantics_model.response_ordering
+          semantics_function: response_ordering_by_tag
+          required_inputs: [request_order, response_order, tag]
+          outputs: [ordering_verdict]
+        - contract_path: interface_semantics_model.fault_response
+          semantics_function: fault_response_retirement
+          required_inputs: [fault_response, instruction_state]
+          outputs: [retire_trap_or_poison]
+  - source_file: golden_model_coverage_table.yaml
+    content: |
+      version: v5
+      coverage_gates:
+        execution_semantics:
+          required_functions: [select_warp, update_active_mask, apply_scoreboard_dependency]
+          required_if_feature_enabled:
+            simt_divergence:
+              contract_path: execution_model.features.simt_divergence
+              functions: [resolve_divergence]
+            visible_pipeline_commit:
+              contract_path: execution_model.features.visible_pipeline_commit
+              functions: [commit_pipeline_visible_state]
+          failure_mode: GOLDEN_MODEL_COVERAGE_FAIL
+        memory_semantics:
+          required_functions: [address_space_resolve, coalesce, byte_enable, request_lifecycle_step]
+          required_if_feature_enabled:
+            memory_fence:
+              contract_path: memory_model.fence.enabled
+              functions: [fence_order]
+            memory_atomic:
+              contract_path: memory_model.atomic.enabled
+              functions: [atomic_apply]
+          required_if_feature_disabled:
+            memory_fence:
+              contract_path: memory_model.fence.enabled
+              functions: [reject_fence_or_trap]
+              evidence: unsupported_reason
+            memory_atomic:
+              contract_path: memory_model.atomic.enabled
+              functions: [reject_atomic_or_trap]
+              evidence: unsupported_reason
+          failure_mode: GOLDEN_MODEL_COVERAGE_FAIL
+        launch_semantics:
+          required_functions: [abi_decode, grid_block_thread_map, kernel_entry_resolve, completion_or_fault_observe]
+          failure_mode: GOLDEN_MODEL_COVERAGE_FAIL
+        interface_semantics:
+          required_functions: [request_accept_lifecycle, payload_stability_when_not_ready, tag_uniqueness_until_response, response_ordering_by_tag, fault_response_retirement]
+          failure_mode: GOLDEN_MODEL_COVERAGE_FAIL
+        forbidden_independent_truth:
+          forbidden_fields: [isa_definition, memory_ordering_override, launch_abi_override, scheduler_override, config_default_override, interface_lifecycle_override]
+          failure_mode: FORBIDDEN_GOLDEN_TRUTH
+  - source_file: source_of_truth_generation_table.yaml
+    content: |
+      table: source_of_truth_generation_table
+      version: v5
+      generation_rules:
+        isa_model.opcodes:
+          source: SYSTEM_CONTRACT_IR.isa_model.opcodes
+          derived_artifacts:
+            - rtl/defines.svh
+            - tools/isa.py
+            - tools/encoding_table.py
+            - tools/assembler.py opcode table
+            - tools/disassembler.py opcode table
+            - docs/isa.md
+          gate: byte_or_semantic_equivalence_required
+        isa_model.instruction_encodings:
+          source: SYSTEM_CONTRACT_IR.isa_model.instruction_encodings
+          derived_artifacts:
+            - tools/assembler.py encode rules
+            - tools/disassembler.py decode rules
+            - tools/isa.py field layout
+            - rtl/decode.svh
+            - docs/isa_encoding.md
+          gate: encoding_equivalence_required
+        isa_model.assembly_syntax:
+          source: SYSTEM_CONTRACT_IR.isa_model.assembly_syntax
+          derived_artifacts:
+            - tools/assembler.py parser rules
+            - docs/isa.md assembly syntax
+          gate: semantic_equivalence_required
+        launch_model.program_image_format:
+          source: SYSTEM_CONTRACT_IR.launch_model.program_image_format
+          derived_artifacts:
+            - tools/program_image.py
+            - tools/loader.py
+            - docs/program_image_format.md
+          gate: byte_layout_equivalence_required
+        launch_model.argument_buffer_layout:
+          source: SYSTEM_CONTRACT_IR.launch_model.argument_buffer_layout
+          derived_artifacts:
+            - tools/runtime_launch.py
+            - tests/expected_arg_buffer.bin
+            - docs/launch_abi.md
+          gate: semantic_equivalence_required
+        launch_model.loader_contract:
+          source: SYSTEM_CONTRACT_IR.launch_model.loader_contract
+          derived_artifacts:
+            - tools/loader.py
+            - rtl/program_image_loader_interface.sv
+            - docs/program_image_format.md loader section
+          gate: semantic_equivalence_required
+        hardware_threads:
+          source: SYSTEM_CONTRACT_IR.launch_model.thread_block_grid_model
+          derived_artifacts:
+            - compiler total_threads
+            - runtime gridDim calculation
+            - test expected output length
+            - memory dump length
+          gate: semantic_equivalence_required
+      truth_source_rules:
+        - docs cannot be the truth source
+        - rtl defines cannot be the truth source
+        - tool opcode tables cannot be the truth source
+      failure_rules:
+        drift: SOURCE_OF_TRUTH_DRIFT
+        isa_encoding_drift: ISA_ENCODING_DRIFT
+source_files:
+  - contract_semantics_binding_table.yaml
+  - golden_model_coverage_table.yaml
+  - source_of_truth_generation_table.yaml

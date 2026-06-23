@@ -1,13 +1,43 @@
 schema: contract_fragment_ir
-version: v5
+version: compact-v1
 type: object
-required: [fragment_id, owner_skill, capability_profile, contract_paths, provenance]
+required: [fragment_id, owner_skill, fragment_type, contract_paths, provenance]
 properties:
-  fragment_id: string
-  owner_skill: enum
-  capability_profile: string
-  contract_paths: list
-  required_trace_events: list
-  required_tests: list
-  provenance: map
-owner_skills: [gpgpu-interconnect, gpgpu-memory, gpgpu-atomic-sync]
+  fragment_id:
+    type: string
+  owner_skill:
+    type: string
+  fragment_type:
+    enum:
+      - simt_core
+      - warp_scheduler
+      - scoreboard
+      - shared_memory
+      - memory_path
+      - coalescer
+      - l1_global_adapter
+      - l2_cache_slice
+      - dram_controller
+      - interconnect
+      - noc_routing
+      - fabric_backpressure
+      - atomic
+      - fence
+      - barrier
+      - memory_consistency
+  contract_paths:
+    type: array
+  provenance:
+    type: object
+  memory_path:
+    type: object
+  interconnect:
+    type: object
+  atomic_sync:
+    type: object
+  validation_hooks:
+    type: array
+  rtl_binding_hooks:
+    type: array
+  golden_semantics_hooks:
+    type: array

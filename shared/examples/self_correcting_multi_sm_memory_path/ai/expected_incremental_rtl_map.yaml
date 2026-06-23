@@ -1,3 +1,0 @@
-capability_profile: multi_sm_memory_path
-modules: [lsu_slice, memory_scheduler, memory_coalescer, local_memory_bank, l1_global_adapter, trace_adapter]
-required_partial_sim_cases: [same_line_multi_lane_load, mixed_byte_enable_restore, response_shape_restore, tag_reuse_forbidden]

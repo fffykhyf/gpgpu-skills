@@ -1,0 +1,51 @@
+title: RUN_STATE
+type: object
+required:
+  - run_id
+  - mode
+  - active_skills
+  - touched_artifacts
+  - current_truth
+  - gates
+  - open_issues
+properties:
+  run_id:
+    type: string
+  mode:
+    enum:
+      - FAST_ITERATION
+      - CONTRACT_FREEZE
+      - DEBUG_REGRESSION
+      - PERF_ANALYSIS
+      - RELEASE_CHECK
+  active_skills:
+    type: array
+    items:
+      type: string
+  touched_artifacts:
+    type: array
+    items:
+      type: object
+  current_truth:
+    type: object
+    properties:
+      architecture:
+        type: string
+      contract:
+        type: string
+      golden_model:
+        type: string
+      toolchain:
+        type: string
+      rtl_map:
+        type: string
+      validation:
+        type: string
+  gates:
+    type: array
+    items:
+      type: object
+  open_issues:
+    type: array
+    items:
+      type: object

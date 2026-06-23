@@ -1,4 +1,0 @@
-system_id: minimal_simt_core_system
-capability_profile: minimal_simt_core
-contract_fragments: [minimal_simt_core_fragment]
-architecture_model: {sm_count: 1, warp_count: 1}

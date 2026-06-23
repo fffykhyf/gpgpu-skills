@@ -1,8 +1,0 @@
-schema: coalescer_response_restore_contract
-version: v5
-type: object
-required: [coalescer_merge, coalescer_restore, failure_modes]
-properties:
-  coalescer_merge: map
-  coalescer_restore: map
-  failure_modes: list
