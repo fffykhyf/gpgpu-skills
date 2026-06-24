@@ -2,7 +2,7 @@
 
 ## Merged Source Material
 
-### Source: `skill/gpgpu-contract/contract_truth_and_state_model.md`
+### Source ID: `gpgpu-contract/contract_truth_and_state_model.md`
 
 # Contract Truth and State Model
 
@@ -172,7 +172,7 @@ trap/fault state.
 atomic pending, fault injection, and debug query state. Sidecar state is allowed
 to synchronize or localize evidence, but it must not become ISA-visible truth.
 
-### Source: `skill/gpgpu-contract/contract_fragment_freeze_rules.md`
+### Source ID: `gpgpu-contract/contract_fragment_freeze_rules.md`
 
 # Contract Fragment Freeze Rules
 
@@ -200,7 +200,7 @@ Required frozen fragments:
 - MSHR replay and deadlock guard fragment;
 - atomic serialization, fence visibility, barrier phase, and WSYNC drain fragment.
 
-### Source: `skill/gpgpu-contract/functional_timing_boundary.md`
+### Source ID: `gpgpu-contract/functional_timing_boundary.md`
 
 # Functional vs Timing Boundary
 
@@ -218,7 +218,7 @@ Do not define a functional rule from:
 Fence, atomic, and barrier correctness must be defined by visibility,
 serialization, return-value, and release conditions in `SYSTEM_CONTRACT_IR`.
 
-### Source: `skill/gpgpu-contract/compatibility_profile_contract.md`
+### Source ID: `gpgpu-contract/compatibility_profile_contract.md`
 
 # Optional CUDA/PTX Compatibility Profile
 

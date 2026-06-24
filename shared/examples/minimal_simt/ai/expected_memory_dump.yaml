@@ -1,0 +1,14 @@
+program_image_ir_hash: hash_program_image_vecadd
+runtime_launch_ir_hash: hash_runtime_launch_vecadd
+golden_contract_model_hash: hash_golden_contract_minimal_simt
+memory_objects:
+  - name: C
+    address: 4128
+    words_u32: [11, 22, 33, 44]
+    bytes: "0b00000016000000210000002c000000"
+trace_summary:
+  fetched_from_program_image: true
+  decoded_instruction_count: 6
+  completed_warps: 1
+  faulted_warps: 0
+verdict: PASS

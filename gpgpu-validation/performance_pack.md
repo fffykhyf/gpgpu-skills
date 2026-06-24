@@ -2,7 +2,7 @@
 
 ## Merged Source Material
 
-### Source: `skill/gpgpu-validation/bottleneck_graph_builder.md`
+### Source ID: `gpgpu-validation/bottleneck_graph_builder.md`
 
 # Bottleneck Graph Builder
 
@@ -152,7 +152,7 @@ stall, synchronization stall, tensor/ALU busy, and structural conflict. Memory
 pipeline stall must be further attributable to coalescer, L1, MSHR, NoC, L2,
 DRAM, or return path when those traces exist.
 
-### Source: `skill/gpgpu-validation/memory_attribution_matrix.md`
+### Source ID: `gpgpu-validation/memory_attribution_matrix.md`
 
 # Memory Attribution Matrix
 
@@ -169,7 +169,7 @@ Memory attribution order:
 9. return path;
 10. scoreboard release.
 
-### Source: `skill/gpgpu-validation/multi_sm_trace_model.md`
+### Source ID: `gpgpu-validation/multi_sm_trace_model.md`
 
 # Multi-SM Trace Model
 
@@ -246,7 +246,7 @@ Human-facing validation dashboard should show:
 
 Full per-event traces remain AI-facing artifacts.
 
-### Source: `skill/gpgpu-validation/performance_metric_extractor.md`
+### Source ID: `gpgpu-validation/performance_metric_extractor.md`
 
 # Performance Metric Extractor
 
@@ -384,7 +384,7 @@ cycle interval, and weight. `CHECKPOINT_PACKAGE` replay must bind golden replay,
 RTL replay, counter schema, trace schema, runtime descriptor, pending
 transactions, barrier state, and atomic state.
 
-### Source: `skill/gpgpu-validation/power_energy_provenance.md`
+### Source ID: `gpgpu-validation/power_energy_provenance.md`
 
 # Power / Energy Provenance
 
@@ -399,7 +399,7 @@ Power reports are derived evidence. They must list:
 
 Power alone cannot prove a performance bottleneck.
 
-### Source: `skill/gpgpu-validation/queue_boundary_attribution.md`
+### Source ID: `gpgpu-validation/queue_boundary_attribution.md`
 
 # Queue Boundary Attribution
 
@@ -407,7 +407,7 @@ A memory bottleneck claim must name:
 
 - request id or aggregate class;
 - queue boundary;
-- owner skill/stage;
+- owner skill stage;
 - enter and exit cycles;
 - occupancy/capacity;
 - release event;
@@ -416,7 +416,7 @@ A memory bottleneck claim must name:
 
 Generic `DRAM slow` or `NoC slow` labels are invalid.
 
-### Source: `skill/gpgpu-validation/report_generation_rules.md`
+### Source ID: `gpgpu-validation/report_generation_rules.md`
 
 # Report Generation Rules
 
@@ -497,7 +497,7 @@ speedup or regression. The report must state which weighted phases changed,
 which TopDown buckets moved, whether correctness diff passed first, and whether
 any phase regressed enough to reject the change.
 
-### Source: `skill/gpgpu-validation/stall_reason_matrix.md`
+### Source ID: `gpgpu-validation/stall_reason_matrix.md`
 
 # Stall Reason Matrix
 

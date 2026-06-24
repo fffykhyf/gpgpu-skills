@@ -12,9 +12,9 @@ reference APIs, layered differential tracing, replayable failure capture, safe
 runtime design-space exploration, structured trace databases, and weighted
 checkpoint-based performance attribution.
 
-Default skill execution should read `shared/references/xiangshan_lessons.yaml`
+Default skill execution should read `shared/references/reference_lessons.yaml`
 and the concise lesson summaries in this directory. Raw reader reports under
-`raw/` are lazy-load material for deep investigation only.
+archived raw reports are lazy-load material for deep investigation only.
 
 ## Applies As
 

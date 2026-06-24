@@ -64,7 +64,7 @@ Reject missing provenance, simulator-only behavior, unowned semantics, unobserva
 
 ## Merged Source Material
 
-### Source: `skill/gpgpu-contract/packs/atomic_sync/SKILL.md`
+### Source ID: `gpgpu-contract/packs/atomic_sync/SKILL.md`
 
 ---
 name: gpgpu-contract/packs/atomic_sync
@@ -102,7 +102,7 @@ Consumes:
 - `CACHE_COHERENCE_MODEL`
 - memory and atomic traces
 - barrier and fence traces
-- `shared/references/vortex_memory_sync_lessons.yaml`
+- `shared/references/source_summaries/vortex.md`
 
 ## Output IR
 
@@ -211,27 +211,17 @@ This skill must not:
 ## Required Tables
 
 This skill must use:
-- `shared/tables/output_mode_table.yaml`
-- `shared/tables/artifact_visibility_table.yaml`
-- `shared/tables/report_language_policy.yaml`
-- `shared/tables/human_report_template_table.yaml`
-- `shared/tables/revalidation_routing_table.yaml`
-- `shared/tables/root_cause_taxonomy.yaml`
-- `shared/tables/stall_reason_taxonomy.md`
+- `shared/tables/workflow_policy.yaml`
+- `shared/tables/rewrite_rules.yaml`
+- `shared/tables/performance_taxonomy.yaml`
 
 ## Required Schemas
 
 This skill must validate:
-- `shared/schemas/output_mode_ir.schema.yaml`
 - `shared/schemas/artifact_manifest_ir.schema.yaml`
-- `shared/schemas/human_report_manifest_ir.schema.yaml`
-- `shared/schemas/artifact_visibility_ir.schema.yaml`
 - `shared/schemas/system_contract_ir.schema.yaml`
 - `shared/schemas/normalized_trace_ir.schema.yaml`
-- `shared/schemas/atomic_operation.schema.yaml`
-- `shared/schemas/fence_visibility.schema.yaml`
-- `shared/schemas/barrier_state.schema.yaml`
-- `shared/schemas/sync_sidechannel_event.schema.yaml` (`SYNC_SIDECHANNEL_EVENT`)
+- `shared/schemas/contract_fragment_ir.schema.yaml` (`SYNC_SIDECHANNEL_EVENT`)
 
 ## Required Invariants
 
@@ -274,24 +264,23 @@ The report must include:
 - affected_sm_ids
 - downstream_contract
 
-## Concrete Assets Required
+## Compact Coverage Required
 
-This skill is incomplete unless the following exist:
-- `atomic_execution_model.md`
-- `barrier_fence_contract.md`
-- `atomic_operation_contract.md`
-- `fence_scope_visibility_contract.md`
-- `cta_barrier_contract.md`
-- `memory_ordering_litmus_tests.md`
-- `synchronization_stall_attribution.md`
-- `shared/schemas/atomic_operation.schema.yaml`
-- `shared/schemas/fence_visibility.schema.yaml`
-- `shared/schemas/barrier_state.schema.yaml`
+This compact pack is incomplete unless these merged source IDs are present below:
+- `atomic_execution_model`
+- `barrier_fence_contract`
+- `atomic_operation_contract`
+- `fence_scope_visibility_contract`
+- `cta_barrier_contract`
+- `memory_ordering_litmus_tests`
+- `synchronization_stall_attribution`
+
+It must also use `shared/schemas/contract_fragment_ir.schema.yaml`.
 
 When a required schema, table, example, or test is missing, emit
 `INSUFFICIENT_SKILL_ASSET` rather than inventing behavior.
 
-### Source: `skill/gpgpu-contract/packs/atomic_sync/atomic_execution_model.md`
+### Source ID: `gpgpu-contract/packs/atomic_sync/atomic_execution_model.md`
 
 # Atomic Execution Model
 
@@ -352,7 +341,7 @@ Atomic trace events must include:
 - per-SM and global ordering are distinguishable
 - cache/coherence visibility agrees with the atomic model
 
-### Source: `skill/gpgpu-contract/packs/atomic_sync/atomic_operation_contract.md`
+### Source ID: `gpgpu-contract/packs/atomic_sync/atomic_operation_contract.md`
 
 # Atomic Operation Contract
 
@@ -371,7 +360,7 @@ Required fields:
 Atomic stalls use `atomic_wait` or `atomic_split_or_replay`, not generic memory
 stall.
 
-### Source: `skill/gpgpu-contract/packs/atomic_sync/atomic_serialization_contract.md`
+### Source ID: `gpgpu-contract/packs/atomic_sync/atomic_serialization_contract.md`
 
 # Atomic Serialization Contract
 
@@ -398,7 +387,7 @@ Rules:
 - Atomic response must return to the original warp and lane.
 - Atomic visibility and fence visibility are different events.
 
-### Source: `skill/gpgpu-contract/packs/atomic_sync/barrier_fence_contract.md`
+### Source ID: `gpgpu-contract/packs/atomic_sync/barrier_fence_contract.md`
 
 # Barrier and Fence Contract
 
@@ -503,7 +492,7 @@ synchronization ownership; they do not replace architectural state diff.
 Required structured tables include `BARRIER_EVENT_LOG`, `FENCE_EVENT_LOG`, and
 `ATOMIC_EVENT_LOG` when those features are enabled.
 
-### Source: `skill/gpgpu-contract/packs/atomic_sync/barrier_phase_contract.md`
+### Source ID: `gpgpu-contract/packs/atomic_sync/barrier_phase_contract.md`
 
 # Barrier Phase Contract
 
@@ -529,7 +518,7 @@ Rules:
 - If barrier requires LSU drain, the drain must complete before release.
 - `BARRIER_PHASE_MISMATCH` routes to `SYNC_ATOMIC_PATCH`.
 
-### Source: `skill/gpgpu-contract/packs/atomic_sync/cta_barrier_contract.md`
+### Source ID: `gpgpu-contract/packs/atomic_sync/cta_barrier_contract.md`
 
 # CTA Barrier Contract
 
@@ -544,7 +533,7 @@ Barrier fields:
 
 Barrier wait requires participant and release evidence.
 
-### Source: `skill/gpgpu-contract/packs/atomic_sync/fence_scope_visibility_contract.md`
+### Source ID: `gpgpu-contract/packs/atomic_sync/fence_scope_visibility_contract.md`
 
 # Fence Scope / Visibility Contract
 
@@ -560,7 +549,7 @@ Fence fields:
 
 Fence completion must not be defined by a fixed timing delay.
 
-### Source: `skill/gpgpu-contract/packs/atomic_sync/fence_visibility_contract.md`
+### Source ID: `gpgpu-contract/packs/atomic_sync/fence_visibility_contract.md`
 
 # Fence Visibility Contract
 
@@ -583,7 +572,7 @@ Rules:
 - Fence completion must be later than the required visibility event.
 - `FENCE_DRAIN_INCOMPLETE` routes to `SYNC_ATOMIC_PATCH`.
 
-### Source: `skill/gpgpu-contract/packs/atomic_sync/memory_ordering_litmus_tests.md`
+### Source ID: `gpgpu-contract/packs/atomic_sync/memory_ordering_litmus_tests.md`
 
 # Memory Ordering Litmus Tests
 
@@ -598,7 +587,7 @@ Minimum litmus coverage:
 
 GPGPU-Sim timing-side notes are insufficient as a full memory consistency model.
 
-### Source: `skill/gpgpu-contract/packs/atomic_sync/synchronization_stall_attribution.md`
+### Source ID: `gpgpu-contract/packs/atomic_sync/synchronization_stall_attribution.md`
 
 # Synchronization Stall Attribution
 
@@ -612,7 +601,7 @@ Stable synchronization stall reasons:
 
 Each reason requires a synchronization contract event and a release condition.
 
-### Source: `skill/gpgpu-contract/packs/atomic_sync/wsync_drain_contract.md`
+### Source ID: `gpgpu-contract/packs/atomic_sync/wsync_drain_contract.md`
 
 # WSYNC Drain Contract
 

@@ -2,7 +2,7 @@
 
 ## Merged Source Material
 
-### Source: `skill/gpgpu-validation/differential_correctness_engine.md`
+### Source ID: `gpgpu-validation/differential_correctness_engine.md`
 
 # Differential Correctness Engine
 
@@ -74,7 +74,7 @@ event type, expected value, actual value, suspected owner, required traces,
 `REPLAY_WINDOW`, related config hash, and runtime image hash. Final output or
 final memory mismatch is a symptom unless it is also the first bad event.
 
-### Source: `skill/gpgpu-validation/legacy_validation_and_trace_constraints.md`
+### Source ID: `gpgpu-validation/legacy_validation_and_trace_constraints.md`
 
 # Legacy Validation and Trace Constraints
 
@@ -186,7 +186,7 @@ Every root cause must cite trace evidence, a failed gate, and a path to either
 `SYSTEM_CONTRACT_IR` or `INCREMENTAL_RTL_MAP`. If multiple root causes cannot be
 ranked deterministically, emit `ROOT_CAUSE_AMBIGUOUS`.
 
-### Source: `skill/gpgpu-validation/root_cause_engine.md`
+### Source ID: `gpgpu-validation/root_cause_engine.md`
 
 # Root Cause Engine
 
@@ -368,7 +368,7 @@ available artifact list. Missing trace, waveform, state, store-log, or counter
 artifacts route to `TEST_EVIDENCE_PATCH` unless an absent reason proves the
 artifact is intentionally unavailable.
 
-### Source: `skill/gpgpu-validation/root_cause_evidence_rule.md`
+### Source ID: `gpgpu-validation/root_cause_evidence_rule.md`
 
 # Root Cause Evidence Rule
 
@@ -384,7 +384,7 @@ Every root cause must include:
 If any field is missing, emit `INSUFFICIENT_TRACE_EVIDENCE` or route to
 `COUNTER_SCHEMA_PATCH` / `TEST_EVIDENCE_PATCH`.
 
-### Source: `skill/gpgpu-validation/toolchain_trace_attribution.md`
+### Source ID: `gpgpu-validation/toolchain_trace_attribution.md`
 
 # Toolchain Trace Attribution
 
@@ -438,11 +438,11 @@ toolchain_attribution_report:
     - launch_model.argument_buffer_layout
     - launch_model.loader_contract
   related_artifacts:
-    - tools/assembler.py
-    - tools/disassembler.py
-    - tools/program_image.py
-    - tools/runtime_launch.py
-    - tools/loader.py
+    - generated_tool:assembler.py
+    - generated_tool:disassembler.py
+    - generated_tool:program_image.py
+    - generated_tool:runtime_launch.py
+    - generated_tool:loader.py
 ```
 
 ## Attribution Rules
@@ -467,7 +467,7 @@ Toolchain and runtime traces that feed a trace database must register tables in
 attribution. Query artifacts are AI-facing English evidence and should be
 referenced by human reports only as summarized results.
 
-### Source: `skill/gpgpu-validation/warp_trace_diff.md`
+### Source ID: `gpgpu-validation/warp_trace_diff.md`
 
 # Warp Trace Diff
 

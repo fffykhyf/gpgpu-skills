@@ -21,14 +21,14 @@ Do not use Rocket as a GPU pipeline reference. Do not copy Rocket scalar
 pipeline stages, CLINT or PLIC register layout, TileLink as a mandatory protocol,
 or CPU privilege semantics.
 
-Raw reader reports are copied under `raw/`. Curated summaries in this directory
+Raw reader reports remain archived outside the compact package. Curated summaries in this directory
 are the preferred AI-facing references for skill rules.
 
 ## config_fragment_lessons
 
 # Rocket Config Fragment Lessons Summary
 
-Raw report: `raw/rocket_config_fragment_lessons.md`
+Raw report: `archived_raw:rocket_config_fragment_lessons.md`
 
 Rocket config fragments show how a generator can compose product, debug, test,
 and harness variants without forking RTL. The reusable abstraction is the
@@ -58,7 +58,7 @@ Anti-patterns:
 
 # Rocket Interface Negotiation Summary
 
-Raw report: `raw/rocket_diplomacy_to_gpgpu_interface_contract.md`
+Raw report: `archived_raw:rocket_diplomacy_to_gpgpu_interface_contract.md`
 
 Rocket diplomacy is a reference for capability negotiation. It is not a
 requirement to use TileLink. The transferable rule is that interfaces are
@@ -90,7 +90,7 @@ Required failure behavior:
 
 # Rocket Generator Verification Summary
 
-Raw report: `raw/rocket_generator_verification_to_gpgpu.md`
+Raw report: `archived_raw:rocket_generator_verification_to_gpgpu.md`
 
 Rocket verification shows that generator outputs include tests, harnesses,
 monitors, fuzzers, trace sinks, and compile-only coverage. These are reusable
@@ -121,7 +121,7 @@ Anti-patterns:
 
 # Rocket MMIO Runtime Debug Summary
 
-Raw report: `raw/rocket_mmio_runtime_debug_to_gpgpu.md`
+Raw report: `archived_raw:rocket_mmio_runtime_debug_to_gpgpu.md`
 
 Rocket regmapper and debug devices are references for generator-owned
 software-visible state. Transfer the declarative register-map pattern, not
@@ -152,7 +152,7 @@ Anti-patterns:
 
 # Rocket Repository Map Summary
 
-Raw report: `raw/rocket_repo_map_for_gpgpu.md`
+Raw report: `archived_raw:rocket_repo_map_for_gpgpu.md`
 
 Rocket Chip is useful because it is a parameterized SoC generator, not because it
 contains a scalar CPU implementation. The transferable packages are `subsystem`,
@@ -179,7 +179,7 @@ Do not transfer:
 
 # Rocket SoC Composition Summary
 
-Raw report: `raw/rocket_soc_composition_to_gpgpu_system.md`
+Raw report: `archived_raw:rocket_soc_composition_to_gpgpu_system.md`
 
 Rocket composition is a reference for a system generator root and narrow-waist
 attachment APIs. It is not a reference for GPU execution pipelines.

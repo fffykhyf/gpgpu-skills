@@ -1,8 +1,8 @@
 cases:
   - case_id: rewrite_loop_routes_memory_system_replay_to_patch
     input_artifacts:
-      - shared/examples/self_correcting_minimal_simt/expected_arch_ir.yaml
-      - shared/examples/self_correcting_minimal_simt/expected_perf_attribution_graph.yaml
+      - shared/examples/minimal_simt/ai/expected_arch_ir.yaml
+      - shared/examples/minimal_simt/ai/expected_perf_attribution_graph.yaml
     expected_outputs:
       - ARCH_REWRITE_PLAN
       - REWRITE_DECISION_REPORT

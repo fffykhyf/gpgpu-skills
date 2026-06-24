@@ -1,7 +1,7 @@
 table: toolchain_rules
 version: compact-v1
 merged_sections:
-  - source_file: toolchain_artifact_generation_table.yaml
+  - source_id: toolchain_artifact_generation_table.yaml
     content: |
       table: toolchain_artifact_generation_table
       version: v5
@@ -9,33 +9,33 @@ merged_sections:
         isa_model:
           source: SYSTEM_CONTRACT_IR.isa_model
           derived_artifacts:
-            - tools/isa.py
-            - tools/encoding_table.py
-            - tools/assembler.py
-            - tools/disassembler.py
+            - generated_tool:isa.py
+            - generated_tool:encoding_table.py
+            - generated_tool:assembler.py
+            - generated_tool:disassembler.py
             - rtl/defines.svh
             - docs/isa.md
           gate: hash_and_semantic_equivalence_required
         launch_model:
           source: SYSTEM_CONTRACT_IR.launch_model
           derived_artifacts:
-            - tools/runtime_launch.py
+            - generated_tool:runtime_launch.py
             - docs/launch_abi.md
           gate: semantic_equivalence_required
         program_image_model:
           source: SYSTEM_CONTRACT_IR.launch_model.program_image_format
           derived_artifacts:
-            - tools/program_image.py
-            - tools/loader.py
+            - generated_tool:program_image.py
+            - generated_tool:loader.py
             - docs/program_image_format.md
           gate: byte_layout_equivalence_required
         loader_model:
           source: SYSTEM_CONTRACT_IR.launch_model.loader_contract
           derived_artifacts:
-            - tools/loader.py
+            - generated_tool:loader.py
             - rtl/program_image_loader_interface.sv
           gate: semantic_equivalence_required
-  - source_file: assembly_syntax_table.yaml
+  - source_id: assembly_syntax_table.yaml
     content: |
       table: assembly_syntax_table
       version: v5
@@ -56,7 +56,7 @@ merged_sections:
       failure_modes:
         parse: ASM_PARSE_FAIL
         unsupported_instruction: UNSUPPORTED_INSTRUCTION_BEHAVIOR_MISMATCH
-  - source_file: instruction_encoding_derivation_table.yaml
+  - source_id: instruction_encoding_derivation_table.yaml
     content: |
       table: instruction_encoding_derivation_table
       version: v5
@@ -78,7 +78,7 @@ merged_sections:
           failure_mode: ISA_ENCODING_DRIFT
         unsupported_behavior_equivalence:
           failure_mode: UNSUPPORTED_INSTRUCTION_BEHAVIOR_MISMATCH
-  - source_file: program_image_format_table.yaml
+  - source_id: program_image_format_table.yaml
     content: |
       table: program_image_format_table
       version: v5
@@ -103,7 +103,7 @@ merged_sections:
       failure_modes:
         layout: PROGRAM_IMAGE_LAYOUT_FAIL
         entry: ENTRY_SYMBOL_RESOLVE_FAIL
-  - source_file: runtime_launch_binding_table.yaml
+  - source_id: runtime_launch_binding_table.yaml
     content: |
       table: runtime_launch_binding_table
       version: v5
@@ -127,7 +127,7 @@ merged_sections:
       failure_modes:
         arg_encoding: RUNTIME_ARG_ENCODING_FAIL
         entry: ENTRY_SYMBOL_RESOLVE_FAIL
-  - source_file: loader_contract_table.yaml
+  - source_id: loader_contract_table.yaml
     content: |
       table: loader_contract_table
       version: v5
@@ -145,7 +145,7 @@ merged_sections:
       failure_modes:
         loader_contract: LOADER_CONTRACT_FAIL
         image_layout: PROGRAM_IMAGE_LAYOUT_FAIL
-  - source_file: toolchain_validation_gate_table.yaml
+  - source_id: toolchain_validation_gate_table.yaml
     content: |
       table: toolchain_validation_gate_table
       version: v5

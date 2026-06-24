@@ -1,0 +1,55 @@
+system_contract_ir_hash: hash_system_contract_minimal_simt
+public_launch_abi:
+  kernel_name: vecadd
+  args_host: host_args_vecadd
+  args_size: 12
+  ndim: 1
+  grid_dim: {x: 1, y: 1, z: 1}
+  block_dim: {x: 4, y: 1, z: 1}
+  local_memory_size: 0
+  cluster_dim_or_workgroup_cluster: {x: 1, y: 1, z: 1}
+program_image_entry:
+  image_format: simple_flat_v1
+  symbol_table: {vecadd: 0}
+  entry_symbol: vecadd
+  entry_pc: 0
+  fallback_symbol: main
+arg_staging:
+  host_pointer: host_args_vecadd
+  device_scratch_addr: "0x2000"
+  arg_buffer_bytes: "001000001010000020100000"
+  alignment: 8
+control_plane_sequence:
+  queue_record_optional: null
+  mmio_writes_optional: []
+  dcr_writes_optional: []
+  csr_writes:
+    - {csr: kernel_entry, value: 0}
+    - {csr: arg_base, value: 8192}
+    - {csr: grid_dim, value: [1, 1, 1]}
+    - {csr: block_dim, value: [4, 1, 1]}
+  start_command: {csr: start, value: 1}
+device_dispatch_view:
+  startup_pc: 0
+  kernel_entry_pc: 0
+  arg_pointer: "0x2000"
+  grid_dim: {x: 1, y: 1, z: 1}
+  block_dim: {x: 4, y: 1, z: 1}
+  derived_cluster_fields: {cluster_size: 1}
+completion_fault_observation:
+  done_bit_or_seqnum: csr_status.done
+  event_completion: none
+  fault_code: csr_status.fault
+  timeout_policy: bounded_test_timeout
+backend_capability:
+  simulator: true
+  rtl_sim: true
+  fpga: false
+launch_trace_chain:
+  - public_launch_abi.kernel_name -> program_image_entry.entry_symbol
+  - program_image_entry.entry_pc -> device_dispatch_view.kernel_entry_pc
+  - arg_staging.device_scratch_addr -> device_dispatch_view.arg_pointer
+  - public_launch_abi.grid_dim -> device_dispatch_view.grid_dim
+  - public_launch_abi.block_dim -> device_dispatch_view.block_dim
+  - completion_fault_observation.done_bit_or_seqnum -> runtime_done
+canonical_hash: hash_runtime_launch_vecadd

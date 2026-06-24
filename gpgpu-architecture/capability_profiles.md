@@ -2,7 +2,7 @@
 
 ## Merged Source Material
 
-### Source: `skill/gpgpu-architecture/capability_profile_and_preset.md`
+### Source ID: `gpgpu-architecture/capability_profile_and_preset.md`
 
 # Capability Profile and Preset Contract
 
@@ -122,7 +122,7 @@ DSE. Every parameter must produce `KNOB_CLASSIFICATION`:
 
 Only runtime behavior and debug trace knobs may become `RUNTIME_DSE_KNOB`.
 
-### Source: `skill/gpgpu-architecture/scheduler_visible_state_contract.md`
+### Source ID: `gpgpu-architecture/scheduler_visible_state_contract.md`
 
 # Scheduler-Visible State Contract
 
@@ -139,7 +139,7 @@ Required scheduler-visible state:
 
 SIMT owns PC/control masks. Scoreboard owns register dependency hazards.
 
-### Source: `skill/gpgpu-architecture/sm_issue_gate_contract_gpgpusim.md`
+### Source ID: `gpgpu-architecture/sm_issue_gate_contract_gpgpusim.md`
 
 # SM Issue / Non-Issue Contract
 
@@ -165,7 +165,7 @@ The canonical issue gate order is:
 7. dual-issue policy allows;
 8. issue and reserve scoreboard.
 
-### Source: `skill/gpgpu-architecture/sm_hierarchy_model.md`
+### Source ID: `gpgpu-architecture/sm_hierarchy_model.md`
 
 # SM Hierarchy Model
 
@@ -304,7 +304,7 @@ A generated `ARCH_IR` reaches `single_sm_warp_pipeline` or
 - coalescer policy is contract-defined
 - multi-SM independence is enforced
 
-### Source: `skill/gpgpu-architecture/warp_state_contract.md`
+### Source ID: `gpgpu-architecture/warp_state_contract.md`
 
 # Warp State Contract
 

@@ -1,0 +1,54 @@
+graph_id: perf_graph_memory_replay_lsq
+graph_mode: PERFORMANCE_BOTTLENECK_GRAPH
+trace_window:
+  start_cycle: 40
+  end_cycle: 96
+nodes:
+  - id: cycle_window_40_96
+    class: cycle_window
+  - id: sm_0
+    class: sm
+  - id: warp_2
+    class: warp
+  - id: dep_r4_load
+    class: scoreboard_dependency
+  - id: mem_req_17
+    class: memory_request
+  - id: lsq_stage
+    class: rtl_pipeline_stage
+  - id: contract_request_lifecycle
+    class: contract_rule
+edges:
+  - from: sm_0
+    to: warp_2
+    class: owns
+  - from: warp_2
+    to: dep_r4_load
+    class: blocked_by
+  - from: dep_r4_load
+    to: mem_req_17
+    class: waits_for
+  - from: mem_req_17
+    to: lsq_stage
+    class: maps_to
+  - from: lsq_stage
+    to: contract_request_lifecycle
+    class: maps_to
+contract_path_index:
+  contract_request_lifecycle: memory_model.request_lifecycle
+rtl_module_path_index:
+  lsq_stage: load_store_queue
+toolchain_artifact_path_index: {}
+bottleneck_summary:
+  root_cause_class: MEMORY_SYSTEM_ROOT_CAUSE
+  root_cause_subclass: MEMORY_REPLAY_OVERHEAD
+  description: LSQ backpressure stalls warp scoreboard wakeup.
+  bottleneck_cycle_window:
+    start_cycle: 40
+    end_cycle: 96
+  counter_evidence:
+    replay_count: 7
+    scoreboard_wait_cycles: 42
+evidence_hashes:
+  - hash_lsq_partial_trace
+  - hash_normalized_trace

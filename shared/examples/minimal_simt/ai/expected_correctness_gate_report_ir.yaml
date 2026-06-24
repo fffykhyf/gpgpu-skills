@@ -1,0 +1,11 @@
+verdict: CORRECTNESS_PASS
+selected_mode: PASS_EVIDENCE_MODE
+comparison_scope:
+  - final_memory_dump
+  - architectural_trace
+mismatch_summary:
+  mismatches: []
+evidence_completeness:
+  trace_fields: sufficient
+  memory_dump: present
+  golden_trace: present

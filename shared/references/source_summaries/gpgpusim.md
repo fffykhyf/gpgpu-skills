@@ -10,7 +10,7 @@ This directory is evidence reference, not a design source of truth.
 
 All imported mechanisms must be rewritten into project-owned contracts before
 they can affect architecture, golden semantics, runtime ABI, RTL, counters, or
-rewrite routing. The raw reader reports live in `raw/`; skill files must cite
+rewrite routing. The raw reader reports remain archived outside the compact package; skill files must cite
 the rule they adopt, not paste GPGPU-Sim implementation details as design truth.
 
 Required intake order:
@@ -52,7 +52,7 @@ timing-side evidence only. Full memory consistency semantics must be defined in
 the project-owned golden contract or by a future deeper `cuda-sim/memory.cc`
 reader pass.
 
-Raw basis: `raw/gpgpu-sim-atomics-fence-consistency-notes.md`.
+Raw basis: `archived_raw:gpgpu-sim-atomics-fence-consistency-notes.md`.
 
 ## config_parameter_taxonomy
 
@@ -79,7 +79,7 @@ Every exposed parameter must include category, default/provenance, legal range
 or `unknown`, performance effect, owner skill, and whether it enters a hardware
 contract.
 
-Raw basis: `raw/gpgpu-sim-config-parameter-taxonomy.md`.
+Raw basis: `archived_raw:gpgpu-sim-config-parameter-taxonomy.md`.
 
 ## counter_stall_taxonomy
 
@@ -119,7 +119,7 @@ Root-cause reports must cite producer-backed counters for stable conclusions.
 Defined-only and parser-only counters can explain gaps or motivate producer
 patches, but cannot be the sole regression gate.
 
-Raw basis: `raw/gpgpu-sim-counter-and-stall-reason-taxonomy.md`.
+Raw basis: `archived_raw:gpgpu-sim-counter-and-stall-reason-taxonomy.md`.
 
 ## design_rules
 
@@ -150,7 +150,7 @@ These rules are imported methodology, not copied implementation.
 15. NVIDIA-specific CUDA/PTX/SASS behavior requires an optional compatibility
     profile.
 
-Raw basis: `raw/gpgpu-sim-design-rules-for-gpgpu-skills.md`.
+Raw basis: `archived_raw:gpgpu-sim-design-rules-for-gpgpu-skills.md`.
 
 ## do_not_copy
 
@@ -185,7 +185,7 @@ Safe methodology to import:
 - queue-boundary memory attribution;
 - producer-backed counter manifests.
 
-Raw basis: `raw/gpgpu-sim-do-not-copy.md`.
+Raw basis: `archived_raw:gpgpu-sim-do-not-copy.md`.
 
 ## l2_noc_dram
 
@@ -210,7 +210,7 @@ DRAM bottlenecks require evidence for queue occupancy or latency plus at least
 one of row locality, bank/chip skew, scheduler command activity, utilization, or
 efficiency. Do not conclude "DRAM is slow" from high memory latency alone.
 
-Raw basis: `raw/gpgpu-sim-l2-noc-dram-notes.md`.
+Raw basis: `archived_raw:gpgpu-sim-l2-noc-dram-notes.md`.
 
 ## memory_coalescing
 
@@ -255,7 +255,7 @@ Reservation fail reasons:
 Rule: `MISS` is a locality/cache outcome. `RESERVATION_FAIL` is a structural
 resource outcome. They must not be merged.
 
-Raw basis: `raw/gpgpu-sim-memory-hierarchy-and-coalescing-notes.md`.
+Raw basis: `archived_raw:gpgpu-sim-memory-hierarchy-and-coalescing-notes.md`.
 
 ## performance_attribution
 
@@ -282,7 +282,7 @@ Every root cause must include symptom counter, exclusion counter, queue or stage
 owner, possible fix target, and confidence. A conclusion without a counter path
 is `INSUFFICIENT_TRACE_EVIDENCE`.
 
-Raw basis: `raw/gpgpu-sim-performance-attribution-methodology.md`.
+Raw basis: `archived_raw:gpgpu-sim-performance-attribution-methodology.md`.
 
 ## power_energy_boundary
 
@@ -302,7 +302,7 @@ Any power report must record:
 Do not copy AccelWattch XML coefficients, McPAT object hierarchy, constant-power
 terms, or hybrid CSV substitution as RTL or validation truth.
 
-Raw basis: `raw/gpgpu-sim-power-energy-model-notes.md`.
+Raw basis: `archived_raw:gpgpu-sim-power-energy-model-notes.md`.
 
 ## scheduler_scoreboard_simt
 
@@ -339,8 +339,8 @@ State split:
 
 Raw basis:
 
-- `raw/gpgpu-sim-shader-core-and-warp-scheduler-notes.md`
-- `raw/gpgpu-sim-scoreboard-and-simt-stack-notes.md`
+- `archived_raw:gpgpu-sim-shader-core-and-warp-scheduler-notes.md`
+- `archived_raw:gpgpu-sim-scoreboard-and-simt-stack-notes.md`
 
 ## source_map
 
@@ -368,5 +368,5 @@ Do not use it as:
 
 Raw basis:
 
-- `raw/gpgpu-sim-repo-structure-map.md`
-- `raw/gpgpu-sim-simulator-flow-index.md`
+- `archived_raw:gpgpu-sim-repo-structure-map.md`
+- `archived_raw:gpgpu-sim-simulator-flow-index.md`

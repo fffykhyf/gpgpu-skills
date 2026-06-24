@@ -1,0 +1,80 @@
+system_contract_ir_hash: hash_system_contract_minimal_simt
+source_kind: hand_written_asm
+sections:
+  - name: .text
+    base_addr: 0
+  - name: .data
+    base_addr: 4096
+symbols:
+  - name: vecadd
+    section: .text
+    offset: 0
+    visibility: global
+  - name: done
+    section: .text
+    offset: 20
+    visibility: local
+  - name: A
+    section: .data
+    offset: 0
+    visibility: local
+  - name: B
+    section: .data
+    offset: 16
+    visibility: local
+  - name: C
+    section: .data
+    offset: 32
+    visibility: local
+instructions:
+  - pc: 0
+    mnemonic: load_word
+    operands: [r4, 0, r1]
+    active_mask: all_lanes
+    source_line: 4
+    contract_path: isa_model.opcodes.load_word
+  - pc: 4
+    mnemonic: load_word
+    operands: [r5, 0, r2]
+    active_mask: all_lanes
+    source_line: 5
+    contract_path: isa_model.opcodes.load_word
+  - pc: 8
+    mnemonic: add
+    operands: [r6, r4, r5]
+    active_mask: all_lanes
+    source_line: 6
+    contract_path: isa_model.opcodes.add
+  - pc: 12
+    mnemonic: store_word
+    operands: [r6, 0, r3]
+    active_mask: all_lanes
+    source_line: 7
+    contract_path: isa_model.opcodes.store_word
+  - pc: 16
+    mnemonic: branch_equal
+    operands: [r0, r0, done]
+    active_mask: all_lanes
+    source_line: 8
+    contract_path: isa_model.opcodes.branch_equal
+  - pc: 20
+    mnemonic: branch_equal
+    operands: [r0, r0, done]
+    active_mask: all_lanes
+    source_line: 10
+    contract_path: isa_model.opcodes.branch_equal
+data_objects:
+  - name: A
+    address: 4096
+    bytes: "01000000020000000300000004000000"
+  - name: B
+    address: 4112
+    bytes: "0a000000140000001e00000028000000"
+  - name: C
+    address: 4128
+    bytes: "00000000000000000000000000000000"
+relocations:
+  - symbol: done
+    relocation_kind: pc_relative_branch
+    patch_site: 16
+canonical_hash: hash_assembly_vecadd

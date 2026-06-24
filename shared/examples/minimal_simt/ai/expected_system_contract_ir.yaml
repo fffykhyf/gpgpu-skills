@@ -1,0 +1,214 @@
+system_id: minimal_simt_contract
+capability_profile: toolchain_runtime_vertical_slice
+arch_ir_hash: hash_arch_minimal_simt
+contract_fragments:
+  - fragment_id: runtime_vertical_memory_fragment
+    owner_skill: gpgpu-memory
+    capability_profile: toolchain_runtime_vertical_slice
+architecture_model:
+  sm_count: 1
+  warp_slots_per_sm: 4
+isa_model:
+  opcodes:
+    add: RV32I_ADD
+    load_word: RV32I_LW
+    store_word: RV32I_SW
+    branch_equal: RV32I_BEQ
+  instruction_encodings:
+    source: vertical_slice_simt_base
+    width_bits: 32
+    endian: little
+    field_layouts:
+      opcode: [6, 0]
+      rd: [11, 7]
+      rs1: [19, 15]
+      rs2: [24, 20]
+      imm_i: [31, 20]
+      imm_s: [[31, 25], [11, 7]]
+      imm_b: [[31, 31], [7, 7], [30, 25], [11, 8]]
+    immediate_layouts:
+      load_word: imm_i_signed_byte_offset
+      store_word: imm_s_signed_byte_offset
+      branch_equal: imm_b_signed_halfword_offset
+    branch_offset_rule:
+      alignment: 2
+      base: current_pc
+    alignment_rule:
+      instruction_bytes: 4
+      memory_access_bytes: 4
+  decode_classes:
+    integer_alu: [add]
+    memory: [load_word, store_word]
+    branch: [branch_equal]
+  operand_fields:
+    integer_registers: 32
+    lane_predicate: active_mask
+    load_store_address: base_register_plus_signed_immediate_plus_lane_word_offset
+  assembly_syntax:
+    register_naming:
+      integer: r0_to_r31
+      zero: r0
+    immediate_formats:
+      decimal: signed_decimal
+      hex: 0x_prefixed
+    label_syntax:
+      definition_suffix: ":"
+      reference: bare_symbol
+    section_syntax:
+      text: ".text"
+      data: ".data"
+      rodata: ".rodata"
+    comment_syntax: "#"
+  pseudo_instruction_rules:
+    enabled: false
+    expansion_rules: {}
+  unsupported_instruction_behavior: trap_unsupported_instruction
+  control_opcode_model:
+    control_ops:
+      TMC: {semantic: write_exec_mask}
+      WSPAWN: {semantic: spawn_warps}
+      SPLIT: {semantic: divergence_push_or_select}
+      JOIN: {semantic: reconvergence_pop_or_else_path}
+      BAR: {semantic: barrier_arrive_or_wait}
+      WSYNC: {semantic: drain_prior_warp_work}
+    variant_bits:
+      split_negate: rs2[0]
+      pred_negate: rd[0]
+    overloaded_fields:
+      - {field: rd, affects: barrier_mode}
+      - {field: "rs2[31]", affects: async_expect_tx}
+    derived_views:
+      assembler: derived
+      disassembler: derived
+      rtl_decode: derived
+      simulator_decode: derived
+      docs: derived
+  isa_model_hash: hash_isa_model_minimal_simt
+execution_model:
+  features:
+    simt_divergence: false
+    visible_pipeline_commit: true
+  scheduler: round_robin_ready_warp
+  simt:
+    active_mask_rule: lane_mask_from_predicate
+    divergence_rule: unsupported_in_minimal_contract
+  scoreboard: register_dependency_bits
+state_model:
+  pc_table:
+    owner: SYSTEM_CONTRACT_IR
+    reset: kernel_entry_pc_per_warp
+  exec_mask_table:
+    owner: SYSTEM_CONTRACT_IR
+    reset: all_lanes_active_for_launched_warp
+  warp_state:
+    states: [idle, ready, running, stalled, completed, faulted]
+  scheduler_state:
+    cursor: round_robin_index
+  register_file_state:
+    integer_registers: per_warp_per_lane
+  scoreboard_state:
+    dependency_bits: per_warp_register
+  simt_stack_state:
+    enabled: false
+    unsupported_reason: minimal_contract_has_no_divergent_branch_workload
+  pipeline_visible_state:
+    commit_rule: writeback_updates_visible_state_in_program_order
+  memory_stall_state:
+    states: [not_stalled, waiting_for_response, faulted]
+  csr_state:
+    launch_visible_csrs: [grid_dim, block_dim, status]
+  launch_state:
+    states: [idle, launched, running]
+  completion_fault_state:
+    states: [completed, faulted]
+memory_model:
+  address_spaces:
+    supported: [global]
+    unsupported: [shared, local, constant]
+  coalescing:
+    rule: contiguous_lane_coalescing
+  ordering:
+    rule: per_warp_program_order
+  fence:
+    enabled: false
+    unsupported_behavior: reject_fence_or_trap
+    unsupported_reason: fence_not_in_minimal_vertical_slice_contract
+  atomic:
+    enabled: false
+    unsupported_behavior: reject_atomic_or_trap
+    unsupported_reason: atomics_initially_is_non_goal
+  request_lifecycle:
+    rule: issue_stall_response_retire
+  fault_behavior:
+    invalid_address: trap_and_mark_faulted
+launch_model:
+  abi: flat_argument_buffer
+  grid_block_thread_mapping: cuda_like_1d
+  kernel_entry: program_image_entry_symbol
+  program_image_format:
+    text_segment_rule:
+      base_addr: 0
+      alignment: 4
+      permissions: rx
+    data_segment_rule:
+      base_addr: 4096
+      alignment: 4
+      permissions: rw
+    symbol_table_rule:
+      include_global_and_entry_symbols: true
+    relocation_rule:
+      supported: [pc_relative_branch]
+      unsupported_behavior: reject_unresolved_relocation
+    entry_symbol_rule:
+      default: vecadd
+      resolve_from_symbol_table: true
+    metadata_hash_rule:
+      include: [isa_model_hash, launch_model_hash, program_image_hash]
+  argument_buffer_layout:
+    endian: little
+    alignment: 8
+    scalar_arg_rule:
+      u32: little_endian_4_bytes
+      dim3: three_u32_fields
+    pointer_arg_rule:
+      global_ptr32: little_endian_4_bytes
+  loader_contract:
+    imem_load_rule:
+      source_segment: text
+      destination: instruction_memory
+    dmem_load_rule:
+      source_segment: data
+      destination: global_data_memory
+    entry_pc_rule:
+      source: program_image_entry_pc
+    reset_visibility:
+      entry_pc: visible_after_reset_release
+      instruction_memory: visible_before_start
+      data_memory: visible_before_start
+      arg_buffer: visible_before_start
+  completion_fault_observation: csr_status_register
+interface_semantics_model:
+  request_acceptance:
+    accepted_when: valid_and_ready
+    eventually_response: true
+  payload_stability:
+    when_ready_zero: payload_must_remain_stable
+  tag_uniqueness:
+    rule: unique_until_response
+  response_ordering:
+    same_tag: preserve_request_order
+  fault_response:
+    can_retire_instruction: false
+    behavior: trap_and_mark_faulted
+config_contract:
+  hw_sw_abi: [warp_size, grid_dim, block_dim]
+source_of_truth_map:
+  isa_opcodes: SYSTEM_CONTRACT_IR.isa_model.opcodes
+  execution: SYSTEM_CONTRACT_IR.execution_model
+  state: SYSTEM_CONTRACT_IR.state_model
+  memory: SYSTEM_CONTRACT_IR.memory_model
+  launch: SYSTEM_CONTRACT_IR.launch_model
+  interface: SYSTEM_CONTRACT_IR.interface_semantics_model
+provenance:
+  all_fields: allowed
+canonical_hash: hash_system_contract_minimal_simt

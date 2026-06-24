@@ -1,7 +1,7 @@
 table: architecture_decision_rules
 version: compact-v1
 merged_sections:
-  - source_file: architecture_preset_library.yaml
+  - source_id: architecture_preset_library.yaml
     content: |
       table: architecture_preset_library
       version: v5
@@ -197,7 +197,7 @@ merged_sections:
             launch_abi: SIMPLE_MMIO_DOORBELL_V1
           provenance: DESIGN_PRESET
       unsupported_presets: [FPGA_SMALL_GPGPU, TENSOR_EXTENDED_GPGPU]
-  - source_file: hard_constraint_table.yaml
+  - source_id: hard_constraint_table.yaml
     content: |
       table: hard_constraint_table
       version: v4
@@ -217,7 +217,7 @@ merged_sections:
         - id: PRESET_SUPPORTS_REQUIRED_FEATURES
           expression: required_features subset_of preset.supported_features
           on_fail: UNSUPPORTED_REQUIREMENT
-  - source_file: quality_target_table.yaml
+  - source_id: quality_target_table.yaml
     content: |
       table: quality_target_table
       version: v4
@@ -225,7 +225,7 @@ merged_sections:
         teaching_minimal: {priority: clarity, ppa_weight: low, verification_weight: high}
         fpga_small: {priority: area, ppa_weight: high, verification_weight: high}
         research_prototype: {priority: extensibility, ppa_weight: medium, verification_weight: high}
-  - source_file: micro_constraint_estimator_table.yaml
+  - source_id: micro_constraint_estimator_table.yaml
     content: |
       version: v5
       estimators:
@@ -279,7 +279,7 @@ merged_sections:
               memory_ops_per_cycle: "target_throughput_ops_per_cycle * (load_fraction + store_fraction)"
               bytes_per_cycle: "memory_ops_per_cycle * bytes_per_memory_op / max(coalescing_efficiency, 0.01)"
           failure_mode: BANDWIDTH_CONSTRAINT_FAIL
-  - source_file: config_ownership_table.yaml
+  - source_id: config_ownership_table.yaml
     content: |
       table: config_ownership_table
       version: v5
@@ -298,7 +298,7 @@ merged_sections:
         memory_dump_range: {owner: gpgpu-validation, visibility: test_only, consumers: [validation]}
         finish_delay_cycles: {owner: gpgpu-rtl, visibility: test_only, consumers: [rtl, validation]}
       on_missing_owner: CONFIG_OWNER_MISSING
-  - source_file: requirement_owner_table.yaml
+  - source_id: requirement_owner_table.yaml
     content: |
       table: requirement_owner_table
       version: v5

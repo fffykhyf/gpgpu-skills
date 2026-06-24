@@ -1,0 +1,12 @@
+verdict: PASS_WITH_PERFORMANCE_WARNING
+evidence_completeness:
+  correctness: complete
+  performance: warning
+architectural_state_comparison:
+  final_memory_dump: match
+  register_writeback: match
+coverage_summary_ref: expected_trace_coverage_report_ir
+performance_metric_ref: expected_performance_metric_ir
+regression_fingerprint_ref: expected_regression_fingerprint
+warnings:
+  - LSQ replay overhead detected after correctness pass.

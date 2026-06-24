@@ -1,9 +1,9 @@
 cases:
   - case_id: harness_closure_and_compile_only_config
     input_artifacts:
-      - shared/examples/self_correcting_minimal_simt/expected_system_contract_ir.yaml
-      - shared/examples/self_correcting_minimal_simt/expected_incremental_rtl_map.yaml
-      - shared/references/rocket/generator_verification.md
+      - shared/examples/minimal_simt/ai/expected_system_contract_ir.yaml
+      - shared/examples/minimal_simt/ai/expected_incremental_rtl_map.yaml
+      - shared/references/source_summaries/rocket.md
     expected_outputs:
       - INCREMENTAL_RTL_MAP
       - MODULE_INTERFACE_REPORT
@@ -25,8 +25,8 @@ cases:
 
   - case_id: incremental_rtl_detects_lsq_backpressure
     input_artifacts:
-      - shared/examples/self_correcting_minimal_simt/expected_system_contract_ir.yaml
-      - shared/examples/self_correcting_minimal_simt/expected_golden_contract_model.yaml
+      - shared/examples/minimal_simt/ai/expected_system_contract_ir.yaml
+      - shared/examples/minimal_simt/ai/expected_golden_contract_model.yaml
     expected_outputs:
       - INCREMENTAL_RTL_MAP
       - MODULE_INTERFACE_REPORT
@@ -48,7 +48,7 @@ cases:
 
   - case_id: register_writeback_requires_byteen_and_eop
     input_artifacts:
-      - shared/examples/self_correcting_minimal_simt/expected_incremental_rtl_map.yaml
+      - shared/examples/minimal_simt/ai/expected_incremental_rtl_map.yaml
     expected_outputs:
       - MODULE_INTERFACE_REPORT
       - RTL_PARTIAL_SIM_REPORT
@@ -61,7 +61,7 @@ cases:
 
   - case_id: coalescer_response_restore_contract
     input_artifacts:
-      - shared/examples/self_correcting_minimal_simt/expected_incremental_rtl_map.yaml
+      - shared/examples/minimal_simt/ai/expected_incremental_rtl_map.yaml
     expected_outputs:
       - MODULE_INTERFACE_REPORT
       - RTL_PARTIAL_SIM_REPORT

@@ -1,7 +1,7 @@
 table: contract_ownership_rules
 version: compact-v1
 merged_sections:
-  - source_file: contract_semantics_binding_table.yaml
+  - source_id: contract_semantics_binding_table.yaml
     content: |
       version: v5
       bindings:
@@ -123,7 +123,7 @@ merged_sections:
           semantics_function: fault_response_retirement
           required_inputs: [fault_response, instruction_state]
           outputs: [retire_trap_or_poison]
-  - source_file: golden_model_coverage_table.yaml
+  - source_id: golden_model_coverage_table.yaml
     content: |
       version: v5
       coverage_gates:
@@ -165,7 +165,7 @@ merged_sections:
         forbidden_independent_truth:
           forbidden_fields: [isa_definition, memory_ordering_override, launch_abi_override, scheduler_override, config_default_override, interface_lifecycle_override]
           failure_mode: FORBIDDEN_GOLDEN_TRUTH
-  - source_file: source_of_truth_generation_table.yaml
+  - source_id: source_of_truth_generation_table.yaml
     content: |
       table: source_of_truth_generation_table
       version: v5
@@ -174,45 +174,45 @@ merged_sections:
           source: SYSTEM_CONTRACT_IR.isa_model.opcodes
           derived_artifacts:
             - rtl/defines.svh
-            - tools/isa.py
-            - tools/encoding_table.py
-            - tools/assembler.py opcode table
-            - tools/disassembler.py opcode table
+            - generated_tool:isa.py
+            - generated_tool:encoding_table.py
+            - generated_tool:assembler.py opcode table
+            - generated_tool:disassembler.py opcode table
             - docs/isa.md
           gate: byte_or_semantic_equivalence_required
         isa_model.instruction_encodings:
           source: SYSTEM_CONTRACT_IR.isa_model.instruction_encodings
           derived_artifacts:
-            - tools/assembler.py encode rules
-            - tools/disassembler.py decode rules
-            - tools/isa.py field layout
+            - generated_tool:assembler.py encode rules
+            - generated_tool:disassembler.py decode rules
+            - generated_tool:isa.py field layout
             - rtl/decode.svh
             - docs/isa_encoding.md
           gate: encoding_equivalence_required
         isa_model.assembly_syntax:
           source: SYSTEM_CONTRACT_IR.isa_model.assembly_syntax
           derived_artifacts:
-            - tools/assembler.py parser rules
+            - generated_tool:assembler.py parser rules
             - docs/isa.md assembly syntax
           gate: semantic_equivalence_required
         launch_model.program_image_format:
           source: SYSTEM_CONTRACT_IR.launch_model.program_image_format
           derived_artifacts:
-            - tools/program_image.py
-            - tools/loader.py
+            - generated_tool:program_image.py
+            - generated_tool:loader.py
             - docs/program_image_format.md
           gate: byte_layout_equivalence_required
         launch_model.argument_buffer_layout:
           source: SYSTEM_CONTRACT_IR.launch_model.argument_buffer_layout
           derived_artifacts:
-            - tools/runtime_launch.py
-            - tests/expected_arg_buffer.bin
+            - generated_tool:runtime_launch.py
+            - golden_fixture:expected_arg_buffer.bin
             - docs/launch_abi.md
           gate: semantic_equivalence_required
         launch_model.loader_contract:
           source: SYSTEM_CONTRACT_IR.launch_model.loader_contract
           derived_artifacts:
-            - tools/loader.py
+            - generated_tool:loader.py
             - rtl/program_image_loader_interface.sv
             - docs/program_image_format.md loader section
           gate: semantic_equivalence_required

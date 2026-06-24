@@ -1,0 +1,16 @@
+failure_signature: memory_replay_lsq_window_40_96
+previous_verdict: PASS_WITH_PERFORMANCE_WARNING
+repaired_by: rewrite_memory_replay_lsq_001
+reappeared_in_run: false
+blocked_module: load_store_queue
+next_required_evidence:
+  - module_partial_sim
+  - rtl_golden_trace_diff
+same_patch_attempt_count: 1
+last_patch_type: RTL_PATCH
+last_owner_module: gpgpu-rtl
+worsened_gates: []
+rollback_required: false
+escalation_policy:
+  after_same_patch_attempts: 3
+  escalation_target: human_review

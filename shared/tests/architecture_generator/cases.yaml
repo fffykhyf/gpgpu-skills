@@ -1,8 +1,8 @@
 cases:
   - case_id: rocket_style_config_resolution
     input_artifacts:
-      - shared/references/rocket/config_fragment_lessons.md
-      - shared/references/rocket/soc_composition.md
+      - shared/references/source_summaries/rocket.md
+      - shared/references/source_summaries/rocket.md
     expected_outputs:
       - CONFIG_STACK_IR
       - RESOLVED_CONFIG_IR
@@ -24,7 +24,7 @@ cases:
 
   - case_id: architecture_generator_memory_pressure_prefilter
     input_artifacts:
-      - shared/examples/self_correcting_minimal_simt/input_request.md
+      - shared/examples/minimal_simt/input_request.md
     expected_outputs:
       - DESIGN_INTENT_IR
       - ARCH_IR

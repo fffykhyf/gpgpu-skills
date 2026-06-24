@@ -1,7 +1,7 @@
 table: performance_taxonomy
 version: compact-v1
 merged_sections:
-  - source_file: performance_metric_table.yaml
+  - source_id: performance_metric_table.yaml
     content: |
       version: v5
       metric_groups:
@@ -64,7 +64,7 @@ merged_sections:
           - synchronization_stall
           - tensor_alu_busy
           - structural_conflict
-  - source_file: bottleneck_template_table.yaml
+  - source_id: bottleneck_template_table.yaml
     content: |
       version: v5
       templates:
@@ -98,7 +98,7 @@ merged_sections:
         runtime_launch_mismatch_template:
           required_nodes: [runtime_launch_event, toolchain_artifact, contract_rule]
           dominant_stall_reasons: [runtime_wait]
-  - source_file: perf_attribution_taxonomy.yaml
+  - source_id: perf_attribution_taxonomy.yaml
     content: |
       version: v5
       node_classes:
@@ -166,7 +166,7 @@ merged_sections:
           - toolchain_artifact
           - contract_rule
       failure_mode: PERF_CAUSAL_CHAIN_MISSING
-  - source_file: toolchain_attribution_taxonomy.yaml
+  - source_id: toolchain_attribution_taxonomy.yaml
     content: |
       version: v5
       failure_points:
@@ -208,7 +208,7 @@ merged_sections:
         - loader_contract_hash
         - runtime_launch_hash
         - rtl_first_fetch_hash
-  - source_file: stall_reason_taxonomy.yaml
+  - source_id: stall_reason_taxonomy.yaml
     content: |
       version: v5
       stall_reasons:
@@ -276,7 +276,7 @@ merged_sections:
           root_cause_family: RUNTIME_LAUNCH_ROOT_CAUSE
         unknown:
           root_cause_family: INSUFFICIENT_TRACE_EVIDENCE
-  - source_file: stall_reason_taxonomy.md
+  - source_id: stall_reason_taxonomy.md
     content: |
       # Stall Reason Taxonomy
       

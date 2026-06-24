@@ -2,7 +2,7 @@
 
 ## Merged Source Material
 
-### Source: `skill/gpgpu-contract/executable_semantics_rules.md`
+### Source ID: `gpgpu-contract/executable_semantics_rules.md`
 
 # Executable Semantics Rules
 
@@ -143,7 +143,7 @@ The live synchronization unit must be explicit: instruction, warp event, memory
 transaction, sync event, or CTA event. Offline profiling and checkpoint calls
 must be separate optional entry points so the basic diff path remains light.
 
-### Source: `skill/gpgpu-contract/golden_model_coverage_and_report.md`
+### Source ID: `gpgpu-contract/golden_model_coverage_and_report.md`
 
 # Golden Model Coverage and Report
 
@@ -229,7 +229,7 @@ Coverage must prove that `GOLDEN_REF_API`, `ARCHITECTURE_STATE_BLOB`,
 defined when live diff is enabled. The report must state whether the golden
 model is being used in live diff mode or offline analysis mode.
 
-### Source: `skill/gpgpu-contract/module_twin_model_rules.md`
+### Source ID: `gpgpu-contract/module_twin_model_rules.md`
 
 # Module Twin Model Rules
 
@@ -256,7 +256,7 @@ Required twin boundaries:
 Every twin trace must carry `contract_path`, `rtl_module_path`, `instruction_uuid`,
 `sm_id`, `warp_id`, lane or request tags, and `evidence_hash`.
 
-### Source: `skill/gpgpu-contract/simt_golden_trace_spec.md`
+### Source ID: `gpgpu-contract/simt_golden_trace_spec.md`
 
 # SIMT Golden Trace Spec
 
@@ -280,7 +280,7 @@ reconvergence state, warp status, lane predicate state, and trap/fault state.
 trace alignment, but SIMT correctness must compare only architecture-visible
 state and events.
 
-### Source: `skill/gpgpu-contract/memory_transaction_golden_spec.md`
+### Source ID: `gpgpu-contract/memory_transaction_golden_spec.md`
 
 # Memory Transaction Golden Spec
 
@@ -304,7 +304,7 @@ cycle or step, SM, warp, lane mask, address, byte enable, data hash, and commit
 sequence. Store mismatch localization must use this channel before falling back
 to final memory dumps.
 
-### Source: `skill/gpgpu-contract/atomic_fence_barrier_golden_spec.md`
+### Source ID: `gpgpu-contract/atomic_fence_barrier_golden_spec.md`
 
 # Atomic / Fence / Barrier Golden Spec
 
@@ -320,7 +320,7 @@ warp list, release condition, and release event.
 
 GPGPU-Sim timing notes are not a complete memory consistency model.
 
-### Source: `skill/gpgpu-contract/memory_path_executable_semantics.md`
+### Source ID: `gpgpu-contract/memory_path_executable_semantics.md`
 
 # Memory Path Executable Semantics
 
@@ -343,7 +343,7 @@ Required functions:
 Each function consumes `SYSTEM_CONTRACT_IR` paths and emits trace events that
 normalize into `NORMALIZED_TRACE_IR`.
 
-### Source: `skill/gpgpu-contract/sync_atomic_executable_semantics.md`
+### Source ID: `gpgpu-contract/sync_atomic_executable_semantics.md`
 
 # Synchronization and Atomic Executable Semantics
 

@@ -1,0 +1,11 @@
+verdict: COVERAGE_SUFFICIENT
+covered_contract_paths:
+  - execution_model.simt
+  - memory_model.request_lifecycle
+  - launch_model.argument_buffer_layout
+missing_contract_paths: []
+trace_sources:
+  rtl_trace: present
+  golden_trace: present
+  toolchain_trace: present
+coverage_hash: hash_trace_coverage_minimal_simt

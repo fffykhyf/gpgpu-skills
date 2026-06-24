@@ -1,7 +1,7 @@
 table: rewrite_rules
 version: compact-v1
 merged_sections:
-  - source_file: rewrite_trigger_table.yaml
+  - source_id: rewrite_trigger_table.yaml
     content: |
       version: v5
       triggers:
@@ -68,7 +68,7 @@ merged_sections:
         - root_cause_without_symptom_and_exclusion_counter
         - simulator_private_parameter_in_hardware_contract
         - stable_counter_without_producer
-  - source_file: patch_taxonomy_table.yaml
+  - source_id: patch_taxonomy_table.yaml
     content: |
       version: v5
       patch_classes:
@@ -134,7 +134,7 @@ merged_sections:
         PASS_EVIDENCE_PATCH:
           target_owner: gpgpu-validation
           examples: [coverage_collection_fix, regression_fingerprint_stabilization, pass_trace_completeness_fix]
-  - source_file: revalidation_routing_table.yaml
+  - source_id: revalidation_routing_table.yaml
     content: |
       version: v5
       routes:
@@ -399,7 +399,7 @@ merged_sections:
           patch_type: TEST_EVIDENCE_PATCH
           target_skill: gpgpu-validation
           revalidation: [trace_completeness_check, coverage_check]
-  - source_file: root_cause_taxonomy.yaml
+  - source_id: root_cause_taxonomy.yaml
     content: |
       version: v5
       root_causes:

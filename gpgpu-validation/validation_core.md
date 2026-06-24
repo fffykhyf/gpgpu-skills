@@ -2,7 +2,7 @@
 
 ## Merged Source Material
 
-### Source: `skill/gpgpu-validation/correctness_gate_and_mode_selection.md`
+### Source ID: `gpgpu-validation/correctness_gate_and_mode_selection.md`
 
 # Correctness Gate and Mode Selection
 
@@ -93,7 +93,7 @@ identifies a memory/sync/control ambiguity, or a prior regression requires
 transaction-level replay. Full diff must not be silently enabled in performance
 ranking runs without marking the run as debug-contaminated.
 
-### Source: `skill/gpgpu-validation/counter_manifest_contract.md`
+### Source ID: `gpgpu-validation/counter_manifest_contract.md`
 
 # Stable Counter Manifest
 
@@ -111,7 +111,7 @@ Every counter must record:
 
 Stable root-cause and regression claims require producer-backed counters.
 
-### Source: `skill/gpgpu-validation/minimal_trace_window_rules.md`
+### Source ID: `gpgpu-validation/minimal_trace_window_rules.md`
 
 # Minimal Trace Window Rules
 
@@ -190,7 +190,7 @@ cycle, end cycle, pre-failure cycles, post-failure cycles, and optional
 checkpoint id. Batch capture should keep the window bounded; interactive replay
 may request additional windows only through explicit debug commands.
 
-### Source: `skill/gpgpu-validation/pass_evidence_engine.md`
+### Source ID: `gpgpu-validation/pass_evidence_engine.md`
 
 # Pass Evidence Engine
 
@@ -310,7 +310,7 @@ test-evidence gap. A failure package must include replay command, trace slice,
 waveform slice or absent reason, config hash, program image hash, golden state,
 RTL state summary, memory store log, counter snapshot, and normalized report.
 
-### Source: `skill/gpgpu-validation/producer_audit.md`
+### Source ID: `gpgpu-validation/producer_audit.md`
 
 # Producer Audit
 
@@ -331,7 +331,7 @@ write gate, schema version, sample window, and consumer skill. A table without
 producer proof can support exploratory debug only; it cannot close
 `SQL_PERF_QUERY` attribution or weighted performance gates.
 
-### Source: `skill/gpgpu-validation/trace_ingestion_and_normalization.md`
+### Source ID: `gpgpu-validation/trace_ingestion_and_normalization.md`
 
 # Trace Ingestion and Normalization
 

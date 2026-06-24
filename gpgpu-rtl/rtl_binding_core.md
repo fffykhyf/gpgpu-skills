@@ -2,7 +2,7 @@
 
 ## Merged Source Material
 
-### Source: `skill/gpgpu-rtl/counter_tap_point_contract.md`
+### Source ID: `gpgpu-rtl/counter_tap_point_contract.md`
 
 # Counter Tap Point Contract
 
@@ -26,7 +26,7 @@ their `STRUCTURED_TRACE_TABLE`, write gate, schema version, and
 `TRACE_DB_MANIFEST` consumer path. Debug-only counters must be marked so they do
 not contaminate performance ranking.
 
-### Source: `skill/gpgpu-rtl/hardware_rewritten_mechanism_checklist.md`
+### Source ID: `gpgpu-rtl/hardware_rewritten_mechanism_checklist.md`
 
 # Hardware-Rewritten Mechanism Checklist
 
@@ -39,7 +39,7 @@ Before binding imported evidence to RTL, confirm:
 - counters have producer tap points;
 - simulator-only artifacts are rejected or quarantined in compatibility notes.
 
-### Source: `skill/gpgpu-rtl/interface_binding_and_checker.md`
+### Source ID: `gpgpu-rtl/interface_binding_and_checker.md`
 
 # Interface Binding And Checker
 
@@ -169,7 +169,7 @@ is forbidden.
 - `COALESCER_RESPONSE_SHAPE_MISMATCH`
 - `TRACE_TAP_INSUFFICIENT_FOR_FIRST_DIVERGENCE`
 
-### Source: `skill/gpgpu-rtl/module_binding_rules.md`
+### Source ID: `gpgpu-rtl/module_binding_rules.md`
 
 # Module Binding Rules
 
@@ -332,7 +332,7 @@ loop must fail interface checking instead of being deferred to synthesis.
 - Reject hidden state not declared in the selected template.
 - Reject missing timing feedback or any combinational ready loop.
 
-### Source: `skill/gpgpu-rtl/observable_trace_contract.md`
+### Source ID: `gpgpu-rtl/observable_trace_contract.md`
 
 # Observable Trace Contract
 
@@ -366,7 +366,7 @@ families include `WARP_ISSUE_LOG`, `WARP_COMMIT_LOG`, `SCOREBOARD_LOG`,
 `MSHR_EVENT_LOG`, `NOC_PACKET_LOG`, `BARRIER_EVENT_LOG`, `FENCE_EVENT_LOG`,
 `ATOMIC_EVENT_LOG`, and `COUNTER_SNAPSHOT_LOG`.
 
-### Source: `skill/gpgpu-rtl/partial_simulation_gates.md`
+### Source ID: `gpgpu-rtl/partial_simulation_gates.md`
 
 # Partial Simulation Gates
 
@@ -397,7 +397,7 @@ full-system verification.
 
 ## Module Case Requirements
 
-`shared/tables/rtl_partial_sim_gate_table.yaml` owns the concrete case list.
+`shared/tables/rtl_binding_rules.yaml` owns the concrete case list.
 At minimum it must cover:
 
 - scoreboard: RAW dependency stall, writeback wakeup, multiple warp independence
@@ -440,7 +440,7 @@ sync, atomic, or performance unless the corresponding basic probe,
 full-transaction debug probe when needed, `STRUCTURED_TRACE_TABLE`, and counter
 tap ownership are present or explicitly waived with owner evidence.
 
-### Source: `skill/gpgpu-rtl/rtl_contract_extraction_from_simulator_evidence.md`
+### Source ID: `gpgpu-rtl/rtl_contract_extraction_from_simulator_evidence.md`
 
 # RTL Contract Extraction From Simulator Evidence
 
@@ -468,7 +468,7 @@ Must not become RTL directly:
 - SM86 queue depth;
 - PTX opcode latency table.
 
-### Source: `skill/gpgpu-rtl/simulator_artifact_rejection_checklist.md`
+### Source ID: `gpgpu-rtl/simulator_artifact_rejection_checklist.md`
 
 # Simulator Artifact Rejection Checklist
 
@@ -484,7 +484,7 @@ Reject or quarantine:
 
 Emit `SIMULATOR_ARTIFACT_REJECTION_REPORT` when such evidence appears.
 
-### Source: `skill/gpgpu-rtl/sm_instance_layout.md`
+### Source ID: `gpgpu-rtl/sm_instance_layout.md`
 
 # SM Instance Layout
 
@@ -571,7 +571,7 @@ The RTL binding must fail if:
 - LDS is bound as a global-memory alias
 - a single global scoreboard owns multiple SM readiness states
 
-### Source: `skill/gpgpu-rtl/warp_exec_model.md`
+### Source ID: `gpgpu-rtl/warp_exec_model.md`
 
 # Warp Execution Model
 

@@ -14,7 +14,7 @@ This skill produces a candidate architecture, not frozen semantics. It must not 
 ## Inputs
 
 - User request, design spec, constraints, prior `RUN_STATE.yaml`.
-- Optional source lessons from `skill/shared/references/reference_lessons.yaml`.
+- Optional source lessons from `shared/references/reference_lessons.yaml`.
 
 ## Core Files
 

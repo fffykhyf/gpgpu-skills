@@ -1,0 +1,144 @@
+candidate_id: minimal_simt_self_correcting
+design_intent_ref: design_intent_minimal_teaching_simt
+capability_profile: toolchain_runtime_vertical_slice
+graph_nodes:
+  - node_id: sm_top
+    node_type: compute_cluster
+    owned_state: [sm_config_shadow, warp_context_table]
+    input_ports: [launch_config, scheduler_ready, memory_response]
+    output_ports: [scheduler_issue, memory_request, trace_event]
+    required_contract_paths: [architecture_model.sm_count, architecture_model.warp_slots_per_sm]
+    scaling_parameters: [sm_count, warp_size, warp_slots_per_sm]
+    state_owner: [sm_top]
+    implementation_policy: {kind: structural_boundary}
+    verification_hooks: {trace: sm_trace, unit_gate: sm_top_smoke}
+    backend_matrix: {simulator: true, rtl_sim: true, module_unit: true}
+  - node_id: warp_scheduler
+    node_type: scheduler
+    owned_state: [ready_warp_queue, current_warp_id]
+    input_ports: [warp_context_status, hazard_status, issue_feedback]
+    output_ports: [issue_warp, scheduler_trace]
+    required_contract_paths: [execution_model.scheduler, architecture_model.warp_slots_per_sm]
+    scaling_parameters: [warp_slots_per_sm, issue_width]
+    state_owner: [warp_scheduler]
+    implementation_policy: {scheduler_policy: round_robin_ready_warp, fairness_caveat: fixed_policy_contract_required}
+    verification_hooks: {trace: scheduler_trace, unit_gate: skip_stalled_warp}
+    backend_matrix: {simulator: true, rtl_sim: true, module_unit: true}
+  - node_id: decode_issue_unit
+    node_type: sm_issue_stage
+    owned_state: [decode_issue_registers, exec_lane_mask]
+    input_ports: [issue_warp, instruction_word, operand_values]
+    output_ports: [alu_result, memory_op, writeback_event]
+    required_contract_paths: [execution_model.simt, state_model.pc_table]
+    scaling_parameters: [issue_width, sm_issue_stage_count, warp_size]
+    state_owner: [decode_issue_unit]
+    implementation_policy: {decode_source: SYSTEM_CONTRACT_IR.isa_model}
+    verification_hooks: {trace: decode_issue_trace, unit_gate: decode_roundtrip}
+    backend_matrix: {simulator: true, rtl_sim: true, module_unit: true}
+  - node_id: register_file
+    node_type: state_store
+    owned_state: [integer_registers]
+    input_ports: [read_addresses, writeback_event]
+    output_ports: [operand_values]
+    required_contract_paths: [config_contract.hw_sw_abi]
+    scaling_parameters: [warp_slots_per_sm, warp_size, registers_per_thread]
+    state_owner: [register_file]
+    implementation_policy: {organization: warp_private_lane_valued}
+    verification_hooks: {trace: rf_writeback_trace, unit_gate: byte_enable_writeback}
+    backend_matrix: {simulator: true, rtl_sim: true, module_unit: true}
+  - node_id: scoreboard
+    node_type: hazard_tracker
+    owned_state: [pending_register_bits]
+    input_ports: [issue_warp, writeback_event]
+    output_ports: [hazard_status]
+    required_contract_paths: [state_model.scoreboard]
+    scaling_parameters: [warp_slots_per_sm, warp_size, registers_per_thread]
+    state_owner: [scoreboard]
+    implementation_policy: {reserve: accepted_issue, release: final_packet_writeback}
+    verification_hooks: {trace: scoreboard_trace, unit_gate: release_on_final_eop}
+    backend_matrix: {simulator: true, rtl_sim: true, module_unit: true}
+  - node_id: load_store_queue
+    node_type: memory_pipeline
+    owned_state: [pending_memory_ops, memory_response_tags]
+    input_ports: [memory_op, memory_response]
+    output_ports: [memory_request, lsq_backpressure]
+    required_contract_paths: [memory_model.request_lifecycle, memory_model.ordering]
+    scaling_parameters: [warp_slots_per_sm, global_interface_bits]
+    state_owner: [load_store_queue]
+    implementation_policy: {tag_rule: unique_until_response}
+    verification_hooks: {trace: lsu_trace, unit_gate: tag_unique_until_response}
+    backend_matrix: {simulator: true, rtl_sim: true, module_unit: true}
+  - node_id: lds
+    node_type: memory_store
+    owned_state: [lds_bytes]
+    input_ports: [lds_request]
+    output_ports: [lds_response]
+    required_contract_paths: [memory_model.request_lifecycle]
+    scaling_parameters: [lds_bytes_per_sm, lds_banks]
+    state_owner: [lds]
+    implementation_policy: {scope: sm_local}
+    verification_hooks: {trace: lds_trace, unit_gate: bank_conflict}
+    backend_matrix: {simulator: true, rtl_sim: true, module_unit: true}
+  - node_id: cache_global_interface
+    node_type: memory_interface
+    owned_state: [cache_tags, memory_request_tags]
+    input_ports: [memory_request]
+    output_ports: [memory_response]
+    required_contract_paths: [memory_model.coalescing, memory_model.ordering]
+    scaling_parameters: [cache_size_bytes_per_sm, global_interface_bits]
+    state_owner: [cache_global_interface]
+    implementation_policy: {coalescer_restore: required}
+    verification_hooks: {trace: memory_response_trace, unit_gate: response_shape_restore}
+    backend_matrix: {simulator: true, rtl_sim: true, module_unit: true, synthesis_if_fpga: true}
+graph_edges:
+  - from: warp_scheduler
+    from_port: issue_warp
+    to: decode_issue_unit
+    to_port: issue_warp
+    edge_type: control_dataflow
+  - from: register_file
+    from_port: operand_values
+    to: decode_issue_unit
+    to_port: operand_values
+    edge_type: operand_dataflow
+  - from: scoreboard
+    from_port: hazard_status
+    to: warp_scheduler
+    to_port: hazard_status
+    edge_type: hazard_feedback
+  - from: decode_issue_unit
+    from_port: memory_op
+    to: load_store_queue
+    to_port: memory_op
+    edge_type: memory_request
+  - from: load_store_queue
+    from_port: memory_request
+    to: cache_global_interface
+    to_port: memory_request
+    edge_type: memory_request
+  - from: cache_global_interface
+    from_port: memory_response
+    to: load_store_queue
+    to_port: memory_response
+    edge_type: memory_response
+constraint_proof:
+  hard_constraints_passed: true
+  rejected_unbounded_memory_design: true
+verification_profile:
+  simulator_required: true
+  rtl_sim_required: true
+  module_unit_required: true
+  runtime_launch_required: true
+  synthesis_required_if_backend_fpga: true
+  ppa_required_if_performance_target: true
+provenance:
+  preset: TOOLCHAIN_RUNTIME_VERTICAL_SLICE
+  preset_selection_rule: VALIDATION_TARGET_VERTICAL_SLICE
+  source: PRESET_DEFAULT
+rejected_alternatives:
+  - preset: MINIMAL_SIMT_CORE
+    reason: missing frontend_program_image_rtl_memory_dump_vertical_slice
+  - preset: MULTI_SM_MEMORY_PATH
+    reason: lower_priority_than_validation_target_vertical_slice
+unresolved_risks:
+  - lsq_backpressure_under_coalesced_loads

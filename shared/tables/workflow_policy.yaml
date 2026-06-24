@@ -1,7 +1,7 @@
 table: workflow_policy
 version: compact-v1
 merged_sections:
-  - source_file: output_mode_table.yaml
+  - source_id: output_mode_table.yaml
     content: |
       table: output_mode_table
       version: v1
@@ -64,7 +64,7 @@ merged_sections:
             - ARCH_REWRITE_PLAN
             - REWRITE_DECISION_REPORT
             - REGRESSION_TRACKING_REPORT
-  - source_file: artifact_visibility_table.yaml
+  - source_id: artifact_visibility_table.yaml
     content: |
       table: artifact_visibility_table
       version: v1
@@ -112,7 +112,7 @@ merged_sections:
         - root_cause_ambiguous
         - regression_reappears
         - downstream_owner_needs_exact_fields
-  - source_file: report_language_policy.yaml
+  - source_id: report_language_policy.yaml
     content: |
       table: report_language_policy
       version: v1
@@ -151,7 +151,7 @@ merged_sections:
           - ambiguous_root_cause
           - recurring_regression
           - owner_field_debug
-  - source_file: human_report_template_table.yaml
+  - source_id: human_report_template_table.yaml
     content: |
       table: human_report_template_table
       version: v1
@@ -188,7 +188,7 @@ merged_sections:
           path: shared/templates/human/zh/regression_summary.zh.md
           required_sections: [回归状态, 历史指纹, 重复失败, 回滚判断, 下一步]
           source_ai_artifacts: [REGRESSION_FINGERPRINT, REGRESSION_TRACKING_REPORT]
-  - source_file: ai_artifact_retention_table.yaml
+  - source_id: ai_artifact_retention_table.yaml
     content: |
       table: ai_artifact_retention_table
       version: v1
@@ -213,7 +213,7 @@ merged_sections:
           artifacts: [DESIGN_BRIEF, ARCHITECTURE_DECISION, CONTRACT_FREEZE_SUMMARY, IMPLEMENTATION_DASHBOARD, VALIDATION_DASHBOARD, DEBUG_SUMMARY, PATCH_CARD, REGRESSION_SUMMARY]
           retain_until: run_summary_superseded
           required_metadata: [source_ai_artifacts, language, visibility]
-  - source_file: mode_decision_table.yaml
+  - source_id: mode_decision_table.yaml
     content: |
       table: mode_decision_table
       version: v5
@@ -237,7 +237,7 @@ merged_sections:
           mode: TRACE_DEBUG
           next_skill: gpgpu-validation
       forbidden_outputs: [warp_size, sm_count, cache_policy, scheduler_policy, isa_encoding, memory_hierarchy, register_file_size, rtl_pipeline]
-  - source_file: report_generation_table.yaml
+  - source_id: report_generation_table.yaml
     content: |
       version: v5
       modes:

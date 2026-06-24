@@ -1,8 +1,8 @@
 cases:
   - case_id: system_contract_derives_executable_golden_model
     input_artifacts:
-      - shared/examples/self_correcting_minimal_simt/expected_arch_ir.yaml
-      - shared/examples/self_correcting_minimal_simt/expected_micro_constraint_estimate.yaml
+      - shared/examples/minimal_simt/ai/expected_arch_ir.yaml
+      - shared/examples/minimal_simt/ai/expected_micro_constraint_estimate.yaml
     expected_outputs:
       - SYSTEM_CONTRACT_IR
       - GOLDEN_CONTRACT_MODEL
@@ -24,7 +24,7 @@ cases:
 
   - case_id: rejects_doc_as_isa_truth
     input_artifacts:
-      - shared/examples/self_correcting_minimal_simt/expected_system_contract_ir.yaml
+      - shared/examples/minimal_simt/ai/expected_system_contract_ir.yaml
     expected_outputs:
       - CONTRACT_SEMANTICS_REPORT
     expected_failure_mode: SOURCE_OF_TRUTH_DRIFT
@@ -36,7 +36,7 @@ cases:
 
   - case_id: control_opcode_overloaded_fields_are_explicit
     input_artifacts:
-      - shared/examples/self_correcting_minimal_simt/expected_arch_ir.yaml
+      - shared/examples/minimal_simt/ai/expected_arch_ir.yaml
     expected_outputs:
       - SYSTEM_CONTRACT_IR
       - GOLDEN_CONTRACT_MODEL

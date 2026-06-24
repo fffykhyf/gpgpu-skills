@@ -2,7 +2,7 @@
 
 ## Merged Source Material
 
-### Source: `skill/gpgpu-toolchain-runtime/argument_layout_contract.md`
+### Source ID: `gpgpu-toolchain-runtime/argument_layout_contract.md`
 
 # Argument Layout Contract
 
@@ -18,7 +18,7 @@ Argument layout must derive from `SYSTEM_CONTRACT_IR.launch_model` and record:
 Runtime artifacts must round-trip this layout through assembler, loader, and
 golden image execution.
 
-### Source: `skill/gpgpu-toolchain-runtime/assembler_disassembler_roundtrip.md`
+### Source ID: `gpgpu-toolchain-runtime/assembler_disassembler_roundtrip.md`
 
 # Assembler/Disassembler Round Trip
 
@@ -70,7 +70,7 @@ Failure modes:
 - `UNSUPPORTED_INSTRUCTION_BEHAVIOR_MISMATCH`
 - `SOURCE_OF_TRUTH_DRIFT`
 
-### Source: `skill/gpgpu-toolchain-runtime/assembly_ir_rules.md`
+### Source ID: `gpgpu-toolchain-runtime/assembly_ir_rules.md`
 
 # Assembly IR Rules
 
@@ -100,7 +100,7 @@ Failure modes:
 - `ENTRY_SYMBOL_RESOLVE_FAIL`
 - `SOURCE_OF_TRUTH_DRIFT`
 
-### Source: `skill/gpgpu-toolchain-runtime/coalescer_input_trace_generation.md`
+### Source ID: `gpgpu-toolchain-runtime/coalescer_input_trace_generation.md`
 
 # Coalescer Input Trace Generation
 
@@ -119,7 +119,7 @@ coalescer input traces:
 
 This trace is input to memory formation, not a cache or DRAM timing result.
 
-### Source: `skill/gpgpu-toolchain-runtime/compatibility_mapping_rules.md`
+### Source ID: `gpgpu-toolchain-runtime/compatibility_mapping_rules.md`
 
 # Optional CUDA/OpenCL Compatibility Mapping
 
@@ -137,7 +137,7 @@ Compatibility-only fields include:
 Native runtime output remains `PROGRAM_IMAGE_IR`, `RUNTIME_LAUNCH_IR`, and
 `LOADER_CONTRACT_IR` derived from `SYSTEM_CONTRACT_IR`.
 
-### Source: `skill/gpgpu-toolchain-runtime/isa_table_derivation.md`
+### Source ID: `gpgpu-toolchain-runtime/isa_table_derivation.md`
 
 # ISA Table Derivation
 
@@ -151,10 +151,10 @@ Derive all ISA-facing toolchain artifacts from:
 
 Derived artifacts include:
 
-- `tools/isa.py`
-- `tools/encoding_table.py`
-- `tools/assembler.py`
-- `tools/disassembler.py`
+- `generated_tool:isa.py`
+- `generated_tool:encoding_table.py`
+- `generated_tool:assembler.py`
+- `generated_tool:disassembler.py`
 - `rtl/defines.svh`
 - `rtl/decode.svh`
 - `docs/isa.md`
@@ -180,7 +180,7 @@ Failure modes:
 - `SIMULATOR_RTL_DECODE_MISMATCH`
 - `INSUFFICIENT_SKILL_ASSET`
 
-### Source: `skill/gpgpu-toolchain-runtime/launch_descriptor_contract.md`
+### Source ID: `gpgpu-toolchain-runtime/launch_descriptor_contract.md`
 
 # Launch Descriptor Contract
 
@@ -200,7 +200,7 @@ Do not include CUDA streams, launch latency, compute capability, or OpenCL
 object model in the native ABI unless an optional compatibility profile is
 selected.
 
-### Source: `skill/gpgpu-toolchain-runtime/lsu_instruction_bundle.md`
+### Source ID: `gpgpu-toolchain-runtime/lsu_instruction_bundle.md`
 
 # LSU Instruction Bundle
 
@@ -285,7 +285,7 @@ Bundle failures route as follows:
 - missing RTL interface fields -> `gpgpu-rtl`
 - trace-only ambiguity -> `gpgpu-validation`
 
-### Source: `skill/gpgpu-toolchain-runtime/memory_coalescing_contract.md`
+### Source ID: `gpgpu-toolchain-runtime/memory_coalescing_contract.md`
 
 # Memory Coalescing Contract
 
@@ -402,7 +402,7 @@ Human-facing reports should show only concise status:
 
 Full bundle YAML is AI-facing and must be registered in `ARTIFACT_MANIFEST_IR`.
 
-### Source: `skill/gpgpu-toolchain-runtime/program_image_and_loader_contract.md`
+### Source ID: `gpgpu-toolchain-runtime/program_image_and_loader_contract.md`
 
 # Program Image and Loader Contract
 
@@ -455,7 +455,7 @@ Failure modes:
 - `ENTRY_SYMBOL_RESOLVE_FAIL`
 - `LOADER_CONTRACT_FAIL`
 
-### Source: `skill/gpgpu-toolchain-runtime/runtime_launch_artifact_rules.md`
+### Source ID: `gpgpu-toolchain-runtime/runtime_launch_artifact_rules.md`
 
 # Runtime Launch Artifact Rules
 
@@ -536,7 +536,7 @@ trace knobs, but any request to change ISA/ABI, launch descriptor layout, MMIO
 map, queue depth, bank count, wire width, module presence, or warp size must be
 rejected before launch.
 
-### Source: `skill/gpgpu-toolchain-runtime/toolchain_smoke_gates.md`
+### Source ID: `gpgpu-toolchain-runtime/toolchain_smoke_gates.md`
 
 # Toolchain Smoke Gates
 

@@ -1,7 +1,7 @@
 table: validation_taxonomy
 version: compact-v1
 merged_sections:
-  - source_file: trace_normalization_table.yaml
+  - source_id: trace_normalization_table.yaml
     content: |
       version: v5
       event_fields:
@@ -83,7 +83,7 @@ merged_sections:
         rtl_source: TRACE_FIELD_MISSING
         golden_source: GOLDEN_TRACE_UNTRUSTED
         order_missing: TRACE_NORMALIZATION_FAIL
-  - source_file: correctness_gate_decision_table.yaml
+  - source_id: correctness_gate_decision_table.yaml
     content: |
       version: v5
       decision_order:
@@ -118,7 +118,7 @@ merged_sections:
         - contract_hash_match
         - launch_config_hash_match
         - initial_memory_hash_match
-  - source_file: trace_source_manifest_table.yaml
+  - source_id: trace_source_manifest_table.yaml
     content: |
       version: v5
       sources:
@@ -155,7 +155,7 @@ merged_sections:
         toolchain_smoke_trace:
           required_for: [TOOLCHAIN_ROOT_CAUSE]
           hash_field: toolchain_smoke_trace_hash
-  - source_file: event_type_taxonomy.yaml
+  - source_id: event_type_taxonomy.yaml
     content: |
       version: v5
       event_types:
@@ -189,7 +189,7 @@ merged_sections:
         - memory_response
         - csr_write
         - fault
-  - source_file: differential_compare_table.yaml
+  - source_id: differential_compare_table.yaml
     content: |
       version: v5
       compare_order:
@@ -223,7 +223,7 @@ merged_sections:
         FAULT_STATUS_MISMATCH: [fault_code]
         COMPLETION_STATUS_MISMATCH: [event_type]
       ranking_rule: first_deterministic_architectural_divergence
-  - source_file: pass_evidence_gate_table.yaml
+  - source_id: pass_evidence_gate_table.yaml
     content: |
       version: v5
       required_pass_checks:
@@ -266,7 +266,7 @@ merged_sections:
         uncovered_contract_paths: PASS_WITH_INSUFFICIENT_EVIDENCE
         performance_below_target: PASS_WITH_PERFORMANCE_WARNING
         trace_divergence_after_final_match: PASS_WITH_TRACE_DIVERGENCE_WARNING
-  - source_file: minimal_trace_window_table.yaml
+  - source_id: minimal_trace_window_table.yaml
     content: |
       version: v5
       correctness_window_rule:

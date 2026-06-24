@@ -68,7 +68,7 @@ Reject missing provenance, simulator-only behavior, unowned semantics, unobserva
 
 ## Merged Source Material
 
-### Source: `skill/gpgpu-contract/packs/interconnect/SKILL.md`
+### Source ID: `gpgpu-contract/packs/interconnect/SKILL.md`
 
 ---
 name: gpgpu-contract/packs/interconnect
@@ -113,7 +113,7 @@ Consumes:
 - `MEMORY_BUNDLE`
 - per-SM trace partitions
 - memory hierarchy constraints
-- `shared/references/vortex_memory_sync_lessons.yaml`
+- `shared/references/source_summaries/vortex.md`
 
 ## Output IR
 
@@ -267,31 +267,21 @@ This skill must not:
 ## Required Tables
 
 This skill must use:
-- `shared/tables/output_mode_table.yaml`
-- `shared/tables/artifact_visibility_table.yaml`
-- `shared/tables/report_language_policy.yaml`
-- `shared/tables/human_report_template_table.yaml`
-- `shared/tables/revalidation_routing_table.yaml`
-- `shared/tables/root_cause_taxonomy.yaml`
-- `shared/tables/stall_reason_taxonomy.md`
+- `shared/tables/workflow_policy.yaml`
+- `shared/tables/rewrite_rules.yaml`
+- `shared/tables/performance_taxonomy.yaml`
 
 ## Required Schemas
 
 This skill must validate:
-- `shared/schemas/output_mode_ir.schema.yaml`
 - `shared/schemas/artifact_manifest_ir.schema.yaml`
-- `shared/schemas/human_report_manifest_ir.schema.yaml`
-- `shared/schemas/artifact_visibility_ir.schema.yaml`
 - `shared/schemas/system_contract_ir.schema.yaml`
 - `shared/schemas/negotiated_interface_ir.schema.yaml`
 - `shared/schemas/adapter_contract.schema.yaml`
 - `shared/schemas/protocol_monitor_contract.schema.yaml`
 - `shared/schemas/incremental_rtl_map.schema.yaml`
 - `shared/schemas/normalized_trace_ir.schema.yaml`
-- `shared/schemas/noc_packet.schema.yaml`
-- `shared/schemas/structured_trace_table.schema.yaml` (`STRUCTURED_TRACE_TABLE`)
-- `shared/schemas/memory_queue_boundary.schema.yaml`
-- `shared/schemas/memory_request_lifecycle.schema.yaml`
+- `shared/schemas/contract_fragment_ir.schema.yaml` (`STRUCTURED_TRACE_TABLE`)
 
 ## Required Invariants
 
@@ -345,28 +335,29 @@ The report must include:
 - affected_sm_ids
 - downstream_contract
 
-## Concrete Assets Required
+## Compact Coverage Required
 
-This skill is incomplete unless the following exist:
-- `noc_routing_contract.md`
-- `sm_to_memory_fabric.md`
-- `packet_contract.md`
-- `icnt_backpressure_contract.md`
-- `l2_subpartition_queue_contract.md`
-- `dram_scheduler_boundary_contract.md`
-- `address_mapping_evidence_contract.md`
-- `return_path_contract.md`
-- `shared/schemas/noc_packet.schema.yaml`
+This compact pack is incomplete unless these merged source IDs are present below:
+- `noc_routing_contract`
+- `sm_to_memory_fabric`
+- `packet_contract`
+- `icnt_backpressure_contract`
+- `l2_subpartition_queue_contract`
+- `dram_scheduler_boundary_contract`
+- `address_mapping_evidence_contract`
+- `return_path_contract`
+
+It must also use:
+- `shared/schemas/contract_fragment_ir.schema.yaml`
 - `shared/schemas/negotiated_interface_ir.schema.yaml`
 - `shared/schemas/adapter_contract.schema.yaml`
 - `shared/schemas/protocol_monitor_contract.schema.yaml`
-- `shared/schemas/memory_queue_boundary.schema.yaml`
 - `shared/templates/memory_queue_boundary_report.md`
 
 When a required schema, table, example, or test is missing, emit
 `INSUFFICIENT_SKILL_ASSET` rather than inventing behavior.
 
-### Source: `skill/gpgpu-contract/packs/interconnect/address_mapping_evidence_contract.md`
+### Source ID: `gpgpu-contract/packs/interconnect/address_mapping_evidence_contract.md`
 
 # Address Mapping Evidence Contract
 
@@ -382,7 +373,7 @@ Address mapping evidence must include:
 
 Bank skew and row locality claims require this evidence.
 
-### Source: `skill/gpgpu-contract/packs/interconnect/dram_scheduler_boundary_contract.md`
+### Source ID: `gpgpu-contract/packs/interconnect/dram_scheduler_boundary_contract.md`
 
 # DRAM Queue / Scheduler Boundary Contract
 
@@ -396,7 +387,7 @@ Evidence passed to memory skill:
 - DRAM queue enter/exit cycle;
 - row/bank/channel address fields when available.
 
-### Source: `skill/gpgpu-contract/packs/interconnect/fabric_queue_backpressure_contract.md`
+### Source ID: `gpgpu-contract/packs/interconnect/fabric_queue_backpressure_contract.md`
 
 # Fabric Queue Backpressure Contract
 
@@ -424,7 +415,7 @@ fabric_queue_backpressure:
   without an explicit synchronization contract.
 - Missing backpressure evidence is `FABRIC_QUEUE_BACKPRESSURE_MISSING`.
 
-### Source: `skill/gpgpu-contract/packs/interconnect/fabric_request_response_contract.md`
+### Source ID: `gpgpu-contract/packs/interconnect/fabric_request_response_contract.md`
 
 # Fabric Request Response Contract
 
@@ -478,7 +469,7 @@ fabric_response:
 - `response_tag`
 - `final_eop`
 
-### Source: `skill/gpgpu-contract/packs/interconnect/icnt_backpressure_contract.md`
+### Source ID: `gpgpu-contract/packs/interconnect/icnt_backpressure_contract.md`
 
 # ICNT Buffer / Backpressure Contract
 
@@ -493,7 +484,7 @@ Backpressure evidence must distinguish:
 
 Do not report only `NoC slow`.
 
-### Source: `skill/gpgpu-contract/packs/interconnect/l2_slice_routing_contract.md`
+### Source ID: `gpgpu-contract/packs/interconnect/l2_slice_routing_contract.md`
 
 # L2 Slice Routing Contract
 
@@ -528,7 +519,7 @@ l2_slice_route:
 - `response_demux_test`
 - `multi_sm_trace_partition_test`
 
-### Source: `skill/gpgpu-contract/packs/interconnect/l2_subpartition_queue_contract.md`
+### Source ID: `gpgpu-contract/packs/interconnect/l2_subpartition_queue_contract.md`
 
 # L2 Subpartition Queue Contract
 
@@ -543,7 +534,7 @@ L2/subpartition evidence must name:
 - L2-to-DRAM queue event;
 - return queue event.
 
-### Source: `skill/gpgpu-contract/packs/interconnect/noc_routing_contract.md`
+### Source ID: `gpgpu-contract/packs/interconnect/noc_routing_contract.md`
 
 # NoC Routing Contract
 
@@ -629,7 +620,7 @@ config hash, source SM, target slice, virtual channel, route id, queue
 occupancy, arbitration wait, and response tag. Every NoC trace feature must
 ship a debug query and a performance attribution query.
 
-### Source: `skill/gpgpu-contract/packs/interconnect/packet_contract.md`
+### Source ID: `gpgpu-contract/packs/interconnect/packet_contract.md`
 
 # Packet Contract
 
@@ -649,7 +640,7 @@ Packet fields:
 
 NoC performance claims require packet class and size evidence.
 
-### Source: `skill/gpgpu-contract/packs/interconnect/response_demux_contract.md`
+### Source ID: `gpgpu-contract/packs/interconnect/response_demux_contract.md`
 
 # Response Demux Contract
 
@@ -678,7 +669,7 @@ response_demux:
 - Response demux must preserve atomic and fence response class.
 - A demux mismatch is `RESPONSE_DEMUX_MISMATCH`.
 
-### Source: `skill/gpgpu-contract/packs/interconnect/return_path_contract.md`
+### Source ID: `gpgpu-contract/packs/interconnect/return_path_contract.md`
 
 # Return Path Contract
 
@@ -692,7 +683,7 @@ Return path evidence must distinguish:
 
 Return congestion is not the same as request injection pressure.
 
-### Source: `skill/gpgpu-contract/packs/interconnect/sm_to_memory_fabric.md`
+### Source ID: `gpgpu-contract/packs/interconnect/sm_to_memory_fabric.md`
 
 # SM To Memory Fabric
 

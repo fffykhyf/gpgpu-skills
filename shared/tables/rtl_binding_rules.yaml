@@ -1,7 +1,7 @@
 table: rtl_binding_rules
 version: compact-v1
 merged_sections:
-  - source_file: module_interface_contract_table.yaml
+  - source_id: module_interface_contract_table.yaml
     content: |
       version: v5
       interface_binding_ir:
@@ -71,7 +71,7 @@ merged_sections:
         explicit_adapter_required: true
         adapter_must_have_module_template: true
         silent_protocol_coercion: forbidden
-  - source_file: rtl_partial_sim_gate_table.yaml
+  - source_id: rtl_partial_sim_gate_table.yaml
     content: |
       version: v5
       required_outputs:
@@ -211,7 +211,7 @@ merged_sections:
         arg_buffer_visible:
           pass_value: PASS
           failure_mode: ARG_BUFFER_VISIBILITY_FAIL
-  - source_file: verification_backend_matrix.yaml
+  - source_id: verification_backend_matrix.yaml
     content: |
       table: verification_backend_matrix
       version: v5

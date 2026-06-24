@@ -1,9 +1,9 @@
 cases:
   - case_id: mmio_start_done_fault_smoke
     input_artifacts:
-      - shared/examples/self_correcting_minimal_simt/expected_system_contract_ir.yaml
-      - shared/examples/self_correcting_minimal_simt/expected_runtime_launch_ir.yaml
-      - shared/references/rocket/mmio_runtime_debug.md
+      - shared/examples/minimal_simt/ai/expected_system_contract_ir.yaml
+      - shared/examples/minimal_simt/ai/expected_runtime_launch_ir.yaml
+      - shared/references/source_summaries/rocket.md
     expected_outputs:
       - MMIO_REGISTER_MAP_IR
       - DEBUG_COUNTER_CONTRACT
@@ -24,9 +24,9 @@ cases:
 
   - case_id: derives_toolchain_runtime_artifacts_from_contract
     input_artifacts:
-      - shared/examples/self_correcting_minimal_simt/expected_system_contract_ir.yaml
-      - shared/examples/self_correcting_minimal_simt/expected_golden_contract_model.yaml
-      - shared/examples/self_correcting_minimal_simt/input_kernel.asm
+      - shared/examples/minimal_simt/ai/expected_system_contract_ir.yaml
+      - shared/examples/minimal_simt/ai/expected_golden_contract_model.yaml
+      - shared/examples/minimal_simt/ai/input_kernel.asm
     expected_outputs:
       - TOOLCHAIN_ARTIFACT_IR
       - ASSEMBLY_IR
@@ -51,8 +51,8 @@ cases:
 
   - case_id: launch_abi_field_chain_complete
     input_artifacts:
-      - shared/examples/self_correcting_minimal_simt/expected_system_contract_ir.yaml
-      - shared/examples/self_correcting_minimal_simt/expected_program_image_ir.yaml
+      - shared/examples/minimal_simt/ai/expected_system_contract_ir.yaml
+      - shared/examples/minimal_simt/ai/expected_program_image_ir.yaml
     expected_outputs:
       - RUNTIME_LAUNCH_IR
       - TOOLCHAIN_SMOKE_REPORT
@@ -67,7 +67,7 @@ cases:
 
   - case_id: rejects_unwired_launch_field
     input_artifacts:
-      - shared/examples/self_correcting_minimal_simt/expected_runtime_launch_ir.yaml
+      - shared/examples/minimal_simt/ai/expected_runtime_launch_ir.yaml
     expected_outputs:
       - RUNTIME_LAUNCH_IR
     expected_failure_mode: UNWIRED_LAUNCH_ABI_FIELD

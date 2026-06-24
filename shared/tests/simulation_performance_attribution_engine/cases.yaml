@@ -1,10 +1,10 @@
 cases:
   - case_id: case_pass_vector_add_evidence
     input_artifacts:
-      - shared/examples/self_correcting_minimal_simt/expected_golden_contract_model.yaml
-      - shared/examples/self_correcting_minimal_simt/expected_incremental_rtl_map.yaml
-      - shared/examples/self_correcting_minimal_simt/expected_program_image_ir.yaml
-      - shared/examples/self_correcting_minimal_simt/expected_runtime_launch_ir.yaml
+      - shared/examples/minimal_simt/ai/expected_golden_contract_model.yaml
+      - shared/examples/minimal_simt/ai/expected_incremental_rtl_map.yaml
+      - shared/examples/minimal_simt/ai/expected_program_image_ir.yaml
+      - shared/examples/minimal_simt/ai/expected_runtime_launch_ir.yaml
     expected_outputs:
       - NORMALIZED_TRACE_IR
       - CORRECTNESS_GATE_REPORT
@@ -26,8 +26,8 @@ cases:
 
   - case_id: case_pass_with_insufficient_trace
     input_artifacts:
-      - shared/examples/self_correcting_minimal_simt/expected_golden_contract_model.yaml
-      - shared/examples/self_correcting_minimal_simt/expected_incremental_rtl_map.yaml
+      - shared/examples/minimal_simt/ai/expected_golden_contract_model.yaml
+      - shared/examples/minimal_simt/ai/expected_incremental_rtl_map.yaml
     expected_outputs:
       - NORMALIZED_TRACE_IR
       - CORRECTNESS_GATE_REPORT
@@ -45,8 +45,8 @@ cases:
 
   - case_id: case_pass_with_performance_warning
     input_artifacts:
-      - shared/examples/self_correcting_minimal_simt/expected_golden_contract_model.yaml
-      - shared/examples/self_correcting_minimal_simt/expected_incremental_rtl_map.yaml
+      - shared/examples/minimal_simt/ai/expected_golden_contract_model.yaml
+      - shared/examples/minimal_simt/ai/expected_incremental_rtl_map.yaml
     expected_outputs:
       - NORMALIZED_TRACE_IR
       - CORRECTNESS_GATE_REPORT
@@ -65,9 +65,9 @@ cases:
 
   - case_id: case_first_divergence_pc_mismatch
     input_artifacts:
-      - shared/examples/self_correcting_minimal_simt/expected_golden_contract_model.yaml
-      - shared/examples/self_correcting_minimal_simt/expected_incremental_rtl_map.yaml
-      - shared/examples/self_correcting_minimal_simt/expected_program_image_ir.yaml
+      - shared/examples/minimal_simt/ai/expected_golden_contract_model.yaml
+      - shared/examples/minimal_simt/ai/expected_incremental_rtl_map.yaml
+      - shared/examples/minimal_simt/ai/expected_program_image_ir.yaml
     expected_outputs:
       - NORMALIZED_TRACE_IR
       - CORRECTNESS_GATE_REPORT
@@ -86,8 +86,8 @@ cases:
 
   - case_id: case_active_mask_mismatch
     input_artifacts:
-      - shared/examples/self_correcting_minimal_simt/expected_golden_contract_model.yaml
-      - shared/examples/self_correcting_minimal_simt/expected_incremental_rtl_map.yaml
+      - shared/examples/minimal_simt/ai/expected_golden_contract_model.yaml
+      - shared/examples/minimal_simt/ai/expected_incremental_rtl_map.yaml
     expected_outputs:
       - NORMALIZED_TRACE_IR
       - CORRECTNESS_GATE_REPORT
@@ -103,8 +103,8 @@ cases:
 
   - case_id: case_register_writeback_mismatch
     input_artifacts:
-      - shared/examples/self_correcting_minimal_simt/expected_golden_contract_model.yaml
-      - shared/examples/self_correcting_minimal_simt/expected_incremental_rtl_map.yaml
+      - shared/examples/minimal_simt/ai/expected_golden_contract_model.yaml
+      - shared/examples/minimal_simt/ai/expected_incremental_rtl_map.yaml
     expected_outputs:
       - NORMALIZED_TRACE_IR
       - CORRECTNESS_GATE_REPORT
@@ -120,8 +120,8 @@ cases:
 
   - case_id: case_memory_byte_enable_mismatch
     input_artifacts:
-      - shared/examples/self_correcting_minimal_simt/expected_golden_contract_model.yaml
-      - shared/examples/self_correcting_minimal_simt/expected_incremental_rtl_map.yaml
+      - shared/examples/minimal_simt/ai/expected_golden_contract_model.yaml
+      - shared/examples/minimal_simt/ai/expected_incremental_rtl_map.yaml
     expected_outputs:
       - NORMALIZED_TRACE_IR
       - CORRECTNESS_GATE_REPORT
@@ -137,8 +137,8 @@ cases:
 
   - case_id: case_response_tag_mismatch
     input_artifacts:
-      - shared/examples/self_correcting_minimal_simt/expected_golden_contract_model.yaml
-      - shared/examples/self_correcting_minimal_simt/expected_incremental_rtl_map.yaml
+      - shared/examples/minimal_simt/ai/expected_golden_contract_model.yaml
+      - shared/examples/minimal_simt/ai/expected_incremental_rtl_map.yaml
     expected_outputs:
       - NORMALIZED_TRACE_IR
       - CORRECTNESS_GATE_REPORT
@@ -154,8 +154,8 @@ cases:
 
   - case_id: case_scoreboard_wakeup_delay
     input_artifacts:
-      - shared/examples/self_correcting_minimal_simt/expected_golden_contract_model.yaml
-      - shared/examples/self_correcting_minimal_simt/expected_incremental_rtl_map.yaml
+      - shared/examples/minimal_simt/ai/expected_golden_contract_model.yaml
+      - shared/examples/minimal_simt/ai/expected_incremental_rtl_map.yaml
     expected_outputs:
       - NORMALIZED_TRACE_IR
       - PERFORMANCE_METRIC_IR
@@ -171,8 +171,8 @@ cases:
 
   - case_id: case_shared_bank_conflict_bottleneck
     input_artifacts:
-      - shared/examples/self_correcting_minimal_simt/expected_golden_contract_model.yaml
-      - shared/examples/self_correcting_minimal_simt/expected_incremental_rtl_map.yaml
+      - shared/examples/minimal_simt/ai/expected_golden_contract_model.yaml
+      - shared/examples/minimal_simt/ai/expected_incremental_rtl_map.yaml
     expected_outputs:
       - NORMALIZED_TRACE_IR
       - PERFORMANCE_METRIC_IR
@@ -188,8 +188,8 @@ cases:
 
   - case_id: case_scheduler_underutilization
     input_artifacts:
-      - shared/examples/self_correcting_minimal_simt/expected_golden_contract_model.yaml
-      - shared/examples/self_correcting_minimal_simt/expected_incremental_rtl_map.yaml
+      - shared/examples/minimal_simt/ai/expected_golden_contract_model.yaml
+      - shared/examples/minimal_simt/ai/expected_incremental_rtl_map.yaml
     expected_outputs:
       - NORMALIZED_TRACE_IR
       - PERFORMANCE_METRIC_IR
@@ -205,8 +205,8 @@ cases:
 
   - case_id: case_barrier_wait_bottleneck
     input_artifacts:
-      - shared/examples/self_correcting_minimal_simt/expected_golden_contract_model.yaml
-      - shared/examples/self_correcting_minimal_simt/expected_incremental_rtl_map.yaml
+      - shared/examples/minimal_simt/ai/expected_golden_contract_model.yaml
+      - shared/examples/minimal_simt/ai/expected_incremental_rtl_map.yaml
     expected_outputs:
       - NORMALIZED_TRACE_IR
       - PERFORMANCE_METRIC_IR
@@ -221,8 +221,8 @@ cases:
 
   - case_id: case_branch_divergence_overhead
     input_artifacts:
-      - shared/examples/self_correcting_minimal_simt/expected_golden_contract_model.yaml
-      - shared/examples/self_correcting_minimal_simt/expected_incremental_rtl_map.yaml
+      - shared/examples/minimal_simt/ai/expected_golden_contract_model.yaml
+      - shared/examples/minimal_simt/ai/expected_incremental_rtl_map.yaml
     expected_outputs:
       - NORMALIZED_TRACE_IR
       - PERFORMANCE_METRIC_IR
@@ -237,9 +237,9 @@ cases:
 
   - case_id: case_assembler_encoding_mismatch
     input_artifacts:
-      - shared/examples/self_correcting_minimal_simt/input_kernel.asm
-      - shared/examples/self_correcting_minimal_simt/expected_assembly_ir.yaml
-      - shared/examples/self_correcting_minimal_simt/expected_toolchain_artifact_ir.yaml
+      - shared/examples/minimal_simt/ai/input_kernel.asm
+      - shared/examples/minimal_simt/ai/expected_assembly_ir.yaml
+      - shared/examples/minimal_simt/ai/expected_toolchain_artifact_ir.yaml
     expected_outputs:
       - NORMALIZED_TRACE_IR
       - CORRECTNESS_GATE_REPORT
@@ -258,8 +258,8 @@ cases:
 
   - case_id: case_disassembler_roundtrip_mismatch
     input_artifacts:
-      - shared/examples/self_correcting_minimal_simt/expected_program.hex
-      - shared/examples/self_correcting_minimal_simt/expected_disassembly.asm
+      - shared/examples/minimal_simt/ai/expected_program.hex
+      - shared/examples/minimal_simt/ai/expected_disassembly.asm
     expected_outputs:
       - NORMALIZED_TRACE_IR
       - TOOLCHAIN_ATTRIBUTION_REPORT
@@ -273,8 +273,8 @@ cases:
 
   - case_id: case_program_image_entry_pc_mismatch
     input_artifacts:
-      - shared/examples/self_correcting_minimal_simt/expected_program_image_ir.yaml
-      - shared/examples/self_correcting_minimal_simt/expected_loader_contract_ir.yaml
+      - shared/examples/minimal_simt/ai/expected_program_image_ir.yaml
+      - shared/examples/minimal_simt/ai/expected_loader_contract_ir.yaml
     expected_outputs:
       - NORMALIZED_TRACE_IR
       - TOOLCHAIN_ATTRIBUTION_REPORT
@@ -290,8 +290,8 @@ cases:
 
   - case_id: case_runtime_arg_buffer_mismatch
     input_artifacts:
-      - shared/examples/self_correcting_minimal_simt/expected_runtime_launch_ir.yaml
-      - shared/examples/self_correcting_minimal_simt/expected_loader_contract_ir.yaml
+      - shared/examples/minimal_simt/ai/expected_runtime_launch_ir.yaml
+      - shared/examples/minimal_simt/ai/expected_loader_contract_ir.yaml
     expected_outputs:
       - NORMALIZED_TRACE_IR
       - TOOLCHAIN_ATTRIBUTION_REPORT
@@ -307,8 +307,8 @@ cases:
 
   - case_id: case_loader_contract_mismatch
     input_artifacts:
-      - shared/examples/self_correcting_minimal_simt/expected_program_image_ir.yaml
-      - shared/examples/self_correcting_minimal_simt/expected_loader_contract_ir.yaml
+      - shared/examples/minimal_simt/ai/expected_program_image_ir.yaml
+      - shared/examples/minimal_simt/ai/expected_loader_contract_ir.yaml
     expected_outputs:
       - NORMALIZED_TRACE_IR
       - TOOLCHAIN_ATTRIBUTION_REPORT
@@ -321,8 +321,8 @@ cases:
 
   - case_id: simx_rtl_trace_missing_byte_enable_is_weak_pass
     input_artifacts:
-      - shared/examples/self_correcting_minimal_simt/expected_golden_contract_model.yaml
-      - shared/examples/self_correcting_minimal_simt/expected_incremental_rtl_map.yaml
+      - shared/examples/minimal_simt/ai/expected_golden_contract_model.yaml
+      - shared/examples/minimal_simt/ai/expected_incremental_rtl_map.yaml
     expected_outputs:
       - NORMALIZED_TRACE_IR
       - PASS_EVIDENCE_REPORT
@@ -336,8 +336,8 @@ cases:
 
   - case_id: cache_replay_order_mismatch_routes_to_memory_system
     input_artifacts:
-      - shared/examples/self_correcting_minimal_simt/expected_golden_contract_model.yaml
-      - shared/examples/self_correcting_minimal_simt/expected_incremental_rtl_map.yaml
+      - shared/examples/minimal_simt/ai/expected_golden_contract_model.yaml
+      - shared/examples/minimal_simt/ai/expected_incremental_rtl_map.yaml
     expected_outputs:
       - NORMALIZED_TRACE_IR
       - FIRST_DIVERGENCE_REPORT
@@ -351,7 +351,7 @@ cases:
 
   - case_id: ppa_claim_without_saif_is_rejected
     input_artifacts:
-      - shared/examples/self_correcting_minimal_simt/expected_performance_metric_ir.yaml
+      - shared/examples/minimal_simt/ai/expected_performance_metric_ir.yaml
     expected_outputs:
       - PERFORMANCE_METRIC_IR
       - SIM_PERF_ATTRIBUTION_REPORT
@@ -363,7 +363,7 @@ cases:
 
   - case_id: case_insufficient_trace_evidence
     input_artifacts:
-      - shared/examples/self_correcting_minimal_simt/expected_golden_contract_model.yaml
+      - shared/examples/minimal_simt/ai/expected_golden_contract_model.yaml
     expected_outputs:
       - NORMALIZED_TRACE_IR
       - CORRECTNESS_GATE_REPORT
@@ -378,8 +378,8 @@ cases:
 
   - case_id: case_ambiguous_root_cause
     input_artifacts:
-      - shared/examples/self_correcting_minimal_simt/expected_golden_contract_model.yaml
-      - shared/examples/self_correcting_minimal_simt/expected_incremental_rtl_map.yaml
+      - shared/examples/minimal_simt/ai/expected_golden_contract_model.yaml
+      - shared/examples/minimal_simt/ai/expected_incremental_rtl_map.yaml
     expected_outputs:
       - NORMALIZED_TRACE_IR
       - CORRECTNESS_GATE_REPORT

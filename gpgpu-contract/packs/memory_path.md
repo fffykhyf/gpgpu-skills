@@ -68,7 +68,7 @@ Reject missing provenance, simulator-only behavior, unowned semantics, unobserva
 
 ## Merged Source Material
 
-### Source: `skill/gpgpu-contract/packs/memory_path/SKILL.md`
+### Source ID: `gpgpu-contract/packs/memory_path/SKILL.md`
 
 ---
 name: gpgpu-contract/packs/memory_path
@@ -105,7 +105,7 @@ Consumes:
 - memory request traces
 - L2/DRAM traces
 - coherence requirements
-- `shared/references/vortex_memory_sync_lessons.yaml`
+- `shared/references/source_summaries/vortex.md`
 
 ## Output IR
 
@@ -226,29 +226,17 @@ This skill must not:
 ## Required Tables
 
 This skill must use:
-- `shared/tables/output_mode_table.yaml`
-- `shared/tables/artifact_visibility_table.yaml`
-- `shared/tables/report_language_policy.yaml`
-- `shared/tables/human_report_template_table.yaml`
-- `shared/tables/revalidation_routing_table.yaml`
-- `shared/tables/root_cause_taxonomy.yaml`
-- `shared/tables/stall_reason_taxonomy.md`
+- `shared/tables/workflow_policy.yaml`
+- `shared/tables/rewrite_rules.yaml`
+- `shared/tables/performance_taxonomy.yaml`
 
 ## Required Schemas
 
 This skill must validate:
-- `shared/schemas/output_mode_ir.schema.yaml`
 - `shared/schemas/artifact_manifest_ir.schema.yaml`
-- `shared/schemas/human_report_manifest_ir.schema.yaml`
-- `shared/schemas/artifact_visibility_ir.schema.yaml`
 - `shared/schemas/system_contract_ir.schema.yaml`
 - `shared/schemas/normalized_trace_ir.schema.yaml`
-- `shared/schemas/warp_memory_transaction.schema.yaml`
-- `shared/schemas/coalescer_output_trace.schema.yaml`
-- `shared/schemas/cache_request_status.schema.yaml`
-- `shared/schemas/memory_request_lifecycle.schema.yaml`
-- `shared/schemas/memory_queue_boundary.schema.yaml`
-- `shared/schemas/memory_transaction_event.schema.yaml` (`MEMORY_TRANSACTION_EVENT`)
+- `shared/schemas/contract_fragment_ir.schema.yaml` (`MEMORY_TRANSACTION_EVENT`)
 
 ## Required Invariants
 
@@ -288,30 +276,30 @@ The report must include:
 - affected_sm_ids
 - downstream_contract
 
-## Concrete Assets Required
+## Compact Coverage Required
 
-This skill is incomplete unless the following exist:
-- `dram_controller_contract.md`
-- `cache_coherence_model.md`
-- `l1_coalescer_cache_contract.md`
-- `mshr_deadlock_guard.md`
-- `memory_response_routing.md`
-- `warp_memory_transaction_contract.md`
-- `coalescer_contract.md`
-- `shared_memory_bank_conflict_contract.md`
-- `l1_cache_status_contract.md`
-- `mshr_reservation_fail_contract.md`
-- `memory_return_scoreboard_release_contract.md`
-- `shared/schemas/warp_memory_transaction.schema.yaml`
-- `shared/schemas/cache_request_status.schema.yaml`
-- `shared/schemas/memory_request_lifecycle.schema.yaml`
+This compact pack is incomplete unless these merged source IDs are present below:
+- `dram_controller_contract`
+- `cache_coherence_model`
+- `l1_coalescer_cache_contract`
+- `mshr_deadlock_guard`
+- `memory_response_routing`
+- `warp_memory_transaction_contract`
+- `coalescer_contract`
+- `shared_memory_bank_conflict_contract`
+- `l1_cache_status_contract`
+- `mshr_reservation_fail_contract`
+- `memory_return_scoreboard_release_contract`
+
+It must also use:
+- `shared/schemas/contract_fragment_ir.schema.yaml`
 - `shared/templates/warp_memory_transaction_contract.md`
 - `shared/templates/memory_queue_boundary_report.md`
 
 When a required schema, table, example, or test is missing, emit
 `INSUFFICIENT_SKILL_ASSET` rather than inventing behavior.
 
-### Source: `skill/gpgpu-contract/packs/memory_path/cache_coherence_model.md`
+### Source ID: `gpgpu-contract/packs/memory_path/cache_coherence_model.md`
 
 # Cache Coherence Model
 
@@ -376,7 +364,7 @@ Failures include:
 - atomic visibility violation
 - fence visibility violation
 
-### Source: `skill/gpgpu-contract/packs/memory_path/cache_response_routing_contract.md`
+### Source ID: `gpgpu-contract/packs/memory_path/cache_response_routing_contract.md`
 
 # Cache Response Routing Contract
 
@@ -402,7 +390,7 @@ Failure modes:
 - `RESPONSE_DEMUX_MISMATCH`
 - `MEMORY_TAG_REUSE_BEFORE_EOP`
 
-### Source: `skill/gpgpu-contract/packs/memory_path/coalescer_contract.md`
+### Source ID: `gpgpu-contract/packs/memory_path/coalescer_contract.md`
 
 # Coalescer Contract
 
@@ -432,7 +420,7 @@ Coalescer features must provide `COALESCER_LOG` as a
 `STRUCTURED_TRACE_TABLE`, plus one `SQL_DEBUG_QUERY` for mismatch localization
 and one `SQL_PERF_QUERY` for request-reduction or amplification attribution.
 
-### Source: `skill/gpgpu-contract/packs/memory_path/coalescer_response_restore_contract.md`
+### Source ID: `gpgpu-contract/packs/memory_path/coalescer_response_restore_contract.md`
 
 # Coalescer Response Restore Contract
 
@@ -467,7 +455,7 @@ Failure modes:
 - `COALESCER_TAG_REUSE_BEFORE_EOP`
 - `COALESCER_BYTE_ENABLE_RESTORE_MISMATCH`
 
-### Source: `skill/gpgpu-contract/packs/memory_path/dram_controller_contract.md`
+### Source ID: `gpgpu-contract/packs/memory_path/dram_controller_contract.md`
 
 # DRAM Controller Contract
 
@@ -530,7 +518,7 @@ Required DRAM trace fields:
 - burst scheduling is auditable
 - performance stalls can distinguish DRAM bank conflict from NoC/L2 contention
 
-### Source: `skill/gpgpu-contract/packs/memory_path/l1_cache_or_global_adapter_contract.md`
+### Source ID: `gpgpu-contract/packs/memory_path/l1_cache_or_global_adapter_contract.md`
 
 # L1 Cache or Global Adapter Contract
 
@@ -552,7 +540,7 @@ If `mode: direct_global_adapter`, the contract must still say whether hit/miss,
 MSHR, response reorder, and visibility effects exist. Hidden default behavior is
 not allowed.
 
-### Source: `skill/gpgpu-contract/packs/memory_path/l1_cache_status_contract.md`
+### Source ID: `gpgpu-contract/packs/memory_path/l1_cache_status_contract.md`
 
 # L1 Cache Status Contract
 
@@ -575,7 +563,7 @@ Reservation fail reasons:
 
 Never merge cache misses with reservation failures.
 
-### Source: `skill/gpgpu-contract/packs/memory_path/l1_coalescer_cache_contract.md`
+### Source ID: `gpgpu-contract/packs/memory_path/l1_coalescer_cache_contract.md`
 
 # L1 Coalescer Cache Contract
 
@@ -604,7 +592,7 @@ Failure modes:
 - `WRITE_REPLAY_POLICY_UNDEFINED`
 - `READ_REPLAY_POLICY_UNDEFINED`
 
-### Source: `skill/gpgpu-contract/packs/memory_path/l2_cache_slice_contract.md`
+### Source ID: `gpgpu-contract/packs/memory_path/l2_cache_slice_contract.md`
 
 # L2 Cache Slice Contract
 
@@ -629,7 +617,7 @@ l2_cache_slice:
 The slice must preserve source SM, source warp, request tag, lane mask, and byte
 enable through miss, fill, replay, and response demux.
 
-### Source: `skill/gpgpu-contract/packs/memory_path/local_memory_bank_contract.md`
+### Source ID: `gpgpu-contract/packs/memory_path/local_memory_bank_contract.md`
 
 # Local Memory Bank Contract
 
@@ -655,7 +643,7 @@ Required tests:
 - response held under downstream backpressure;
 - barrier after shared memory access waits for required visibility.
 
-### Source: `skill/gpgpu-contract/packs/memory_path/lsu_lane_format_contract.md`
+### Source ID: `gpgpu-contract/packs/memory_path/lsu_lane_format_contract.md`
 
 # LSU Lane Format Contract
 
@@ -680,7 +668,7 @@ lsu_lane_request:
 Acceptance requires traceable address alignment, byte enable, shifted store
 data, load response formatting, and lane mask preservation.
 
-### Source: `skill/gpgpu-contract/packs/memory_path/memory_response_routing.md`
+### Source ID: `gpgpu-contract/packs/memory_path/memory_response_routing.md`
 
 # Memory Response Routing
 
@@ -721,7 +709,7 @@ store, atomic, coalesced request, cache refill, MSHR replay, response restore,
 and final scoreboard release. Each event must preserve request tag, response
 tag, original request tag, SM, warp, lane mask, byte enable, and final EOP.
 
-### Source: `skill/gpgpu-contract/packs/memory_path/memory_return_scoreboard_release_contract.md`
+### Source ID: `gpgpu-contract/packs/memory_path/memory_return_scoreboard_release_contract.md`
 
 # Memory Return / Scoreboard Release Contract
 
@@ -738,7 +726,7 @@ Return path must preserve:
 Loads and atomics with destination registers must not release scoreboard before
 the final core-visible response.
 
-### Source: `skill/gpgpu-contract/packs/memory_path/memory_visibility_contract.md`
+### Source ID: `gpgpu-contract/packs/memory_path/memory_visibility_contract.md`
 
 # Memory Visibility Contract
 
@@ -761,7 +749,7 @@ Rules:
 - Barrier release does not imply memory visibility unless the contract says so.
 - Atomic visibility and fence visibility are separate events.
 
-### Source: `skill/gpgpu-contract/packs/memory_path/mshr_deadlock_guard.md`
+### Source ID: `gpgpu-contract/packs/memory_path/mshr_deadlock_guard.md`
 
 # MSHR Deadlock Guard
 
@@ -785,7 +773,7 @@ Acceptance evidence:
 - directed test with response backpressure
 - trace showing accepted request count never exceeds guaranteed drain capacity
 
-### Source: `skill/gpgpu-contract/packs/memory_path/mshr_replay_contract.md`
+### Source ID: `gpgpu-contract/packs/memory_path/mshr_replay_contract.md`
 
 # MSHR Replay Contract
 
@@ -814,7 +802,7 @@ mshr_deadlock_guard:
 
 `MSHR_REPLAY_MISMATCH` routes to `MEMORY_PATH_PATCH`.
 
-### Source: `skill/gpgpu-contract/packs/memory_path/mshr_reservation_fail_contract.md`
+### Source ID: `gpgpu-contract/packs/memory_path/mshr_reservation_fail_contract.md`
 
 # MSHR / Reservation Failure Contract
 
@@ -831,7 +819,7 @@ MSHR evidence must include:
 
 Reservation failures are structural resource pressure, not locality misses.
 
-### Source: `skill/gpgpu-contract/packs/memory_path/nonblocking_memory_tag_contract.md`
+### Source ID: `gpgpu-contract/packs/memory_path/nonblocking_memory_tag_contract.md`
 
 # Nonblocking Memory Tag Contract
 
@@ -858,7 +846,7 @@ Forbidden behavior:
 - response without `final_eop` releases tag;
 - tag reuse before final core-visible response.
 
-### Source: `skill/gpgpu-contract/packs/memory_path/shared_memory_bank_conflict_contract.md`
+### Source ID: `gpgpu-contract/packs/memory_path/shared_memory_bank_conflict_contract.md`
 
 # Shared Memory Bank Conflict Contract
 
@@ -875,7 +863,7 @@ Required evidence:
 
 Do not use fixed shared-memory latency as the contract.
 
-### Source: `skill/gpgpu-contract/packs/memory_path/warp_memory_transaction_contract.md`
+### Source ID: `gpgpu-contract/packs/memory_path/warp_memory_transaction_contract.md`
 
 # Warp Memory Transaction Contract
 

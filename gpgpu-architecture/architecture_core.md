@@ -2,7 +2,7 @@
 
 ## Merged Source Material
 
-### Source: `skill/gpgpu-architecture/legacy_request_and_candidate_constraints.md`
+### Source ID: `gpgpu-architecture/legacy_request_and_candidate_constraints.md`
 
 # Legacy Request and Candidate Constraints
 
@@ -67,7 +67,7 @@ multiple candidates, but each candidate must expose:
 - downstream contract obligations
 
 Preset selection must be deterministic. Apply the preset rules from
-`shared/tables/architecture_preset_library.yaml` in priority order:
+`shared/tables/architecture_decision_rules.yaml` in priority order:
 
 - end-to-end validation targets containing `compile_kernel_to_program_image`,
   `rtl_sim_smoke_test`, and `memory_dump_golden_check` prefer
@@ -123,7 +123,7 @@ The generator must fail closed for:
 - unrealizable micro-constraint
 - missing schema, table, example, or regression case
 
-### Source: `skill/gpgpu-architecture/imported_evidence_classification.md`
+### Source ID: `gpgpu-architecture/imported_evidence_classification.md`
 
 # Imported Evidence Classification
 
@@ -131,7 +131,7 @@ Before using any external reference, classify each imported item as state,
 config, counter, visualization, power, test, debug, or simulator artifact.
 
 Parameters must validate against
-`shared/schemas/config_parameter_classification.schema.yaml`.
+`shared/schemas/resolved_config_ir.schema.yaml`.
 
 Reject these as architecture truth unless the project explicitly defines a
 replacement contract:
@@ -150,7 +150,7 @@ trace gates, and counter selection. Reject evidence that would change module
 existence, wire width, queue depth, bank count, warp size, ISA/ABI, or MMIO
 layout at runtime.
 
-### Source: `skill/gpgpu-architecture/simulator_only_exclusion_rules.md`
+### Source ID: `gpgpu-architecture/simulator_only_exclusion_rules.md`
 
 # Simulator-Only Exclusion Rules
 
@@ -167,7 +167,7 @@ Architecture artifacts must reject:
 If a rejected item appears in a candidate contract, emit
 `FORBIDDEN_PROVENANCE`.
 
-### Source: `skill/gpgpu-architecture/architecture_performance_attribution_rules.md`
+### Source ID: `gpgpu-architecture/architecture_performance_attribution_rules.md`
 
 # Architecture-Level Performance Attribution Rules
 
@@ -188,7 +188,7 @@ Architecture changes for performance must follow this order:
 
 Do not tune DRAM before ruling out coalescing, L1/MSHR, ICNT, and L2 queues.
 
-### Source: `skill/gpgpu-architecture/non_issue_reason_taxonomy.md`
+### Source ID: `gpgpu-architecture/non_issue_reason_taxonomy.md`
 
 # Non-Issue Reason Taxonomy
 

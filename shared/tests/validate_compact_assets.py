@@ -149,6 +149,7 @@ def list_dir_names(p):
 
 def walk_files(base):
     for current, dirs, files in os.walk(base):
+        dirs[:] = [name for name in dirs if name not in (".git", "__pycache__")]
         for name in files:
             yield os.path.join(current, name)
 
@@ -165,6 +166,67 @@ def assert_contains(p, tokens):
     for token in tokens:
         if token.lower() not in lowered:
             fail("%s missing token: %s" % (rel(p), token))
+
+
+def add_error(errors, p, lineno, message):
+    errors.append("%s:%d: %s" % (rel(p), lineno, message))
+
+
+def strip_ref_token(token):
+    return token.rstrip(".,;:)]}'\"")
+
+
+def validate_existing_skill_ref(errors, p, lineno, ref):
+    ref = strip_ref_token(ref)
+    if ref.startswith("skill/"):
+        add_error(errors, p, lineno, "use skill-internal path without skill/ prefix: %s" % ref)
+        return
+    if ref.startswith("raw/"):
+        add_error(errors, p, lineno, "raw archive path is not packaged as an active asset: %s" % ref)
+        return
+    if ref.startswith("tools/") or ref.startswith("tests/"):
+        if not is_file(path(SKILL, ref)):
+            add_error(errors, p, lineno, "missing packaged tool/test asset: %s" % ref)
+        return
+    if ref.startswith("shared/") and not is_file(path(SKILL, ref)):
+        add_error(errors, p, lineno, "missing shared asset: %s" % ref)
+
+
+def validate_asset_references():
+    errors = []
+    shared_ref = re.compile(r"\bshared/(?:schemas|tables|templates|references|examples)/[A-Za-z0-9_./-]+")
+    skill_ref = re.compile(r"\bskill/[A-Za-z0-9_./-]+")
+    raw_ref = re.compile(r"\braw/[A-Za-z0-9_./-]+")
+    local_asset_ref = re.compile(r"(^|[^A-Za-z0-9_./-])((?:tools|tests)/[A-Za-z0-9_./-]+)")
+    source_file_ref = re.compile(r"^\s*-\s*source_file:\s*([A-Za-z0-9_./-]+)")
+    text_suffixes = (".md", ".yaml", ".yml", ".py")
+
+    for current in walk_files(SKILL):
+        if not current.endswith(text_suffixes):
+            continue
+        if os.path.basename(current).startswith("validate_"):
+            continue
+        for lineno, line in enumerate(read(current).splitlines(), 1):
+            source_match = source_file_ref.search(line)
+            if source_match:
+                ref = strip_ref_token(source_match.group(1))
+                if "/" in ref:
+                    candidate = path(SKILL, ref)
+                else:
+                    candidate = path(os.path.dirname(current), ref)
+                if not is_file(candidate):
+                    add_error(errors, current, lineno, "source_file points to absent split file: %s" % ref)
+            for regex in (shared_ref, skill_ref, raw_ref):
+                for match in regex.finditer(line):
+                    validate_existing_skill_ref(errors, current, lineno, match.group(0))
+            for match in local_asset_ref.finditer(line):
+                validate_existing_skill_ref(errors, current, lineno, match.group(2))
+
+    if errors:
+        preview = "\n".join(errors[:40])
+        if len(errors) > 40:
+            preview += "\n... %d more" % (len(errors) - 40)
+        fail("asset reference validation found %d problem(s):\n%s" % (len(errors), preview))
 
 
 def parse_lesson_entries(text):
@@ -271,6 +333,8 @@ def main():
 
     for required, tokens in REQUIRED_SKILL_TEXT.items():
         assert_contains(path(SKILL, required), tokens)
+
+    validate_asset_references()
 
     print("PASS: compact GPGPU skill assets validated")
 

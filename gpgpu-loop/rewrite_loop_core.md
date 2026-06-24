@@ -2,7 +2,7 @@
 
 ## Merged Source Material
 
-### Source: `skill/gpgpu-loop/attribution_driven_rewrite_trigger.md`
+### Source ID: `gpgpu-loop/attribution_driven_rewrite_trigger.md`
 
 # Attribution-Driven Rewrite Trigger
 
@@ -15,7 +15,7 @@ Rewrite when attribution is invalid even if output is correct:
 - power evidence is used as primary proof;
 - memory bottleneck lacks lifecycle boundary.
 
-### Source: `skill/gpgpu-loop/config_drift_guard.md`
+### Source ID: `gpgpu-loop/config_drift_guard.md`
 
 # Config Drift Guard
 
@@ -34,7 +34,7 @@ compile-time or ABI-visible fields. Debug trace knobs must be separated from
 performance ranking inputs so enabling full transaction diff or trace DB writes
 does not contaminate throughput comparisons.
 
-### Source: `skill/gpgpu-loop/counter_gated_regression.md`
+### Source ID: `gpgpu-loop/counter_gated_regression.md`
 
 # Counter-Gated Regression
 
@@ -58,7 +58,7 @@ performance patch when correctness diff fails, checkpoint replay is missing, a
 high-weight phase regresses without owner explanation, or debug trace knobs
 contaminate the measured ranking.
 
-### Source: `skill/gpgpu-loop/legacy_closure_repair_constraints.md`
+### Source ID: `gpgpu-loop/legacy_closure_repair_constraints.md`
 
 # Legacy Closure Repair Constraints
 
@@ -149,7 +149,7 @@ attribution inputs or patch triggers:
 These classes do not replace v5 root causes. They provide compatibility labels
 that must map to v5 patch classes and revalidation routes.
 
-### Source: `skill/gpgpu-loop/patch_routing_rule.md`
+### Source ID: `gpgpu-loop/patch_routing_rule.md`
 
 # Patch Routing Rule
 
@@ -168,7 +168,7 @@ Patch classes include:
 
 Route by owner, not by symptom wording.
 
-### Source: `skill/gpgpu-loop/patch_taxonomy.md`
+### Source ID: `gpgpu-loop/patch_taxonomy.md`
 
 # Patch Taxonomy
 
@@ -217,7 +217,7 @@ behavior is wrong.
 from `SYSTEM_CONTRACT_IR`. It routes to
 `gpgpu-contract`.
 
-### Source: `skill/gpgpu-loop/regression_tracking.md`
+### Source ID: `gpgpu-loop/regression_tracking.md`
 
 # Regression Tracking
 
@@ -252,7 +252,7 @@ Regression tracking prevents repeated failed repairs from being treated as new p
 - `escalation_policy` must state when repeated RTL, runtime, architecture, or
   evidence patches escalate to another owner.
 
-### Source: `skill/gpgpu-loop/revalidation_routing.md`
+### Source ID: `gpgpu-loop/revalidation_routing.md`
 
 # Revalidation Routing
 
@@ -300,7 +300,7 @@ Every patch plan must declare the modules and gates that must rerun.
 
 No rewrite is accepted until its route produces fresh evidence and a new attribution report.
 
-### Source: `skill/gpgpu-loop/rewrite_trigger.md`
+### Source ID: `gpgpu-loop/rewrite_trigger.md`
 
 # Rewrite Trigger
 
@@ -344,7 +344,7 @@ The loop must route:
 - representative checkpoint performance regression to `ARCHITECTURE_PATCH`
   only after correctness diff passes and `WEIGHTED_PERF_REPORT` is complete
 
-### Source: `skill/gpgpu-loop/simulator_artifact_guard.md`
+### Source ID: `gpgpu-loop/simulator_artifact_guard.md`
 
 # Simulator Artifact Guard
 
