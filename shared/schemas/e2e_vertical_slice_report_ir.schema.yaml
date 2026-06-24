@@ -1,0 +1,45 @@
+schema: e2e_vertical_slice_report_ir
+version: v6
+type: object
+required:
+  - report_id
+  - example_id
+  - stages
+  - final_verdict
+  - pass_evidence_report_ref
+  - regression_fingerprint_ref
+  - determinism_manifest_ref
+properties:
+  report_id: string
+  example_id: string
+  stages:
+    type: list
+    items:
+      type: object
+      required:
+        - stage_id
+        - verdict
+        - inputs
+        - outputs
+        - evidence_hashes
+      properties:
+        stage_id: string
+        verdict: string
+        inputs:
+          type: list
+          items:
+            type: string
+        outputs:
+          type: list
+          items:
+            type: string
+        command: string
+        evidence_hashes:
+          type: list
+          items:
+            type: string
+        absent_tool_reason: map
+  final_verdict: string
+  pass_evidence_report_ref: string
+  regression_fingerprint_ref: string
+  determinism_manifest_ref: string

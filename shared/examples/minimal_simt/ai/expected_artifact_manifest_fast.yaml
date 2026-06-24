@@ -57,6 +57,14 @@ ai_artifacts:
     content_hash: hash_pass_evidence_minimal_simt
     producer_skill: gpgpu-validation
     consumed_by: [gpgpu-loop]
+  - artifact_name: DETERMINISM_MANIFEST_IR
+    artifact_type: yaml
+    path: shared/examples/minimal_simt/ai/expected_determinism_manifest_ir.yaml
+    language: en-US
+    visibility: AI_REQUIRED
+    content_hash: hash_determinism_manifest_minimal_simt
+    producer_skill: shared-ci
+    consumed_by: [gpgpu-validation, gpgpu-loop]
 human_reports:
   - report_name: DESIGN_BRIEF
     path: shared/examples/minimal_simt/human/DESIGN_BRIEF.zh.md

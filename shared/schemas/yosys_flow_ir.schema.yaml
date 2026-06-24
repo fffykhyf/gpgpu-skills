@@ -31,3 +31,12 @@ properties:
   log_dir: string
   script_path: string
   claim_scope: list
+profile_ids:
+  - yosys_lint_parse
+  - yosys_elaborate
+  - yosys_synth_generic
+  - yosys_ppa_baseline
+  - yosys_elaborate_only
+  - yosys_synth_hygiene
+  - sby_bmc_interface_protocol
+  - smtbmc_assertion_pack

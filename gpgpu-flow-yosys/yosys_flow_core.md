@@ -51,9 +51,15 @@ Use the narrowest profile that supports the requested claim:
 - `yosys_elaborate`: top-module elaboration and hierarchy checks.
 - `yosys_synth_generic`: generic synthesis and structural hygiene.
 - `yosys_ppa_baseline`: generic synthesis metrics and relative area trend.
+- `yosys_elaborate_only`: parse and hierarchy elaboration only.
+- `yosys_synth_hygiene`: generic synthesis hygiene reports only.
+- `sby_bmc_interface_protocol`: bounded valid/ready and tag protocol checks.
+- `smtbmc_assertion_pack`: bounded assertion-pack checks.
 
 Do not escalate a profile to produce a stronger claim unless the required
 reports are present in `YOSYS_EVIDENCE_BUNDLE`.
+Yosys-only profiles must not claim Fmax or timing closure. Bounded formal
+profiles must not claim unbounded correctness.
 
 ## Flow Identity
 

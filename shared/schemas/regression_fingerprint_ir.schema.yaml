@@ -11,15 +11,15 @@ required:
   - performance_metric_hash
   - coverage_hash
 properties:
-  contract_hash: string
-  golden_model_hash: string
-  rtl_hash: string
-  toolchain_artifact_hash: string
-  program_image_hash: string
-  runtime_launch_hash: string
-  loader_contract_hash: string
-  input_memory_hash: string
-  final_memory_hash: string
-  trace_summary_hash: string
-  performance_metric_hash: string
-  coverage_hash: string
+  contract_hash: {type: string, hash_format: sha256_canonical_json}
+  golden_model_hash: {type: string, hash_format: sha256_canonical_json}
+  rtl_hash: {type: string, hash_format: sha256_canonical_json}
+  toolchain_artifact_hash: {type: string, hash_format: sha256_canonical_json}
+  program_image_hash: {type: string, hash_format: sha256_canonical_json}
+  runtime_launch_hash: {type: string, hash_format: sha256_canonical_json}
+  loader_contract_hash: {type: string, hash_format: sha256_canonical_json}
+  input_memory_hash: {type: string, hash_format: sha256_canonical_json}
+  final_memory_hash: {type: string, hash_format: sha256_canonical_json}
+  trace_summary_hash: {type: string, hash_format: sha256_canonical_json}
+  performance_metric_hash: {type: string, hash_format: sha256_canonical_json}
+  coverage_hash: {type: string, hash_format: sha256_canonical_json}

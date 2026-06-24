@@ -13,6 +13,33 @@ backend_claims:
   yosys_ppa_baseline:
     supports: [cell_count, wire_bits, hierarchy_size, relative_area_trend, synthesis_hygiene]
     rejects: [timing_closure, frequency_mhz, backend_signoff, frequency_closure]
+  yosys_elaborate_only:
+    supports: [syntax_parse, hierarchy_elaborated]
+    rejects: [fmax, timing_closure, frequency_mhz, backend_signoff, bounded_no_protocol_violation, unbounded_proof, full_correctness_proof]
+  yosys_synth_hygiene:
+    supports: [cell_count, wire_bits, hierarchy_size, synthesis_hygiene]
+    rejects: [fmax, timing_closure, frequency_mhz, backend_signoff, unbounded_proof, full_correctness_proof]
+  sby_bmc_interface_protocol:
+    supports: [bounded_no_protocol_violation, counterexample_found]
+    rejects: [unbounded_proof, full_correctness_proof, timing_closure, frequency_mhz]
+  smtbmc_assertion_pack:
+    supports: [bounded_assertion_pass, counterexample_found]
+    rejects: [unbounded_proof, full_correctness_proof, timing_closure, frequency_mhz]
+formal_claims:
+  bounded_model_check:
+    allowed:
+      - bounded_no_protocol_violation
+      - counterexample_found
+    forbidden:
+      - unbounded_proof
+      - full_correctness_proof
+  simulation_assertion:
+    allowed:
+      - assertion_exercised_in_test
+      - assertion_failed_with_trace
+    forbidden:
+      - proof
+      - exhaustive_coverage
 failure_modes:
   missing_evidence: BACKEND_EVIDENCE_MISSING
   unsupported_claim: BACKEND_UNSUPPORTED_CLAIM

@@ -470,8 +470,8 @@ At minimum it must cover:
 
 ## Gate Rule
 
-A module with `PARTIAL_SIM_FAIL`, `INTERFACE_PROTOCOL_MICUATCH`,
-`GOLDEN_SLICE_MICUATCH`, or `COMBINATIONAL_READY_LOOP` cannot be used in
+A module with `PARTIAL_SIM_FAIL`, `INTERFACE_PROTOCOL_MISMATCH`,
+`GOLDEN_SLICE_MISMATCH`, or `COMBINATIONAL_READY_LOOP` cannot be used in
 full-system simulation.
 
 Program-image and runtime partial gates also fail closed on

@@ -40,6 +40,8 @@ Yosys profile and whether the evidence bundle supports the claim.
 - `yosys_profile_matrix.md`: supported profile matrix and claim limits.
 - `yosys_evidence_bundle.md`: build_dir/BUILD_DIR, report_dir, log_dir,
   hashes, parsed metrics, report coverage, and claim boundary requirements.
+- All generated IR and derived artifacts must obey `shared/references/canonical_generation_rules.md` before hash calculation, comparison, validation, or rewrite routing.
+- RTL correctness cannot be marked strong unless relevant `gpgpu-validation/formal_assertion_pack.md` entries are proven, bounded-checked, simulated as assertions, or explicitly waived with a contract-path-bound reason.
 
 ## Required Shared Assets
 

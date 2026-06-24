@@ -12,6 +12,7 @@ Derive assembler, disassembler, assembly IR, program image, loader contract, run
 ## Core File
 
 Read `toolchain_runtime_core.md` for ISA table derivation, assembly IR, assembler/disassembler roundtrip, program image and loader contract, runtime launch, LSU instruction bundle, coalescer input traces, compatibility mapping, and smoke gates.
+All generated IR and derived artifacts must obey `shared/references/canonical_generation_rules.md` before hash calculation, comparison, validation, or rewrite routing.
 
 ## Required Rules
 

@@ -15,6 +15,7 @@ This skill owns architectural semantics. It is the only owner of final ISA behav
 
 - Read `system_contract_core.md` for truth ownership, freeze rules, functional/timing boundaries, and compatibility profile contracts.
 - Read `golden_semantics.md` for executable semantics, coverage, module twins, SIMT traces, memory transactions, and synchronization semantics.
+- All generated IR and derived artifacts must obey `shared/references/canonical_generation_rules.md` before hash calculation, comparison, validation, or rewrite routing.
 
 ## Optional Packs
 

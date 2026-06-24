@@ -20,6 +20,7 @@ This skill produces a candidate architecture, not frozen semantics. It must not 
 
 - Read `architecture_core.md` for request normalization, evidence classification, simulator-only rejection, issue/non-issue taxonomy, and performance attribution rules.
 - Read `capability_profiles.md` for capability presets, scheduler-visible state, SM hierarchy, warp state, and capability pack selection.
+- All generated IR and derived artifacts must obey `shared/references/canonical_generation_rules.md` before hash calculation, comparison, validation, or rewrite routing.
 
 ## Capability Pack Selection
 

@@ -1,0 +1,84 @@
+schema: determinism_manifest_ir
+version: v6
+type: object
+required:
+  - manifest_id
+  - canonicalization_version
+  - input_spec_ref
+  - input_spec_hash
+  - normalized_spec_hash
+  - generation_plan_hash
+  - artifact_hashes
+  - volatile_fields
+  - comparison_policy
+  - determinism_verdict
+properties:
+  manifest_id: string
+  canonicalization_version: string
+  input_spec_ref: string
+  input_spec_hash: {type: string, hash_format: sha256_canonical_json}
+  normalized_spec_hash: {type: string, hash_format: sha256_canonical_json}
+  generation_plan_hash: {type: string, hash_format: sha256_canonical_json}
+  artifact_hashes:
+    type: list
+    items:
+      type: object
+      required:
+        - artifact_name
+        - artifact_path
+        - producer_skill
+        - canonical_hash
+        - comparison_policy
+      properties:
+        artifact_name: string
+        artifact_path: string
+        producer_skill: string
+        canonical_hash:
+          type: string
+          hash_format: sha256_canonical_json
+        comparison_policy: string
+        volatile_fields:
+          type: list
+          items:
+            type: string
+  volatile_fields:
+    type: list
+    items:
+      type: string
+  comparison_policy:
+    type: object
+    required:
+      - mode
+      - excluded_fields
+      - ordered_list_policy
+      - set_like_list_policy
+    properties:
+      mode:
+        type: string
+        enum:
+          - byte_identical
+          - semantic_identical_excluding_volatile
+          - hash_identical
+      excluded_fields:
+        type: list
+        items:
+          type: string
+      ordered_list_policy: map
+      set_like_list_policy: map
+  determinism_verdict:
+    type: string
+    enum:
+      - DETERMINISTIC_PASS
+      - DETERMINISTIC_FAIL
+      - DETERMINISTIC_INSUFFICIENT_EVIDENCE
+  mismatch_summary: map
+  run_a_ref: string
+  run_b_ref: string
+verdicts:
+  - DETERMINISTIC_PASS
+  - DETERMINISTIC_FAIL
+  - DETERMINISTIC_INSUFFICIENT_EVIDENCE
+comparison_modes:
+  - byte_identical
+  - semantic_identical_excluding_volatile
+  - hash_identical

@@ -60,6 +60,59 @@ profiles:
       - frequency_mhz
       - backend_signoff
       - frequency_closure
+  yosys_elaborate_only:
+    purpose: parse_and_elaborate_rtl
+    frontend_modes: [read_verilog, read_systemverilog]
+    required_reports: [read_verilog_log, hierarchy_check, proc_check]
+    allowed_claims:
+      - syntax_parse
+      - hierarchy_elaborated
+    cannot_claim:
+      - fmax
+      - timing_closure
+      - frequency_mhz
+      - backend_signoff
+      - bounded_no_protocol_violation
+      - unbounded_proof
+  yosys_synth_hygiene:
+    purpose: generic_synthesis_hygiene
+    frontend_modes: [read_verilog, read_systemverilog]
+    required_reports: [check.rpt, stat.rpt, yosys.log]
+    allowed_claims:
+      - cell_count
+      - wire_bits
+      - hierarchy_size
+      - synthesis_hygiene
+    cannot_claim:
+      - fmax
+      - timing_closure
+      - frequency_mhz
+      - backend_signoff
+      - unbounded_proof
+  sby_bmc_interface_protocol:
+    purpose: bounded_model_check_valid_ready_and_tags
+    frontend_modes: [sby]
+    required_reports: [sby_status, engine_log, counterexample_or_proof_log]
+    allowed_claims:
+      - bounded_no_protocol_violation
+      - counterexample_found
+    cannot_claim:
+      - unbounded_proof
+      - full_correctness_proof
+      - timing_closure
+      - frequency_mhz
+  smtbmc_assertion_pack:
+    purpose: smtbmc_assertion_check
+    frontend_modes: [smtbmc]
+    required_reports: [smtbmc_log, assertion_status, witness_or_vcd_on_fail]
+    allowed_claims:
+      - bounded_assertion_pass
+      - counterexample_found
+    cannot_claim:
+      - unbounded_proof
+      - full_correctness_proof
+      - timing_closure
+      - frequency_mhz
 claim_gate:
   missing_required_report: YOSYS_EVIDENCE_MISSING
   unsupported_claim: BACKEND_UNSUPPORTED_CLAIM

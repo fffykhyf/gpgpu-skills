@@ -1,7 +1,7 @@
 # 架构决策说明
 
 ## 本轮选择
-- 选择的 preset：`MINIMAL_VERTICAL_SLICE_GPGPU`。
+- 选择的 preset：`TOOLCHAIN_RUNTIME_VERTICAL_SLICE`。
 - 核心结构：单 SM、warp scheduler、decode/execute pipeline、register file、scoreboard、LSQ、LDS、global interface。
 - 关键参数：1 SM、4 logical warps、小 FPGA 面积优先。
 
@@ -15,7 +15,7 @@
 | 方案 | 拒绝原因 | 后续是否可恢复 |
 |---|---|---|
 | `MINIMAL_WARP_SM_LEGACY_COMPAT` | 缺少 toolchain/runtime/loader vertical slice | 可恢复 |
-| `MULTI_WARP_SINGLE_SM` | 优先级低于 vertical slice 验证目标 | 可恢复 |
+| `SINGLE_SM_WARP_PIPELINE` | 优先级低于 vertical slice 验证目标 | 可恢复 |
 
 ## 影响范围
 - contract：需要冻结 ISA、launch ABI、memory request lifecycle。

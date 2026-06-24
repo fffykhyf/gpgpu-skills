@@ -42,6 +42,11 @@ For `yosys_ppa_baseline`, the bundle must include at least:
 Missing `stat` report rejects PPA baseline claims. A build_dir/report_dir/log
 path mismatch rejects the bundle until `REPORT_PATH_PATCH` repairs it.
 
+For `sby_bmc_interface_protocol`, the bundle must include `sby_status`,
+`engine_log`, and `counterexample_or_proof_log`. For `smtbmc_assertion_pack`,
+the bundle must include `smtbmc_log`, `assertion_status`, and
+`witness_or_vcd_on_fail`.
+
 ## Warning and Error Handling
 
 Warnings are not automatically fatal, but warnings that map to fail-closed RTL
@@ -54,3 +59,5 @@ declares the error as outside claim scope.
 The bundle must state what the evidence can and cannot prove. Yosys-only PPA
 baseline evidence cannot prove timing closure, MHz frequency, backend signoff,
 or frequency closure.
+Bounded formal evidence cannot prove unbounded correctness. Simulation-only
+assertions cannot prove exhaustive coverage.

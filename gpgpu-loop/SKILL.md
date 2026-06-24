@@ -14,6 +14,7 @@ This skill must not directly rewrite architecture, contract, runtime, or RTL sem
 ## Core File
 
 Read `rewrite_loop_core.md` for rewrite triggers, config drift guard, counter-gated regression, patch routing, patch taxonomy, regression tracking, revalidation routing, and simulator-artifact guards.
+All generated IR and derived artifacts must obey `shared/references/canonical_generation_rules.md` before hash calculation, comparison, validation, or rewrite routing.
 
 ## Patch Classes
 

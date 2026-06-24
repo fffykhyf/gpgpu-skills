@@ -46,6 +46,9 @@ compatibility.
 - `YOSYS_RTL_COMPATIBILITY_REPORT`
 - `YOSYS_EVIDENCE_BUNDLE`
 
+All generated IR and derived artifacts must obey `shared/references/canonical_generation_rules.md` before hash calculation, comparison, validation, or rewrite routing.
+RTL correctness cannot be marked strong unless relevant `formal_assertion_pack.md` entries are proven, bounded-checked, simulated as assertions, or explicitly waived with a contract-path-bound reason.
+
 ## Boundaries
 
 Do not generate full root-cause reports when golden and RTL match. Generate minimal pass evidence and regression fingerprint by default.

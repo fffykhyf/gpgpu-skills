@@ -20,7 +20,7 @@ properties:
   event_to_toolchain_artifact_path_map: map
   event_to_rtl_module_map: map
   timestamp_normalization_report: map
-  trace_summary_hash: string
+  trace_summary_hash: {type: string, hash_format: sha256_canonical_json}
   source_hashes: map
 event_schema:
   required:

@@ -16,7 +16,7 @@
 - RTL / FPGA / ASIC：先跑 vertical slice RTL smoke，不做 ASIC PPA。
 
 ## 本轮输出
-- 架构候选：`MINIMAL_VERTICAL_SLICE_GPGPU`。
+- 架构候选：`TOOLCHAIN_RUNTIME_VERTICAL_SLICE`。
 - contract 状态：等待 freeze。
 - toolchain 状态：需要 assembler、program image、runtime launch、loader smoke。
 - RTL 状态：按模块增量绑定。

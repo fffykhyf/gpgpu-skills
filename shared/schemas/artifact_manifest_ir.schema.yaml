@@ -17,7 +17,7 @@ properties:
       path: string
       language: string
       visibility: string
-      content_hash: string
+      content_hash: {type: string, hash_format: sha256_canonical_json}
       producer_skill: string
       consumed_by: list[string]
   human_reports:

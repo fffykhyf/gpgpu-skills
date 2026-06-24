@@ -98,6 +98,14 @@ FORBIDDEN = [
     "L4" + " system memory",
 ]
 
+FORBIDDEN_TOKENS = [
+    "MINIMAL_" + "VERTICAL_SLICE_GPGPU",
+    "MULTI_" + "WARP_SINGLE_SM",
+    "MINIMAL_" + "WARP_SM_TEACHING",
+    "INTERFACE_PROTOCOL_" + "MIC" + "UATCH",
+    "GOLDEN_SLICE_" + "MIC" + "UATCH",
+]
+
 REQUIRED_SKILL_TEXT = {
     "gpgpu-contract/SKILL.md": ["SYSTEM_CONTRACT_IR", "GOLDEN_CONTRACT_MODEL"],
     "gpgpu-toolchain-runtime/SKILL.md": [
@@ -363,6 +371,9 @@ def main():
         for phrase in FORBIDDEN:
             if phrase in text:
                 fail("forbidden phrase %r found in %s" % (phrase, rel(current)))
+        for token in FORBIDDEN_TOKENS:
+            if token in text:
+                fail("forbidden token %r found in %s" % (token, rel(current)))
 
     for required, tokens in REQUIRED_SKILL_TEXT.items():
         assert_contains(path(SKILL, required), tokens)

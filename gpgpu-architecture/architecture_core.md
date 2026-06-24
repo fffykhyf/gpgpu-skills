@@ -71,11 +71,11 @@ Preset selection must be deterministic. Apply the preset rules from
 
 - end-to-end validation targets containing `compile_kernel_to_program_image`,
   `rtl_sim_smoke_test`, and `memory_dump_golden_check` prefer
-  `MINIMAL_VERTICAL_SLICE_GPGPU`
+  `TOOLCHAIN_RUNTIME_VERTICAL_SLICE`
 - teaching-only targets with no runtime, frontend, or vertical-slice requirement
   prefer `MINIMAL_SIMT_CORE`
 - workloads that need memory latency hiding, or requests with
-  `max_warps_per_sm > 1`, prefer `MULTI_WARP_SINGLE_SM` unless the vertical-slice
+  `max_warps_per_sm > 1`, prefer `SINGLE_SM_WARP_PIPELINE` unless the vertical-slice
   rule already matched
 
 Every selected candidate must record the matching preset rule and rejected

@@ -183,10 +183,10 @@ merged_sections:
           failure_mode: PARTIAL_SIM_FAIL
         interface_transaction_result:
           pass_value: PASS
-          failure_mode: INTERFACE_PROTOCOL_MICUATCH
+          failure_mode: INTERFACE_PROTOCOL_MISMATCH
         golden_slice_compare_result:
           pass_value: PASS
-          failure_mode: GOLDEN_SLICE_MICUATCH
+          failure_mode: GOLDEN_SLICE_MISMATCH
         timing_feedback_result:
           required_checks:
             - local_timing_risk

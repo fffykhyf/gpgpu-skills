@@ -29,6 +29,9 @@ User request/spec
 
 Default output is `RUN_STATE.yaml` plus one Chinese human summary.
 Expanded artifacts are mode-gated, not always generated.
+All generated IR and derived artifacts must obey
+`shared/references/canonical_generation_rules.md` before hash calculation,
+comparison, validation, or rewrite routing.
 
 Current module order:
 
@@ -45,3 +48,7 @@ gpgpu-architecture
 `gpgpu-flow-yosys` is mandatory only when `backend_toolchain` includes Yosys or
 the user asks for RTL elaboration, synthesis, PPA, or Yosys-backed build/report
 evidence.
+RTL correctness cannot be marked strong unless relevant
+`gpgpu-validation/formal_assertion_pack.md` entries are proven,
+bounded-checked, simulated as assertions, or explicitly waived with a
+contract-path-bound reason.

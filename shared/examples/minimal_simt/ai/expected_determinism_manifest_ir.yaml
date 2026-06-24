@@ -1,0 +1,37 @@
+manifest_id: determinism_minimal_simt_vector_add
+canonicalization_version: canonical_generation_rules_v1
+input_spec_ref: shared/examples/minimal_simt/input_request.md
+input_spec_hash: hash_input_spec_minimal_simt
+normalized_spec_hash: hash_normalized_spec_minimal_simt
+generation_plan_hash: hash_generation_plan_minimal_simt
+artifact_hashes:
+  - artifact_name: DESIGN_INTENT_IR
+    artifact_path: shared/examples/minimal_simt/ai/expected_design_intent_ir.yaml
+    producer_skill: gpgpu-architecture
+    canonical_hash: hash_design_intent_minimal_simt
+    comparison_policy: semantic_identical_excluding_volatile
+  - artifact_name: SYSTEM_CONTRACT_IR
+    artifact_path: shared/examples/minimal_simt/ai/expected_system_contract_ir.yaml
+    producer_skill: gpgpu-contract
+    canonical_hash: hash_system_contract_minimal_simt
+    comparison_policy: semantic_identical_excluding_volatile
+volatile_fields:
+  - generated_at
+  - tool_wall_time_sec
+  - local_absolute_path
+comparison_policy:
+  mode: semantic_identical_excluding_volatile
+  excluded_fields:
+    - generated_at
+    - tool_wall_time_sec
+    - local_absolute_path
+  ordered_list_policy:
+    events: preserve_order
+    instructions: preserve_order
+  set_like_list_policy:
+    enabled_subsystems: sort_by_canonical_string
+    required_features: sort_by_canonical_string
+determinism_verdict: DETERMINISTIC_PASS
+mismatch_summary: {}
+run_a_ref: local_run_a
+run_b_ref: local_run_b

@@ -19,6 +19,8 @@ binding unless it comes from a negotiated interface edge.
 Read `rtl_binding_core.md` for module binding rules, interface/checker binding,
 Yosys RTL compatibility gates, partial simulation gates, trace/counter hooks,
 simulator-artifact rejection, SM instance layout, and warp execution mapping.
+All generated IR and derived artifacts must obey `shared/references/canonical_generation_rules.md` before hash calculation, comparison, validation, or rewrite routing.
+RTL correctness cannot be marked strong unless relevant `gpgpu-validation/formal_assertion_pack.md` entries are proven, bounded-checked, simulated as assertions, or explicitly waived with a contract-path-bound reason.
 
 ## Core Execution Loop
 

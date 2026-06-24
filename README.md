@@ -31,3 +31,6 @@ RTL must bind to contract paths and negotiated interfaces.
 Runtime/toolchain must derive from SYSTEM_CONTRACT_IR.
 Validation compares golden/toolchain/RTL evidence.
 Rewrite loop only routes patches; it does not invent semantics.
+All generated IR and derived artifacts must obey
+`shared/references/canonical_generation_rules.md` before hash calculation,
+comparison, validation, or rewrite routing.

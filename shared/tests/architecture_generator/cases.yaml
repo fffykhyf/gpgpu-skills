@@ -23,21 +23,37 @@ cases:
       - INCREMENTAL_RTL_MAP
 
   - case_id: architecture_generator_memory_pressure_prefilter
-    input_artifacts:
-      - shared/examples/minimal_simt/input_request.md
-    expected_outputs:
-      - DESIGN_INTENT_IR
-      - ARCH_IR
-      - MICRO_CONSTRAINT_ESTIMATE_IR
-    expected_failure_mode: null
+    input:
+      artifacts:
+        - path: shared/examples/minimal_simt/input_request.md
+          role: user_spec
+    expected:
+      outputs:
+        - artifact_name: DESIGN_INTENT_IR
+          schema: design_intent_ir
+          path: shared/examples/minimal_simt/ai/expected_design_intent_ir.yaml
+        - artifact_name: ARCH_IR
+          schema: arch_ir
+          path: shared/examples/minimal_simt/ai/expected_arch_ir.yaml
+        - artifact_name: MICRO_CONSTRAINT_ESTIMATE_IR
+          schema: micro_constraint_estimate_ir
+          path: shared/examples/minimal_simt/ai/expected_micro_constraint_estimate.yaml
+      verdict: ACCEPT
+      failure_mode: null
+    required_gates:
+      - schema_valid
+      - contract_paths_resolvable
+      - canonical_hash_present
     required_evidence:
       - area_estimate
       - deterministic_area_rule
       - memory_pressure_estimate
       - warp_occupancy_bound
-      - preset_rule_MINIMAL_VERTICAL_SLICE_GPGPU
+      - preset_rule_TOOLCHAIN_RUNTIME_VERTICAL_SLICE
       - arch_graph_node_required_contract_paths
     forbidden_outputs:
       - SYSTEM_CONTRACT_IR
       - GOLDEN_CONTRACT_MODEL
       - ARCH_REWRITE_PLAN
+    patch_route:
+      expected: none

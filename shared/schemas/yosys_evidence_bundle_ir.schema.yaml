@@ -20,9 +20,9 @@ properties:
   bundle_id: string
   profile_id: string
   yosys_version: string
-  flow_hash: string
-  filelist_hash: string
-  script_hash: string
+  flow_hash: {type: string, hash_format: sha256_canonical_json}
+  filelist_hash: {type: string, hash_format: sha256_canonical_json}
+  script_hash: {type: string, hash_format: sha256_canonical_json}
   build_dir: string
   report_dir: string
   logs: list
@@ -31,3 +31,6 @@ properties:
   warnings: list
   errors: list
   claim_boundary: map
+  formal_status: map
+  assertion_status: map
+  witness_or_vcd_on_fail: list

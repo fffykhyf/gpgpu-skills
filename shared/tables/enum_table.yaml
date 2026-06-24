@@ -3,7 +3,25 @@ version: v4
 enums:
   mode: [REPRODUCE, DESIGN, PATCH_REQUEST, TRACE_DEBUG]
   verdict: [ACCEPT, REJECT, REFINE_REQUIRED, INSUFFICIENT_EVIDENCE]
-  architecture_preset: [MINIMAL_WARP_SM_TEACHING, MULTI_WARP_SINGLE_SM, MINIMAL_VERTICAL_SLICE_GPGPU]
+  architecture_preset:
+    - MINIMAL_SIMT_CORE
+    - SINGLE_SM_WARP_PIPELINE
+    - TOOLCHAIN_RUNTIME_VERTICAL_SLICE
+    - MULTI_SM_MEMORY_PATH
+    - FULL_MEMORY_SYNC_SYSTEM
+  capability_profile:
+    - minimal_simt_core
+    - single_sm_warp_pipeline
+    - toolchain_runtime_vertical_slice
+    - multi_sm_memory_path
+    - full_memory_sync_system
+  hash_kind:
+    - sha256_canonical_json
+    - sha256_canonical_yaml
+  comparison_policy:
+    - byte_identical
+    - semantic_identical_excluding_volatile
+    - hash_identical
   scheduler_policy: [ROUND_ROBIN, SCOREBOARD_ROUND_ROBIN]
   cache_policy: [NONE, DIRECT_MAPPED_L1]
   memory_space: [global, shared, local, constant]

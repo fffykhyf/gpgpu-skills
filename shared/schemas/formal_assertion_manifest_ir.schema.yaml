@@ -1,0 +1,50 @@
+schema: formal_assertion_manifest_ir
+version: v6
+type: object
+required:
+  - manifest_id
+  - rtl_artifact_ref
+  - assertions
+  - final_verdict
+properties:
+  manifest_id: string
+  rtl_artifact_ref: string
+  assertions:
+    type: list
+    items:
+      type: object
+      required:
+        - assertion_name
+        - property_name
+        - module_name
+        - contract_path
+        - evidence_mode
+        - verdict
+      properties:
+        assertion_name: string
+        property_name: string
+        module_name: string
+        contract_path: string
+        evidence_mode:
+          type: string
+          enum:
+            - proven
+            - bounded_checked
+            - simulated_assertion
+            - waived_with_contract_reason
+        bound: string
+        waiver_reason: string
+        evidence_ref: string
+        verdict:
+          type: string
+          enum:
+            - ASSERTION_PASS
+            - ASSERTION_FAIL
+            - ASSERTION_WAIVED
+            - ASSERTION_INSUFFICIENT_EVIDENCE
+  final_verdict:
+    type: string
+    enum:
+      - FORMAL_ASSERTION_PASS
+      - FORMAL_ASSERTION_FAIL
+      - FORMAL_ASSERTION_INSUFFICIENT_EVIDENCE
