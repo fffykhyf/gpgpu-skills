@@ -1,0 +1,21 @@
+schema: structured_trace_table
+version: v1
+type: object
+required:
+  - table_id
+  - schema_version
+  - producer_module
+  - write_gate
+  - common_fields
+  - event_fields
+  - consumer_skill
+  - evidence_hash
+properties:
+  table_id: string
+  schema_version: string
+  producer_module: string
+  write_gate: string
+  common_fields: list
+  event_fields: list
+  consumer_skill: string
+  evidence_hash: string

@@ -17,6 +17,14 @@ merged_sections:
           patch_options: [RTL_PATCH]
         RTL_INTERFACE_ROOT_CAUSE:
           patch_options: [RTL_PATCH]
+        YOSYS_RTL_STYLE_ROOT_CAUSE:
+          patch_options: [YOSYS_RTL_STYLE_PATCH]
+        YOSYS_FLOW_ROOT_CAUSE:
+          patch_options: [YOSYS_FLOW_PATCH, REPORT_PATH_PATCH]
+        BACKEND_CLAIM_ROOT_CAUSE:
+          patch_options: [BACKEND_CLAIM_PATCH]
+        REPORT_PATH_ROOT_CAUSE:
+          patch_options: [REPORT_PATH_PATCH]
         MEMORY_SYSTEM_ROOT_CAUSE:
           patch_options: [RTL_PATCH, ARCHITECTURE_PATCH]
         MEMORY_PATH_ROOT_CAUSE:
@@ -113,6 +121,22 @@ merged_sections:
         RTL_PATCH:
           target_owner: gpgpu-rtl
           examples: [pipeline_relayout, scoreboard_redesign, lsq_replay_policy_change, interface_latency_adjustment]
+        YOSYS_RTL_STYLE_PATCH:
+          target_owner: gpgpu-rtl
+          route_after_owner: [gpgpu-flow-yosys, gpgpu-validation]
+          examples: [flatten_top_unpacked_ports, add_memory_reset_profile_gate, replace_data_dependent_while, repair_valid_ready_payload_stability]
+        YOSYS_FLOW_PATCH:
+          target_owner: gpgpu-flow-yosys
+          route_after_owner: [gpgpu-validation]
+          examples: [repair_yosys_script_path, fix_filelist_hash, select_supported_profile, refresh_flow_hash]
+        BACKEND_CLAIM_PATCH:
+          target_owner: gpgpu-validation
+          route_after_owner: [gpgpu-loop]
+          examples: [remove_unsupported_frequency_claim, add_claim_boundary, require_backend_signoff_evidence]
+        REPORT_PATH_PATCH:
+          target_owner: gpgpu-flow-yosys
+          route_after_owner: [gpgpu-validation]
+          examples: [fix_build_dir, fix_report_dir, fix_log_dir, reconcile_report_paths]
         MEMORY_PATCH:
           target_owner: gpgpu-contract/packs/memory_path
           examples: [warp_memory_transaction_fix, coalescer_contract_fix, cache_reservation_fail_fix, memory_return_path_fix]
@@ -258,6 +282,38 @@ merged_sections:
             - module_partial_sim
             - rtl_golden_trace_diff
             - memory_dump_compare
+        YOSYS_RTL_STYLE_PATCH:
+          required_modules:
+            - gpgpu-rtl
+            - gpgpu-flow-yosys
+            - gpgpu-validation
+          required_gates:
+            - rtl_synth_hygiene_report
+            - yosys_rtl_compatibility_report
+            - backend_evidence_gate
+        YOSYS_FLOW_PATCH:
+          required_modules:
+            - gpgpu-flow-yosys
+            - gpgpu-validation
+          required_gates:
+            - YOSYS_FLOW_IR
+            - YOSYS_EVIDENCE_BUNDLE
+            - backend_evidence_gate
+        BACKEND_CLAIM_PATCH:
+          required_modules:
+            - gpgpu-validation
+            - gpgpu-loop
+          required_gates:
+            - backend_claim_boundary_check
+            - rewrite_decision_report
+        REPORT_PATH_PATCH:
+          required_modules:
+            - gpgpu-flow-yosys
+            - gpgpu-validation
+          required_gates:
+            - build_report_log_path_check
+            - YOSYS_EVIDENCE_BUNDLE
+            - backend_evidence_gate
         MEMORY_PATCH:
           required_modules:
             - gpgpu-contract/packs/memory_path
@@ -347,6 +403,22 @@ merged_sections:
           patch_type: RTL_PATCH
           target_skill: gpgpu-rtl
           revalidation: [module_partial_sim, rtl_golden_trace_diff, memory_dump_compare]
+        YOSYS_RTL_STYLE_ROOT_CAUSE:
+          patch_type: YOSYS_RTL_STYLE_PATCH
+          target_skill: gpgpu-rtl
+          revalidation: [rtl_synth_hygiene_report, yosys_rtl_compatibility_report, backend_evidence_gate]
+        YOSYS_FLOW_ROOT_CAUSE:
+          patch_type: YOSYS_FLOW_PATCH
+          target_skill: gpgpu-flow-yosys
+          revalidation: [YOSYS_FLOW_IR, YOSYS_EVIDENCE_BUNDLE, backend_evidence_gate]
+        BACKEND_CLAIM_ROOT_CAUSE:
+          patch_type: BACKEND_CLAIM_PATCH
+          target_skill: gpgpu-validation
+          revalidation: [backend_claim_boundary_check, rewrite_decision_report]
+        REPORT_PATH_ROOT_CAUSE:
+          patch_type: REPORT_PATH_PATCH
+          target_skill: gpgpu-flow-yosys
+          revalidation: [build_report_log_path_check, YOSYS_EVIDENCE_BUNDLE, backend_evidence_gate]
         MEMORY_SYSTEM_ROOT_CAUSE:
           patch_type: RTL_PATCH
           target_skill: gpgpu-rtl
@@ -457,6 +529,41 @@ merged_sections:
             - BACKPRESSURE_DEADLOCK
           requires: [rtl_module_paths, contract_paths, evidence_hashes]
           rewrite_candidate: RTL_PATCH
+        YOSYS_RTL_STYLE_ROOT_CAUSE:
+          subclasses:
+            - TOP_LEVEL_UNPACKED_ARRAY_PORT
+            - MEMORY_RESET_PROFILE_GATE_MISSING
+            - DATA_DEPENDENT_WHILE_LOOP
+            - NON_CONSTANT_LOOP_BOUND_IN_SYNTH_REGION
+            - VALID_READY_PROTOCOL_SYNTH_UNSAFE
+            - DONE_RESULT_STABILITY_UNSAFE
+          requires: [YOSYS_RTL_COMPATIBILITY_REPORT, RTL_SYNTH_HYGIENE_REPORT]
+          rewrite_candidate: YOSYS_RTL_STYLE_PATCH
+        YOSYS_FLOW_ROOT_CAUSE:
+          subclasses:
+            - BUILD_DIR_REPORT_PATH_MISMATCH
+            - YOSYS_SCRIPT_MISSING
+            - FILELIST_HASH_MISMATCH
+            - SCRIPT_HASH_MISMATCH
+            - PROFILE_RESULT_MISSING
+          requires: [YOSYS_FLOW_IR, YOSYS_EVIDENCE_BUNDLE]
+          rewrite_candidate: YOSYS_FLOW_PATCH
+        BACKEND_CLAIM_ROOT_CAUSE:
+          subclasses:
+            - PPA_CLAIM_WITHOUT_STAT_REPORT
+            - TIMING_CLAIM_FROM_YOSYS_PPA_ONLY
+            - FREQUENCY_CLAIM_FROM_YOSYS_PPA_ONLY
+            - BACKEND_SIGNOFF_CLAIM_FROM_YOSYS_PPA_ONLY
+          requires: [YOSYS_EVIDENCE_BUNDLE, backend_claim_boundary]
+          rewrite_candidate: BACKEND_CLAIM_PATCH
+        REPORT_PATH_ROOT_CAUSE:
+          subclasses:
+            - BUILD_DIR_MISSING
+            - REPORT_DIR_MISSING
+            - LOG_DIR_MISSING
+            - REPORT_OUTSIDE_DECLARED_DIR
+          requires: [YOSYS_FLOW_IR, YOSYS_EVIDENCE_BUNDLE]
+          rewrite_candidate: REPORT_PATH_PATCH
         MEMORY_SYSTEM_ROOT_CAUSE:
           subclasses:
             - COALESCING_MISMATCH

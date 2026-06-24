@@ -6,6 +6,8 @@ import os
 import re
 import sys
 
+import yaml
+
 
 ROOT = os.path.abspath(os.path.join(os.path.dirname(__file__), "..", "..", ".."))
 SKILL = os.path.join(ROOT, "skill")
@@ -15,6 +17,7 @@ ACTIVE = [
     "gpgpu-contract",
     "gpgpu-toolchain-runtime",
     "gpgpu-rtl",
+    "gpgpu-flow-yosys",
     "gpgpu-validation",
     "gpgpu-loop",
 ]
@@ -39,6 +42,11 @@ REQUIRED_FILES = [
     "gpgpu-contract/packs/atomic_sync.md",
     "gpgpu-toolchain-runtime/toolchain_runtime_core.md",
     "gpgpu-rtl/rtl_binding_core.md",
+    "gpgpu-flow-yosys/SKILL.md",
+    "gpgpu-flow-yosys/yosys_flow_core.md",
+    "gpgpu-flow-yosys/yosys_rtl_style.md",
+    "gpgpu-flow-yosys/yosys_profile_matrix.md",
+    "gpgpu-flow-yosys/yosys_evidence_bundle.md",
     "gpgpu-validation/validation_core.md",
     "gpgpu-validation/debug_attribution_pack.md",
     "gpgpu-validation/performance_pack.md",
@@ -104,6 +112,14 @@ REQUIRED_SKILL_TEXT = {
         "negotiated interface",
         "partial sim",
         "trace",
+    ],
+    "gpgpu-flow-yosys/SKILL.md": [
+        "YOSYS_FLOW_IR",
+        "YOSYS_EVIDENCE_BUNDLE",
+        "BUILD_DIR",
+        "profile",
+        "report",
+        "claim boundary",
     ],
     "gpgpu-validation/SKILL.md": [
         "PASS_EVIDENCE",
@@ -229,6 +245,23 @@ def validate_asset_references():
         fail("asset reference validation found %d problem(s):\n%s" % (len(errors), preview))
 
 
+def validate_yaml_parse():
+    shared = path(SKILL, "shared")
+    errors = []
+    for current in walk_files(shared):
+        if not current.endswith(".yaml"):
+            continue
+        try:
+            yaml.safe_load(read(current))
+        except Exception as exc:
+            errors.append("%s: %s" % (rel(current), exc))
+    if errors:
+        preview = "\n".join(errors[:20])
+        if len(errors) > 20:
+            preview += "\n... %d more" % (len(errors) - 20)
+        fail("YAML parse validation found %d problem(s):\n%s" % (len(errors), preview))
+
+
 def parse_lesson_entries(text):
     entries = []
     current = None
@@ -302,13 +335,13 @@ def main():
 
     schema_dir = path(SKILL, "shared", "schemas")
     schema_count = len([name for name in list_dir_names(schema_dir) if is_file(path(schema_dir, name))])
-    if schema_count > 35:
-        fail("active schema count %d exceeds 35" % schema_count)
+    if schema_count > 50:
+        fail("active schema count %d exceeds 50" % schema_count)
 
     table_dir = path(SKILL, "shared", "tables")
     table_count = len([name for name in list_dir_names(table_dir) if is_file(path(table_dir, name))])
-    if table_count > 15:
-        fail("active table count %d exceeds 15" % table_count)
+    if table_count > 20:
+        fail("active table count %d exceeds 20" % table_count)
 
     example_dir = path(SKILL, "shared", "examples")
     examples = sorted(name for name in list_dir_names(example_dir) if is_dir(path(example_dir, name)))
@@ -334,6 +367,35 @@ def main():
     for required, tokens in REQUIRED_SKILL_TEXT.items():
         assert_contains(path(SKILL, required), tokens)
 
+    for required in [
+        "shared/schemas/yosys_flow_ir.schema.yaml",
+        "shared/schemas/yosys_rtl_compatibility_report_ir.schema.yaml",
+        "shared/schemas/yosys_evidence_bundle_ir.schema.yaml",
+        "shared/schemas/rtl_synth_hygiene_issue.schema.yaml",
+        "shared/schemas/warp_memory_transaction.schema.yaml",
+        "shared/schemas/cache_request_status.schema.yaml",
+        "shared/schemas/memory_request_lifecycle.schema.yaml",
+        "shared/schemas/noc_packet.schema.yaml",
+        "shared/schemas/memory_queue_boundary.schema.yaml",
+        "shared/schemas/structured_trace_table.schema.yaml",
+        "shared/schemas/atomic_operation.schema.yaml",
+        "shared/schemas/barrier_state.schema.yaml",
+        "shared/tables/yosys_profile_matrix.yaml",
+        "shared/tables/yosys_rtl_style_rules.yaml",
+        "shared/tables/backend_claim_boundary.yaml",
+        "shared/tables/revalidation_routing_table.yaml",
+        "shared/tables/root_cause_taxonomy.yaml",
+        "shared/templates/yosys_synth_bundle_report.md",
+        "shared/templates/rtl_synth_hygiene_report.md",
+        "shared/templates/warp_memory_transaction_contract.md",
+        "shared/templates/memory_queue_boundary_report.md",
+        "shared/tests/yosys_flow_evidence_engine/cases.yaml",
+        "shared/tests/yosys_rtl_style_gate/cases.yaml",
+    ]:
+        if not is_file(path(SKILL, required)):
+            fail("missing required shared asset: " + required)
+
+    validate_yaml_parse()
     validate_asset_references()
 
     print("PASS: compact GPGPU skill assets validated")

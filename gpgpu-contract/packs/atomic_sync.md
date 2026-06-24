@@ -10,6 +10,20 @@ Load when `CAPABILITY_PROFILE_IR.enabled_packs` includes `atomic_sync`, or when 
 
 Own only the contract fragments named by this pack. The frozen truth remains `SYSTEM_CONTRACT_IR`; pack details must become explicit contract paths before RTL or toolchain use.
 
+## Compact Provenance
+
+Merged source IDs in this pack have provenance
+`merged_into_current_pack`. A loader must not expect separate source files for
+those IDs unless a real `shared/` or pack-local path is listed below.
+
+## Claim Boundary
+
+Do not claim complete memory ordering, full response queue behavior, dirty
+writeback handling, full MSHR behavior, or cache coherence from atomic/fence
+evidence alone. Atomic and barrier claims are limited to the serialization,
+visibility, release, and participant rules explicitly declared in
+`SYSTEM_CONTRACT_IR` and validated by tests.
+
 ## Atomic Operation Contract
 
 Preserve the merged source rules below and bind every generated artifact to explicit contract paths and evidence.
@@ -222,6 +236,9 @@ This skill must validate:
 - `shared/schemas/system_contract_ir.schema.yaml`
 - `shared/schemas/normalized_trace_ir.schema.yaml`
 - `shared/schemas/contract_fragment_ir.schema.yaml` (`SYNC_SIDECHANNEL_EVENT`)
+- `shared/schemas/atomic_operation.schema.yaml`
+- `shared/schemas/barrier_state.schema.yaml`
+- `shared/schemas/structured_trace_table.schema.yaml`
 
 ## Required Invariants
 
@@ -231,6 +248,9 @@ The output must satisfy:
 - every atomic event has source SM, address, scope, serialization point, and visibility event
 - every fence event names drain scope and completion condition
 - every barrier event names participant scope and release condition
+- complete memory ordering, full response queues, dirty writeback, full MSHR,
+  and coherence claims require explicit contract ownership and validation
+  evidence
 - atomic_wait, atomic_split_or_replay, membar_wait, fence_flush_or_invalidate, and barrier_wait must be separately attributable.
 - atomic requests must define lane participation, return value behavior, destination register, completion event, serialization domain, and scoreboard release.
 - fence visibility must define scope, ordering domain, affected spaces, visibility point, completion condition, and cache policy.
@@ -275,7 +295,11 @@ This compact pack is incomplete unless these merged source IDs are present below
 - `memory_ordering_litmus_tests`
 - `synchronization_stall_attribution`
 
-It must also use `shared/schemas/contract_fragment_ir.schema.yaml`.
+It must also use:
+- `shared/schemas/contract_fragment_ir.schema.yaml`
+- `shared/schemas/atomic_operation.schema.yaml`
+- `shared/schemas/barrier_state.schema.yaml`
+- `shared/schemas/structured_trace_table.schema.yaml`
 
 When a required schema, table, example, or test is missing, emit
 `INSUFFICIENT_SKILL_ASSET` rather than inventing behavior.

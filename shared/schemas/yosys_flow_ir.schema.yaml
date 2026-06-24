@@ -1,0 +1,33 @@
+schema: yosys_flow_ir
+version: v1
+type: object
+required:
+  - flow_id
+  - yosys_version
+  - frontend_mode
+  - filelist
+  - include_dirs
+  - defines
+  - chparams
+  - top_module
+  - profile_id
+  - build_dir
+  - report_dir
+  - log_dir
+  - script_path
+  - claim_scope
+properties:
+  flow_id: string
+  yosys_version: string
+  frontend_mode: enum
+  filelist: list
+  include_dirs: list
+  defines: map
+  chparams: map
+  top_module: string
+  profile_id: string
+  build_dir: string
+  report_dir: string
+  log_dir: string
+  script_path: string
+  claim_scope: list

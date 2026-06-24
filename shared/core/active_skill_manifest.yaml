@@ -3,6 +3,7 @@ active_design_skills:
   - gpgpu-contract
   - gpgpu-toolchain-runtime
   - gpgpu-rtl
+  - gpgpu-flow-yosys
   - gpgpu-validation
   - gpgpu-loop
 

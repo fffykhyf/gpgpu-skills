@@ -1,0 +1,25 @@
+schema: memory_queue_boundary
+version: v1
+type: object
+required:
+  - boundary_id
+  - request_id
+  - owner
+  - queue_name
+  - enter_cycle
+  - exit_cycle
+  - occupancy
+  - capacity
+  - release_event
+  - stall_reason
+properties:
+  boundary_id: string
+  request_id: string
+  owner: string
+  queue_name: string
+  enter_cycle: integer
+  exit_cycle: integer
+  occupancy: integer
+  capacity: integer
+  release_event: string
+  stall_reason: string

@@ -1,0 +1,42 @@
+table: revalidation_routing_table
+version: v1
+routes:
+  YOSYS_RTL_STYLE_PATCH:
+    required_modules:
+      - gpgpu-rtl
+      - gpgpu-flow-yosys
+      - gpgpu-validation
+    required_gates:
+      - rtl_synth_hygiene_report
+      - yosys_rtl_compatibility_report
+      - backend_evidence_gate
+  YOSYS_FLOW_PATCH:
+    required_modules:
+      - gpgpu-flow-yosys
+      - gpgpu-validation
+    required_gates:
+      - YOSYS_FLOW_IR
+      - YOSYS_EVIDENCE_BUNDLE
+      - backend_evidence_gate
+  BACKEND_CLAIM_PATCH:
+    required_modules:
+      - gpgpu-validation
+      - gpgpu-loop
+    required_gates:
+      - backend_claim_boundary_check
+      - rewrite_decision_report
+  REPORT_PATH_PATCH:
+    required_modules:
+      - gpgpu-flow-yosys
+      - gpgpu-validation
+    required_gates:
+      - build_report_log_path_check
+      - YOSYS_EVIDENCE_BUNDLE
+      - backend_evidence_gate
+failure_routes:
+  rtl_style_failures:
+    route: [gpgpu-rtl, gpgpu-flow-yosys, gpgpu-validation]
+  build_dir_report_log_mismatch:
+    route: [gpgpu-flow-yosys, gpgpu-validation]
+  unsupported_ppa_timing_frequency_claim:
+    route: [gpgpu-validation, gpgpu-loop]

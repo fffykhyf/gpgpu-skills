@@ -1,6 +1,6 @@
 ---
 name: gpgpu-validation
-description: Use when validating golden, toolchain, and RTL agreement; collecting compact pass evidence; debugging first divergence or root cause; or performing GPGPU performance, PPA, stall, energy, and bottleneck analysis.
+description: Use when validating golden, toolchain, RTL, and Yosys backend evidence agreement; collecting compact pass evidence; debugging first divergence or root cause; or performing GPGPU performance, PPA, stall, energy, and bottleneck analysis.
 ---
 
 # gpgpu-validation
@@ -8,6 +8,10 @@ description: Use when validating golden, toolchain, and RTL agreement; collectin
 ## Role
 
 Validate golden/toolchain/RTL agreement and performance evidence.
+
+Also validate Yosys backend evidence when a claim includes Yosys elaboration,
+Yosys synthesis, a Yosys PPA baseline, or generated RTL with requested Yosys
+compatibility.
 
 ## Loading Policy
 
@@ -35,6 +39,12 @@ Validate golden/toolchain/RTL agreement and performance evidence.
 - `STALL_REASON_MATRIX`
 - `MEMORY_ATTRIBUTION_MATRIX`
 - `POWER_ENERGY_PROVENANCE`
+
+## Backend Evidence Inputs
+
+- `YOSYS_FLOW_IR`
+- `YOSYS_RTL_COMPATIBILITY_REPORT`
+- `YOSYS_EVIDENCE_BUNDLE`
 
 ## Boundaries
 

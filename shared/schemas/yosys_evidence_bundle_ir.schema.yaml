@@ -1,0 +1,33 @@
+schema: yosys_evidence_bundle_ir
+version: v1
+type: object
+required:
+  - bundle_id
+  - profile_id
+  - yosys_version
+  - flow_hash
+  - filelist_hash
+  - script_hash
+  - build_dir
+  - report_dir
+  - logs
+  - reports
+  - parsed_metrics
+  - warnings
+  - errors
+  - claim_boundary
+properties:
+  bundle_id: string
+  profile_id: string
+  yosys_version: string
+  flow_hash: string
+  filelist_hash: string
+  script_hash: string
+  build_dir: string
+  report_dir: string
+  logs: list
+  reports: list
+  parsed_metrics: map
+  warnings: list
+  errors: list
+  claim_boundary: map

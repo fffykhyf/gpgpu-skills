@@ -1,0 +1,106 @@
+table: yosys_rtl_style_rules
+version: v1
+fail_closed_rules:
+  top_level_unpacked_array_port:
+    severity: error
+    owner: gpgpu-rtl
+    patch_class: YOSYS_RTL_STYLE_PATCH
+    rule: top-level multi-instance ports must be flattened packed buses
+  large_memory_reset_loop_without_profile_gate:
+    severity: error
+    owner: gpgpu-rtl
+    patch_class: YOSYS_RTL_STYLE_PATCH
+    rule: large memories must not be cleared by reset loops unless an explicit profile gate allows it
+  memory_reset_clear_loop_without_profile_gate:
+    severity: error
+    owner: gpgpu-rtl
+    patch_class: YOSYS_RTL_STYLE_PATCH
+    rule: memory reset clear loops over large arrays require an explicit profile gate
+  memory_init_loop_without_profile_gate:
+    severity: error
+    owner: gpgpu-rtl
+    patch_class: YOSYS_RTL_STYLE_PATCH
+    rule: large memory initialization loops require an explicit profile gate
+  data_dependent_while_loop:
+    severity: error
+    owner: gpgpu-rtl
+    patch_class: YOSYS_RTL_STYLE_PATCH
+    rule: synthesizable regions must not contain data-dependent while loops
+  non_constant_loop_bound_in_synth_region:
+    severity: error
+    owner: gpgpu-rtl
+    patch_class: YOSYS_RTL_STYLE_PATCH
+    rule: synthesizable loops must use fixed bounds, FSMs, or pipelined reductions
+  unbounded_for_generate:
+    severity: error
+    owner: gpgpu-rtl
+    patch_class: YOSYS_RTL_STYLE_PATCH
+    rule: generate loops must have static bounded ranges
+  implicit_wire:
+    severity: error
+    owner: gpgpu-rtl
+    patch_class: YOSYS_RTL_STYLE_PATCH
+    rule: implicit wires are forbidden; use explicit net declarations and default_nettype none
+  combinational_ready_loop:
+    severity: error
+    owner: gpgpu-rtl
+    patch_class: YOSYS_RTL_STYLE_PATCH
+    rule: valid/ready networks must not form combinational ready loops
+  dequeue_not_gated_by_valid_ready_accept:
+    severity: error
+    owner: gpgpu-rtl
+    patch_class: YOSYS_RTL_STYLE_PATCH
+    rule: "dequeue side effects must use accept = valid && ready"
+  payload_changes_while_valid_high_ready_low:
+    severity: error
+    owner: gpgpu-rtl
+    patch_class: YOSYS_RTL_STYLE_PATCH
+    rule: "payload must remain stable while valid && !ready"
+  launch_ready_gap_without_inflight_register:
+    severity: error
+    owner: gpgpu-rtl
+    patch_class: YOSYS_RTL_STYLE_PATCH
+    rule: start/busy/done bridges require an inflight register when inner busy is delayed
+  done_asserted_before_result_counter_stable:
+    severity: error
+    owner: gpgpu-rtl
+    patch_class: YOSYS_RTL_STYLE_PATCH
+    rule: done must assert only after architectural result and counters are latched or stable
+  array_of_packed_struct_port:
+    severity: error
+    owner: gpgpu-rtl
+    patch_class: YOSYS_RTL_STYLE_PATCH
+    rule: top-level arrays of packed struct ports must be flattened for Yosys-facing RTL
+  structure_literal_in_synth_region:
+    severity: error
+    owner: gpgpu-rtl
+    patch_class: YOSYS_RTL_STYLE_PATCH
+    rule: synthesizable regions should avoid structure literals that selected Yosys frontends cannot elaborate
+  unpacked_array_assignment:
+    severity: error
+    owner: gpgpu-rtl
+    patch_class: YOSYS_RTL_STYLE_PATCH
+    rule: unpacked array aggregate assignment must be rewritten into supported packed or indexed assignments
+  async_reset_on_large_memory_array:
+    severity: error
+    owner: gpgpu-rtl
+    patch_class: YOSYS_RTL_STYLE_PATCH
+    rule: large memory arrays must not use async reset clearing by default
+  default_parameter_requires_elaboration_before_chparam:
+    severity: warning
+    owner: gpgpu-flow-yosys
+    patch_class: YOSYS_FLOW_PATCH
+    rule: parameters that affect hierarchy must be resolved before profile evidence is claimed
+partial_sim_cases:
+  valid_ready_payload_stage:
+    required_trace_fields: [valid, ready, accept, payload_before, payload_after]
+    pass_rule: "payload stable while valid && !ready and side effects on accept only"
+  launch_inflight_gap:
+    required_trace_fields: [start, inner_busy, inflight, done]
+    pass_rule: inflight covers delayed busy and prevents early done
+  done_result_stability:
+    required_trace_fields: [done, result_latched, counters_stable]
+    pass_rule: done implies result_latched and counters_stable
+  memory_reset_profile_gate:
+    required_trace_fields: [memory_name, reset_clear_loop, init_loop, profile_gate]
+    pass_rule: large reset/init loops require explicit profile_gate

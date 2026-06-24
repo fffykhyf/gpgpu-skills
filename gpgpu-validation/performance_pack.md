@@ -375,6 +375,28 @@ Warnings:
 - Reject PPA claims when `backend_perf_evidence` lacks the required backend
   matrix artifacts.
 
+## Yosys PPA Baseline Boundary
+
+Yosys PPA baseline evidence may support:
+
+- cell count
+- wire bits
+- hierarchy size
+- relative area trend
+- synthesis hygiene
+
+Yosys PPA baseline evidence must not be used as proof of:
+
+- timing closure
+- MHz frequency
+- backend signoff
+- frequency closure
+
+Claims outside the Yosys evidence boundary require separate backend-owned
+reports. If those reports are absent, validation emits
+`PASS_WITH_INSUFFICIENT_EVIDENCE` with `BACKEND_EVIDENCE_MISSING` or routes an
+unsupported claim to `BACKEND_CLAIM_PATCH`.
+
 ## XiangShan Phase Sampling Metrics
 
 Performance gates that claim optimization must include `PHASE_FEATURE` records

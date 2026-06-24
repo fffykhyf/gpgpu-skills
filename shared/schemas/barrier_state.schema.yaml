@@ -1,0 +1,25 @@
+schema: barrier_state
+version: v1
+type: object
+required:
+  - barrier_id
+  - scope
+  - cta_id
+  - barrier_phase
+  - expected_participant_count
+  - arrival_bitmap
+  - release_bitmap
+  - waiting_warps
+  - release_condition
+  - release_event
+properties:
+  barrier_id: string
+  scope: string
+  cta_id: integer
+  barrier_phase: integer
+  expected_participant_count: integer
+  arrival_bitmap: string
+  release_bitmap: string
+  waiting_warps: list
+  release_condition: string
+  release_event: string

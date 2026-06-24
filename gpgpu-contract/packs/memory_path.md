@@ -10,6 +10,19 @@ Load when `CAPABILITY_PROFILE_IR.enabled_packs` includes `memory_path`, or when 
 
 Own only the contract fragments named by this pack. The frozen truth remains `SYSTEM_CONTRACT_IR`; pack details must become explicit contract paths before RTL or toolchain use.
 
+## Compact Provenance
+
+Merged source IDs in this pack have provenance
+`merged_into_current_pack`. A loader must not expect separate source files for
+those IDs unless a real `shared/` or pack-local path is listed below.
+
+## Claim Boundary
+
+Do not claim full MSHR behavior, dirty writeback, cache coherence, complete
+response queue behavior, or complete memory ordering unless
+`SYSTEM_CONTRACT_IR` explicitly declares that feature implemented and validation
+evidence proves the declared behavior.
+
 ## Warp Memory Transaction
 
 Preserve the merged source rules below and bind every generated artifact to explicit contract paths and evidence.
@@ -237,12 +250,19 @@ This skill must validate:
 - `shared/schemas/system_contract_ir.schema.yaml`
 - `shared/schemas/normalized_trace_ir.schema.yaml`
 - `shared/schemas/contract_fragment_ir.schema.yaml` (`MEMORY_TRANSACTION_EVENT`)
+- `shared/schemas/warp_memory_transaction.schema.yaml`
+- `shared/schemas/cache_request_status.schema.yaml`
+- `shared/schemas/memory_request_lifecycle.schema.yaml`
+- `shared/schemas/memory_queue_boundary.schema.yaml`
+- `shared/schemas/structured_trace_table.schema.yaml`
 
 ## Required Invariants
 
 The output must satisfy:
 - DRAM_CONTROLLER_CONTRACT defines ordering, burst scheduling, and bank-level parallelism model
 - CACHE_COHERENCE_MODEL defines writeback vs write-through policy and cross-SM coherence
+- full MSHR behavior, dirty writeback, coherence, complete response queues, and
+  complete memory ordering require explicit contract and validation evidence
 - cache coherence never changes atomic visibility rules without atomic-sync ownership
 - every memory visibility claim cites source SM, address range, request order, and response order
 - memory path order is lane access, warp transaction, coalesced request, shared/L1 decision, cache status, MSHR decision, lower memory packet, return, scoreboard release
@@ -293,6 +313,11 @@ This compact pack is incomplete unless these merged source IDs are present below
 
 It must also use:
 - `shared/schemas/contract_fragment_ir.schema.yaml`
+- `shared/schemas/warp_memory_transaction.schema.yaml`
+- `shared/schemas/cache_request_status.schema.yaml`
+- `shared/schemas/memory_request_lifecycle.schema.yaml`
+- `shared/schemas/memory_queue_boundary.schema.yaml`
+- `shared/schemas/structured_trace_table.schema.yaml`
 - `shared/templates/warp_memory_transaction_contract.md`
 - `shared/templates/memory_queue_boundary_report.md`
 

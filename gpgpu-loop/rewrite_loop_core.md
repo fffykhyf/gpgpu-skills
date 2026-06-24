@@ -123,6 +123,14 @@ Valid patch classes are:
   ABI, CSR behavior, scoreboard semantics
 - RTL Patch: module interface, pipeline boundary, scoreboard implementation,
   LSQ replay policy, coalescer structure, cache/global protocol
+- Yosys RTL Style Patch: Yosys-incompatible RTL style such as top-level
+  unpacked array ports, unsafe memory reset/init loops, data-dependent
+  synthesizable loops, or valid/ready hygiene failures
+- Yosys Flow Patch: profile selection, Yosys script, filelist, build_dir,
+  report_dir, log_dir, or hash evidence repair
+- Backend Claim Patch: unsupported PPA, timing, frequency, or backend signoff
+  claim boundary repair
+- Report Path Patch: build/report/log path mismatch repair
 - Test Evidence Patch: missing trace, undeclared validation gate, stale
   artifact hash, missing golden output, insufficient coverage
 
@@ -165,6 +173,10 @@ Patch classes include:
 - `COUNTER_SCHEMA_PATCH`
 - `TEST_EVIDENCE_PATCH`
 - `SIMULATOR_ARTIFACT_REMOVAL_PATCH`
+- `YOSYS_RTL_STYLE_PATCH`
+- `YOSYS_FLOW_PATCH`
+- `BACKEND_CLAIM_PATCH`
+- `REPORT_PATH_PATCH`
 
 Route by owner, not by symptom wording.
 
@@ -268,6 +280,10 @@ Every patch plan must declare the modules and gates that must rerun.
 | `TOOLCHAIN_PATCH` | Module 3 -> Module 4 -> Module 5 |
 | `RUNTIME_PATCH` | Module 3 -> Module 4 -> Module 5 |
 | `RTL_PATCH` | Module 4 -> Module 5 |
+| `YOSYS_RTL_STYLE_PATCH` | gpgpu-rtl -> gpgpu-flow-yosys -> gpgpu-validation |
+| `YOSYS_FLOW_PATCH` | gpgpu-flow-yosys -> gpgpu-validation |
+| `BACKEND_CLAIM_PATCH` | gpgpu-validation -> gpgpu-loop |
+| `REPORT_PATH_PATCH` | gpgpu-flow-yosys -> gpgpu-validation |
 | `PASS_EVIDENCE_PATCH` | Module 5 |
 | `TEST_EVIDENCE_PATCH` | Module 5 |
 
@@ -296,6 +312,25 @@ Every patch plan must declare the modules and gates that must rerun.
 - performance metric extraction
 - regression fingerprint generation
 
+`YOSYS_RTL_STYLE_PATCH` reruns:
+
+- RTL synthesis hygiene report
+- Yosys RTL compatibility report
+- selected Yosys profile evidence
+- backend evidence gate
+
+`YOSYS_FLOW_PATCH` and `REPORT_PATH_PATCH` rerun:
+
+- `YOSYS_FLOW_IR`
+- `YOSYS_EVIDENCE_BUNDLE`
+- backend evidence gate
+
+`BACKEND_CLAIM_PATCH` reruns:
+
+- backend claim boundary check
+- validation report generation
+- rewrite decision report
+
 ## Gate
 
 No rewrite is accepted until its route produces fresh evidence and a new attribution report.
@@ -316,6 +351,10 @@ Rewrite triggers map root causes to patch classes and revalidation routes.
 | `RUNTIME_LAUNCH_ROOT_CAUSE` | Runtime Patch |
 | `RTL_FUNCTIONAL_ROOT_CAUSE` | RTL Patch |
 | `RTL_INTERFACE_ROOT_CAUSE` | RTL Patch |
+| `YOSYS_RTL_STYLE_ROOT_CAUSE` | Yosys RTL Style Patch |
+| `YOSYS_FLOW_ROOT_CAUSE` | Yosys Flow Patch or Report Path Patch |
+| `BACKEND_CLAIM_ROOT_CAUSE` | Backend Claim Patch |
+| `REPORT_PATH_ROOT_CAUSE` | Report Path Patch |
 | `MEMORY_SYSTEM_ROOT_CAUSE` | RTL Patch or Architecture Patch |
 | `SCHEDULER_ROOT_CAUSE` | RTL Patch or Architecture Patch |
 | `PERFORMANCE_ARCH_ROOT_CAUSE` | Architecture Patch |

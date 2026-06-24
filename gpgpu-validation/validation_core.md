@@ -76,6 +76,32 @@ Failure Attribution Mode. If the divergence is real but final outputs match,
 the report may use `PASS_WITH_TRACE_DIVERGENCE_WARNING` as the correctness
 verdict while still requiring `FIRST_DIVERGENCE_REPORT`.
 
+## Backend Evidence Gate
+
+Yosys elaboration, synthesis, and PPA claims require backend evidence in
+addition to golden/RTL agreement. The gate consumes flow and bundle artifacts
+owned by `gpgpu-flow-yosys`; validation owns the pass/fail interpretation.
+
+```yaml
+BACKEND_EVIDENCE_GATE:
+  required_when:
+    - claim includes elaborates_on_yosys
+    - claim includes synthesizes_on_yosys
+    - claim includes ppa_baseline
+    - output includes generated RTL and user requested Yosys compatibility
+  required_inputs:
+    - YOSYS_FLOW_IR
+    - YOSYS_RTL_COMPATIBILITY_REPORT
+    - YOSYS_EVIDENCE_BUNDLE
+  fail_closed_on_missing:
+    verdict: PASS_WITH_INSUFFICIENT_EVIDENCE
+    failure_mode: BACKEND_EVIDENCE_MISSING
+```
+
+Unsupported backend claims, including timing/frequency/backend signoff claims
+derived only from `yosys_ppa_baseline`, must route to `BACKEND_CLAIM_PATCH`
+rather than being accepted as performance evidence.
+
 ## Fail-Closed Rules
 
 - Do not infer correctness pass from final memory alone when completion, fault,
@@ -83,6 +109,9 @@ verdict while still requiring `FIRST_DIVERGENCE_REPORT`.
 - Do not run failure localization for a clean pass.
 - Do not route to rewrite when evidence is incomplete; route to
   `TEST_EVIDENCE_PATCH` through pass evidence or root cause reporting.
+- Do not claim Yosys elaboration, synthesis, or PPA baseline when
+  `YOSYS_FLOW_IR`, `YOSYS_RTL_COMPATIBILITY_REPORT`, or
+  `YOSYS_EVIDENCE_BUNDLE` is missing.
 
 ## XiangShan Probe Mode Policy
 

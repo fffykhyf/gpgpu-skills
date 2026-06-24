@@ -1,0 +1,28 @@
+schema: cache_request_status
+version: v1
+type: object
+required:
+  - request_id
+  - cache_level
+  - status
+  - reservation_fail_reason
+  - queue_occupancy
+  - replay_required
+  - response_route
+properties:
+  request_id: string
+  cache_level: string
+  status:
+    enum:
+      - HIT
+      - HIT_RESERVED
+      - MISS
+      - SECTOR_MISS
+      - MSHR_HIT
+      - RESERVATION_FAIL
+      - BYPASS
+      - UNSUPPORTED
+  reservation_fail_reason: string
+  queue_occupancy: integer
+  replay_required: bool
+  response_route: string

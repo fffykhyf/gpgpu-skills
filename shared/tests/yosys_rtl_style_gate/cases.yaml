@@ -1,0 +1,38 @@
+suite: yosys_rtl_style_gate
+version: v1
+cases:
+  - case_id: reject_top_level_unpacked_array_port
+    input:
+      top_port_style: unpacked_array_port
+    expect:
+      verdict: YOSYS_UNSAFE_RTL
+      failure_mode: top_level_unpacked_array_port
+      patch_class: YOSYS_RTL_STYLE_PATCH
+  - case_id: reject_memory_reset_loop_without_profile_gate
+    input:
+      memory_reset_loop: large_array_clear
+      profile_gate: absent
+    expect:
+      verdict: YOSYS_UNSAFE_RTL
+      failure_mode: large_memory_reset_loop_without_profile_gate
+      patch_class: YOSYS_RTL_STYLE_PATCH
+  - case_id: reject_data_dependent_while
+    input:
+      synth_region_loop: data_dependent_while
+    expect:
+      verdict: YOSYS_UNSAFE_RTL
+      failure_mode: data_dependent_while_loop
+      patch_class: YOSYS_RTL_STYLE_PATCH
+  - case_id: accept_flattened_top_packed_bus
+    input:
+      top_port_style: flattened_packed_bus
+      implicit_wires: false
+    expect:
+      verdict: YOSYS_READY
+  - case_id: accept_valid_ready_payload_stage
+    input:
+      accept_rule: "valid && ready"
+      payload_stable_while_stalled: true
+      dequeue_gated_by_accept: true
+    expect:
+      verdict: YOSYS_READY

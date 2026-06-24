@@ -1,0 +1,66 @@
+table: yosys_profile_matrix
+version: v1
+profiles:
+  yosys_lint_parse:
+    purpose: frontend parse and basic Yosys script sanity
+    frontend_modes: [read_verilog, read_systemverilog]
+    required_reports: [yosys_log]
+    allowed_claims:
+      - parses_on_yosys
+      - frontend_compatible_with_limits
+    cannot_claim:
+      - elaborates_on_yosys
+      - synthesizes_on_yosys
+      - ppa_baseline
+      - timing_closure
+      - frequency_mhz
+      - backend_signoff
+      - frequency_closure
+  yosys_elaborate:
+    purpose: hierarchy and top-module elaboration
+    frontend_modes: [read_verilog, read_systemverilog]
+    required_reports: [yosys_log, hierarchy_report, check_report]
+    allowed_claims:
+      - elaborates_on_yosys
+      - hierarchy_resolves_on_yosys
+    cannot_claim:
+      - synthesizes_on_yosys
+      - ppa_baseline
+      - timing_closure
+      - frequency_mhz
+      - backend_signoff
+      - frequency_closure
+  yosys_synth_generic:
+    purpose: generic synthesis and synthesis hygiene
+    frontend_modes: [read_verilog, read_systemverilog]
+    required_reports: [yosys_log, check_report, stat_report]
+    allowed_claims:
+      - synthesizes_on_yosys
+      - synthesis_hygiene
+      - generic_cell_count
+      - hierarchy_size
+    cannot_claim:
+      - timing_closure
+      - frequency_mhz
+      - backend_signoff
+      - frequency_closure
+  yosys_ppa_baseline:
+    purpose: generic Yosys PPA baseline for relative area trends
+    frontend_modes: [read_verilog, read_systemverilog]
+    required_reports: [yosys_log, check_report, stat_report]
+    allowed_claims:
+      - ppa_baseline
+      - cell_count
+      - wire_bits
+      - hierarchy_size
+      - relative_area_trend
+      - synthesis_hygiene
+    cannot_claim:
+      - timing_closure
+      - frequency_mhz
+      - backend_signoff
+      - frequency_closure
+claim_gate:
+  missing_required_report: YOSYS_EVIDENCE_MISSING
+  unsupported_claim: BACKEND_UNSUPPORTED_CLAIM
+  profile_mismatch: YOSYS_PROFILE_UNSUPPORTED

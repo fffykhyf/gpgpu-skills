@@ -10,6 +10,19 @@ Load when `CAPABILITY_PROFILE_IR.enabled_packs` includes `interconnect`, or when
 
 Own only the contract fragments named by this pack. The frozen truth remains `SYSTEM_CONTRACT_IR`; pack details must become explicit contract paths before RTL or toolchain use.
 
+## Compact Provenance
+
+Merged source IDs in this pack have provenance
+`merged_into_current_pack`. A loader must not expect separate source files for
+those IDs unless a real `shared/` or pack-local path is listed below.
+
+## Claim Boundary
+
+Do not claim complete response queue behavior, full MSHR routing, complete
+memory ordering, dirty writeback handling, or coherence behavior from
+interconnect evidence alone. Those claims require explicit contract ownership
+and validation evidence from the relevant memory or synchronization pack.
+
 ## SM to Memory Fabric
 
 Preserve the merged source rules below and bind every generated artifact to explicit contract paths and evidence.
@@ -282,6 +295,9 @@ This skill must validate:
 - `shared/schemas/incremental_rtl_map.schema.yaml`
 - `shared/schemas/normalized_trace_ir.schema.yaml`
 - `shared/schemas/contract_fragment_ir.schema.yaml` (`STRUCTURED_TRACE_TABLE`)
+- `shared/schemas/noc_packet.schema.yaml`
+- `shared/schemas/memory_queue_boundary.schema.yaml`
+- `shared/schemas/structured_trace_table.schema.yaml`
 
 ## Required Invariants
 
@@ -301,6 +317,9 @@ The output must satisfy:
 - NoC bottlenecks must state request/response packet volume, has-buffer failure, or return FIFO pressure.
 - DRAM bottleneck claims must be handed off with row locality, bank skew, queue occupancy, or address mapping evidence rather than asserted generically.
 - Request path and return path must remain separately attributable.
+- complete response queue, full MSHR, dirty writeback, coherence, and complete
+  memory-ordering claims require explicit downstream contract and validation
+  evidence
 - interconnect artifacts preserve `ARTIFACT_MANIFEST_IR` provenance
 
 ## Failure Modes
@@ -352,6 +371,9 @@ It must also use:
 - `shared/schemas/negotiated_interface_ir.schema.yaml`
 - `shared/schemas/adapter_contract.schema.yaml`
 - `shared/schemas/protocol_monitor_contract.schema.yaml`
+- `shared/schemas/noc_packet.schema.yaml`
+- `shared/schemas/memory_queue_boundary.schema.yaml`
+- `shared/schemas/structured_trace_table.schema.yaml`
 - `shared/templates/memory_queue_boundary_report.md`
 
 When a required schema, table, example, or test is missing, emit

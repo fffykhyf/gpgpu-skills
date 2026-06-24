@@ -1,0 +1,43 @@
+suite: yosys_flow_evidence_engine
+version: v1
+cases:
+  - case_id: reject_build_dir_report_path_mismatch
+    input:
+      build_dir: build/yosys/a
+      report_dir: reports/yosys/b
+      reports: [other/stat.rpt]
+    expect:
+      verdict: PASS_WITH_INSUFFICIENT_EVIDENCE
+      failure_mode: BUILD_DIR_REPORT_PATH_MISMATCH
+      patch_class: REPORT_PATH_PATCH
+  - case_id: reject_ppa_claim_without_stat_report
+    input:
+      profile_id: yosys_ppa_baseline
+      claim: ppa_baseline
+      reports: [check.rpt]
+    expect:
+      verdict: PASS_WITH_INSUFFICIENT_EVIDENCE
+      failure_mode: PPA_CLAIM_WITHOUT_STAT_REPORT
+      patch_class: BACKEND_CLAIM_PATCH
+  - case_id: reject_timing_frequency_claim_from_yosys_ppa_only
+    input:
+      profile_id: yosys_ppa_baseline
+      claim: frequency_mhz
+      reports: [check.rpt, stat.rpt]
+    expect:
+      verdict: PASS_WITH_INSUFFICIENT_EVIDENCE
+      failure_mode: BACKEND_UNSUPPORTED_CLAIM
+      patch_class: BACKEND_CLAIM_PATCH
+  - case_id: accept_complete_yosys_ppa_baseline_bundle
+    input:
+      profile_id: yosys_ppa_baseline
+      claim: ppa_baseline
+      yosys_version: 0.0
+      reports: [check.rpt, stat.rpt]
+      logs: [yosys.log]
+      filelist_hash: present
+      script_hash: present
+      claim_boundary: present
+    expect:
+      verdict: EVIDENCE_COMPLETE
+      allowed_claims: [cell_count, wire_bits, hierarchy_size, relative_area_trend, synthesis_hygiene]

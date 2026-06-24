@@ -292,6 +292,32 @@ merged_sections:
       ambiguity_failures:
         - AMBIGUOUS_TRACE_ORDERING
         - INSUFFICIENT_TRACE_EVIDENCE
+  - source_id: backend_evidence_gate.yaml
+    content: |
+      version: v1
+      BACKEND_EVIDENCE_GATE:
+        required_when:
+          - claim includes elaborates_on_yosys
+          - claim includes synthesizes_on_yosys
+          - claim includes ppa_baseline
+          - output includes generated RTL and user requested Yosys compatibility
+        required_inputs:
+          - YOSYS_FLOW_IR
+          - YOSYS_RTL_COMPATIBILITY_REPORT
+          - YOSYS_EVIDENCE_BUNDLE
+        fail_closed_on_missing:
+          verdict: PASS_WITH_INSUFFICIENT_EVIDENCE
+          failure_mode: BACKEND_EVIDENCE_MISSING
+      unsupported_backend_claims:
+        yosys_ppa_baseline:
+          - timing_closure
+          - frequency_mhz
+          - backend_signoff
+          - frequency_closure
+      missing_report_failures:
+        ppa_without_stat_report: PPA_CLAIM_WITHOUT_STAT_REPORT
+        path_mismatch: BUILD_DIR_REPORT_PATH_MISMATCH
+        unsupported_claim: BACKEND_UNSUPPORTED_CLAIM
 source_files:
   - trace_normalization_table.yaml
   - correctness_gate_decision_table.yaml
@@ -300,3 +326,4 @@ source_files:
   - differential_compare_table.yaml
   - pass_evidence_gate_table.yaml
   - minimal_trace_window_table.yaml
+  - backend_evidence_gate.yaml

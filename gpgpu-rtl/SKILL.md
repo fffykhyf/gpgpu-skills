@@ -1,6 +1,6 @@
 ---
 name: gpgpu-rtl
-description: Use when binding GPGPU RTL modules to frozen contract paths, negotiated interfaces, adapter contracts, protocol monitors, partial simulation evidence, traces, and counter tap points.
+description: Use when binding GPGPU RTL modules to frozen contract paths, negotiated interfaces, adapter contracts, protocol monitors, partial simulation evidence, Yosys RTL compatibility reports, traces, and counter tap points.
 ---
 
 # gpgpu-rtl
@@ -9,11 +9,16 @@ description: Use when binding GPGPU RTL modules to frozen contract paths, negoti
 
 Perform module-by-module RTL binding from `SYSTEM_CONTRACT_IR`, `TOOLCHAIN_ARTIFACT_IR`, and `NEGOTIATED_INTERFACE_IR`.
 
-This skill owns `INCREMENTAL_RTL_MAP`. It must not change architecture semantics or ISA semantics. It must not use raw wire binding unless it comes from a negotiated interface edge.
+This skill owns `INCREMENTAL_RTL_MAP` and contributes
+`YOSYS_RTL_COMPATIBILITY_REPORT` findings when RTL is targeting Yosys. It must
+not change architecture semantics or ISA semantics. It must not use raw wire
+binding unless it comes from a negotiated interface edge.
 
 ## Core File
 
-Read `rtl_binding_core.md` for module binding rules, interface/checker binding, partial simulation gates, trace/counter hooks, simulator-artifact rejection, SM instance layout, and warp execution mapping.
+Read `rtl_binding_core.md` for module binding rules, interface/checker binding,
+Yosys RTL compatibility gates, partial simulation gates, trace/counter hooks,
+simulator-artifact rejection, SM instance layout, and warp execution mapping.
 
 ## Core Execution Loop
 
@@ -31,3 +36,6 @@ select module
 ## Evidence
 
 Produce partial sim evidence, maintain observable trace hooks, and maintain counter tap points for validation.
+
+When backend evidence names Yosys, also emit `YOSYS_RTL_COMPATIBILITY_REPORT`
+and `RTL_SYNTH_HYGIENE_REPORT` for the RTL style surface owned by this skill.

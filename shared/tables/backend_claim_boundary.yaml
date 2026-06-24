@@ -1,0 +1,19 @@
+table: backend_claim_boundary
+version: v1
+backend_claims:
+  yosys_lint_parse:
+    supports: [parses_on_yosys, frontend_compatible_with_limits]
+    rejects: [elaborates_on_yosys, synthesizes_on_yosys, ppa_baseline, timing_closure, frequency_mhz, backend_signoff, frequency_closure]
+  yosys_elaborate:
+    supports: [elaborates_on_yosys, hierarchy_resolves_on_yosys]
+    rejects: [synthesizes_on_yosys, ppa_baseline, timing_closure, frequency_mhz, backend_signoff, frequency_closure]
+  yosys_synth_generic:
+    supports: [synthesizes_on_yosys, generic_cell_count, hierarchy_size, synthesis_hygiene]
+    rejects: [timing_closure, frequency_mhz, backend_signoff, frequency_closure]
+  yosys_ppa_baseline:
+    supports: [cell_count, wire_bits, hierarchy_size, relative_area_trend, synthesis_hygiene]
+    rejects: [timing_closure, frequency_mhz, backend_signoff, frequency_closure]
+failure_modes:
+  missing_evidence: BACKEND_EVIDENCE_MISSING
+  unsupported_claim: BACKEND_UNSUPPORTED_CLAIM
+  claim_boundary_absent: BACKEND_CLAIM_BOUNDARY_MISSING

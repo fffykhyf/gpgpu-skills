@@ -1,0 +1,27 @@
+schema: memory_request_lifecycle
+version: v1
+type: object
+required:
+  - request_id
+  - source_sm_id
+  - source_warp_id
+  - request_tag
+  - accepted_cycle
+  - queued_cycle
+  - issued_cycle
+  - response_cycle
+  - final_core_visible_response_eop
+  - scoreboard_release_cycle
+  - lifecycle_state
+properties:
+  request_id: string
+  source_sm_id: integer
+  source_warp_id: integer
+  request_tag: string
+  accepted_cycle: integer
+  queued_cycle: integer
+  issued_cycle: integer
+  response_cycle: integer
+  final_core_visible_response_eop: bool
+  scoreboard_release_cycle: integer
+  lifecycle_state: string

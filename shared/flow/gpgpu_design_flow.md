@@ -16,6 +16,9 @@ User request/spec
   -> gpgpu-rtl
      binds module-by-module RTL to contract paths and negotiated interfaces
 
+  -> gpgpu-flow-yosys
+     records Yosys flow/profile/build/report evidence when required
+
   -> gpgpu-validation
      validates golden vs RTL and collects compact evidence
      expands debug/perf packs only when needed
@@ -26,3 +29,19 @@ User request/spec
 
 Default output is `RUN_STATE.yaml` plus one Chinese human summary.
 Expanded artifacts are mode-gated, not always generated.
+
+Current module order:
+
+```text
+gpgpu-architecture
+  -> gpgpu-contract
+  -> gpgpu-toolchain-runtime
+  -> gpgpu-rtl
+  -> gpgpu-flow-yosys
+  -> gpgpu-validation
+  -> gpgpu-loop
+```
+
+`gpgpu-flow-yosys` is mandatory only when `backend_toolchain` includes Yosys or
+the user asks for RTL elaboration, synthesis, PPA, or Yosys-backed build/report
+evidence.

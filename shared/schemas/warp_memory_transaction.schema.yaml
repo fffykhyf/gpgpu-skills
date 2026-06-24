@@ -1,0 +1,37 @@
+schema: warp_memory_transaction
+version: v1
+type: object
+required:
+  - transaction_id
+  - sm_id
+  - warp_id
+  - pc
+  - instruction_id
+  - access_type
+  - lane_addresses
+  - active_mask
+  - byte_mask
+  - sector_mask
+  - transaction_address
+  - transaction_size
+  - coalesced_group_id
+  - is_read
+  - is_write
+  - is_atomic
+properties:
+  transaction_id: string
+  sm_id: integer
+  warp_id: integer
+  pc: integer
+  instruction_id: string
+  access_type: enum
+  lane_addresses: list
+  active_mask: string
+  byte_mask: string
+  sector_mask: string
+  transaction_address: integer
+  transaction_size: integer
+  coalesced_group_id: string
+  is_read: bool
+  is_write: bool
+  is_atomic: bool

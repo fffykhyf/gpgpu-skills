@@ -1,0 +1,30 @@
+schema: atomic_operation
+version: v1
+type: object
+required:
+  - operation_id
+  - sm_id
+  - warp_id
+  - operation
+  - address
+  - lane_mask
+  - byte_mask
+  - return_value_behavior
+  - serialization_domain
+  - serialization_point
+  - completion_event
+  - scoreboard_release_condition
+properties:
+  operation_id: string
+  sm_id: integer
+  warp_id: integer
+  operation: string
+  address: integer
+  lane_mask: string
+  byte_mask: string
+  return_value_behavior: string
+  destination_register: string
+  serialization_domain: string
+  serialization_point: string
+  completion_event: string
+  scoreboard_release_condition: string

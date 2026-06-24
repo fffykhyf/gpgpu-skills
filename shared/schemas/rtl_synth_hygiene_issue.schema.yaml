@@ -1,0 +1,22 @@
+schema: rtl_synth_hygiene_issue
+version: v1
+type: object
+required:
+  - issue_id
+  - rule_id
+  - severity
+  - module_path
+  - evidence
+  - fail_closed
+  - owner
+  - recommended_patch_class
+properties:
+  issue_id: string
+  rule_id: string
+  severity: enum
+  module_path: string
+  object_path: string
+  evidence: map
+  fail_closed: bool
+  owner: string
+  recommended_patch_class: string

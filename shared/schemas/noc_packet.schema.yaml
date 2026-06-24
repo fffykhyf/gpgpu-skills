@@ -1,0 +1,31 @@
+schema: noc_packet
+version: v1
+type: object
+required:
+  - packet_id
+  - packet_class
+  - direction
+  - source_sm_id
+  - destination_id
+  - request_tag
+  - traffic_class
+  - route_id
+  - virtual_channel
+  - flit_count
+  - has_buffer
+  - queue_enter_cycle
+  - queue_exit_cycle
+properties:
+  packet_id: string
+  packet_class: string
+  direction: enum
+  source_sm_id: integer
+  destination_id: string
+  request_tag: string
+  traffic_class: string
+  route_id: string
+  virtual_channel: string
+  flit_count: integer
+  has_buffer: bool
+  queue_enter_cycle: integer
+  queue_exit_cycle: integer

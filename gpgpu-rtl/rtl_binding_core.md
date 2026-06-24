@@ -322,6 +322,61 @@ Each module binding must include timing feedback hooks:
 full-system assembly. A valid/ready network that forms a combinational ready
 loop must fail interface checking instead of being deferred to synthesis.
 
+# Yosys RTL Compatibility Gate
+
+When RTL targets Yosys elaboration, synthesis, PPA baseline, or Yosys-backed
+report evidence, the RTL binding must run a compatibility gate before the flow
+skill can produce backend evidence.
+
+```yaml
+YOSYS_RTL_COMPATIBILITY_GATE:
+  required_when:
+    - backend_toolchain includes yosys
+    - output_artifact includes RTL
+    - task asks for elaboration
+    - task asks for synthesis
+    - task asks for PPA
+    - task asks for Yosys compatibility
+  required_outputs:
+    - YOSYS_RTL_COMPATIBILITY_REPORT
+    - RTL_SYNTH_HYGIENE_REPORT
+  fail_closed_on:
+    - data_dependent_while_loop
+    - unbounded_for_generate
+    - non_constant_loop_bound_in_synth_region
+    - top_level_unpacked_array_port
+    - array_of_packed_struct_port
+    - structure_literal_in_synth_region
+    - unpacked_array_assignment
+    - memory_reset_clear_loop_without_profile_gate
+    - memory_init_loop_without_profile_gate
+    - async_reset_on_large_memory_array
+    - implicit_wire
+    - combinational_ready_loop
+    - dequeue_not_gated_by_valid_ready_accept
+    - payload_changes_while_valid_high_ready_low
+    - launch_ready_gap_without_inflight_register
+    - done_asserted_before_result_counter_stable
+    - default_parameter_requires_elaboration_before_chparam
+```
+
+## Yosys-Safe RTL Defaults
+
+- Top-level multi-instance ports must be flattened packed buses.
+- Large memories must not be cleared by reset loops by default.
+- Register file, shared memory, L2 arrays, metadata caches, and large memories
+  require explicit reset/init profile gates.
+- Use fixed-bound `for` loops, FSMs, or pipelined reductions; do not use
+  data-dependent `while` loops in synthesizable regions.
+- All ready/valid side effects must use `accept = valid && ready`.
+- Dequeue, tag allocation, payload capture, scoreboard release, and response
+  wakeup must be gated by accepted transactions.
+- Payload must remain stable while `valid && !ready`.
+- Start/busy/done interfaces require an inflight register when inner busy is
+  delayed.
+- Done/completion must assert only after architectural result and counters are
+  latched or stable.
+
 ## Fail Closed Rules
 
 - Reject modules without consumed contract paths.
@@ -331,6 +386,8 @@ loop must fail interface checking instead of being deferred to synthesis.
 - Reject local state bindings that do not map to `SYSTEM_CONTRACT_IR`.
 - Reject hidden state not declared in the selected template.
 - Reject missing timing feedback or any combinational ready loop.
+- Reject missing `YOSYS_RTL_COMPATIBILITY_REPORT` when Yosys elaboration,
+  synthesis, PPA, or compatibility evidence is requested.
 
 ### Source ID: `gpgpu-rtl/observable_trace_contract.md`
 

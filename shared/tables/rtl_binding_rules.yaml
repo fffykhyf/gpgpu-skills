@@ -260,7 +260,31 @@ merged_sections:
             - bitstream_or_hw_run
             - host_runtime
             - memory_result
+  - source_id: yosys_rtl_style_rules.yaml
+    content: |
+      table: yosys_rtl_style_rules
+      version: v1
+      merged_from: shared/tables/yosys_rtl_style_rules.yaml
+      gate:
+        required_outputs:
+          - YOSYS_RTL_COMPATIBILITY_REPORT
+          - RTL_SYNTH_HYGIENE_REPORT
+        fail_closed_table: shared/tables/yosys_rtl_style_rules.yaml
+      partial_sim_cases:
+        valid_ready_payload_stage:
+          required_trace_fields: [valid, ready, accept, payload_before, payload_after]
+          pass_rule: payload stable while valid && !ready and side effects on accept only
+        launch_inflight_gap:
+          required_trace_fields: [start, inner_busy, inflight, done]
+          pass_rule: inflight covers delayed busy and prevents early done
+        done_result_stability:
+          required_trace_fields: [done, result_latched, counters_stable]
+          pass_rule: done implies result_latched and counters_stable
+        memory_reset_profile_gate:
+          required_trace_fields: [memory_name, reset_clear_loop, init_loop, profile_gate]
+          pass_rule: large reset/init loops require explicit profile_gate
 source_files:
   - module_interface_contract_table.yaml
   - rtl_partial_sim_gate_table.yaml
   - verification_backend_matrix.yaml
+  - yosys_rtl_style_rules.yaml

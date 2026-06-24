@@ -1,0 +1,26 @@
+schema: yosys_rtl_compatibility_report_ir
+version: v1
+type: object
+required:
+  - report_id
+  - backend_toolchain
+  - rtl_files
+  - top_module
+  - style_check_results
+  - memory_style_results
+  - interface_style_results
+  - verdict
+properties:
+  report_id: string
+  backend_toolchain: string
+  rtl_files: list
+  top_module: string
+  style_check_results: map
+  memory_style_results: map
+  interface_style_results: map
+  verdict:
+    enum:
+      - YOSYS_READY
+      - YOSYS_READY_WITH_LIMITS
+      - YOSYS_UNSAFE_RTL
+      - YOSYS_EVIDENCE_MISSING
