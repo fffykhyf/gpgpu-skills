@@ -2,16 +2,16 @@
 
 ## Summary
 
-本 skill 的目标可以明确拆分为两个核心问题：
+本 skill 的目标拆分为两个核心问题：
 1. 如何保证生成结果的正确性与一致性
-2. 如何保证生成的 GPGPU 具有良好性能
+2. 如何保证生成的 GPGPU 是最优设计
 
 存在的问题：
-gpgpu的生成质量仍然和你提供的 template 强正相关。关键在于如何提升 skill 的上限，而由某 RTL template 决定，而应该由以下三件事共同决定：
+gpgpu的RTL生成质量仍然和 template 强正相关。关键在于如何提升 skill 的上限，而由某 RTL template 决定，而应该由以下三件事共同决定：
 
 template 决定默认质量和稳定性；
 contract / property / test 决定正确性；
-design space / DSE / benchmark 决定性能上限。
+DSE 决定性能上限。
 
 
 ### 1. 如何保证生成结果的正确性与一致性（同一 spec → 相同结果）
